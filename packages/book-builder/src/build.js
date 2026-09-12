@@ -5,6 +5,8 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { build } from 'vite';
 
+import { coreScssModulesPlugin } from './coreScssModulesPlugin.js';
+
 const renderSource = (bookDocument) => `
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -61,6 +63,7 @@ ReactDOM.createRoot(globalThis.document.getElementById('root')).render(
 
 export async function buildBook({ document, repoRoot, outDir = path.join(repoRoot, 'dist-book') }) {
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'active-book-'));
+  const coreSourceRoot = path.resolve(repoRoot, 'node_modules/activeBook-core/lib/src');
 
   try {
     await fs.mkdir(path.join(tempRoot, 'src'), { recursive: true });
@@ -72,12 +75,22 @@ export async function buildBook({ document, repoRoot, outDir = path.join(repoRoo
 
     await build({
       root: tempRoot,
-      plugins: [react()],
+      plugins: [
+        coreScssModulesPlugin({ repoRoot }),
+        react(),
+      ],
       resolve: {
         alias: {
-          'activeBook-core': path.resolve(repoRoot, 'node_modules/activeBook-core'),
+          'activeBook-core': coreSourceRoot,
           react: path.resolve(repoRoot, 'node_modules/react'),
           'react-dom': path.resolve(repoRoot, 'node_modules/react-dom'),
+        },
+      },
+      css: {
+        preprocessorOptions: {
+          scss: {
+            loadPaths: [coreSourceRoot, path.resolve(repoRoot, 'node_modules')],
+          },
         },
       },
       build: {
