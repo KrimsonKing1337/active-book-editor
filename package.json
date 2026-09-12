@@ -13,6 +13,7 @@
     "build:book": "npm run build -w @active-book/book-builder"
   },
   "dependencies": {
-    "activeBook-core": "file:../activebook-core"
+    "activeBook-core": "file:../activebook-core",
+    "sass": "^1.96.0"
   }
 }
