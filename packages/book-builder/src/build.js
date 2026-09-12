@@ -5,17 +5,30 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { build } from 'vite';
 
-const renderSource = (document) => `
+const renderSource = (bookDocument) => `
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App, Counter, H1, H2, P, PageWrapper } from 'activeBook-core/components';
 import 'activeBook-core/styles/styles.scss';
 
-const document = ${JSON.stringify(document, null, 2)};
+const bookDocument = ${JSON.stringify(bookDocument, null, 2)};
 const config = { id: 'built-book', authorComments: 0, pages: 0, defaultTheme: 'light' };
 
+function renderText(node) {
+  let result = node.text ?? '';
+
+  for (const mark of node.marks ?? []) {
+    if (mark.type === 'bold') result = React.createElement('strong', null, result);
+    if (mark.type === 'italic') result = React.createElement('em', null, result);
+    if (mark.type === 'strike') result = React.createElement('s', null, result);
+    if (mark.type === 'code') result = React.createElement('code', null, result);
+  }
+
+  return result;
+}
+
 function renderNode(node, key) {
-  if (node.type === 'text') return node.text ?? '';
+  if (node.type === 'text') return React.createElement(React.Fragment, { key }, renderText(node));
   const children = (node.content ?? []).map((child, index) => renderNode(child, index));
 
   if (node.type === 'heading') {
@@ -33,11 +46,11 @@ function BookPage() {
   return React.createElement(
     PageWrapper,
     null,
-    ...(document.content ?? []).map((node, index) => renderNode(node, index)),
+    ...(bookDocument.content ?? []).map((node, index) => renderNode(node, index)),
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(globalThis.document.getElementById('root')).render(
   React.createElement(
     App,
     { config, tableOfContents: [], rangeEffects: [] },
