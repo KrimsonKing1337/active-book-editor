@@ -1,0 +1,14 @@
+html, body, #root { margin: 0; min-height: 100%; }
+body { font-family: Inter, system-ui, sans-serif; background: #171717; color: #f5f5f5; }
+button { font: inherit; }
+.editor-shell { min-height: 100vh; }
+.editor-toolbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 12px 16px; background: #101010; border-bottom: 1px solid #303030; }
+.editor-actions { display: flex; gap: 8px; }
+.editor-actions button { padding: 8px 12px; cursor: pointer; }
+.build-status { min-height: 24px; padding: 6px 16px; font-size: 13px; }
+.editor-canvas { width: min(1100px, calc(100% - 32px)); margin: 24px auto; }
+.editor-canvas #page-wrapper { min-height: 70vh; }
+.tiptap { min-height: 60vh; outline: none; }
+.core-component-node { margin: 16px 0; padding: 12px; border: 1px dashed #777; border-radius: 8px; }
+.core-component-node.is-selected { outline: 2px solid currentColor; }
+.core-component-label { margin-bottom: 8px; font-size: 12px; opacity: 0.7; text-transform: uppercase; }

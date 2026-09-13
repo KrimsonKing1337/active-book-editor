@@ -1,0 +1,19 @@
+{
+  "name": "activebook-editor",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @active-book/editor",
+    "build:editor": "npm run build -w @active-book/editor",
+    "build:book": "npm run build -w @active-book/book-builder"
+  },
+  "dependencies": {
+    "activeBook-core": "file:../activebook-core",
+    "sass": "^1.96.0"
+  }
+}
