@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Document from '@tiptap/extension-document';
 
 import { App, PageWrapper } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
@@ -9,27 +10,18 @@ import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
 import { CoreComponentNode } from './CoreComponentNode';
+import { PNode, H1Node, H2Node } from './EditableComponentNode';
+
+export const ActiveBookDocument = Document.extend({
+  content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',
+});
 
 const config: Config = {
   id: 'editor-preview',
   authorComments: 0,
   pages: 0,
-  defaultTheme: 'light',
-};
-
-const initialContent = {
-  type: 'doc',
-  content: [
-    {
-      type: 'heading',
-      attrs: { level: 1 },
-      content: [{ type: 'text', text: 'Новая активная книга' }],
-    },
-    {
-      type: 'paragraph',
-      content: [{ type: 'text', text: 'Этот текст можно менять прямо внутри PageWrapper.' }],
-    },
-  ],
+  defaultTheme: 'dark',
+  disableThemes: false,
 };
 
 export function EditorScreen() {
@@ -37,17 +29,47 @@ export function EditorScreen() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        document: false,
+        paragraph: false,
+        heading: false,
+        blockquote: false,
+        codeBlock: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
+
+      ActiveBookDocument,
+
       CoreComponentNode,
+      PNode,
+      H1Node,
+      H2Node,
     ],
-    content: initialContent,
   });
 
-  const insertCounter = () => {
+  const insertComponent = (name: string) => {
     editor?.chain().focus().insertContent({
       type: 'coreComponent',
-      attrs: { name: 'Counter' },
+      attrs: { name },
     }).run();
+  };
+
+  const insertTextComponent = (name: 'P' | 'H1' | 'H2') => {
+    const typeMap = {
+      P: 'activeBookP',
+      H1: 'activeBookH1',
+      H2: 'activeBookH2',
+    } as const;
+
+    editor
+      ?.chain()
+      .focus()
+      .insertContent({
+        type: typeMap[name],
+      })
+      .run();
   };
 
   const buildBook = async () => {
@@ -80,7 +102,22 @@ export function EditorScreen() {
       <header className="editor-toolbar">
         <strong>Active Book Editor</strong>
         <div className="editor-actions">
-          <button type="button" onClick={insertCounter}>Добавить Counter</button>
+          <button type="button" onClick={() => insertComponent('Counter')}>
+            Добавить Counter
+          </button>
+
+          <button type="button" onClick={() => insertTextComponent('P')}>
+            Добавить параграф
+          </button>
+
+          <button type="button" onClick={() => insertTextComponent('H1')}>
+            Добавить заголовок 1
+          </button>
+
+          <button type="button" onClick={() => insertTextComponent('H2')}>
+            Добавить заголовок 2
+          </button>
+
           <button type="button" onClick={buildBook} disabled={!editor || buildState === 'building'}>
             {buildState === 'building' ? 'Сборка…' : 'Собрать книгу'}
           </button>
@@ -94,7 +131,7 @@ export function EditorScreen() {
 
       <main className="editor-canvas">
         <App config={config} tableOfContents={[]} rangeEffects={[]}>
-          <PageWrapper withoutToolbar>
+          <PageWrapper>
             <EditorContent editor={editor} />
           </PageWrapper>
         </App>

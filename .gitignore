@@ -2,4 +2,6 @@ node_modules/
 dist/
 dist-book/
 .active-book-build/
+.active-book-temp/
 .DS_Store
+.idea

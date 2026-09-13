@@ -1,11 +1,9 @@
 import fs from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { build } from 'vite';
-
-import { coreScssModulesPlugin } from './coreScssModulesPlugin.js';
+import svgr from 'vite-plugin-svgr';
 
 const renderSource = (bookDocument) => `
 import React from 'react';
@@ -14,7 +12,7 @@ import { App, Counter, H1, H2, P, PageWrapper } from 'activeBook-core/components
 import 'activeBook-core/styles/styles.scss';
 
 const bookDocument = ${JSON.stringify(bookDocument, null, 2)};
-const config = { id: 'built-book', authorComments: 0, pages: 0, defaultTheme: 'light' };
+const config = { id: 'built-book', authorComments: 0, pages: 0, defaultTheme: 'dark' };
 
 function renderText(node) {
   let result = node.text ?? '';
@@ -62,8 +60,13 @@ ReactDOM.createRoot(globalThis.document.getElementById('root')).render(
 `;
 
 export async function buildBook({ document, repoRoot, outDir = path.join(repoRoot, 'dist-book') }) {
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'active-book-'));
-  const coreSourceRoot = path.resolve(repoRoot, 'node_modules/activeBook-core/lib/src');
+  const tempRoot = path.resolve(repoRoot, '.active-book-temp');
+
+  await fs.mkdir(tempRoot, {
+    recursive: true,
+  });
+
+  const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
 
   try {
     await fs.mkdir(path.join(tempRoot, 'src'), { recursive: true });
@@ -76,21 +79,41 @@ export async function buildBook({ document, repoRoot, outDir = path.join(repoRoo
     await build({
       root: tempRoot,
       plugins: [
-        coreScssModulesPlugin({ repoRoot }),
         react(),
+        svgr({
+          include: '**/*.svg',
+          svgrOptions: {
+            plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
+            svgoConfig: {
+              plugins: [
+                {
+                  name: 'preset-default',
+                  params: {
+                    overrides: {
+                      removeViewBox: false,
+                    },
+                  },
+                },
+                'prefixIds',
+              ],
+            },
+          },
+        }),
       ],
-      resolve: {
-        alias: {
-          'activeBook-core': coreSourceRoot,
-          react: path.resolve(repoRoot, 'node_modules/react'),
-          'react-dom': path.resolve(repoRoot, 'node_modules/react-dom'),
-        },
-      },
       css: {
+        modules: {
+          generateScopedName: '[name]__[local]__[hash:base64:5]',
+        },
         preprocessorOptions: {
           scss: {
-            loadPaths: [coreSourceRoot, path.resolve(repoRoot, 'node_modules')],
+            loadPaths: [coreRoot, path.resolve(repoRoot, 'node_modules')],
           },
+        },
+      },
+      resolve: {
+        alias: {
+          assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
+          styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
         },
       },
       build: {

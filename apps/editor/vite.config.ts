@@ -1,32 +1,63 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
+
+// @ts-ignore
 import { activeBookBuildPlugin } from '../../packages/book-builder/src/plugin.js';
-import { coreScssModulesPlugin } from '../../packages/book-builder/src/coreScssModulesPlugin.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, '../..');
-const coreSourceRoot = path.resolve(repoRoot, 'node_modules/activeBook-core/lib/src');
 
-export default defineConfig({
-  plugins: [
-    coreScssModulesPlugin({ repoRoot }),
-    react(),
-    activeBookBuildPlugin({ repoRoot }),
-  ],
-  resolve: {
-    alias: {
-      'activeBook-core': coreSourceRoot,
+const repoRoot = path.resolve(__dirname, '../..');
+const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
+
+export default defineConfig(({ mode }) => {
+  return {
+    plugins: [
+      react(),
+      svgr({
+        include: '**/*.svg',
+        svgrOptions: {
+          plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
+          svgoConfig: {
+            plugins: [
+              {
+                name: 'preset-default',
+                params: {
+                  overrides: {
+                    removeViewBox: false,
+                  },
+                },
+              },
+              'prefixIds',
+            ],
+          },
+        },
+      }),
+
+      activeBookBuildPlugin({ repoRoot }),
+    ],
+    define: {
+      'process.env.mode': JSON.stringify(mode),
     },
-  },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        loadPaths: [coreSourceRoot, path.resolve(repoRoot, 'node_modules')],
+    css: {
+      modules: {
+        generateScopedName: '[name]__[local]__[hash:base64:5]',
+      },
+      preprocessorOptions: {
+        scss: {
+          loadPaths: [coreRoot, path.resolve(repoRoot, 'node_modules')],
+        },
       },
     },
-  },
+    resolve: {
+      alias: {
+        assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
+        styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
+      },
+    },
+  }
 });
