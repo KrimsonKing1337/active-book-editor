@@ -47,6 +47,13 @@ export function EditorScreen() {
       H1Node,
       H2Node,
     ],
+
+    editorProps: {
+      attributes: {
+        spellcheck: 'true', // проверка правописания
+        lang: 'ru',
+      },
+    },
   });
 
   const insertComponent = (name: string) => {
