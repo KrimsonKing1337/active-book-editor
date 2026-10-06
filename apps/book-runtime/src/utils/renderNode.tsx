@@ -1,9 +1,11 @@
-import React from 'react';
+import { Fragment, type Key, type ReactNode } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
-const renderText = (node) => {
-  let result = node.text ?? '';
+import type { BookNode } from '../types';
+
+const renderText = (node: BookNode): ReactNode => {
+  let result: ReactNode = node.text ?? '';
 
   for (const mark of node.marks ?? []) {
     if (mark.type === 'bold') result = <strong>{result}</strong>;
@@ -15,9 +17,9 @@ const renderText = (node) => {
   return result;
 };
 
-export const renderNode = (node, key) => {
+export const renderNode = (node: BookNode, key: Key): ReactNode => {
   if (node.type === 'text') {
-    return <React.Fragment key={key}>{renderText(node)}</React.Fragment>;
+    return <Fragment key={key}>{renderText(node)}</Fragment>;
   }
 
   const children = (node.content ?? []).map((child, index) => renderNode(child, index));
@@ -26,7 +28,6 @@ export const renderNode = (node, key) => {
   if (node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
   if (node.type === 'activeBookP') return <P key={key}>{children}</P>;
 
-  // Backward compatibility with standard TipTap nodes.
   if (node.type === 'heading') {
     return node.attrs?.level === 1
       ? <H1 key={key}>{children}</H1>
@@ -39,5 +40,5 @@ export const renderNode = (node, key) => {
     return <Counter key={key} />;
   }
 
-  return <React.Fragment key={key}>{children}</React.Fragment>;
+  return <Fragment key={key}>{children}</Fragment>;
 };
