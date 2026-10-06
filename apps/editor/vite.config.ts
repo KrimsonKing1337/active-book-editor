@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 
-import { activeBookBuildPlugin } from '../../packages/book-builder/src/plugin.ts';
+import { activeBookBuildPlugin } from '../../packages/book-builder/src/plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
