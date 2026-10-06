@@ -2,7 +2,7 @@ import { Fragment, type Key, type ReactNode } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
-import type { BookNode } from '../types';
+import type { BookNode } from '@book-runtime/types';
 
 const renderText = (node: BookNode): ReactNode => {
   let result: ReactNode = node.text ?? '';
