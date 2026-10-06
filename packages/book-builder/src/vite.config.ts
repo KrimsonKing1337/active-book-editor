@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 import type { InlineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
+import { createProjectAliases } from '../../../vite.aliases';
+
 type CreateViteConfigParams = {
   root: string;
   repoRoot: string;
@@ -53,6 +55,7 @@ export const createViteConfig = ({
     },
     resolve: {
       alias: {
+        ...createProjectAliases(repoRoot),
         assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
         styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
       },
