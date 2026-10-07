@@ -55,7 +55,6 @@ export default defineConfig([
       '@stylistic/eol-last': ['error', 'always'],
       '@stylistic/indent': ['error', 2, { SwitchCase: 1 }],
       '@stylistic/jsx-quotes': ['error', 'prefer-double'],
-      '@stylistic/max-statements-per-line': ['error', { max: 1 }],
       '@stylistic/no-multiple-empty-lines': [
         'error',
         {
