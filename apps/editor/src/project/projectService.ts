@@ -12,6 +12,7 @@ import {
 } from './recentProjectStore';
 import type {
   BookProject,
+  OpenedBookProject,
   PendingLocalProject,
   RestoreLastProjectResult,
 } from './types';
@@ -96,7 +97,7 @@ const forgetProject = async (): Promise<void> => {
 const openProjectFromHandle = async (
   directoryHandle: FileSystemDirectoryHandle,
   remember = true,
-): Promise<BookProject> => {
+): Promise<OpenedBookProject> => {
   const storage = new LocalProjectStorage(directoryHandle);
   const document = await storage.readBook();
 
@@ -105,8 +106,10 @@ const openProjectFromHandle = async (
   }
 
   return {
-    name: storage.name,
-    storage,
+    project: {
+      name: storage.name,
+      storage,
+    },
     document,
   };
 };
@@ -123,11 +126,10 @@ export const createLocalProject = async (
   return {
     name: storage.name,
     storage,
-    document,
   };
 };
 
-export const openLocalProject = async (): Promise<BookProject> => {
+export const openLocalProject = async (): Promise<OpenedBookProject> => {
   const directoryHandle = await pickProjectDirectory();
   return openProjectFromHandle(directoryHandle);
 };
@@ -135,13 +137,8 @@ export const openLocalProject = async (): Promise<BookProject> => {
 export const saveProject = async (
   project: BookProject,
   document: JSONContent,
-): Promise<BookProject> => {
+): Promise<void> => {
   await project.storage.writeBook(document);
-
-  return {
-    ...project,
-    document,
-  };
 };
 
 export const clearCurrentProject = async (): Promise<void> => {
@@ -168,7 +165,7 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
     try {
       return {
         status: 'opened',
-        project: await openProjectFromHandle(directoryHandle, false),
+        openedProject: await openProjectFromHandle(directoryHandle, false),
       };
     } catch (error) {
       console.warn('[project] Could not restore the last project.', error);
@@ -193,7 +190,7 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
 
 export const continueLastProject = async (
   pendingProject: PendingLocalProject,
-): Promise<BookProject | null> => {
+): Promise<OpenedBookProject | null> => {
   const permission = await requestWritePermission(
     pendingProject.directoryHandle,
   );
