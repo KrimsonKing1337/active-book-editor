@@ -1,3 +1,5 @@
+import type { ProjectDirectoryHandle } from './fileSystemAccess';
+
 const DATABASE_NAME = 'active-book-editor';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'project-handles';
@@ -55,17 +57,17 @@ const withStore = async <T>(
 };
 
 export const saveLastProjectHandle = async (
-  handle: FileSystemDirectoryHandle,
+  handle: ProjectDirectoryHandle,
 ): Promise<void> => {
   await withStore('readwrite', (store) => store.put(handle, LAST_PROJECT_KEY));
 };
 
-export const getLastProjectHandle = async (): Promise<FileSystemDirectoryHandle | null> => {
+export const getLastProjectHandle = async (): Promise<ProjectDirectoryHandle | null> => {
   const handle = await withStore('readonly', (store) =>
     store.get(LAST_PROJECT_KEY),
   );
 
-  return (handle as FileSystemDirectoryHandle | undefined) ?? null;
+  return (handle as ProjectDirectoryHandle | undefined) ?? null;
 };
 
 export const clearLastProjectHandle = async (): Promise<void> => {
