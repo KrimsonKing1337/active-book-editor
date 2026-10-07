@@ -152,9 +152,11 @@ export function EditorScreen() {
         const result = await restoreLastProject();
 
         if (result.status === 'opened') {
-          setProject(result.project);
-          replaceDocument(result.project.document);
-          setProjectMessage(`Открыт последний проект: ${result.project.name}`);
+          setProject(result.openedProject.project);
+          replaceDocument(result.openedProject.document);
+          setProjectMessage(
+            `Открыт последний проект: ${result.openedProject.project.name}`,
+          );
         } else if (result.status === 'permission-required') {
           setPendingRestore(result.project);
           setProjectMessage(
@@ -214,12 +216,12 @@ export function EditorScreen() {
     setIsProjectBusy(true);
 
     try {
-      const nextProject = await openLocalProject();
+      const openedProject = await openLocalProject();
 
-      setProject(nextProject);
+      setProject(openedProject.project);
       setPendingRestore(null);
-      replaceDocument(nextProject.document);
-      setProjectMessage(`Открыт проект: ${nextProject.name}`);
+      replaceDocument(openedProject.document);
+      setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
     } catch (error) {
       if (isAbortError(error)) return;
 
@@ -237,9 +239,13 @@ export function EditorScreen() {
 
     try {
       const document = editor.getJSON();
-      const nextProject = project
-        ? await saveProject(project, document)
-        : await createLocalProject(document);
+      let nextProject = project;
+
+      if (nextProject) {
+        await saveProject(nextProject, document);
+      } else {
+        nextProject = await createLocalProject(document);
+      }
 
       setProject(nextProject);
       setPendingRestore(null);
@@ -261,19 +267,19 @@ export function EditorScreen() {
     setIsProjectBusy(true);
 
     try {
-      const nextProject = await continueLastProject(pendingRestore);
+      const openedProject = await continueLastProject(pendingRestore);
 
-      if (!nextProject) {
+      if (!openedProject) {
         setProjectMessage(
           `Нет разрешения на открытие «${pendingRestore.name}».`,
         );
         return;
       }
 
-      setProject(nextProject);
+      setProject(openedProject.project);
       setPendingRestore(null);
-      replaceDocument(nextProject.document);
-      setProjectMessage(`Открыт проект: ${nextProject.name}`);
+      replaceDocument(openedProject.document);
+      setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
     } catch (error) {
       console.error('[project] Continue failed.', error);
       setProjectMessage(getProjectErrorMessage(error));
