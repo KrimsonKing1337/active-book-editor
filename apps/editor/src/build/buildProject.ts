@@ -50,7 +50,7 @@ const uploadBuildFile = async (
 
   const response = await fetch(`${BUILD_ENDPOINT}/file?${query}`, {
     method: 'PUT',
-    body: buildFile.file,
+    body: buildFile.data,
   });
 
   if (!response.ok) {
