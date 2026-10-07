@@ -4,7 +4,7 @@ import type { ProjectDirectoryHandle } from './fileSystemAccess';
 
 export type ProjectBuildFile = {
   path: string;
-  file: File;
+  data: Blob;
 };
 
 export interface ProjectStorage {
