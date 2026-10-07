@@ -11,7 +11,9 @@
     "dev": "npm run dev -w @active-book/editor",
     "preview": "vite preview --outDir dist-book",
     "build:editor": "npm run build -w @active-book/editor",
-    "build:book": "npm run build -w @active-book/book-builder"
+    "build:book": "npm run build -w @active-book/book-builder",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "activeBook-core": "file:../activeBook-react-core/tgz/activebook-react-core-0.0.706.tgz",
@@ -21,6 +23,14 @@
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
     "@types/node": "^26.5.1",
-    "vite-plugin-svgr": "^5.2.0"
+    "vite-plugin-svgr": "^5.2.0",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.10.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "jiti": "^2.7.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1"
   }
 }
