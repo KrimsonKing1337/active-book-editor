@@ -15,6 +15,8 @@ import type { Config } from 'activeBook-core/@types';
 
 import 'activeBook-core/styles/styles.scss';
 
+import { buildProject } from '@editor/build/buildProject';
+
 import { CoreComponentNode } from './CoreComponentNode';
 import { PNode, H1Node, H2Node } from './EditableComponentNode';
 import {
@@ -232,34 +234,48 @@ export function EditorScreen() {
     }
   }, [confirmDiscardChanges, editor, replaceDocument]);
 
+  const saveCurrentProject = useCallback(async (): Promise<BookProject | null> => {
+    if (!editor) {
+      return null;
+    }
+
+    const document = editor.getJSON();
+    let nextProject = project;
+
+    if (nextProject) {
+      await saveProject(nextProject, document);
+    } else {
+      nextProject = await createLocalProject(document);
+    }
+
+    setProject(nextProject);
+    setPendingRestore(null);
+    setIsDirty(false);
+    setProjectMessage(`Сохранено: ${nextProject.name}`);
+
+    return nextProject;
+  }, [editor, project]);
+
   const handleSaveProject = useCallback(async () => {
-    if (!editor || isProjectBusy) return;
+    if (isProjectBusy) {
+      return;
+    }
 
     setIsProjectBusy(true);
 
     try {
-      const document = editor.getJSON();
-      let nextProject = project;
-
-      if (nextProject) {
-        await saveProject(nextProject, document);
-      } else {
-        nextProject = await createLocalProject(document);
-      }
-
-      setProject(nextProject);
-      setPendingRestore(null);
-      setIsDirty(false);
-      setProjectMessage(`Сохранено: ${nextProject.name}`);
+      await saveCurrentProject();
     } catch (error) {
-      if (isAbortError(error)) return;
+      if (isAbortError(error)) {
+        return;
+      }
 
       console.error('[project] Save failed.', error);
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
     }
-  }, [editor, isProjectBusy, project]);
+  }, [isProjectBusy, saveCurrentProject]);
 
   const handleContinueLastProject = useCallback(async () => {
     if (!pendingRestore || !editor || !confirmDiscardChanges()) return;
@@ -348,27 +364,36 @@ export function EditorScreen() {
   };
 
   const buildBook = async () => {
-    if (!editor) return;
+    if (!editor || isProjectBusy) {
+      return;
+    }
 
+    setIsProjectBusy(true);
     setBuildState('building');
 
     try {
-      const response = await fetch('/__active-book/build', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ document: editor.getJSON() }),
-      });
+      const savedProject = await saveCurrentProject();
 
-      if (!response.ok) {
-        throw new Error(await response.text());
+      if (!savedProject) {
+        setBuildState('idle');
+
+        return;
       }
+
+      await buildProject(savedProject.storage);
 
       setBuildState('success');
     } catch (error) {
-      console.error(error);
+      if (isAbortError(error)) {
+        setBuildState('idle');
+
+        return;
+      }
+
+      console.error('[book-builder]', error);
       setBuildState('error');
+    } finally {
+      setIsProjectBusy(false);
     }
   };
 

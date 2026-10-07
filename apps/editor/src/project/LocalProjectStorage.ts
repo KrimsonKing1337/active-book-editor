@@ -1,9 +1,18 @@
 import type { JSONContent } from '@tiptap/core';
 
-import type { ProjectStorage } from './@types';
+import type {
+  ProjectBuildFile,
+  ProjectStorage,
+} from './@types';
 
-import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
-import { ExistingProjectError, InvalidProjectError } from './errors';
+import type {
+  ProjectDirectoryHandle,
+  ProjectFileHandle,
+} from './fileSystemAccess';
+import {
+  ExistingProjectError,
+  InvalidProjectError,
+} from './errors';
 
 const BOOK_FILE_NAME = 'book.json';
 const ASSETS_DIRECTORY_NAME = 'assets';
@@ -28,6 +37,28 @@ export class LocalProjectStorage implements ProjectStorage {
     await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
       create: true,
     });
+  }
+
+  private async *getDirectoryBuildFiles(
+    directoryHandle: ProjectDirectoryHandle,
+    relativePath: string,
+  ): AsyncGenerator<ProjectBuildFile> {
+    for await (const handle of directoryHandle.values()) {
+      const handlePath = `${relativePath}/${handle.name}`;
+
+      if (handle.kind === 'file') {
+        const file = await handle.getFile();
+
+        yield {
+          path: handlePath,
+          data: file,
+        };
+
+        continue;
+      }
+
+      yield* this.getDirectoryBuildFiles(handle, handlePath);
+    }
   }
 
   async getHasBook(): Promise<boolean> {
@@ -90,7 +121,9 @@ export class LocalProjectStorage implements ProjectStorage {
   async writeBook(document: JSONContent): Promise<void> {
     await this.ensureAssetsDirectory();
 
-    const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, { create: true });
+    const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, {
+      create: true,
+    });
     const writable = await fileHandle.createWritable();
 
     try {
@@ -104,5 +137,22 @@ export class LocalProjectStorage implements ProjectStorage {
 
       throw error;
     }
+  }
+
+  async *getBuildFiles(): AsyncGenerator<ProjectBuildFile> {
+    const bookFileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
+    const bookFile = await bookFileHandle.getFile();
+
+    yield {
+      path: BOOK_FILE_NAME,
+      data: bookFile,
+    };
+
+    const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+
+    yield* this.getDirectoryBuildFiles(
+      assetsDirectory,
+      ASSETS_DIRECTORY_NAME,
+    );
   }
 }

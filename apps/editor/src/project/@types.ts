@@ -2,6 +2,11 @@ import type { JSONContent } from '@tiptap/core';
 
 import type { ProjectDirectoryHandle } from './fileSystemAccess';
 
+export type ProjectBuildFile = {
+  path: string;
+  data: Blob;
+};
+
 export interface ProjectStorage {
   readonly name: string;
 
@@ -9,6 +14,7 @@ export interface ProjectStorage {
   initialize(document: JSONContent): Promise<void>;
   readBook(): Promise<JSONContent>;
   writeBook(document: JSONContent): Promise<void>;
+  getBuildFiles(): AsyncIterable<ProjectBuildFile>;
 }
 
 export type BookProject = {

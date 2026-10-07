@@ -18,15 +18,24 @@ export interface ProjectWritableFileStream {
 }
 
 export interface ProjectFileHandle {
+  readonly kind: 'file';
+  readonly name: string;
+
   getFile(): Promise<File>;
   createWritable(): Promise<ProjectWritableFileStream>;
 }
 
+export type ProjectFileSystemHandle =
+  | ProjectFileHandle
+  | ProjectDirectoryHandle;
+
 export interface ProjectDirectoryHandle {
+  readonly kind: 'directory';
   readonly name: string;
 
   getFileHandle(name: string, options?: FileHandleOptions): Promise<ProjectFileHandle>;
   getDirectoryHandle(name: string, options?: FileHandleOptions): Promise<ProjectDirectoryHandle>;
+  values(): AsyncIterableIterator<ProjectFileSystemHandle>;
   queryPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
   requestPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
 }
