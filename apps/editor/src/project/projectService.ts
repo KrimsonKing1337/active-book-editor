@@ -7,7 +7,7 @@ import {
 import type {
   DirectoryPickerWindow,
   ProjectDirectoryHandle,
-  ProjectProjectPermissionState,
+  ProjectPermissionState,
 } from './fileSystemAccess';
 import { LocalProjectStorage } from './LocalProjectStorage';
 import {
