@@ -149,16 +149,18 @@ const handleCompleteRequest = async (
     return;
   }
 
-  try {
-    const outDir = await completeBuildSession(repoRoot, sessionId);
+  let outDir: string;
 
-    sendJson(res, 200, {
-      ok: true,
-      outDir,
-    });
+  try {
+    outDir = await completeBuildSession(repoRoot, sessionId);
   } finally {
     await removeBuildSession(repoRoot, sessionId);
   }
+
+  sendJson(res, 200, {
+    ok: true,
+    outDir,
+  });
 };
 
 const withErrorHandling = (
