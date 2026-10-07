@@ -51,7 +51,7 @@ export async function buildBook({
   repoRoot,
   outDir,
 }: BuildBookParams): Promise<string> {
-  const tempRoot = path.resolve(repoRoot, '.active-book-temp');
+  const tempRoot = path.resolve(repoRoot, 'apps/.active-book-temp');
   const runtimeRoot = path.resolve(repoRoot, 'apps/book-runtime');
   const outDirSafe = outDir ?? path.join(repoRoot, 'dist-book');
 
