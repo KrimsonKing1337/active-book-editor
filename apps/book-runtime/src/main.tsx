@@ -4,9 +4,10 @@ import { App } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
-import bookDocument from '../book.json';
-import { BookPage } from '@book-runtime/components/BookPage';
+import bookDocumentDefault from '../book.json';
+
 import type { BookDocument } from '@book-runtime/types';
+import { BookPage } from '@book-runtime/components/BookPage';
 
 const config: Config = {
   id: 'built-book',
@@ -24,6 +25,6 @@ if (!root) {
 
 ReactDOM.createRoot(root).render(
   <App config={config} tableOfContents={[]} rangeEffects={[]}>
-    <BookPage document={bookDocument as BookDocument} />
+    <BookPage document={bookDocumentDefault as BookDocument} />
   </App>,
 );

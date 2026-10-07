@@ -5,7 +5,7 @@ import type { ProjectDirectoryHandle } from './fileSystemAccess';
 export interface ProjectStorage {
   readonly name: string;
 
-  hasBook(): Promise<boolean>;
+  getHasBook(): Promise<boolean>;
   initialize(document: JSONContent): Promise<void>;
   readBook(): Promise<JSONContent>;
   writeBook(document: JSONContent): Promise<void>;

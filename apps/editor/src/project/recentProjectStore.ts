@@ -5,29 +5,31 @@ const DATABASE_VERSION = 1;
 const STORE_NAME = 'project-handles';
 const LAST_PROJECT_KEY = 'last-project';
 
-const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> =>
-  new Promise((resolve, reject) => {
+const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => {
+  return new Promise((resolve, reject) => {
     request.addEventListener('success', () => resolve(request.result));
     request.addEventListener('error', () => reject(request.error));
   });
+}
 
-const transactionToPromise = (
-  transaction: IDBTransaction,
-): Promise<void> =>
-  new Promise((resolve, reject) => {
+const transactionToPromise = (transaction: IDBTransaction): Promise<void> => {
+  return new Promise((resolve, reject) => {
     transaction.addEventListener('complete', () => resolve());
+
     transaction.addEventListener('abort', () => reject(transaction.error));
     transaction.addEventListener('error', () => reject(transaction.error));
   });
+}
 
-const openDatabase = (): Promise<IDBDatabase> =>
-  new Promise((resolve, reject) => {
+const openDatabase = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
 
     request.addEventListener('upgradeneeded', () => {
       const database = request.result;
+      const databaseContainsStoreName= database.objectStoreNames.contains(STORE_NAME);
 
-      if (!database.objectStoreNames.contains(STORE_NAME)) {
+      if (!databaseContainsStoreName) {
         database.createObjectStore(STORE_NAME);
       }
     });
@@ -35,10 +37,13 @@ const openDatabase = (): Promise<IDBDatabase> =>
     request.addEventListener('success', () => resolve(request.result));
     request.addEventListener('error', () => reject(request.error));
   });
+};
+
+export type WithStoreOperation<T> = (store: IDBObjectStore) => IDBRequest<T>;
 
 const withStore = async <T>(
   mode: IDBTransactionMode,
-  operation: (store: IDBObjectStore) => IDBRequest<T>,
+  operation: WithStoreOperation<T>,
 ): Promise<T> => {
   const database = await openDatabase();
 
@@ -59,17 +64,27 @@ const withStore = async <T>(
 export const saveLastProjectHandle = async (
   handle: ProjectDirectoryHandle,
 ): Promise<void> => {
-  await withStore('readwrite', (store) => store.put(handle, LAST_PROJECT_KEY));
+  const actionFunction = (store: IDBObjectStore) => {
+    return store.put(handle, LAST_PROJECT_KEY);
+  }
+
+  await withStore('readwrite', actionFunction);
 };
 
 export const getLastProjectHandle = async (): Promise<ProjectDirectoryHandle | null> => {
-  const handle = await withStore('readonly', (store) =>
-    store.get(LAST_PROJECT_KEY),
-  );
+  const actionFunction = (store: IDBObjectStore) => {
+    return store.get(LAST_PROJECT_KEY);
+  }
 
-  return (handle as ProjectDirectoryHandle | undefined) ?? null;
+  const handle = await withStore('readonly', actionFunction);
+
+  type Handle = ProjectDirectoryHandle | undefined;
+
+  return handle as Handle ?? null;
 };
 
 export const clearLastProjectHandle = async (): Promise<void> => {
-  await withStore('readwrite', (store) => store.delete(LAST_PROJECT_KEY));
+  await withStore('readwrite', (store) => {
+    return store.delete(LAST_PROJECT_KEY);
+  });
 };

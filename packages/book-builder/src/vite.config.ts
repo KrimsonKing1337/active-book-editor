@@ -1,10 +1,11 @@
 import path from 'node:path';
 
-import react from '@vitejs/plugin-react';
 import type { InlineConfig } from 'vite';
+
+import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 
-import { createProjectAliases } from '../../../vite.aliases';
+import { createProjectAliases } from '@@/vite.aliases.js';
 
 type CreateViteConfigParams = {
   root: string;
@@ -21,6 +22,7 @@ export const createViteConfig = ({
 
   return {
     root,
+
     plugins: [
       react(),
       svgr({
@@ -43,6 +45,7 @@ export const createViteConfig = ({
         },
       }),
     ],
+
     css: {
       modules: {
         generateScopedName: '[name]__[local]__[hash:base64:5]',
@@ -53,6 +56,7 @@ export const createViteConfig = ({
         },
       },
     },
+
     resolve: {
       alias: {
         ...createProjectAliases(repoRoot),
@@ -60,6 +64,7 @@ export const createViteConfig = ({
         styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
       },
     },
+
     build: {
       outDir,
       emptyOutDir: true,

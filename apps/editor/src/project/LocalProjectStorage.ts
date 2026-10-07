@@ -1,27 +1,26 @@
 import type { JSONContent } from '@tiptap/core';
 
+import type { ProjectStorage } from './@types';
+
+import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
 import { ExistingProjectError, InvalidProjectError } from './errors';
-import type {
-  ProjectDirectoryHandle,
-  ProjectFileHandle,
-} from './fileSystemAccess';
-import type { ProjectStorage } from './types';
 
 const BOOK_FILE_NAME = 'book.json';
 const ASSETS_DIRECTORY_NAME = 'assets';
 
-const isBookDocument = (value: unknown): value is JSONContent =>
-  typeof value === 'object' &&
-  value !== null &&
-  'type' in value &&
-  (value as { type?: unknown }).type === 'doc';
+const getIsBookDocument = (value: unknown): value is JSONContent => {
+  type Value = { type?: unknown };
+
+  return typeof value === 'object'
+    && value !== null
+    && 'type' in value
+    && (value as Value).type === 'doc';
+};
 
 export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;
 
-  constructor(
-    public readonly directoryHandle: ProjectDirectoryHandle,
-  ) {
+  constructor(public readonly directoryHandle: ProjectDirectoryHandle) {
     this.name = directoryHandle.name;
   }
 
@@ -31,9 +30,10 @@ export class LocalProjectStorage implements ProjectStorage {
     });
   }
 
-  async hasBook(): Promise<boolean> {
+  async getHasBook(): Promise<boolean> {
     try {
       await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
+
       return true;
     } catch (error) {
       if (error instanceof DOMException && error.name === 'NotFoundError') {
@@ -45,7 +45,9 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async initialize(document: JSONContent): Promise<void> {
-    if (await this.hasBook()) {
+    const hasBook = await this.getHasBook();
+
+    if (hasBook) {
       throw new ExistingProjectError();
     }
 
@@ -76,31 +78,30 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new InvalidProjectError('book.json содержит некорректный JSON.');
     }
 
-    if (!isBookDocument(document)) {
-      throw new InvalidProjectError(
-        'book.json не содержит документ Active Book.',
-      );
+    const isBookDocument = getIsBookDocument(document);
+
+    if (!isBookDocument) {
+      throw new InvalidProjectError('book.json не содержит документ Active Book.');
     }
 
-    return document;
+    return document as JSONContent;
   }
 
   async writeBook(document: JSONContent): Promise<void> {
     await this.ensureAssetsDirectory();
 
-    const fileHandle = await this.directoryHandle.getFileHandle(
-      BOOK_FILE_NAME,
-      {
-        create: true,
-      },
-    );
+    const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, { create: true });
     const writable = await fileHandle.createWritable();
 
     try {
-      await writable.write(`${JSON.stringify(document, null, 2)}\n`);
+      const jsonString = `${JSON.stringify(document, null, 2)}\n`;
+
+      await writable.write(jsonString);
+
       await writable.close();
     } catch (error) {
       await writable.abort?.();
+
       throw error;
     }
   }

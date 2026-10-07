@@ -3,15 +3,17 @@ export type BookMark = {
   attrs?: Record<string, unknown>;
 };
 
+export type BookNodeAttrs = {
+  level?: number;
+  name?: string;
+  [key: string]: unknown;
+};
+
 export type BookNode = {
   type: string;
   text?: string;
   marks?: BookMark[];
-  attrs?: {
-    level?: number;
-    name?: string;
-    [key: string]: unknown;
-  };
+  attrs?: BookNodeAttrs;
   content?: BookNode[];
 };
 

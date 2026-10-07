@@ -34,7 +34,7 @@ import {
 import type {
   BookProject,
   PendingLocalProject,
-} from '@editor/project/types';
+} from '@editor/project/@types';
 
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',

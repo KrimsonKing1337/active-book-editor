@@ -1,17 +1,19 @@
-import { Fragment, type Key, type ReactNode } from 'react';
+import { type Key, type ReactNode, Fragment } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
 import type { BookNode } from '@book-runtime/types';
 
 const renderText = (node: BookNode): ReactNode => {
+  const marks = node.marks ?? [];
+
   let result: ReactNode = node.text ?? '';
 
-  for (const mark of node.marks ?? []) {
-    if (mark.type === 'bold') result = <strong>{result}</strong>;
-    if (mark.type === 'italic') result = <em>{result}</em>;
-    if (mark.type === 'strike') result = <s>{result}</s>;
-    if (mark.type === 'code') result = <code>{result}</code>;
+  for (const markCur of marks) {
+    if (markCur.type === 'bold') result = <strong>{result}</strong>;
+    if (markCur.type === 'italic') result = <em>{result}</em>;
+    if (markCur.type === 'strike') result = <s>{result}</s>;
+    if (markCur.type === 'code') result = <code>{result}</code>;
   }
 
   return result;
@@ -19,10 +21,18 @@ const renderText = (node: BookNode): ReactNode => {
 
 export const renderNode = (node: BookNode, key: Key): ReactNode => {
   if (node.type === 'text') {
-    return <Fragment key={key}>{renderText(node)}</Fragment>;
+    return (
+      <Fragment key={key}>
+        {renderText(node)}
+      </Fragment>
+    );
   }
 
-  const children = (node.content ?? []).map((child, index) => renderNode(child, index));
+  const content = node.content ?? [];
+
+  const children = content.map((child, index) => {
+    return renderNode(child, index);
+  });
 
   if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
   if (node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
@@ -40,5 +50,9 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
     return <Counter key={key} />;
   }
 
-  return <Fragment key={key}>{children}</Fragment>;
+  return (
+    <Fragment key={key}>
+      {children}
+    </Fragment>
+  );
 };

@@ -1,5 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core';
-import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from '@tiptap/react';
+import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+
+import classNames from 'classnames';
 
 import { Counter } from 'activeBook-core/components';
 
@@ -11,15 +13,27 @@ type ComponentName = keyof typeof componentRegistry;
 
 function CoreComponentView({ node, selected }: NodeViewProps) {
   const name = node.attrs.name as ComponentName;
+
   const Component = componentRegistry[name];
 
+  const nodeViewWrapperClassNames = classNames({
+    'core-component-node': true,
+    'is-selected': selected,
+  });
+
+  const unknownComponent = (
+    <div>
+      Unknown component: {name}
+    </div>
+  );
+
   return (
-    <NodeViewWrapper
-      className={`core-component-node${selected ? ' is-selected' : ''}`}
-      data-component={name}
-    >
-      <div className="core-component-label">{name}</div>
-      {Component ? <Component /> : <div>Unknown component: {name}</div>}
+    <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name}>
+      <div className="core-component-label">
+        {name}
+      </div>
+
+      {Component ? <Component /> : unknownComponent}
     </NodeViewWrapper>
   );
 }
@@ -47,7 +61,12 @@ export const CoreComponentNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['active-book-component', mergeAttributes(HTMLAttributes)];
+    const mergedAttributes = mergeAttributes(HTMLAttributes);
+
+    return [
+      'active-book-component',
+      mergedAttributes,
+    ];
   },
 
   addNodeView() {

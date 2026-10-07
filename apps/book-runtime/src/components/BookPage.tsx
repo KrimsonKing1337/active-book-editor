@@ -8,9 +8,13 @@ type BookPageProps = {
 };
 
 export const BookPage = ({ document }: BookPageProps) => {
+  const content = document.content ?? [];
+
   return (
     <PageWrapper>
-      {(document.content ?? []).map((node, index) => renderNode(node, index))}
+      {content.map((node, index) => {
+        return renderNode(node, index);
+      })}
     </PageWrapper>
   );
 };

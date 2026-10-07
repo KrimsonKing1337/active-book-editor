@@ -7,6 +7,10 @@ export type ProjectPermissionDescriptor = {
   mode?: 'read' | 'readwrite';
 };
 
+export type FileHandleOptions = {
+  create?: boolean;
+};
+
 export interface ProjectWritableFileStream {
   write(data: string): Promise<void>;
   close(): Promise<void>;
@@ -21,23 +25,10 @@ export interface ProjectFileHandle {
 export interface ProjectDirectoryHandle {
   readonly name: string;
 
-  getFileHandle(
-    name: string,
-    options?: { create?: boolean },
-  ): Promise<ProjectFileHandle>;
-
-  getDirectoryHandle(
-    name: string,
-    options?: { create?: boolean },
-  ): Promise<ProjectDirectoryHandle>;
-
-  queryPermission?(
-    descriptor?: ProjectPermissionDescriptor,
-  ): Promise<ProjectPermissionState>;
-
-  requestPermission?(
-    descriptor?: ProjectPermissionDescriptor,
-  ): Promise<ProjectPermissionState>;
+  getFileHandle(name: string, options?: FileHandleOptions): Promise<ProjectFileHandle>;
+  getDirectoryHandle(name: string, options?: FileHandleOptions): Promise<ProjectDirectoryHandle>;
+  queryPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
+  requestPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
 }
 
 export type DirectoryPickerOptions = {
@@ -46,7 +37,5 @@ export type DirectoryPickerOptions = {
 };
 
 export type DirectoryPickerWindow = Window & {
-  showDirectoryPicker(
-    options?: DirectoryPickerOptions,
-  ): Promise<ProjectDirectoryHandle>;
+  showDirectoryPicker(options?: DirectoryPickerOptions): Promise<ProjectDirectoryHandle>;
 };

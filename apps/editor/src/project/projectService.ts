@@ -20,7 +20,7 @@ import type {
   OpenedBookProject,
   PendingLocalProject,
   RestoreLastProjectResult,
-} from './types';
+} from './@types';
 
 const pickProjectDirectory = async (): Promise<ProjectDirectoryHandle> => {
   if (!('showDirectoryPicker' in window)) {

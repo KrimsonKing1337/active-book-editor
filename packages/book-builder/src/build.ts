@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { build } from 'vite';
 
-import { createViteConfig } from './vite.config.ts';
+import { createViteConfig } from './vite.config.js';
 
 type BuildBookParams = {
   document: unknown;
@@ -14,27 +14,32 @@ type BuildBookParams = {
 export async function buildBook({
   document,
   repoRoot,
-  outDir = path.join(repoRoot, 'dist-book'),
+  outDir,
 }: BuildBookParams): Promise<string> {
   const tempRoot = path.resolve(repoRoot, '.active-book-temp');
   const runtimeRoot = path.resolve(repoRoot, 'apps/book-runtime');
 
+  const outDirSafe = outDir ?? path.join(repoRoot, 'dist-book');
+
   try {
     await fs.rm(tempRoot, { recursive: true, force: true });
     await fs.cp(runtimeRoot, tempRoot, { recursive: true });
-    await fs.writeFile(
-      path.join(tempRoot, 'book.json'),
-      JSON.stringify(document, null, 2),
-    );
 
-    await build(createViteConfig({
+    const bookJsonPath = path.join(tempRoot, 'book.json');
+    const documentAsString = JSON.stringify(document, null, 2);
+
+    await fs.writeFile(bookJsonPath, documentAsString);
+
+    const viteConfig = {
       root: tempRoot,
       repoRoot,
-      outDir,
-    }));
+      outDir: outDirSafe,
+    };
+
+    await build(createViteConfig(viteConfig));
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
   }
 
-  return outDir;
+  return outDirSafe;
 }
