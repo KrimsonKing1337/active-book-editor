@@ -10,6 +10,7 @@ export type ProjectPermissionDescriptor = {
 export interface ProjectWritableFileStream {
   write(data: string): Promise<void>;
   close(): Promise<void>;
+  abort?(): Promise<void>;
 }
 
 export interface ProjectFileHandle {
