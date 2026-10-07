@@ -146,11 +146,12 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
       };
     } catch (error) {
       console.warn('[project] Could not restore the last project.', error);
+      await forgetProject();
       return { status: 'unavailable' };
     }
   }
 
-  if (permission === 'prompt') {
+  if (permission === 'prompt' || permission === 'denied') {
     const project: PendingLocalProject = {
       name: directoryHandle.name,
       directoryHandle,
