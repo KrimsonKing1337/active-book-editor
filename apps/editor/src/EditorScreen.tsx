@@ -294,9 +294,15 @@ export function EditorScreen() {
   ]);
 
   const handleForgetLastProject = useCallback(async () => {
-    await clearCurrentProject();
-    setPendingRestore(null);
-    setProjectMessage('Новый несохранённый проект');
+    setIsProjectBusy(true);
+
+    try {
+      await clearCurrentProject();
+      setPendingRestore(null);
+      setProjectMessage('Новый несохранённый проект');
+    } finally {
+      setIsProjectBusy(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -401,31 +407,47 @@ export function EditorScreen() {
             onClick={() => void handleSaveProject()}
             disabled={!editor || isProjectBusy}
           >
-            {isProjectBusy ? 'Сохранение…' : 'Сохранить'}
+            {isProjectBusy ? 'Подождите…' : 'Сохранить'}
           </button>
 
           <span className="editor-actions-separator" />
 
-          <button type="button" onClick={() => insertComponent('Counter')}>
+          <button
+            type="button"
+            onClick={() => insertComponent('Counter')}
+            disabled={!editor || isProjectBusy}
+          >
             Добавить Counter
           </button>
 
-          <button type="button" onClick={() => insertTextComponent('P')}>
+          <button
+            type="button"
+            onClick={() => insertTextComponent('P')}
+            disabled={!editor || isProjectBusy}
+          >
             Добавить параграф
           </button>
 
-          <button type="button" onClick={() => insertTextComponent('H1')}>
+          <button
+            type="button"
+            onClick={() => insertTextComponent('H1')}
+            disabled={!editor || isProjectBusy}
+          >
             Добавить заголовок 1
           </button>
 
-          <button type="button" onClick={() => insertTextComponent('H2')}>
+          <button
+            type="button"
+            onClick={() => insertTextComponent('H2')}
+            disabled={!editor || isProjectBusy}
+          >
             Добавить заголовок 2
           </button>
 
           <button
             type="button"
             onClick={buildBook}
-            disabled={!editor || buildState === 'building'}
+            disabled={!editor || isProjectBusy || buildState === 'building'}
           >
             {buildState === 'building' ? 'Сборка…' : 'Собрать книгу'}
           </button>
