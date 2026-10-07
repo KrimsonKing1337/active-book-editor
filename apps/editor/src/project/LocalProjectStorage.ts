@@ -1,6 +1,7 @@
 import type { JSONContent } from '@tiptap/core';
 
 import { ExistingProjectError, InvalidProjectError } from './errors';
+import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
 import type { ProjectStorage } from './types';
 
 const BOOK_FILE_NAME = 'book.json';
@@ -16,7 +17,7 @@ export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;
 
   constructor(
-    public readonly directoryHandle: FileSystemDirectoryHandle,
+    public readonly directoryHandle: ProjectDirectoryHandle,
   ) {
     this.name = directoryHandle.name;
   }
@@ -47,7 +48,7 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async readBook(): Promise<JSONContent> {
-    let fileHandle: FileSystemFileHandle;
+    let fileHandle: ProjectFileHandle;
 
     try {
       fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
