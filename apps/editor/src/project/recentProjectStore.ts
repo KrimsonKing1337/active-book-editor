@@ -9,6 +9,15 @@ const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> =>
     request.addEventListener('error', () => reject(request.error));
   });
 
+const transactionToPromise = (
+  transaction: IDBTransaction,
+): Promise<void> =>
+  new Promise((resolve, reject) => {
+    transaction.addEventListener('complete', () => resolve());
+    transaction.addEventListener('abort', () => reject(transaction.error));
+    transaction.addEventListener('error', () => reject(transaction.error));
+  });
+
 const openDatabase = (): Promise<IDBDatabase> =>
   new Promise((resolve, reject) => {
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
@@ -33,13 +42,11 @@ const withStore = async <T>(
 
   try {
     const transaction = database.transaction(STORE_NAME, mode);
-    const result = await requestToPromise(operation(transaction.objectStore(STORE_NAME)));
+    const transactionDone = transactionToPromise(transaction);
+    const request = operation(transaction.objectStore(STORE_NAME));
+    const result = await requestToPromise(request);
 
-    await new Promise<void>((resolve, reject) => {
-      transaction.addEventListener('complete', () => resolve());
-      transaction.addEventListener('abort', () => reject(transaction.error));
-      transaction.addEventListener('error', () => reject(transaction.error));
-    });
+    await transactionDone;
 
     return result;
   } finally {
@@ -54,7 +61,10 @@ export const saveLastProjectHandle = async (
 };
 
 export const getLastProjectHandle = async (): Promise<FileSystemDirectoryHandle | null> => {
-  const handle = await withStore('readonly', (store) => store.get(LAST_PROJECT_KEY));
+  const handle = await withStore('readonly', (store) =>
+    store.get(LAST_PROJECT_KEY),
+  );
+
   return (handle as FileSystemDirectoryHandle | undefined) ?? null;
 };
 
