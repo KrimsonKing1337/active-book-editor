@@ -51,7 +51,7 @@ export class LocalProjectStorage implements ProjectStorage {
 
         yield {
           path: handlePath,
-          file,
+          data: file,
         };
 
         continue;
@@ -145,7 +145,7 @@ export class LocalProjectStorage implements ProjectStorage {
 
     yield {
       path: BOOK_FILE_NAME,
-      file: bookFile,
+      data: bookFile,
     };
 
     const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
