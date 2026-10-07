@@ -4,6 +4,11 @@ import {
   FileSystemAccessUnsupportedError,
   isAbortError,
 } from './errors';
+import type {
+  DirectoryPickerWindow,
+  ProjectDirectoryHandle,
+  ProjectProjectPermissionState,
+} from './fileSystemAccess';
 import { LocalProjectStorage } from './LocalProjectStorage';
 import {
   clearLastProjectHandle,
@@ -17,31 +22,7 @@ import type {
   RestoreLastProjectResult,
 } from './types';
 
-type DirectoryPickerOptions = {
-  id?: string;
-  mode?: 'read' | 'readwrite';
-};
-
-type DirectoryPickerWindow = Window & {
-  showDirectoryPicker(
-    options?: DirectoryPickerOptions,
-  ): Promise<FileSystemDirectoryHandle>;
-};
-
-type PermissionDescriptor = {
-  mode?: 'read' | 'readwrite';
-};
-
-type PermissionCapableDirectoryHandle = FileSystemDirectoryHandle & {
-  queryPermission(
-    descriptor?: PermissionDescriptor,
-  ): Promise<PermissionState>;
-  requestPermission(
-    descriptor?: PermissionDescriptor,
-  ): Promise<PermissionState>;
-};
-
-const pickProjectDirectory = async (): Promise<FileSystemDirectoryHandle> => {
+const pickProjectDirectory = async (): Promise<ProjectDirectoryHandle> => {
   if (!('showDirectoryPicker' in window)) {
     throw new FileSystemAccessUnsupportedError();
   }
@@ -53,31 +34,27 @@ const pickProjectDirectory = async (): Promise<FileSystemDirectoryHandle> => {
 };
 
 const queryWritePermission = async (
-  handle: FileSystemDirectoryHandle,
-): Promise<PermissionState> => {
-  const permissionHandle = handle as PermissionCapableDirectoryHandle;
-
-  if (typeof permissionHandle.queryPermission !== 'function') {
+  handle: ProjectDirectoryHandle,
+): Promise<ProjectPermissionState> => {
+  if (typeof handle.queryPermission !== 'function') {
     return 'prompt';
   }
 
-  return permissionHandle.queryPermission({ mode: 'readwrite' });
+  return handle.queryPermission({ mode: 'readwrite' });
 };
 
 const requestWritePermission = async (
-  handle: FileSystemDirectoryHandle,
-): Promise<PermissionState> => {
-  const permissionHandle = handle as PermissionCapableDirectoryHandle;
-
-  if (typeof permissionHandle.requestPermission !== 'function') {
+  handle: ProjectDirectoryHandle,
+): Promise<ProjectPermissionState> => {
+  if (typeof handle.requestPermission !== 'function') {
     return 'denied';
   }
 
-  return permissionHandle.requestPermission({ mode: 'readwrite' });
+  return handle.requestPermission({ mode: 'readwrite' });
 };
 
 const rememberProject = async (
-  handle: FileSystemDirectoryHandle,
+  handle: ProjectDirectoryHandle,
 ): Promise<void> => {
   try {
     await saveLastProjectHandle(handle);
@@ -95,7 +72,7 @@ const forgetProject = async (): Promise<void> => {
 };
 
 const openProjectFromHandle = async (
-  directoryHandle: FileSystemDirectoryHandle,
+  directoryHandle: ProjectDirectoryHandle,
   remember = true,
 ): Promise<OpenedBookProject> => {
   const storage = new LocalProjectStorage(directoryHandle);
@@ -146,7 +123,7 @@ export const clearCurrentProject = async (): Promise<void> => {
 };
 
 export const restoreLastProject = async (): Promise<RestoreLastProjectResult> => {
-  let directoryHandle: FileSystemDirectoryHandle | null;
+  let directoryHandle: ProjectDirectoryHandle | null;
 
   try {
     directoryHandle = await getLastProjectHandle();
