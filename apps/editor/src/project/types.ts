@@ -1,5 +1,7 @@
 import type { JSONContent } from '@tiptap/core';
 
+import type { ProjectDirectoryHandle } from './fileSystemAccess';
+
 export interface ProjectStorage {
   readonly name: string;
 
@@ -21,7 +23,7 @@ export type OpenedBookProject = {
 
 export type PendingLocalProject = {
   name: string;
-  directoryHandle: FileSystemDirectoryHandle;
+  directoryHandle: ProjectDirectoryHandle;
 };
 
 export type RestoreLastProjectResult =
