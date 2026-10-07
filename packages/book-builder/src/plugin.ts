@@ -1,19 +1,28 @@
 import fs from 'node:fs';
+
 import fsPromises from 'node:fs/promises';
+
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+
+import type {
+  IncomingMessage,
+  ServerResponse,
+} from 'node:http';
+
 import { pipeline } from 'node:stream/promises';
 
-import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 
-import { buildBook } from './build.js';
+import {
+  completeBuildSession,
+  createBuildSession,
+  getBuildSessionFilePath,
+  removeBuildSession,
+} from './buildSession.js';
 
 type ActiveBookBuildPluginParams = {
   repoRoot: string;
 };
-
-const BUILD_ROOT_NAME = '.active-book-build';
 
 const sendJson = (
   res: ServerResponse,
@@ -45,63 +54,6 @@ const getQuery = (req: IncomingMessage): URLSearchParams => {
   return url.searchParams;
 };
 
-const getSessionRoot = (
-  repoRoot: string,
-  sessionId: string,
-): string => {
-  const isValidSessionId = /^[0-9a-f-]{36}$/i.test(sessionId);
-
-  if (!isValidSessionId) {
-    throw new Error('Invalid build session');
-  }
-
-  return path.join(repoRoot, BUILD_ROOT_NAME, sessionId);
-};
-
-const getProjectFilePath = (
-  sessionRoot: string,
-  relativePath: string,
-): string => {
-  const normalizedPath = relativePath.replaceAll('\\', '/');
-  const safePath = path.posix.normalize(normalizedPath);
-
-  const isBookJson = safePath === 'book.json';
-  const isAsset = safePath.startsWith('assets/');
-
-  if (!isBookJson && !isAsset) {
-    throw new Error('Invalid project file path');
-  }
-
-  if (safePath.startsWith('../') || path.posix.isAbsolute(safePath)) {
-    throw new Error('Invalid project file path');
-  }
-
-  return path.join(sessionRoot, ...safePath.split('/'));
-};
-
-const createBuildSession = async (
-  repoRoot: string,
-): Promise<string> => {
-  const sessionId = randomUUID();
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
-
-  await fsPromises.mkdir(sessionRoot, { recursive: true });
-
-  return sessionId;
-};
-
-const removeBuildSession = async (
-  repoRoot: string,
-  sessionId: string,
-): Promise<void> => {
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
-
-  await fsPromises.rm(sessionRoot, {
-    recursive: true,
-    force: true,
-  });
-};
-
 const uploadProjectFile = async (
   req: IncomingMessage,
   repoRoot: string,
@@ -114,8 +66,11 @@ const uploadProjectFile = async (
     throw new Error('Missing build file parameters');
   }
 
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
-  const targetPath = getProjectFilePath(sessionRoot, filePath);
+  const targetPath = getBuildSessionFilePath(
+    repoRoot,
+    sessionId,
+    filePath,
+  );
 
   await fsPromises.mkdir(path.dirname(targetPath), {
     recursive: true,
@@ -124,21 +79,6 @@ const uploadProjectFile = async (
   const writeStream = fs.createWriteStream(targetPath);
 
   await pipeline(req, writeStream);
-};
-
-const completeBuildSession = async (
-  repoRoot: string,
-  sessionId: string,
-): Promise<string> => {
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
-  const bookJsonPath = path.join(sessionRoot, 'book.json');
-
-  await fsPromises.access(bookJsonPath);
-
-  return buildBook({
-    projectRoot: sessionRoot,
-    repoRoot,
-  });
 };
 
 const handleSessionRequest = async (
