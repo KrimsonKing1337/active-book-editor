@@ -12,6 +12,10 @@ export interface ProjectStorage {
 export type BookProject = {
   name: string;
   storage: ProjectStorage;
+};
+
+export type OpenedBookProject = {
+  project: BookProject;
   document: JSONContent;
 };
 
@@ -22,6 +26,6 @@ export type PendingLocalProject = {
 
 export type RestoreLastProjectResult =
   | { status: 'none' }
-  | { status: 'opened'; project: BookProject }
+  | { status: 'opened'; openedProject: OpenedBookProject }
   | { status: 'permission-required'; project: PendingLocalProject }
   | { status: 'unavailable' };
