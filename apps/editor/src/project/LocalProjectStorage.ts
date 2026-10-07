@@ -1,7 +1,10 @@
 import type { JSONContent } from '@tiptap/core';
 
 import { ExistingProjectError, InvalidProjectError } from './errors';
-import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
+import type {
+  ProjectDirectoryHandle,
+  ProjectFileHandle,
+} from './fileSystemAccess';
 import type { ProjectStorage } from './types';
 
 const BOOK_FILE_NAME = 'book.json';
@@ -22,6 +25,12 @@ export class LocalProjectStorage implements ProjectStorage {
     this.name = directoryHandle.name;
   }
 
+  private async ensureAssetsDirectory(): Promise<void> {
+    await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
+      create: true,
+    });
+  }
+
   async hasBook(): Promise<boolean> {
     try {
       await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
@@ -39,10 +48,6 @@ export class LocalProjectStorage implements ProjectStorage {
     if (await this.hasBook()) {
       throw new ExistingProjectError();
     }
-
-    await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
-      create: true,
-    });
 
     await this.writeBook(document);
   }
@@ -72,22 +77,31 @@ export class LocalProjectStorage implements ProjectStorage {
     }
 
     if (!isBookDocument(document)) {
-      throw new InvalidProjectError('book.json не содержит документ Active Book.');
+      throw new InvalidProjectError(
+        'book.json не содержит документ Active Book.',
+      );
     }
 
     return document;
   }
 
   async writeBook(document: JSONContent): Promise<void> {
-    const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, {
-      create: true,
-    });
+    await this.ensureAssetsDirectory();
+
+    const fileHandle = await this.directoryHandle.getFileHandle(
+      BOOK_FILE_NAME,
+      {
+        create: true,
+      },
+    );
     const writable = await fileHandle.createWritable();
 
     try {
       await writable.write(`${JSON.stringify(document, null, 2)}\n`);
-    } finally {
       await writable.close();
+    } catch (error) {
+      await writable.abort?.();
+      throw error;
     }
   }
 }
