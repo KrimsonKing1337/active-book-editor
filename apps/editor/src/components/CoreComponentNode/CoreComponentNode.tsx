@@ -29,7 +29,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
   );
 
   return (
-    <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name}>
+    <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name} data-active-book-node={name}>
       <div className={styles.Label}>
         {name}
       </div>
@@ -41,7 +41,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
 export const CoreComponentNode = Node.create({
   name: 'coreComponent',
-  group: 'block',
+  group: 'activeBookBlock',
   atom: true,
   selectable: true,
 

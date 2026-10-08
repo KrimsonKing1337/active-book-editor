@@ -28,6 +28,10 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
     );
   }
 
+  if (node.type === 'hardBreak') {
+    return <br key={key} />;
+  }
+
   const content = node.content ?? [];
 
   const children = content.map((child, index) => {
@@ -36,7 +40,7 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
 
   if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
   if (node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
-  if (node.type === 'activeBookP') return <P key={key}>{children}</P>;
+  if (node.type === 'activeBookP') return <P key={key} data-active-book-node="P">{children}</P>;
 
   if (node.type === 'heading') {
     return node.attrs?.level === 1
@@ -44,7 +48,7 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
       : <H2 key={key}>{children}</H2>;
   }
 
-  if (node.type === 'paragraph') return <P key={key}>{children}</P>;
+  if (node.type === 'paragraph') return <P key={key} data-active-book-node="P">{children}</P>;
 
   if (node.type === 'coreComponent' && node.attrs?.name === 'Counter') {
     return <Counter key={key} />;

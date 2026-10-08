@@ -6,6 +6,8 @@ import 'activeBook-core/styles/styles.scss';
 
 import { BookPage } from '@components/BookPage';
 
+import './styles.scss';
+
 import bookDocumentDefault from '../book.json';
 import type { BookDocument } from './@types';
 
