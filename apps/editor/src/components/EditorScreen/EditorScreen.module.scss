@@ -1,6 +1,32 @@
 .EditorScreen {
   min-height: 100vh;
 
+  &.isStructureVisible {
+    .Canvas {
+      :global([data-active-book-node]) {
+        position: relative;
+        outline: 1px dashed rgba(255, 255, 255, 0.4);
+        outline-offset: 2px;
+
+        &::before {
+          content: attr(data-active-book-node);
+          position: absolute;
+          top: 0;
+          right: 0;
+          z-index: 1;
+          padding: 2px 4px;
+          font-size: 10px;
+          line-height: 1;
+          text-indent: 0;
+          pointer-events: none;
+          user-select: none;
+          background: #101010;
+          color: #f5f5f5;
+        }
+      }
+    }
+  }
+
   .Toolbar {
     position: sticky;
     top: 0;

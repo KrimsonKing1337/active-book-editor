@@ -9,6 +9,8 @@ import Document from '@tiptap/extension-document';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
+import classNames from 'classnames';
+
 import { App, PageWrapper } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 
@@ -53,12 +55,8 @@ const activeBookBlockNodes = [
   CoreComponentNode,
 ];
 
-const activeBookBlockContent = activeBookBlockNodes
-  .map((node) => node.name)
-  .join(' | ');
-
 export const ActiveBookDocument = Document.extend({
-  content: `(${activeBookBlockContent})+`,
+  content: 'activeBookBlock+',
 });
 
 const config: Config = {
@@ -104,6 +102,7 @@ export const EditorScreen = () => {
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
+  const [showStructure, setShowStructure] = useState(false);
 
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
@@ -120,6 +119,11 @@ export const EditorScreen = () => {
         bulletList: false,
         orderedList: false,
         listItem: false,
+        horizontalRule: false,
+        trailingNode: false,
+        hardBreak: {
+          keepMarks: true,
+        },
       }),
 
       ActiveBookDocument,
@@ -419,6 +423,10 @@ export const EditorScreen = () => {
     insertEditorContent(textContent);
   };
 
+  const toggleStructure = () => {
+    setShowStructure((structureIsVisible) => !structureIsVisible);
+  };
+
   const buildBook = async () => {
     if (buttonIsDisabled) {
       return;
@@ -457,6 +465,10 @@ export const EditorScreen = () => {
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
   const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
+  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
+  const editorScreenClassNames = classNames(styles.EditorScreen, {
+    [styles.isStructureVisible]: showStructure,
+  });
 
   let buildStateLabel = '';
 
@@ -467,7 +479,7 @@ export const EditorScreen = () => {
   }
 
   return (
-    <div className={styles.EditorScreen}>
+    <div className={editorScreenClassNames}>
       <header className={styles.Toolbar}>
         <div className={styles.ProjectTitle}>
           <strong>
@@ -506,6 +518,15 @@ export const EditorScreen = () => {
           </button>
 
           <span className={styles.Separator} />
+
+          <button
+            type="button"
+            disabled={!editor}
+            aria-pressed={showStructure}
+            onClick={toggleStructure}
+          >
+            {structureButtonLabel}
+          </button>
 
           <button
             type="button"
