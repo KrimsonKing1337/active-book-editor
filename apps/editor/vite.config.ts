@@ -1,13 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { defineConfig } from 'vite';
-
+import { activeBookBuildPlugin } from '@active-book/book-builder/plugin';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
-
-import { activeBookBuildPlugin } from '../../packages/book-builder/src/plugin';
-import { createProjectAliases } from '../../vite.aliases';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,7 +15,12 @@ const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
+      tsconfigPaths({
+        projectDiscovery: 'lazy',
+      }),
+
       react(),
+
       svgr({
         include: '**/*.svg',
         svgrOptions: {
@@ -55,10 +58,9 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        ...createProjectAliases(repoRoot),
         assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
         styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
       },
     },
-  }
+  };
 });
