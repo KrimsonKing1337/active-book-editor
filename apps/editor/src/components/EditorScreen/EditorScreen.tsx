@@ -112,6 +112,7 @@ export const EditorScreen = () => {
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
   const autosaveTimerRef = useRef<number | null>(null);
+  const autosaveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const documentRevisionRef = useRef(0);
   const projectRef = useRef<BookProject | null>(null);
   const isProjectBusyRef = useRef(true);
@@ -125,34 +126,33 @@ export const EditorScreen = () => {
     autosaveTimerRef.current = null;
   }, []);
 
-  const saveProjectAutomatically = useCallback(async (currentEditor: Editor) => {
-    const currentProject = projectRef.current;
-
-    if (!currentProject || isProjectBusyRef.current) {
-      return;
-    }
-
-    const documentRevision = documentRevisionRef.current;
-    const document = currentEditor.getJSON();
-
+  const saveProjectAutomatically = useCallback(async (
+    projectToSave: BookProject,
+    document: JSONContent,
+    documentRevision: number,
+  ) => {
     try {
-      await saveProject(currentProject, document);
+      await saveProject(projectToSave, document);
     } catch (error) {
       console.error('[project] Autosave failed.', error);
 
-      setProjectMessage(getProjectErrorMessage(error));
+      if (projectRef.current === projectToSave) {
+        setProjectMessage(getProjectErrorMessage(error));
+      }
 
       return;
     }
 
+    const projectIsCurrent = projectRef.current === projectToSave;
     const documentIsUnchanged = documentRevision === documentRevisionRef.current;
 
-    if (!documentIsUnchanged) {
+    if (!projectIsCurrent || !documentIsUnchanged) {
       return;
     }
 
     setIsDirty(false);
     setShowSavedStatus(true);
+    setProjectMessage('Локальный проект');
   }, []);
 
   const scheduleAutosave = useCallback((currentEditor: Editor) => {
@@ -161,7 +161,18 @@ export const EditorScreen = () => {
     autosaveTimerRef.current = window.setTimeout(() => {
       autosaveTimerRef.current = null;
 
-      void saveProjectAutomatically(currentEditor);
+      const currentProject = projectRef.current;
+
+      if (!currentProject || isProjectBusyRef.current) {
+        return;
+      }
+
+      const documentRevision = documentRevisionRef.current;
+      const document = currentEditor.getJSON();
+
+      autosaveQueueRef.current = autosaveQueueRef.current.then(() => {
+        return saveProjectAutomatically(currentProject, document, documentRevision);
+      });
     }, AUTO_SAVE_DELAY);
   }, [clearAutosaveTimer, saveProjectAutomatically]);
 
@@ -320,6 +331,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -331,7 +343,7 @@ export const EditorScreen = () => {
     } finally {
       setIsProjectBusy(false);
     }
-  }, [confirmDiscardChanges, editor, replaceDocument]);
+  }, [clearAutosaveTimer, confirmDiscardChanges, editor, replaceDocument]);
 
   const handleOpenProject = useCallback(async () => {
     const discardChangesConfirmed = confirmDiscardChanges();
@@ -340,6 +352,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -360,7 +373,7 @@ export const EditorScreen = () => {
     } finally {
       setIsProjectBusy(false);
     }
-  }, [confirmDiscardChanges, editor, replaceDocument]);
+  }, [clearAutosaveTimer, confirmDiscardChanges, editor, replaceDocument]);
 
   const saveCurrentProject = useCallback(async (): Promise<BookProject | null> => {
     if (!editor) {
@@ -368,6 +381,8 @@ export const EditorScreen = () => {
     }
 
     clearAutosaveTimer();
+
+    await autosaveQueueRef.current;
 
     const documentRevision = documentRevisionRef.current;
     const document = editor.getJSON();
@@ -433,6 +448,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -456,6 +472,7 @@ export const EditorScreen = () => {
       setIsProjectBusy(false);
     }
   }, [
+    clearAutosaveTimer,
     editor,
     pendingRestore,
     replaceDocument,
