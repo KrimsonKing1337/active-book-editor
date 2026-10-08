@@ -18,7 +18,8 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
   const Component = componentRegistry[name];
 
-  const nodeViewWrapperClassNames = classNames(styles.CoreComponentNode, {
+  const nodeViewWrapperClassNames = classNames({
+    [styles.CoreComponentNode]: true,
     [styles.isSelected]: selected,
   });
 

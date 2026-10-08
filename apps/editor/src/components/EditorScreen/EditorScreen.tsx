@@ -465,8 +465,13 @@ export const EditorScreen = () => {
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
   const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
-  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
-  const editorScreenClassNames = classNames(styles.EditorScreen, {
+
+  const structureButtonLabel = showStructure
+    ? 'Скрыть структуру'
+    : 'Показать структуру';
+
+  const editorScreenClassNames = classNames({
+    [styles.EditorScreen]: true,
     [styles.isStructureVisible]: showStructure,
   });
 
