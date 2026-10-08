@@ -127,6 +127,7 @@ const handleFileRequest = async (
   }
 
   await uploadProjectFile(req, repoRoot);
+
   sendJson(res, 200, { ok: true });
 };
 
@@ -149,7 +150,7 @@ const handleCompleteRequest = async (
     return;
   }
 
-  let outDir: string;
+  let outDir = '';
 
   try {
     outDir = await completeBuildSession(repoRoot, sessionId);
@@ -164,15 +165,9 @@ const handleCompleteRequest = async (
 };
 
 const withErrorHandling = (
-  handler: (
-    req: IncomingMessage,
-    res: ServerResponse,
-  ) => Promise<void>,
+  handler: (req: IncomingMessage, res: ServerResponse) => Promise<void>
 ) => {
-  return async (
-    req: IncomingMessage,
-    res: ServerResponse,
-  ): Promise<void> => {
+  return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {
       await handler(req, res);
     } catch (error) {
@@ -187,9 +182,7 @@ const withErrorHandling = (
   };
 };
 
-export function activeBookBuildPlugin({
-  repoRoot,
-}: ActiveBookBuildPluginParams): Plugin {
+export function activeBookBuildPlugin({ repoRoot }: ActiveBookBuildPluginParams): Plugin {
   return {
     name: 'active-book-build-endpoint',
 

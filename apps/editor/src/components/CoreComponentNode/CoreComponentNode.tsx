@@ -30,7 +30,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name}>
-      <div className={styles.label}>
+      <div className={styles.Label}>
         {name}
       </div>
 

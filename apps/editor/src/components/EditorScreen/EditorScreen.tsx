@@ -14,15 +14,18 @@ import { App, PageWrapper } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 
 import { buildProject } from '@build/buildProject';
+
 import type {
   BookProject,
   PendingLocalProject,
 } from '@project/@types';
+
 import {
   ExistingProjectError,
   FileSystemAccessUnsupportedError,
   InvalidProjectError,
 } from '@project/errors';
+
 import {
   clearCurrentProject,
   continueLastProject,
@@ -33,8 +36,12 @@ import {
   saveProject,
 } from '@project/projectService';
 
-import { CoreComponentNode } from './CoreComponentNode';
-import { PNode, H1Node, H2Node } from './EditableComponentNode';
+import {
+  CoreComponentNode,
+  PNode,
+  H1Node,
+  H2Node,
+} from '@components';
 
 import styles from './EditorScreen.module.scss';
 
@@ -61,32 +68,33 @@ const createEmptyDocument = (): JSONContent => ({
 
 const getProjectErrorMessage = (error: unknown): string => {
   if (error instanceof FileSystemAccessUnsupportedError) {
-    return 'Этот браузер не поддерживает выбор локальных папок для проектов.';
+    return 'Этот браузер не поддерживает выбор локальных папок для проектов';
   }
 
   if (error instanceof ExistingProjectError) {
-    return 'В выбранной папке уже есть book.json. Открой этот проект через «Открыть проект», чтобы не перезаписать его.';
+    return 'В выбранной папке уже есть book.json. ' +
+      'Откройте этот проект через «Открыть проект», чтобы не перезаписать его';
   }
 
   if (error instanceof InvalidProjectError) {
     return error.message;
   }
 
-  return 'Не удалось выполнить операцию с проектом. Подробности — в консоли.';
+  return 'Не удалось выполнить операцию с проектом. Подробности — в консоли';
 };
 
-export function EditorScreen() {
-  const [buildState, setBuildState] = useState<
-    'idle' | 'building' | 'success' | 'error'
-  >('idle');
+export type BuildState = 'idle' | 'building' | 'success' | 'error';
+
+export const EditorScreen = () => {
+  const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
-  const [pendingRestore, setPendingRestore] =
-    useState<PendingLocalProject | null>(null);
+  const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
+
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
-  const [projectMessage, setProjectMessage] = useState(
-    'Проверяем последний открытый проект…',
-  );
+
+  const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
+
   const restoreStartedRef = useRef(false);
 
   const editor = useEditor({
@@ -126,26 +134,31 @@ export function EditorScreen() {
 
   const replaceDocument = useCallback(
     (document: JSONContent) => {
-      if (!editor) return;
+      if (!editor) {
+        return;
+      }
 
       editor.commands.setContent(document, {
         emitUpdate: false,
       });
+
       setIsDirty(false);
     },
     [editor],
   );
 
   const confirmDiscardChanges = useCallback((): boolean => {
-    if (!isDirty) return true;
+    if (!isDirty) {
+      return true;
+    }
 
-    return window.confirm(
-      'Есть несохранённые изменения. Продолжить и потерять их?',
-    );
+    return window.confirm('Есть несохранённые изменения. Продолжить и потерять их?');
   }, [isDirty]);
 
   useEffect(() => {
-    if (!editor || restoreStartedRef.current) return;
+    if (!editor || restoreStartedRef.current) {
+      return;
+    }
 
     restoreStartedRef.current = true;
 
@@ -156,23 +169,19 @@ export function EditorScreen() {
         if (result.status === 'opened') {
           setProject(result.openedProject.project);
           replaceDocument(result.openedProject.document);
-          setProjectMessage(
-            `Открыт последний проект: ${result.openedProject.project.name}`,
-          );
+          setProjectMessage(`Открыт последний проект: ${result.openedProject.project.name}`);
         } else if (result.status === 'permission-required') {
           setPendingRestore(result.project);
-          setProjectMessage(
-            `Нужно разрешение, чтобы снова открыть «${result.project.name}».`,
-          );
+          setProjectMessage(`Нужно разрешение, чтобы снова открыть «${result.project.name}»`);
         } else if (result.status === 'unavailable') {
-          setProjectMessage(
-            'Последний проект недоступен. Можно открыть другой проект вручную.',
-          );
+          setProjectMessage('Последний проект недоступен. Можно открыть другой проект вручную');
         } else {
           setProjectMessage('Новый несохранённый проект');
         }
       } catch (error) {
+
         console.error('[project] Restore failed.', error);
+
         setProjectMessage(getProjectErrorMessage(error));
       } finally {
         editor.setEditable(true);
@@ -197,7 +206,11 @@ export function EditorScreen() {
   }, [isDirty]);
 
   const handleNewProject = useCallback(async () => {
-    if (!editor || !confirmDiscardChanges()) return;
+    const discardChangesConfirmed = confirmDiscardChanges();
+
+    if (!editor || !discardChangesConfirmed) {
+      return;
+    }
 
     setIsProjectBusy(true);
 
@@ -213,7 +226,11 @@ export function EditorScreen() {
   }, [confirmDiscardChanges, editor, replaceDocument]);
 
   const handleOpenProject = useCallback(async () => {
-    if (!editor || !confirmDiscardChanges()) return;
+    const discardChangesConfirmed = confirmDiscardChanges();
+
+    if (!editor || !discardChangesConfirmed) {
+      return;
+    }
 
     setIsProjectBusy(true);
 
@@ -225,9 +242,12 @@ export function EditorScreen() {
       replaceDocument(openedProject.document);
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
     } catch (error) {
-      if (isAbortError(error)) return;
+      if (isAbortError(error)) {
+        return;
+      }
 
       console.error('[project] Open failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
@@ -240,6 +260,7 @@ export function EditorScreen() {
     }
 
     const document = editor.getJSON();
+
     let nextProject = project;
 
     if (nextProject) {
@@ -271,6 +292,7 @@ export function EditorScreen() {
       }
 
       console.error('[project] Save failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
@@ -278,7 +300,11 @@ export function EditorScreen() {
   }, [isProjectBusy, saveCurrentProject]);
 
   const handleContinueLastProject = useCallback(async () => {
-    if (!pendingRestore || !editor || !confirmDiscardChanges()) return;
+    const discardChangesConfirmed = confirmDiscardChanges();
+
+    if (!pendingRestore || !editor || !discardChangesConfirmed) {
+      return;
+    }
 
     setIsProjectBusy(true);
 
@@ -286,9 +312,8 @@ export function EditorScreen() {
       const openedProject = await continueLastProject(pendingRestore);
 
       if (!openedProject) {
-        setProjectMessage(
-          `Нет разрешения на открытие «${pendingRestore.name}».`,
-        );
+        setProjectMessage(`Нет разрешения на открытие «${pendingRestore.name}»`);
+
         return;
       }
 
@@ -298,15 +323,16 @@ export function EditorScreen() {
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
     } catch (error) {
       console.error('[project] Continue failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
     }
   }, [
-    confirmDiscardChanges,
     editor,
     pendingRestore,
     replaceDocument,
+    confirmDiscardChanges,
   ]);
 
   const handleForgetLastProject = useCallback(async () => {
@@ -323,13 +349,17 @@ export function EditorScreen() {
 
   useEffect(() => {
     const handleSaveShortcut = (event: KeyboardEvent) => {
-      const isSaveShortcut =
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === 's';
+      const isModifier = event.ctrlKey || event.metaKey;
+      const isS = event.code === 'KeyS';
 
-      if (!isSaveShortcut) return;
+      const isSaveShortcut = isModifier && isS;
+
+      if (!isSaveShortcut) {
+        return;
+      }
 
       event.preventDefault();
+
       void handleSaveProject();
     };
 
@@ -364,7 +394,7 @@ export function EditorScreen() {
   };
 
   const buildBook = async () => {
-    if (!editor || isProjectBusy) {
+    if (buttonIsDisabled) {
       return;
     }
 
@@ -391,6 +421,7 @@ export function EditorScreen() {
       }
 
       console.error('[book-builder]', error);
+
       setBuildState('error');
     } finally {
       setIsProjectBusy(false);
@@ -398,116 +429,129 @@ export function EditorScreen() {
   };
 
   const projectName = project?.name ?? 'Без названия';
+  const buttonIsDisabled = !editor || isProjectBusy;
+  const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
+
+  let buildStateLabel = '';
+
+  if (buildState === 'success') {
+    buildStateLabel = 'Готово: результат в dist-book/';
+  } else if (buildState === 'error') {
+    buildStateLabel = 'Сборка завершилась с ошибкой. Смотри консоль dev-сервера'
+  }
 
   return (
     <div className={styles.EditorScreen}>
-      <header className={styles.toolbar}>
-        <div className={styles.projectTitle}>
+      <header className={styles.Toolbar}>
+        <div className={styles.ProjectTitle}>
           <strong>
             {projectName}
             {isDirty ? ' *' : ''}
           </strong>
-          <span>{projectMessage}</span>
+
+          <span>
+            {projectMessage}
+          </span>
         </div>
 
-        <div className={styles.actions}>
+        <div className={styles.Actions}>
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => void handleNewProject()}
-            disabled={!editor || isProjectBusy}
           >
             Новый проект
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => void handleOpenProject()}
-            disabled={!editor || isProjectBusy}
           >
             Открыть проект
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => void handleSaveProject()}
-            disabled={!editor || isProjectBusy}
           >
-            {isProjectBusy ? 'Подождите…' : 'Сохранить'}
+            {isProjectBusy ? 'Подождите...' : 'Сохранить'}
           </button>
 
-          <span className={styles.separator} />
+          <span className={styles.Separator} />
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => insertComponent('Counter')}
-            disabled={!editor || isProjectBusy}
           >
             Добавить Counter
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => insertTextComponent('P')}
-            disabled={!editor || isProjectBusy}
           >
             Добавить параграф
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => insertTextComponent('H1')}
-            disabled={!editor || isProjectBusy}
           >
             Добавить заголовок 1
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled}
             onClick={() => insertTextComponent('H2')}
-            disabled={!editor || isProjectBusy}
           >
             Добавить заголовок 2
           </button>
 
           <button
             type="button"
+            disabled={buttonIsDisabled || buildState === 'building'}
             onClick={buildBook}
-            disabled={!editor || isProjectBusy || buildState === 'building'}
           >
-            {buildState === 'building' ? 'Сборка…' : 'Собрать книгу'}
+            {buttonBuildLabel}
           </button>
         </div>
       </header>
 
       {pendingRestore && (
-        <div className={styles.restoreBanner}>
+        <div className={styles.RestoreBanner}>
           <span>
             Продолжить работу с последним проектом «{pendingRestore.name}»?
           </span>
+
           <button
             type="button"
-            onClick={() => void handleContinueLastProject()}
             disabled={isProjectBusy}
+            onClick={() => void handleContinueLastProject()}
           >
             Открыть последний проект
           </button>
+
           <button
             type="button"
-            onClick={() => void handleForgetLastProject()}
             disabled={isProjectBusy}
+            onClick={() => void handleForgetLastProject()}
           >
             Не открывать
           </button>
         </div>
       )}
 
-      <div className={styles.buildStatus} data-state={buildState}>
-        {buildState === 'success' && 'Готово: результат в dist-book/'}
-        {buildState === 'error' &&
-          'Сборка завершилась с ошибкой. Смотри консоль dev-сервера.'}
+      <div className={styles.BuildStatus} data-state={buildState}>
+        {buildStateLabel}
       </div>
 
-      <main className={styles.canvas}>
+      <main className={styles.Canvas}>
         <App config={config} tableOfContents={[]} rangeEffects={[]}>
           <PageWrapper>
             <EditorContent editor={editor} />
@@ -516,4 +560,4 @@ export function EditorScreen() {
       </main>
     </div>
   );
-}
+};

@@ -21,9 +21,7 @@ const getSessionRoot = (
   return path.join(repoRoot, BUILD_ROOT_NAME, sessionId);
 };
 
-export const createBuildSession = async (
-  repoRoot: string,
-): Promise<string> => {
+export const createBuildSession = async (repoRoot: string): Promise<string> => {
   const sessionId = randomUUID();
   const sessionRoot = getSessionRoot(repoRoot, sessionId);
 
@@ -54,9 +52,10 @@ export const getBuildSessionFilePath = (
   const safePath = path.posix.normalize(normalizedPath);
 
   const isBookJson = safePath === 'book.json';
+
   const isAsset = safePath.startsWith('assets/');
-  const isOutsideProject = safePath.startsWith('../')
-    || path.posix.isAbsolute(safePath);
+
+  const isOutsideProject = safePath.startsWith('../') || path.posix.isAbsolute(safePath);
 
   if (isOutsideProject || (!isBookJson && !isAsset)) {
     throw new Error('Invalid project file path');

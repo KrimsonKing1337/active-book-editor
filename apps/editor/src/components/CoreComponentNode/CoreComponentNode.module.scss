@@ -4,11 +4,11 @@
   border: 1px dashed #777;
   border-radius: 8px;
 
-  &.selected {
+  &.isSelected {
     outline: 2px solid currentColor;
   }
 
-  .label {
+  .Label {
     margin-bottom: 8px;
     font-size: 12px;
     opacity: 0.7;

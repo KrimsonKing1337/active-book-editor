@@ -16,7 +16,9 @@
     "paths": {
       "@root/*": ["../../*"],
       "@build/*": ["src/build/*"],
-      "@project/*": ["src/project/*"]
+      "@project/*": ["src/project/*"],
+      "@components": ["src/components"],
+      "@components/*": ["src/components/*"],
     }
   },
   "include": ["src", "vite.config.ts"]
