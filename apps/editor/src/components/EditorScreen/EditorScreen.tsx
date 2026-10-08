@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 
@@ -36,6 +35,8 @@ import {
   saveProject,
 } from '@project/projectService';
 
+import { useAsyncEffect } from '@hooks/useAsyncEffect';
+
 import {
   CoreComponentNode,
   PNode,
@@ -45,8 +46,19 @@ import {
 
 import styles from './EditorScreen.module.scss';
 
+const activeBookBlockNodes = [
+  PNode,
+  H1Node,
+  H2Node,
+  CoreComponentNode,
+];
+
+const activeBookBlockContent = activeBookBlockNodes
+  .map((node) => node.name)
+  .join(' | ');
+
 export const ActiveBookDocument = Document.extend({
-  content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',
+  content: `(${activeBookBlockContent})+`,
 });
 
 const config: Config = {
@@ -95,8 +107,6 @@ export const EditorScreen = () => {
 
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
-  const restoreStartedRef = useRef(false);
-
   const editor = useEditor({
     content: createEmptyDocument(),
     editable: false,
@@ -113,11 +123,7 @@ export const EditorScreen = () => {
       }),
 
       ActiveBookDocument,
-
-      CoreComponentNode,
-      PNode,
-      H1Node,
-      H2Node,
+      ...activeBookBlockNodes,
     ],
 
     editorProps: {
@@ -155,39 +161,44 @@ export const EditorScreen = () => {
     return window.confirm('Есть несохранённые изменения. Продолжить и потерять их?');
   }, [isDirty]);
 
-  useEffect(() => {
-    if (!editor || restoreStartedRef.current) {
+  useAsyncEffect(async (signal) => {
+    if (!editor) {
       return;
     }
 
-    restoreStartedRef.current = true;
+    try {
+      const result = await restoreLastProject();
 
-    void (async () => {
-      try {
-        const result = await restoreLastProject();
+      if (signal.aborted) {
+        return;
+      }
 
-        if (result.status === 'opened') {
-          setProject(result.openedProject.project);
-          replaceDocument(result.openedProject.document);
-          setProjectMessage(`Открыт последний проект: ${result.openedProject.project.name}`);
-        } else if (result.status === 'permission-required') {
-          setPendingRestore(result.project);
-          setProjectMessage(`Нужно разрешение, чтобы снова открыть «${result.project.name}»`);
-        } else if (result.status === 'unavailable') {
-          setProjectMessage('Последний проект недоступен. Можно открыть другой проект вручную');
-        } else {
-          setProjectMessage('Новый несохранённый проект');
-        }
-      } catch (error) {
+      if (result.status === 'opened') {
+        setProject(result.openedProject.project);
+        replaceDocument(result.openedProject.document);
+        setProjectMessage(`Открыт последний проект: ${result.openedProject.project.name}`);
+      } else if (result.status === 'permission-required') {
+        setPendingRestore(result.project);
+        setProjectMessage(`Нужно разрешение, чтобы снова открыть «${result.project.name}»`);
+      } else if (result.status === 'unavailable') {
+        setProjectMessage('Последний проект недоступен. Можно открыть другой проект вручную');
+      } else {
+        setProjectMessage('Новый несохранённый проект');
+      }
+    } catch (error) {
+      if (signal.aborted) {
+        return;
+      }
 
-        console.error('[project] Restore failed.', error);
+      console.error('[project] Restore failed.', error);
 
-        setProjectMessage(getProjectErrorMessage(error));
-      } finally {
+      setProjectMessage(getProjectErrorMessage(error));
+    } finally {
+      if (!signal.aborted) {
         editor.setEditable(true);
         setIsProjectBusy(false);
       }
-    })();
+    }
   }, [editor, replaceDocument]);
 
   useEffect(() => {
@@ -195,7 +206,6 @@ export const EditorScreen = () => {
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
-      event.returnValue = '';
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -370,11 +380,27 @@ export const EditorScreen = () => {
     };
   }, [handleSaveProject]);
 
+  const insertEditorContent = (contentToInsert: JSONContent) => {
+    if (!editor) {
+      return;
+    }
+
+    const editorChain = editor.chain();
+    const focusedEditorChain = editorChain.focus();
+    const contentEditorChain = focusedEditorChain.insertContent(contentToInsert);
+
+    contentEditorChain.run();
+  };
+
   const insertComponent = (name: string) => {
-    editor?.chain().focus().insertContent({
+    const componentContent: JSONContent = {
       type: 'coreComponent',
-      attrs: { name },
-    }).run();
+      attrs: {
+        name,
+      },
+    };
+
+    insertEditorContent(componentContent);
   };
 
   const insertTextComponent = (name: 'P' | 'H1' | 'H2') => {
@@ -384,13 +410,13 @@ export const EditorScreen = () => {
       H2: 'activeBookH2',
     } as const;
 
-    editor
-      ?.chain()
-      .focus()
-      .insertContent({
-        type: typeMap[name],
-      })
-      .run();
+    const nodeType = typeMap[name];
+
+    const textContent: JSONContent = {
+      type: nodeType,
+    };
+
+    insertEditorContent(textContent);
   };
 
   const buildBook = async () => {
@@ -437,7 +463,7 @@ export const EditorScreen = () => {
   if (buildState === 'success') {
     buildStateLabel = 'Готово: результат в dist-book/';
   } else if (buildState === 'error') {
-    buildStateLabel = 'Сборка завершилась с ошибкой. Смотри консоль dev-сервера'
+    buildStateLabel = 'Сборка завершилась с ошибкой. Смотри консоль dev-сервера';
   }
 
   return (
