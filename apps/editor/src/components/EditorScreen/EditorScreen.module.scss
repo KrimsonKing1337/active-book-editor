@@ -46,9 +46,26 @@
     gap: 2px;
     min-width: 180px;
 
-    span {
+    > span {
       font-size: 12px;
       opacity: 0.65;
+    }
+
+    .TitleLine {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+
+      .SavedStatus {
+        font-size: 12px;
+        font-weight: 400;
+        opacity: 0;
+        transition: opacity 200ms ease;
+
+        &.isVisible {
+          opacity: 0.65;
+        }
+      }
     }
   }
 
