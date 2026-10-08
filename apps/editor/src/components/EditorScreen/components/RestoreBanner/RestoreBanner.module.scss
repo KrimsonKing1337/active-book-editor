@@ -1,0 +1,23 @@
+.RestoreBanner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  background: #202020;
+  border-bottom: 1px solid #303030;
+
+  span {
+    margin-right: auto;
+    font-size: 13px;
+  }
+
+  button {
+    padding: 8px 12px;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+  }
+}
