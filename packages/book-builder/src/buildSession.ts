@@ -8,11 +8,18 @@ import { buildBook } from './build.js';
 
 const BUILD_ROOT_NAME = '.active-book-build';
 
+const BUILD_SESSION_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const getIsValidSessionId = (sessionId: string): boolean => {
+  return BUILD_SESSION_ID_PATTERN.test(sessionId);
+};
+
 const getSessionRoot = (
   repoRoot: string,
   sessionId: string,
 ): string => {
-  const isValidSessionId = /^[0-9a-f-]{36}$/i.test(sessionId);
+  const isValidSessionId = getIsValidSessionId(sessionId);
 
   if (!isValidSessionId) {
     throw new Error('Invalid build session');
