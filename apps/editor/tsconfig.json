@@ -17,6 +17,7 @@
       "@root/*": ["../../*"],
       "@build/*": ["src/build/*"],
       "@project/*": ["src/project/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@components": ["src/components"],
       "@components/*": ["src/components/*"],
     }
