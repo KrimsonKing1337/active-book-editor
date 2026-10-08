@@ -15,15 +15,16 @@ import type { Config } from 'activeBook-core/@types';
 
 import 'activeBook-core/styles/styles.scss';
 
-import { buildProject } from '@editor/build/buildProject';
-
-import { CoreComponentNode } from './CoreComponentNode';
-import { PNode, H1Node, H2Node } from './EditableComponentNode';
+import { buildProject } from '@build/buildProject';
+import type {
+  BookProject,
+  PendingLocalProject,
+} from '@project/@types';
 import {
   ExistingProjectError,
   FileSystemAccessUnsupportedError,
   InvalidProjectError,
-} from '@editor/project/errors';
+} from '@project/errors';
 import {
   clearCurrentProject,
   continueLastProject,
@@ -32,11 +33,10 @@ import {
   openLocalProject,
   restoreLastProject,
   saveProject,
-} from '@editor/project/projectService';
-import type {
-  BookProject,
-  PendingLocalProject,
-} from '@editor/project/@types';
+} from '@project/projectService';
+
+import { CoreComponentNode } from './CoreComponentNode';
+import { PNode, H1Node, H2Node } from './EditableComponentNode';
 
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',

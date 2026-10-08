@@ -1,11 +1,9 @@
 import path from 'node:path';
 
-import type { InlineConfig } from 'vite';
-
 import react from '@vitejs/plugin-react';
+import type { InlineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
-
-import { createProjectAliases } from '../../../vite.aliases.js';
 
 type CreateViteConfigParams = {
   root: string;
@@ -24,7 +22,12 @@ export const createViteConfig = ({
     root,
 
     plugins: [
+      tsconfigPaths({
+        projectDiscovery: 'lazy',
+      }),
+
       react(),
+
       svgr({
         include: '**/*.svg',
         svgrOptions: {
@@ -59,7 +62,6 @@ export const createViteConfig = ({
 
     resolve: {
       alias: {
-        ...createProjectAliases(repoRoot),
         assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
         styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
       },

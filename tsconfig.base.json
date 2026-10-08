@@ -1,11 +1,3 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@@/*": ["*"],
-      "@editor/*": ["apps/editor/src/*"],
-      "@book-runtime/*": ["apps/book-runtime/src/*"],
-      "@book-builder/*": ["packages/book-builder/src/*"]
-    }
-  }
+  "compilerOptions": {}
 }

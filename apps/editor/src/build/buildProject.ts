@@ -1,7 +1,7 @@
 import type {
   ProjectBuildFile,
   ProjectStorage,
-} from '@editor/project/@types';
+} from '@project/@types';
 
 type BuildSessionResponse = {
   ok: true;

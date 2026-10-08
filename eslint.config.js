@@ -23,7 +23,6 @@ const compat = new FlatCompat({
 
 const ignores = [
   '**/*.js',
-  'eslint.config.ts',
   'lib',
   'scripts',
   'd.ts',
@@ -68,7 +67,7 @@ export default defineConfig([
         version: 'detect',
       },
       'import/internal-regex':
-        '^(@@|@editor|@book-runtime|@book-builder|assets|styles)(/.*)?$',
+        '^(@root|@build|@project|@components|@utils|assets|styles)(/.*)?$',
     },
 
     rules: {
@@ -87,18 +86,11 @@ export default defineConfig([
             { pattern: 'react', group: 'external', position: 'before' },
             { pattern: 'react-dom{,/**}', group: 'external', position: 'before' },
 
-            { pattern: '@@{,/**}', group: 'internal', position: 'before' },
-            { pattern: '@editor{,/**}', group: 'internal', position: 'after' },
-            {
-              pattern: '@book-runtime{,/**}',
-              group: 'internal',
-              position: 'after',
-            },
-            {
-              pattern: '@book-builder{,/**}',
-              group: 'internal',
-              position: 'after',
-            },
+            { pattern: '@root{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@build{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@project{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@components{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@utils{,/**}', group: 'internal', position: 'after' },
             { pattern: 'assets{,/**}', group: 'internal', position: 'after' },
             { pattern: 'styles{,/**}', group: 'internal', position: 'after' },
           ],
@@ -169,7 +161,6 @@ export default defineConfig([
           ignoreRestArgs: false,
         },
       ],
-
     },
   },
 ]);
