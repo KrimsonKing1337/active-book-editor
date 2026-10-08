@@ -13,7 +13,6 @@ import StarterKit from '@tiptap/starter-kit';
 import { App, PageWrapper } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 
-import 'activeBook-core/styles/styles.scss';
 
 import { buildProject } from '@build/buildProject';
 import type {
@@ -37,6 +36,8 @@ import {
 
 import { CoreComponentNode } from './CoreComponentNode';
 import { PNode, H1Node, H2Node } from './EditableComponentNode';
+
+import './EditorScreen.scss';
 
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',
@@ -400,9 +401,9 @@ export function EditorScreen() {
   const projectName = project?.name ?? 'Без названия';
 
   return (
-    <div className="editor-shell">
-      <header className="editor-toolbar">
-        <div className="editor-project-title">
+    <div className="EditorScreen">
+      <header className="toolbar">
+        <div className="projectTitle">
           <strong>
             {projectName}
             {isDirty ? ' *' : ''}
@@ -410,7 +411,7 @@ export function EditorScreen() {
           <span>{projectMessage}</span>
         </div>
 
-        <div className="editor-actions">
+        <div className="actions">
           <button
             type="button"
             onClick={() => void handleNewProject()}
@@ -435,7 +436,7 @@ export function EditorScreen() {
             {isProjectBusy ? 'Подождите…' : 'Сохранить'}
           </button>
 
-          <span className="editor-actions-separator" />
+          <span className="separator" />
 
           <button
             type="button"
@@ -480,7 +481,7 @@ export function EditorScreen() {
       </header>
 
       {pendingRestore && (
-        <div className="project-restore-banner">
+        <div className="restoreBanner">
           <span>
             Продолжить работу с последним проектом «{pendingRestore.name}»?
           </span>
@@ -501,13 +502,13 @@ export function EditorScreen() {
         </div>
       )}
 
-      <div className="build-status" data-state={buildState}>
+      <div className="buildStatus" data-state={buildState}>
         {buildState === 'success' && 'Готово: результат в dist-book/'}
         {buildState === 'error' &&
           'Сборка завершилась с ошибкой. Смотри консоль dev-сервера.'}
       </div>
 
-      <main className="editor-canvas">
+      <main className="canvas">
         <App config={config} tableOfContents={[]} rangeEffects={[]}>
           <PageWrapper>
             <EditorContent editor={editor} />
