@@ -6,8 +6,8 @@ import 'activeBook-core/styles/styles.scss';
 
 import bookDocumentDefault from '../book.json';
 
-import type { BookDocument } from '@book-runtime/types';
-import { BookPage } from '@book-runtime/components/BookPage';
+import type { BookDocument } from './types';
+import { BookPage } from '@components/BookPage';
 
 const config: Config = {
   id: 'built-book',
