@@ -13,7 +13,6 @@ import StarterKit from '@tiptap/starter-kit';
 import { App, PageWrapper } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 
-
 import { buildProject } from '@build/buildProject';
 import type {
   BookProject,
