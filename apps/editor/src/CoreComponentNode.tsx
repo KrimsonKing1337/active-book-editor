@@ -5,7 +5,7 @@ import classNames from 'classnames';
 
 import { Counter } from 'activeBook-core/components';
 
-import './CoreComponentNode.scss';
+import styles from './CoreComponentNode.module.scss';
 
 const componentRegistry = {
   Counter,
@@ -18,8 +18,8 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
   const Component = componentRegistry[name];
 
-  const nodeViewWrapperClassNames = classNames('CoreComponentNode', {
-    selected,
+  const nodeViewWrapperClassNames = classNames(styles.CoreComponentNode, {
+    [styles.selected]: selected,
   });
 
   const unknownComponent = (
@@ -30,7 +30,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name}>
-      <div className="label">
+      <div className={styles.label}>
         {name}
       </div>
 
