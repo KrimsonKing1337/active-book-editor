@@ -13,7 +13,12 @@ import type { BuildState, TextComponentName } from './@types';
 
 export const AUTO_SAVE_DELAY = 1500;
 
-export const activeBookBlockNodes = [CoreComponentNode, PNode, H1Node, H2Node];
+export const activeBookBlockNodes = [
+  CoreComponentNode,
+  PNode,
+  H1Node,
+  H2Node,
+];
 
 // Чтобы явно указать, что дефолтный текстовый узел - это P, пишем его первым.
 // И тогда при нажатии на Enter вставится именно он.

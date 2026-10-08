@@ -1,4 +1,11 @@
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef } from 'react';
+import {
+  type Dispatch,
+  type SetStateAction,
+
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react';
 
 import type { Editor, JSONContent } from '@tiptap/core';
 
@@ -166,11 +173,17 @@ export const useAutosave = ({
     } else {
       setIsDirty(true);
       setShowSavedStatus(false);
+
       scheduleAutosave(editor);
     }
 
     return nextProject;
-  }, [editor, project, clearAutosaveTimer, scheduleAutosave]);
+  }, [
+    editor,
+    project,
+    clearAutosaveTimer,
+    scheduleAutosave,
+  ]);
 
   useEffect(() => {
     projectRef.current = project;
@@ -206,12 +219,23 @@ export const useAutosave = ({
   }, [editor, scheduleAutosave]);
 
   useEffect(() => {
-    if (!editor || !project || !isDirty || isProjectBusy) {
+    const dontAutosave = !editor
+      || !project
+      || !isDirty
+      || isProjectBusy;
+
+    if (dontAutosave) {
       return;
     }
 
     scheduleAutosave(editor);
-  }, [editor, project, isDirty, isProjectBusy, scheduleAutosave]);
+  }, [
+    editor,
+    project,
+    isDirty,
+    isProjectBusy,
+    scheduleAutosave,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -273,10 +297,12 @@ export const useProjectRestore = ({
       }
 
       console.error('[project] Restore failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       if (!signal.aborted) {
         editor.setEditable(true);
+
         setIsProjectBusy(false);
       }
     }
@@ -312,7 +338,7 @@ export const useProjectActions = ({
   setProjectMessage,
   setBuildState,
 }: UseProjectActionsParams) => {
-  const confirmDiscardChanges = useCallback((): boolean => {
+  const confirmDiscardChanges = useCallback(() => {
     if (!isDirty) {
       return true;
     }
@@ -339,7 +365,12 @@ export const useProjectActions = ({
     } finally {
       setIsProjectBusy(false);
     }
-  }, [editor, clearAutosaveTimer, confirmDiscardChanges, replaceDocument]);
+  }, [
+    editor,
+    clearAutosaveTimer,
+    confirmDiscardChanges,
+    replaceDocument,
+  ]);
 
   const handleOpenProject = useCallback(async () => {
     const discardChangesConfirmed = confirmDiscardChanges();
@@ -364,11 +395,17 @@ export const useProjectActions = ({
       }
 
       console.error('[project] Open failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
     }
-  }, [editor, clearAutosaveTimer, confirmDiscardChanges, replaceDocument]);
+  }, [
+    editor,
+    clearAutosaveTimer,
+    replaceDocument,
+    confirmDiscardChanges,
+  ]);
 
   const handleSaveProject = useCallback(async () => {
     if (isProjectBusy) {
@@ -385,6 +422,7 @@ export const useProjectActions = ({
       }
 
       console.error('[project] Save failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
@@ -416,17 +454,25 @@ export const useProjectActions = ({
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
     } catch (error) {
       console.error('[project] Continue failed.', error);
+
       setProjectMessage(getProjectErrorMessage(error));
     } finally {
       setIsProjectBusy(false);
     }
-  }, [editor, pendingRestore, clearAutosaveTimer, confirmDiscardChanges, replaceDocument]);
+  }, [
+    editor,
+    pendingRestore,
+    clearAutosaveTimer,
+    replaceDocument,
+    confirmDiscardChanges,
+  ]);
 
   const handleForgetLastProject = useCallback(async () => {
     setIsProjectBusy(true);
 
     try {
       await clearCurrentProject();
+
       setPendingRestore(null);
       setProjectMessage('Новый несохранённый проект');
     } finally {
@@ -452,6 +498,7 @@ export const useProjectActions = ({
       }
 
       await buildProject(savedProject.storage);
+
       setBuildState('success');
     } catch (error) {
       if (isAbortError(error)) {
@@ -461,6 +508,7 @@ export const useProjectActions = ({
       }
 
       console.error('[book-builder]', error);
+
       setBuildState('error');
     } finally {
       setIsProjectBusy(false);

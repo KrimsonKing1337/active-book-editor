@@ -10,16 +10,22 @@ import type { BookProject, PendingLocalProject } from '@project/@types';
 
 import type { BuildState, TextComponentName } from './@types';
 
-import { Header, RestoreBanner } from './components';
+import {
+  useAutosave,
+  useBeforeUnload,
+  useProjectActions,
+  useProjectRestore,
+  useSaveShortcut,
+} from './hooks';
 
-import { useAutosave, useBeforeUnload, useProjectActions, useProjectRestore, useSaveShortcut } from './hooks';
+import { Header, RestoreBanner } from './components';
 
 import styles from './EditorScreen.module.scss';
 
 import {
-  createEmptyDocument,
   editorConfig,
   editorExtensions,
+  createEmptyDocument,
   getBuildStateLabel,
   insertComponent,
   insertTextComponent,
@@ -49,7 +55,7 @@ export const EditorScreen = () => {
     },
   });
 
-  const { clearAutosaveTimer, replaceDocument, saveCurrentProject } = useAutosave({
+  const autosave = useAutosave({
     editor,
     project,
     isDirty,
@@ -60,6 +66,8 @@ export const EditorScreen = () => {
     setShowSavedStatus,
     setProjectMessage,
   });
+
+  const { clearAutosaveTimer, replaceDocument, saveCurrentProject } = autosave;
 
   useProjectRestore({
     editor,
@@ -129,6 +137,7 @@ export const EditorScreen = () => {
         buildState={buildState}
         buttonIsDisabled={buttonIsDisabled}
         structureButtonIsDisabled={structureButtonIsDisabled}
+
         onNewProject={handleNewProject}
         onOpenProject={handleOpenProject}
         onSaveProject={handleSaveProject}
