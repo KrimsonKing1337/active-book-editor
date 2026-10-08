@@ -16,9 +16,10 @@ import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
 import { buildProject } from '@build/buildProject';
-
-import { CoreComponentNode } from './CoreComponentNode';
-import { PNode, H1Node, H2Node } from './EditableComponentNode';
+import type {
+  BookProject,
+  PendingLocalProject,
+} from '@project/@types';
 import {
   ExistingProjectError,
   FileSystemAccessUnsupportedError,
@@ -33,10 +34,9 @@ import {
   restoreLastProject,
   saveProject,
 } from '@project/projectService';
-import type {
-  BookProject,
-  PendingLocalProject,
-} from '@project/@types';
+
+import { CoreComponentNode } from './CoreComponentNode';
+import { PNode, H1Node, H2Node } from './EditableComponentNode';
 
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',
