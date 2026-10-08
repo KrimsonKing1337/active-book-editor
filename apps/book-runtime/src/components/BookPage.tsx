@@ -1,7 +1,8 @@
 import { PageWrapper } from 'activeBook-core/components';
 
-import type { BookDocument } from '../types';
 import { renderNode } from '@utils/renderNode';
+
+import type { BookDocument } from '../types';
 
 type BookPageProps = {
   document: BookDocument;
