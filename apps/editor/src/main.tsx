@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom/client';
 
 import { EditorScreen } from './EditorScreen';
 
+import 'reset-css/reset.css';
 import 'activeBook-core/styles/styles.scss';
-import './styles.css';
+import './styles.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
