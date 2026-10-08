@@ -1,10 +1,11 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
-import type { JSONContent } from '@tiptap/core';
+import type { Editor, JSONContent } from '@tiptap/core';
 import Document from '@tiptap/extension-document';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -94,6 +95,8 @@ const getProjectErrorMessage = (error: unknown): string => {
   return 'Не удалось выполнить операцию с проектом. Подробности — в консоли';
 };
 
+const AUTO_SAVE_DELAY = 1500;
+
 export type BuildState = 'idle' | 'building' | 'success' | 'error';
 
 export const EditorScreen = () => {
@@ -104,8 +107,74 @@ export const EditorScreen = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
   const [showStructure, setShowStructure] = useState(false);
+  const [showSavedStatus, setShowSavedStatus] = useState(false);
 
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
+
+  const autosaveTimerRef = useRef<number | null>(null);
+  const autosaveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const documentRevisionRef = useRef(0);
+  const projectRef = useRef<BookProject | null>(null);
+  const isProjectBusyRef = useRef(true);
+
+  const clearAutosaveTimer = useCallback(() => {
+    if (autosaveTimerRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = null;
+  }, []);
+
+  const saveProjectAutomatically = useCallback(async (
+    projectToSave: BookProject,
+    document: JSONContent,
+    documentRevision: number,
+  ) => {
+    try {
+      await saveProject(projectToSave, document);
+    } catch (error) {
+      console.error('[project] Autosave failed.', error);
+
+      if (projectRef.current === projectToSave) {
+        setProjectMessage(getProjectErrorMessage(error));
+      }
+
+      return;
+    }
+
+    const projectIsCurrent = projectRef.current === projectToSave;
+    const documentIsUnchanged = documentRevision === documentRevisionRef.current;
+
+    if (!projectIsCurrent || !documentIsUnchanged) {
+      return;
+    }
+
+    setIsDirty(false);
+    setShowSavedStatus(true);
+    setProjectMessage('Локальный проект');
+  }, []);
+
+  const scheduleAutosave = useCallback((currentEditor: Editor) => {
+    clearAutosaveTimer();
+
+    autosaveTimerRef.current = window.setTimeout(() => {
+      autosaveTimerRef.current = null;
+
+      const currentProject = projectRef.current;
+
+      if (!currentProject || isProjectBusyRef.current) {
+        return;
+      }
+
+      const documentRevision = documentRevisionRef.current;
+      const document = currentEditor.getJSON();
+
+      autosaveQueueRef.current = autosaveQueueRef.current.then(() => {
+        return saveProjectAutomatically(currentProject, document, documentRevision);
+      });
+    }, AUTO_SAVE_DELAY);
+  }, [clearAutosaveTimer, saveProjectAutomatically]);
 
   const editor = useEditor({
     content: createEmptyDocument(),
@@ -138,8 +207,15 @@ export const EditorScreen = () => {
       },
     },
 
-    onUpdate: () => {
+    onUpdate: ({ editor: currentEditor }) => {
+      documentRevisionRef.current += 1;
+
       setIsDirty(true);
+      setShowSavedStatus(false);
+
+      if (projectRef.current) {
+        scheduleAutosave(currentEditor);
+      }
     },
   });
 
@@ -149,14 +225,42 @@ export const EditorScreen = () => {
         return;
       }
 
+      clearAutosaveTimer();
+      documentRevisionRef.current += 1;
+
       editor.commands.setContent(document, {
         emitUpdate: false,
       });
 
       setIsDirty(false);
+      setShowSavedStatus(false);
     },
-    [editor],
+    [clearAutosaveTimer, editor],
   );
+
+  useEffect(() => {
+    projectRef.current = project;
+
+    clearAutosaveTimer();
+  }, [clearAutosaveTimer, project]);
+
+  useEffect(() => {
+    isProjectBusyRef.current = isProjectBusy;
+  }, [isProjectBusy]);
+
+  useEffect(() => {
+    return () => {
+      clearAutosaveTimer();
+    };
+  }, [clearAutosaveTimer]);
+
+  useEffect(() => {
+    if (!editor || !project || !isDirty || isProjectBusy) {
+      return;
+    }
+
+    scheduleAutosave(editor);
+  }, [editor, isDirty, isProjectBusy, project, scheduleAutosave]);
 
   const confirmDiscardChanges = useCallback((): boolean => {
     if (!isDirty) {
@@ -227,6 +331,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -238,7 +343,7 @@ export const EditorScreen = () => {
     } finally {
       setIsProjectBusy(false);
     }
-  }, [confirmDiscardChanges, editor, replaceDocument]);
+  }, [clearAutosaveTimer, confirmDiscardChanges, editor, replaceDocument]);
 
   const handleOpenProject = useCallback(async () => {
     const discardChangesConfirmed = confirmDiscardChanges();
@@ -247,6 +352,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -267,14 +373,20 @@ export const EditorScreen = () => {
     } finally {
       setIsProjectBusy(false);
     }
-  }, [confirmDiscardChanges, editor, replaceDocument]);
+  }, [clearAutosaveTimer, confirmDiscardChanges, editor, replaceDocument]);
 
   const saveCurrentProject = useCallback(async (): Promise<BookProject | null> => {
     if (!editor) {
       return null;
     }
 
+    clearAutosaveTimer();
+
+    await autosaveQueueRef.current;
+
+    const documentRevision = documentRevisionRef.current;
     const document = editor.getJSON();
+    const projectIsNew = !project;
 
     let nextProject = project;
 
@@ -284,13 +396,28 @@ export const EditorScreen = () => {
       nextProject = await createLocalProject(document);
     }
 
+    projectRef.current = nextProject;
+
     setProject(nextProject);
     setPendingRestore(null);
-    setIsDirty(false);
-    setProjectMessage(`Сохранено: ${nextProject.name}`);
+
+    if (projectIsNew) {
+      setProjectMessage('Локальный проект');
+    }
+
+    const documentIsUnchanged = documentRevision === documentRevisionRef.current;
+
+    if (documentIsUnchanged) {
+      setIsDirty(false);
+      setShowSavedStatus(true);
+    } else {
+      setIsDirty(true);
+      setShowSavedStatus(false);
+      scheduleAutosave(editor);
+    }
 
     return nextProject;
-  }, [editor, project]);
+  }, [clearAutosaveTimer, editor, project, scheduleAutosave]);
 
   const handleSaveProject = useCallback(async () => {
     if (isProjectBusy) {
@@ -321,6 +448,7 @@ export const EditorScreen = () => {
       return;
     }
 
+    clearAutosaveTimer();
     setIsProjectBusy(true);
 
     try {
@@ -344,6 +472,7 @@ export const EditorScreen = () => {
       setIsProjectBusy(false);
     }
   }, [
+    clearAutosaveTimer,
     editor,
     pendingRestore,
     replaceDocument,
@@ -467,9 +596,11 @@ export const EditorScreen = () => {
   const buttonIsDisabled = !editor || isProjectBusy;
   const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
 
-  const structureButtonLabel = showStructure
-    ? 'Скрыть структуру'
-    : 'Показать структуру';
+  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
+
+  const savedStatusClassNames = classNames(styles.SavedStatus, {
+    [styles.isVisible]: showSavedStatus,
+  });
 
   const editorScreenClassNames = classNames({
     [styles.EditorScreen]: true,
@@ -488,10 +619,16 @@ export const EditorScreen = () => {
     <div className={editorScreenClassNames}>
       <header className={styles.Toolbar}>
         <div className={styles.ProjectTitle}>
-          <strong>
-            {projectName}
-            {isDirty ? ' *' : ''}
-          </strong>
+          <div className={styles.TitleLine}>
+            <strong>
+              {projectName}
+              {isDirty ? ' *' : ''}
+            </strong>
+
+            <span className={savedStatusClassNames} aria-hidden={!showSavedStatus}>
+              Сохранено
+            </span>
+          </div>
 
           <span>
             {projectMessage}
