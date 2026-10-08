@@ -4,10 +4,10 @@ import { App } from 'activeBook-core/components';
 import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
-import bookDocumentDefault from '../book.json';
-
-import type { BookDocument } from './types';
 import { BookPage } from '@components/BookPage';
+
+import bookDocumentDefault from '../book.json';
+import type { BookDocument } from './types';
 
 const config: Config = {
   id: 'built-book',
