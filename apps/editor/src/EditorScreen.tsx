@@ -36,7 +36,7 @@ import {
 import { CoreComponentNode } from './CoreComponentNode';
 import { PNode, H1Node, H2Node } from './EditableComponentNode';
 
-import './EditorScreen.scss';
+import styles from './EditorScreen.module.scss';
 
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookH1 | activeBookH2 | coreComponent)+',
@@ -400,9 +400,9 @@ export function EditorScreen() {
   const projectName = project?.name ?? 'Без названия';
 
   return (
-    <div className="EditorScreen">
-      <header className="toolbar">
-        <div className="projectTitle">
+    <div className={styles.EditorScreen}>
+      <header className={styles.toolbar}>
+        <div className={styles.projectTitle}>
           <strong>
             {projectName}
             {isDirty ? ' *' : ''}
@@ -410,7 +410,7 @@ export function EditorScreen() {
           <span>{projectMessage}</span>
         </div>
 
-        <div className="actions">
+        <div className={styles.actions}>
           <button
             type="button"
             onClick={() => void handleNewProject()}
@@ -435,7 +435,7 @@ export function EditorScreen() {
             {isProjectBusy ? 'Подождите…' : 'Сохранить'}
           </button>
 
-          <span className="separator" />
+          <span className={styles.separator} />
 
           <button
             type="button"
@@ -480,7 +480,7 @@ export function EditorScreen() {
       </header>
 
       {pendingRestore && (
-        <div className="restoreBanner">
+        <div className={styles.restoreBanner}>
           <span>
             Продолжить работу с последним проектом «{pendingRestore.name}»?
           </span>
@@ -501,13 +501,13 @@ export function EditorScreen() {
         </div>
       )}
 
-      <div className="buildStatus" data-state={buildState}>
+      <div className={styles.buildStatus} data-state={buildState}>
         {buildState === 'success' && 'Готово: результат в dist-book/'}
         {buildState === 'error' &&
           'Сборка завершилась с ошибкой. Смотри консоль dev-сервера.'}
       </div>
 
-      <main className="canvas">
+      <main className={styles.canvas}>
         <App config={config} tableOfContents={[]} rangeEffects={[]}>
           <PageWrapper>
             <EditorContent editor={editor} />
