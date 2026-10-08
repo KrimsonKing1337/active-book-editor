@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { build } from 'vite';
 
-import { createViteConfig } from './vite.config.js';
+import { createViteConfig } from './vite.config.ts';
 
 type BuildBookParams = {
   projectRoot: string;

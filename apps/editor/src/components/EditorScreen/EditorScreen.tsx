@@ -39,24 +39,25 @@ import {
 
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
-import {
-  CoreComponentNode,
-  PNode,
-  H1Node,
-  H2Node,
-} from '@components';
+import { CoreComponentNode } from '@components';
+
+// импортируем именно так, чтобы избежать цикличного импорта
+import { PNode, H1Node, H2Node } from '@components/EditableComponentNode';
 
 import styles from './EditorScreen.module.scss';
 
 const activeBookBlockNodes = [
+  CoreComponentNode,
+
   PNode,
   H1Node,
   H2Node,
-  CoreComponentNode,
 ];
 
+// Чтобы явно указать, что дефолтный текстовый узел - это P, пишем его первым.
+// И тогда при нажатии на Enter вставится именно он
 export const ActiveBookDocument = Document.extend({
-  content: 'activeBookBlock+',
+  content: '(activeBookP | activeBookBlock)+',
 });
 
 const config: Config = {
@@ -534,6 +535,7 @@ export const EditorScreen = () => {
           </button>
 
           <button
+            className={styles.Button}
             type="button"
             disabled={buttonIsDisabled}
             onClick={() => insertComponent('Counter')}

@@ -1,13 +1,14 @@
 import type { ComponentType, PropsWithChildren } from 'react';
-import { Node } from '@tiptap/core';
 
-import { P, H1, H2 } from 'activeBook-core/components';
+import { Node } from '@tiptap/core';
 
 import {
   NodeViewContent,
   NodeViewWrapper,
   ReactNodeViewRenderer,
 } from '@tiptap/react';
+
+import { P, H1, H2 } from 'activeBook-core/components';
 
 import styles from './EditableComponentNode.module.scss';
 
@@ -30,26 +31,6 @@ export const createCoreTextNode = (
 
     renderHTML() {
       return [tag, 0];
-    },
-
-    addKeyboardShortcuts() {
-      return {
-        Enter: () => {
-          const nodeIsActive = this.editor.isActive(this.name);
-
-          if (!nodeIsActive) {
-            return false;
-          }
-
-          const blockWasSplit = this.editor.commands.splitBlock();
-
-          if (!blockWasSplit) {
-            return false;
-          }
-
-          return this.editor.commands.setNode('activeBookP');
-        },
-      };
     },
 
     addNodeView() {

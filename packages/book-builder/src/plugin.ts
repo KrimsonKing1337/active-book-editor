@@ -18,7 +18,7 @@ import {
   createBuildSession,
   getBuildSessionFilePath,
   removeBuildSession,
-} from './buildSession.js';
+} from './buildSession.ts';
 
 type ActiveBookBuildPluginParams = {
   repoRoot: string;
