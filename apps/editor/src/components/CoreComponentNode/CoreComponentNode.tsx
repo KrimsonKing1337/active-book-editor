@@ -19,7 +19,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
   const Component = componentRegistry[name];
 
   const nodeViewWrapperClassNames = classNames(styles.CoreComponentNode, {
-    [styles.selected]: selected,
+    [styles.isSelected]: selected,
   });
 
   const unknownComponent = (

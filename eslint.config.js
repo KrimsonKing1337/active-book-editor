@@ -67,7 +67,7 @@ export default defineConfig([
         version: 'detect',
       },
       'import/internal-regex':
-        '^(@root|@build|@project|@components|@utils|assets|styles)(/.*)?$',
+        '^(@root|@build|@project|@hooks|@components|@utils|assets|styles)(/.*)?$',
     },
 
     rules: {
@@ -89,6 +89,7 @@ export default defineConfig([
             { pattern: '@root{,/**}', group: 'internal', position: 'before' },
             { pattern: '@build{,/**}', group: 'internal', position: 'after' },
             { pattern: '@project{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@hooks{,/**}', group: 'internal', position: 'after' },
             { pattern: '@components{,/**}', group: 'internal', position: 'after' },
             { pattern: '@utils{,/**}', group: 'internal', position: 'after' },
             { pattern: 'assets{,/**}', group: 'internal', position: 'after' },

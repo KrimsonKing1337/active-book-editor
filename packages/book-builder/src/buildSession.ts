@@ -8,17 +8,26 @@ import { buildBook } from './build.js';
 
 const BUILD_ROOT_NAME = '.active-book-build';
 
+const activeBuildSessions = new Set<string>();
+
 const getSessionRoot = (
   repoRoot: string,
   sessionId: string,
 ): string => {
-  const isValidSessionId = /^[0-9a-f-]{36}$/i.test(sessionId);
+  return path.join(repoRoot, BUILD_ROOT_NAME, sessionId);
+};
 
-  if (!isValidSessionId) {
-    throw new Error('Invalid build session');
+const getActiveSessionRoot = (
+  repoRoot: string,
+  sessionId: string,
+): string => {
+  const sessionIsActive = activeBuildSessions.has(sessionId);
+
+  if (!sessionIsActive) {
+    throw new Error('Unknown build session');
   }
 
-  return path.join(repoRoot, BUILD_ROOT_NAME, sessionId);
+  return getSessionRoot(repoRoot, sessionId);
 };
 
 export const createBuildSession = async (repoRoot: string): Promise<string> => {
@@ -27,6 +36,8 @@ export const createBuildSession = async (repoRoot: string): Promise<string> => {
 
   await fs.mkdir(sessionRoot, { recursive: true });
 
+  activeBuildSessions.add(sessionId);
+
   return sessionId;
 };
 
@@ -34,12 +45,16 @@ export const removeBuildSession = async (
   repoRoot: string,
   sessionId: string,
 ): Promise<void> => {
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
+  const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
 
-  await fs.rm(sessionRoot, {
-    recursive: true,
-    force: true,
-  });
+  try {
+    await fs.rm(sessionRoot, {
+      recursive: true,
+      force: true,
+    });
+  } finally {
+    activeBuildSessions.delete(sessionId);
+  }
 };
 
 export const getBuildSessionFilePath = (
@@ -47,7 +62,7 @@ export const getBuildSessionFilePath = (
   sessionId: string,
   relativePath: string,
 ): string => {
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
+  const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
   const normalizedPath = relativePath.replaceAll('\\', '/');
   const safePath = path.posix.normalize(normalizedPath);
 
@@ -68,7 +83,7 @@ export const completeBuildSession = async (
   repoRoot: string,
   sessionId: string,
 ): Promise<string> => {
-  const sessionRoot = getSessionRoot(repoRoot, sessionId);
+  const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
   const bookJsonPath = path.join(sessionRoot, 'book.json');
 
   await fs.access(bookJsonPath);
