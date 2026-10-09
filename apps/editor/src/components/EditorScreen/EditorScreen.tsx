@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
 
@@ -31,6 +31,8 @@ import {
   insertTextComponent,
 } from './utils';
 
+const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
+
 export const EditorScreen = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
@@ -38,7 +40,9 @@ export const EditorScreen = () => {
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
-  const [showStructure, setShowStructure] = useState(false);
+  const [showStructure, setShowStructure] = useState(() => {
+    return localStorage.getItem(SHOW_STRUCTURE_STORAGE_KEY) === 'true';
+  });
   const [showSavedStatus, setShowSavedStatus] = useState(false);
 
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
@@ -102,6 +106,10 @@ export const EditorScreen = () => {
 
   useBeforeUnload(isDirty);
   useSaveShortcut(handleSaveProject);
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
+  }, [showStructure]);
 
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
