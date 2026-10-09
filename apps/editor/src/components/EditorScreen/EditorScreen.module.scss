@@ -1,5 +1,12 @@
 .EditorScreen {
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100dvh;
+
+  > :not(.Canvas) {
+    flex-shrink: 0;
+  }
 
   &.isStructureVisible {
     .Canvas {
@@ -35,11 +42,14 @@
 }
 
 .Canvas {
+  flex: 1 1 auto;
+  min-height: 0;
   width: min(1100px, calc(100% - 32px));
   margin: 24px auto;
+  overflow: hidden;
 
   :global(#page-wrapper) {
-    min-height: 70vh;
+    min-height: 0;
   }
 
   :global(.tiptap) {
