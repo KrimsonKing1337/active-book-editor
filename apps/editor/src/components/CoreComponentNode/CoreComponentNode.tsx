@@ -3,7 +3,7 @@ import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tip
 
 import classNames from 'classnames';
 
-import { Counter } from 'activeBook-core/components';
+import { Counter } from '@components/Counter';
 
 import styles from './CoreComponentNode.module.scss';
 
