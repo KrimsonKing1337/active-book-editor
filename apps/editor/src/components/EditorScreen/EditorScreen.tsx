@@ -18,7 +18,7 @@ import {
   useSaveShortcut,
 } from './hooks';
 
-import { Header, RestoreBanner } from './components';
+import { Header, PageEffects, RestoreBanner } from './components';
 
 import styles from './EditorScreen.module.scss';
 
@@ -169,6 +169,8 @@ export const EditorScreen = () => {
       </div>
 
       <main className={styles.Canvas}>
+        <PageEffects />
+
         <App
           config={editorConfig}
           appMode="editor"

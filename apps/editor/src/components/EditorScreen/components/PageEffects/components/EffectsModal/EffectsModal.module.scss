@@ -1,0 +1,158 @@
+.Dialog {
+  width: min(760px, calc(100% - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  overflow: auto;
+  color: #f5f5f5;
+  background: #202020;
+  border: 1px solid #555;
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.Header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #202020;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.Title {
+  flex: 1;
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    font-size: 19px;
+  }
+
+  p {
+    margin: 8px 0 0;
+    color: #b5b5b5;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.Back,
+.Close {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  color: #f5f5f5;
+  background: #303030;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background: #424242;
+  }
+}
+
+.Close {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.Content {
+  padding: 24px;
+}
+
+.Empty {
+  margin-bottom: 18px;
+  padding: 20px;
+  color: #bdbdbd;
+  background: #272727;
+  border: 1px dashed #555;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.Tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 185px), 1fr));
+  gap: 12px;
+}
+
+.Tile,
+.AddTile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 155px;
+  padding: 16px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.Tile {
+  color: #f5f5f5;
+  background: #2b2b2b;
+  text-align: left;
+
+  &:hover {
+    background: #363636;
+    border-color: #8b8b8b;
+  }
+
+  strong {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+
+  code {
+    color: #9f9f9f;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+}
+
+.Kind {
+  color: #b5c6ee;
+  font-size: 11px;
+}
+
+.Source {
+  color: #bcbcbc;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.AddTile {
+  align-items: center;
+  justify-content: center;
+  color: #d5d5d5;
+  background: transparent;
+  border-style: dashed;
+  font-size: 13px;
+  text-align: center;
+
+  &:hover {
+    background: #303030;
+  }
+}
+
+.AddIcon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.Notice {
+  margin: 0;
+  padding: 12px 24px;
+  color: #a8a8a8;
+  background: #191919;
+  border-top: 1px solid #3d3d3d;
+  font-size: 12px;
+}

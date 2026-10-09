@@ -1,0 +1,161 @@
+import { useState } from 'react';
+
+import type { AudioEffectDraft } from './@types';
+
+import { EffectsModal } from './components';
+
+import styles from './PageEffects.module.scss';
+
+const createAudioEffect = (): AudioEffectDraft => ({
+  id: crypto.randomUUID(),
+  slug: 'Новый звук',
+  options: {
+    src: '',
+    type: 'sfx',
+    loop: false,
+    playOnLoad: false,
+    stopBy: 0,
+    delay: 0,
+    relativeVolume: 100,
+    screamer: false,
+    fadeOutWhenUnload: true,
+  },
+});
+
+export const PageEffects = () => {
+  // Пока это только UI-прототип: эффекты не сохраняются в проекте и не воспроизводятся.
+  const [effects, setEffects] = useState<AudioEffectDraft[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
+
+  const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
+  const effectsCount = effects.length;
+
+  const openEffects = () => {
+    setIsOpen(true);
+  };
+
+  const closeEffects = () => {
+    setIsOpen(false);
+    setSelectedEffectId(null);
+  };
+
+  const goBackToEffects = () => {
+    setSelectedEffectId(null);
+  };
+
+  const addAudio = () => {
+    const effect = createAudioEffect();
+
+    setEffects((current) => [...current, effect]);
+    setSelectedEffectId(effect.id);
+  };
+
+  const updateEffect = (previousId: string, updatedEffect: AudioEffectDraft) => {
+    const nextId = updatedEffect.id.trim();
+    const idIsEmpty = nextId.length === 0;
+
+    const idAlreadyExists = effects.some((effect) => {
+      if (effect.id === previousId) {
+        return false;
+      }
+
+      return effect.id === nextId;
+    });
+
+    if (idIsEmpty || idAlreadyExists) {
+      return;
+    }
+
+    const normalizedEffect = {
+      ...updatedEffect,
+      id: nextId,
+    };
+
+    setEffects((current) => {
+      return current.map((effect) => {
+        if (effect.id !== previousId) {
+          return effect;
+        }
+
+        return normalizedEffect;
+      });
+    });
+
+    if (nextId !== previousId) {
+      setSelectedEffectId(nextId);
+    }
+  };
+
+  const duplicateEffect = () => {
+    if (!selectedEffect) {
+      return;
+    }
+
+    const duplicate: AudioEffectDraft = {
+      ...selectedEffect,
+      id: crypto.randomUUID(),
+      slug: `${selectedEffect.slug} (копия)`,
+      options: { ...selectedEffect.options },
+    };
+
+    setEffects((current) => [...current, duplicate]);
+    setSelectedEffectId(duplicate.id);
+  };
+
+  const deleteEffect = () => {
+    if (!selectedEffect) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(`Удалить эффект «${selectedEffect.slug}»?`);
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const effectId = selectedEffect.id;
+
+    setEffects((current) => current.filter((effect) => effect.id !== effectId));
+    setSelectedEffectId(null);
+  };
+
+  return (
+    <>
+      <button
+        className={styles.Trigger}
+        type="button"
+        title="Эффекты страницы"
+        aria-label="Эффекты страницы"
+        aria-haspopup="dialog"
+        onClick={openEffects}
+      >
+        <span className={styles.Icon} aria-hidden="true">
+          ⚙
+        </span>
+
+        <span>
+          Эффекты
+        </span>
+
+        <span className={styles.Count}>
+          {effectsCount}
+        </span>
+      </button>
+
+      {isOpen && (
+        <EffectsModal
+          effects={effects}
+          selectedEffect={selectedEffect}
+          onClose={closeEffects}
+          onBack={goBackToEffects}
+          onAddAudio={addAudio}
+          onSelectEffect={setSelectedEffectId}
+          onUpdateEffect={updateEffect}
+          onDuplicateEffect={duplicateEffect}
+          onDeleteEffect={deleteEffect}
+        />
+      )}
+    </>
+  );
+};
