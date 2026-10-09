@@ -29,6 +29,7 @@ export const PageEffects = () => {
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
 
   const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
+  const effectsCount = effects.length;
 
   const openEffects = () => {
     setIsOpen(true);
@@ -36,6 +37,10 @@ export const PageEffects = () => {
 
   const closeEffects = () => {
     setIsOpen(false);
+    setSelectedEffectId(null);
+  };
+
+  const goBackToEffects = () => {
     setSelectedEffectId(null);
   };
 
@@ -48,14 +53,34 @@ export const PageEffects = () => {
 
   const updateEffect = (previousId: string, updatedEffect: AudioEffectDraft) => {
     const nextId = updatedEffect.id.trim();
+    const idIsEmpty = nextId.length === 0;
 
-    if (!nextId || effects.some((effect) => effect.id !== previousId && effect.id === nextId)) {
+    const idAlreadyExists = effects.some((effect) => {
+      if (effect.id === previousId) {
+        return false;
+      }
+
+      return effect.id === nextId;
+    });
+
+    if (idIsEmpty || idAlreadyExists) {
       return;
     }
 
-    setEffects((current) => current.map((effect) => (
-      effect.id === previousId ? { ...updatedEffect, id: nextId } : effect
-    )));
+    const normalizedEffect = {
+      ...updatedEffect,
+      id: nextId,
+    };
+
+    setEffects((current) => {
+      return current.map((effect) => {
+        if (effect.id !== previousId) {
+          return effect;
+        }
+
+        return normalizedEffect;
+      });
+    });
 
     if (nextId !== previousId) {
       setSelectedEffectId(nextId);
@@ -79,11 +104,19 @@ export const PageEffects = () => {
   };
 
   const deleteEffect = () => {
-    if (!selectedEffect || !window.confirm(`Удалить эффект «${selectedEffect.slug}»?`)) {
+    if (!selectedEffect) {
       return;
     }
 
-    setEffects((current) => current.filter((effect) => effect.id !== selectedEffect.id));
+    const shouldDelete = window.confirm(`Удалить эффект «${selectedEffect.slug}»?`);
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    const effectId = selectedEffect.id;
+
+    setEffects((current) => current.filter((effect) => effect.id !== effectId));
     setSelectedEffectId(null);
   };
 
@@ -97,9 +130,17 @@ export const PageEffects = () => {
         aria-haspopup="dialog"
         onClick={openEffects}
       >
-        <span className={styles.Icon} aria-hidden="true">⚙</span>
-        <span>Эффекты</span>
-        <span className={styles.Count}>{effects.length}</span>
+        <span className={styles.Icon} aria-hidden="true">
+          ⚙
+        </span>
+
+        <span>
+          Эффекты
+        </span>
+
+        <span className={styles.Count}>
+          {effectsCount}
+        </span>
       </button>
 
       {isOpen && (
@@ -107,7 +148,7 @@ export const PageEffects = () => {
           effects={effects}
           selectedEffect={selectedEffect}
           onClose={closeEffects}
-          onBack={() => setSelectedEffectId(null)}
+          onBack={goBackToEffects}
           onAddAudio={addAudio}
           onSelectEffect={setSelectedEffectId}
           onUpdateEffect={updateEffect}

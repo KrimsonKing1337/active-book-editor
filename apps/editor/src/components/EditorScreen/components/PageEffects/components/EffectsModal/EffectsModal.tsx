@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { type MouseEvent, type ReactNode, type SyntheticEvent, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { AudioEffectDraft } from '../../@types';
 
 import { AudioSettings } from '../AudioSettings';
+
+import { EffectTile } from './components';
 
 import styles from './EffectsModal.module.scss';
 
@@ -32,6 +34,57 @@ export const EffectsModal = ({
 }: EffectsModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
+  const isSettingsOpen = Boolean(selectedEffect);
+  const isEffectsEmpty = effects.length === 0;
+  const existingIds = effects.map((effect) => effect.id);
+
+  let modalTitle = 'Эффекты страницы';
+  let modalDescription = 'Невидимые эффекты, которые относятся к странице.';
+
+  let modalContent: ReactNode = (
+    <>
+      {isEffectsEmpty && (
+        <div className={styles.Empty}>
+          Пока нет эффектов. Добавь Audio, чтобы попробовать настройку звука.
+        </div>
+      )}
+
+      <div className={styles.Tiles}>
+        {effects.map((effect) => (
+          <EffectTile
+            key={effect.id}
+            effect={effect}
+            onSelect={onSelectEffect}
+          />
+        ))}
+
+        <button className={styles.AddTile} type="button" onClick={onAddAudio}>
+          <span className={styles.AddIcon} aria-hidden="true">
+            +
+          </span>
+
+          Добавить Audio
+        </button>
+      </div>
+    </>
+  );
+
+  if (selectedEffect) {
+    modalTitle = 'Настройки Audio';
+    modalDescription = 'Измени параметры звука. Пока изменения видны только в редакторе.';
+
+    modalContent = (
+      <AudioSettings
+        key={selectedEffect.id}
+        effect={selectedEffect}
+        existingIds={existingIds}
+        onUpdate={onUpdateEffect}
+        onDuplicate={onDuplicateEffect}
+        onDelete={onDeleteEffect}
+      />
+    );
+  }
+
   useEffect(() => {
     const dialog = dialogRef.current;
 
@@ -42,39 +95,48 @@ export const EffectsModal = ({
     };
   }, []);
 
+  const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
+    event.preventDefault();
+
+    if (isSettingsOpen) {
+      onBack();
+
+      return;
+    }
+
+    onClose();
+  };
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    onClose();
+  };
+
   return createPortal(
     <dialog
       ref={dialogRef}
       className={styles.Dialog}
       aria-label="Эффекты страницы"
-      onCancel={(event) => {
-        event.preventDefault();
-
-        if (selectedEffect) {
-          onBack();
-        } else {
-          onClose();
-        }
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
+      onCancel={handleCancel}
+      onClick={handleBackdropClick}
     >
       <div className={styles.Header}>
-        {selectedEffect && (
+        {isSettingsOpen && (
           <button className={styles.Back} type="button" onClick={onBack}>
             ← Назад
           </button>
         )}
 
         <div className={styles.Title}>
-          <h2>{selectedEffect ? 'Настройки Audio' : 'Эффекты страницы'}</h2>
+          <h2>
+            {modalTitle}
+          </h2>
+
           <p>
-            {selectedEffect
-              ? 'Измени параметры звука. Пока изменения видны только в редакторе.'
-              : 'Невидимые эффекты, которые относятся к странице.'}
+            {modalDescription}
           </p>
         </div>
 
@@ -84,45 +146,7 @@ export const EffectsModal = ({
       </div>
 
       <div className={styles.Content}>
-        {selectedEffect ? (
-          <AudioSettings
-            key={selectedEffect.id}
-            effect={selectedEffect}
-            existingIds={effects.map((effect) => effect.id)}
-            onUpdate={onUpdateEffect}
-            onDuplicate={onDuplicateEffect}
-            onDelete={onDeleteEffect}
-          />
-        ) : (
-          <>
-            {effects.length === 0 && (
-              <div className={styles.Empty}>
-                Пока нет эффектов. Добавь Audio, чтобы попробовать настройку звука.
-              </div>
-            )}
-
-            <div className={styles.Tiles}>
-              {effects.map((effect) => (
-                <button
-                  key={effect.id}
-                  className={styles.Tile}
-                  type="button"
-                  onClick={() => onSelectEffect(effect.id)}
-                >
-                  <span className={styles.Kind}>Audio · {effect.options.type}</span>
-                  <strong>{effect.slug.trim() || 'Без названия'}</strong>
-                  <span className={styles.Source}>{effect.options.src || 'Файл не выбран'}</span>
-                  <code>{effect.id}</code>
-                </button>
-              ))}
-
-              <button className={styles.AddTile} type="button" onClick={onAddAudio}>
-                <span className={styles.AddIcon} aria-hidden="true">+</span>
-                Добавить Audio
-              </button>
-            </div>
-          </>
-        )}
+        {modalContent}
       </div>
 
       <p className={styles.Notice}>
