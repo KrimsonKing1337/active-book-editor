@@ -1,3 +1,5 @@
+import classNames from 'classnames';
+
 import type { BuildState, TextComponentName } from '../../@types';
 
 import styles from './Header.module.scss';
@@ -42,9 +44,10 @@ export const Header = ({
   const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
   const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
 
-  const savedStatusClassName = showSavedStatus
-    ? `${styles.SavedStatus} ${styles.isVisible}`
-    : styles.SavedStatus;
+  const savedStatusClassNames = classNames({
+    [styles.SavedStatus]: true,
+    [styles.isVisible]: showSavedStatus,
+  });
 
   return (
     <header className={styles.Header}>
@@ -55,7 +58,7 @@ export const Header = ({
             {isDirty ? ' *' : ''}
           </strong>
 
-          <span className={savedStatusClassName} aria-hidden={!showSavedStatus}>
+          <span className={savedStatusClassNames} aria-hidden={!showSavedStatus}>
             Сохранено
           </span>
         </div>

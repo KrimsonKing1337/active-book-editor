@@ -358,8 +358,10 @@ export const useProjectActions = ({
 
     try {
       await clearCurrentProject();
+
       setProject(null);
       setPendingRestore(null);
+
       replaceDocument(createEmptyDocument());
       setProjectMessage('Новый несохранённый проект');
     } finally {
@@ -368,8 +370,8 @@ export const useProjectActions = ({
   }, [
     editor,
     clearAutosaveTimer,
-    confirmDiscardChanges,
     replaceDocument,
+    confirmDiscardChanges,
   ]);
 
   const handleOpenProject = useCallback(async () => {
@@ -387,8 +389,9 @@ export const useProjectActions = ({
 
       setProject(openedProject.project);
       setPendingRestore(null);
-      replaceDocument(openedProject.document);
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
+
+      replaceDocument(openedProject.document);
     } catch (error) {
       if (isAbortError(error)) {
         return;
@@ -450,8 +453,9 @@ export const useProjectActions = ({
 
       setProject(openedProject.project);
       setPendingRestore(null);
-      replaceDocument(openedProject.document);
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
+
+      replaceDocument(openedProject.document);
     } catch (error) {
       console.error('[project] Continue failed.', error);
 
