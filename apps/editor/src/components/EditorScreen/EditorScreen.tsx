@@ -169,6 +169,8 @@ export const EditorScreen = () => {
       </div>
 
       <main className={styles.Canvas}>
+        <PageEffects />
+
         <App
           config={editorConfig}
           appMode="editor"
