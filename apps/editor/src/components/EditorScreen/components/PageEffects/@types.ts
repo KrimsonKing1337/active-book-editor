@@ -15,6 +15,6 @@ export type AudioOptions = Required<Pick<
 
 export type AudioEffectDraft = {
   id: string;
-  title: string;
+  slug: string;
   options: AudioOptions;
 };

@@ -14,7 +14,7 @@ type EffectsModalProps = {
   onBack: () => void;
   onAddAudio: () => void;
   onSelectEffect: (id: string) => void;
-  onUpdateEffect: (effect: AudioEffectDraft) => void;
+  onUpdateEffect: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicateEffect: () => void;
   onDeleteEffect: () => void;
 };
@@ -86,7 +86,9 @@ export const EffectsModal = ({
       <div className={styles.Content}>
         {selectedEffect ? (
           <AudioSettings
+            key={selectedEffect.id}
             effect={selectedEffect}
+            existingIds={effects.map((effect) => effect.id)}
             onUpdate={onUpdateEffect}
             onDuplicate={onDuplicateEffect}
             onDelete={onDeleteEffect}
@@ -108,7 +110,7 @@ export const EffectsModal = ({
                   onClick={() => onSelectEffect(effect.id)}
                 >
                   <span className={styles.Kind}>Audio · {effect.options.type}</span>
-                  <strong>{effect.title.trim() || 'Без названия'}</strong>
+                  <strong>{effect.slug.trim() || 'Без названия'}</strong>
                   <span className={styles.Source}>{effect.options.src || 'Файл не выбран'}</span>
                   <code>{effect.id}</code>
                 </button>

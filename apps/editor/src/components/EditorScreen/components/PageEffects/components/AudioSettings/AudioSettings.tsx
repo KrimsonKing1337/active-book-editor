@@ -1,23 +1,49 @@
+import { useState } from 'react';
+
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
 
 type AudioSettingsProps = {
   effect: AudioEffectDraft;
-  onUpdate: (effect: AudioEffectDraft) => void;
+  existingIds: string[];
+  onUpdate: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
 
-export const AudioSettings = ({ effect, onUpdate, onDuplicate, onDelete }: AudioSettingsProps) => {
+export const AudioSettings = ({
+  effect,
+  existingIds,
+  onUpdate,
+  onDuplicate,
+  onDelete,
+}: AudioSettingsProps) => {
   const { options } = effect;
 
-  const updateTitle = (title: string) => {
-    onUpdate({ ...effect, title });
+  const [idDraft, setIdDraft] = useState(effect.id);
+  const normalizedId = idDraft.trim();
+
+  const idError = !normalizedId
+    ? 'ID не может быть пустым'
+    : existingIds.some((id) => id !== effect.id && id === normalizedId)
+      ? 'Такой ID уже существует'
+      : null;
+
+  const updateId = () => {
+    if (idError || idDraft === effect.id) {
+      return;
+    }
+
+    onUpdate(effect.id, { ...effect, id: normalizedId });
+  };
+
+  const updateSlug = (slug: string) => {
+    onUpdate(effect.id, { ...effect, slug });
   };
 
   const updateOption = <K extends keyof AudioOptions>(name: K, value: AudioOptions[K]) => {
-    onUpdate({
+    onUpdate(effect.id, {
       ...effect,
       options: {
         ...options,
@@ -44,18 +70,41 @@ export const AudioSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Audio
     <div className={styles.AudioSettings}>
       <div className={styles.Fields}>
         <label className={styles.Field}>
-          <span>Название эффекта</span>
+          <span>Метка (slug)</span>
           <input
             type="text"
-            value={effect.title}
-            onChange={(event) => updateTitle(event.target.value)}
-            placeholder="Например, гул станции"
+            value={effect.slug}
+            onChange={(event) => updateSlug(event.target.value)}
+            placeholder="Например, звук дождя"
           />
+          <small>Человекочитаемая подпись на плитке эффекта.</small>
         </label>
 
         <div className={styles.Field}>
-          <span>ID эффекта</span>
-          <code className={styles.Id}>{effect.id}</code>
+          <label htmlFor="page-effect-id">ID эффекта</label>
+          <div className={styles.IdRow}>
+            <input
+              id="page-effect-id"
+              type="text"
+              value={idDraft}
+              onChange={(event) => setIdDraft(event.target.value)}
+              aria-invalid={!!idError}
+              aria-describedby={idError ? 'page-effect-id-error' : undefined}
+              spellCheck={false}
+            />
+            <button
+              type="button"
+              disabled={!!idError || idDraft === effect.id}
+              onClick={updateId}
+            >
+              Применить
+            </button>
+          </div>
+          {idError ? (
+            <small id="page-effect-id-error" className={styles.IdError}>{idError}</small>
+          ) : (
+            <small>ID должен быть уникальным. После изменения нажми «Применить».</small>
+          )}
         </div>
 
         <label className={styles.Field}>

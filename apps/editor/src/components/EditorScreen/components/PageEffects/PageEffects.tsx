@@ -8,7 +8,7 @@ import styles from './PageEffects.module.scss';
 
 const createAudioEffect = (): AudioEffectDraft => ({
   id: crypto.randomUUID(),
-  title: 'Новый звук',
+  slug: 'Новый звук',
   options: {
     src: '',
     type: 'sfx',
@@ -46,10 +46,20 @@ export const PageEffects = () => {
     setSelectedEffectId(effect.id);
   };
 
-  const updateEffect = (updatedEffect: AudioEffectDraft) => {
+  const updateEffect = (previousId: string, updatedEffect: AudioEffectDraft) => {
+    const nextId = updatedEffect.id.trim();
+
+    if (!nextId || effects.some((effect) => effect.id !== previousId && effect.id === nextId)) {
+      return;
+    }
+
     setEffects((current) => current.map((effect) => (
-      effect.id === updatedEffect.id ? updatedEffect : effect
+      effect.id === previousId ? { ...updatedEffect, id: nextId } : effect
     )));
+
+    if (nextId !== previousId) {
+      setSelectedEffectId(nextId);
+    }
   };
 
   const duplicateEffect = () => {
@@ -60,7 +70,7 @@ export const PageEffects = () => {
     const duplicate: AudioEffectDraft = {
       ...selectedEffect,
       id: crypto.randomUUID(),
-      title: `${selectedEffect.title} (копия)`,
+      slug: `${selectedEffect.slug} (копия)`,
       options: { ...selectedEffect.options },
     };
 
@@ -69,7 +79,7 @@ export const PageEffects = () => {
   };
 
   const deleteEffect = () => {
-    if (!selectedEffect || !window.confirm(`Удалить эффект «${selectedEffect.title}»?`)) {
+    if (!selectedEffect || !window.confirm(`Удалить эффект «${selectedEffect.slug}»?`)) {
       return;
     }
 
