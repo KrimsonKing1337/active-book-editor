@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Audio } from 'activeBook-core/components/ProxyHooks';
 
-import { useDispatch, useSelector } from 'activeBook-core/store';
+import { useAudioController } from 'activeBook-core/hooks/effects';
+
+import { useDispatch } from 'activeBook-core/store';
 
 import { mainActions } from 'activeBook-core/store/main';
-import { audioEffectsSelectors } from 'activeBook-core/store/effects/audio/audio';
-
 import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
@@ -26,6 +26,11 @@ type ResolvedSource = {
 type AudioPreviewProps = {
   effect: AudioEffectDraft;
   project: BookProject | null;
+};
+
+type ScheduledRelease = {
+  id: string;
+  timeout: number;
 };
 
 const resolveSource = async (source: string, project: BookProject | null): Promise<ResolvedSource> => {
@@ -77,32 +82,61 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const audioInstances = useSelector(audioEffectsSelectors.audioInstances);
-  const audioInstance = preview ? audioInstances[preview.id] : null;
+  const scheduledReleaseRef = useRef<ScheduledRelease | null>(null);
+  const { audio, play, stop, remove } = useAudioController(preview?.id ?? '');
 
   useEffect(() => {
-    if (!playRequested || !audioInstance) {
+    if (!playRequested || !audio) {
       return;
     }
 
-    void audioInstance.play();
+    void play();
 
     setPlayRequested(false);
-  }, [playRequested, audioInstance]);
+  }, [playRequested, audio, play]);
 
   useEffect(() => {
+    // StrictMode повторно запускает effects: не выгружаем звук между cleanup и следующим setup.
+    const scheduledRelease = scheduledReleaseRef.current;
+
+    if (scheduledRelease?.id === preview?.id) {
+      window.clearTimeout(scheduledRelease.timeout);
+      scheduledReleaseRef.current = null;
+    }
+
+    if (!preview) {
+      return;
+    }
+
     return () => {
-      if (preview?.src.startsWith('blob:')) {
-        URL.revokeObjectURL(preview.src);
-      }
+      const releasedPreview = preview;
+      const releasedRemove = remove;
+
+      const timeout = window.setTimeout(() => {
+        releasedRemove();
+
+        if (releasedPreview.src.startsWith('blob:')) {
+          URL.revokeObjectURL(releasedPreview.src);
+        }
+
+        if (scheduledReleaseRef.current?.id === releasedPreview.id) {
+          scheduledReleaseRef.current = null;
+        }
+      }, 0);
+
+      scheduledReleaseRef.current = {
+        id: releasedPreview.id,
+        timeout,
+      };
     };
-  }, [preview]);
+  }, [preview, remove]);
 
   const handlePreview = async () => {
     if (preview) {
       setPlayRequested(false);
 
-      void audioInstance?.stop();
+      void stop();
+      remove();
 
       setPreview(null);
 
@@ -157,6 +191,7 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
           src={preview.src}
           format={preview.format}
           playOnLoad={false}
+          lifecycle="manual"
         />
       )}
     </div>
