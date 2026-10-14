@@ -1,5 +1,7 @@
 import { type ChangeEvent, useState } from 'react';
 
+import { Slider } from 'activeBook-core/components';
+
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
@@ -128,8 +130,8 @@ export const AudioSettings = ({
     updateOption('loop', event.target.checked);
   };
 
-  const handleVolumeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('relativeVolume', event.target.value);
+  const handleVolumeChange = (value: number) => {
+    updateOption('relativeVolume', value);
   };
 
   const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -268,7 +270,7 @@ export const AudioSettings = ({
           </span>
         </label>
 
-        <label className={styles.Field}>
+        <div className={styles.Field}>
           <span className={styles.VolumeLabel}>
             Относительная громкость
 
@@ -277,15 +279,11 @@ export const AudioSettings = ({
             </strong>
           </span>
 
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
+          <Slider
             value={options.relativeVolume}
             onChange={handleVolumeChange}
           />
-        </label>
+        </div>
 
         <details className={styles.Advanced}>
           <summary>
