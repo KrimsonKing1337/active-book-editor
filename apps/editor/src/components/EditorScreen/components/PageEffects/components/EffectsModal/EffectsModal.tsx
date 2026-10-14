@@ -1,4 +1,6 @@
-import { type MouseEvent, type ReactNode, type SyntheticEvent, useEffect, useRef } from 'react';
+import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
+import { useEffect, useRef } from 'react';
+
 import { createPortal } from 'react-dom';
 
 import type { AudioEffectDraft } from '../../@types';
@@ -24,6 +26,7 @@ type EffectsModalProps = {
 export const EffectsModal = ({
   effects,
   selectedEffect,
+
   onClose,
   onBack,
   onAddAudio,
@@ -45,18 +48,20 @@ export const EffectsModal = ({
     <>
       {isEffectsEmpty && (
         <div className={styles.Empty}>
-          Пока нет эффектов. Добавь Audio, чтобы попробовать настройку звука.
+          Пока нет эффектов. Добавьте Audio, чтобы попробовать настройку звука
         </div>
       )}
 
       <div className={styles.Tiles}>
-        {effects.map((effect) => (
-          <EffectTile
-            key={effect.id}
-            effect={effect}
-            onSelect={onSelectEffect}
-          />
-        ))}
+        {effects.map((effectCur) => {
+          return (
+            <EffectTile
+              key={effectCur.id}
+              effect={effectCur}
+              onSelect={onSelectEffect}
+            />
+          );
+        })}
 
         <button className={styles.AddTile} type="button" onClick={onAddAudio}>
           <span className={styles.AddIcon} aria-hidden="true">
@@ -71,7 +76,7 @@ export const EffectsModal = ({
 
   if (selectedEffect) {
     modalTitle = 'Настройки Audio';
-    modalDescription = 'Измени параметры звука. Пока изменения видны только в редакторе.';
+    modalDescription = 'Измените параметры звука. Пока изменения видны только в редакторе';
 
     modalContent = (
       <AudioSettings
@@ -86,12 +91,16 @@ export const EffectsModal = ({
   }
 
   useEffect(() => {
-    const dialog = dialogRef.current;
+    const dialogElement = dialogRef.current;
 
-    dialog?.showModal();
+    if (!dialogElement) {
+      return;
+    }
+
+    dialogElement.showModal();
 
     return () => {
-      dialog?.close();
+      dialogElement.close();
     };
   }, []);
 
@@ -140,7 +149,12 @@ export const EffectsModal = ({
           </p>
         </div>
 
-        <button className={styles.Close} type="button" onClick={onClose} aria-label="Закрыть">
+        <button
+          className={styles.Close}
+          type="button"
+          onClick={onClose}
+          aria-label="Закрыть"
+        >
           ×
         </button>
       </div>
