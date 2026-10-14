@@ -14,7 +14,13 @@ import type { AudioEffectDraft, AudioOptions } from '../../@types';
 type PreviewAudio = {
   id: string;
   src: string;
+  format?: string[];
   options: AudioOptions;
+};
+
+type ResolvedSource = {
+  src: string;
+  format?: string[];
 };
 
 type AudioPreviewProps = {
@@ -22,7 +28,7 @@ type AudioPreviewProps = {
   project: BookProject | null;
 };
 
-const resolveSource = async (source: string, project: BookProject | null): Promise<string> => {
+const resolveSource = async (source: string, project: BookProject | null): Promise<ResolvedSource> => {
   const path = source.trim();
 
   if (!path) {
@@ -30,7 +36,7 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
   }
 
   if (/^(https?:|blob:|data:)/.test(path)) {
-    return path;
+    return { src: path };
   }
 
   if (!project) {
@@ -45,7 +51,16 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
 
   for await (const file of project.storage.getBuildFiles()) {
     if (file.path === assetPath) {
-      return URL.createObjectURL(file.data);
+      const extension = assetPath.split('.').pop()?.toLowerCase();
+
+      if (!extension) {
+        throw new Error('У аудиофайла должно быть расширение (например, .mp3 или .ogg).');
+      }
+
+      return {
+        src: URL.createObjectURL(file.data),
+        format: [extension],
+      };
     }
   }
 
@@ -93,13 +108,14 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
     setError('');
 
     try {
-      const src = await resolveSource(effect.options.src, project);
+      const source = await resolveSource(effect.options.src, project);
 
       dispatch(mainActions.setIsAudioUnlocked(true));
 
       setPreview({
         id: `editor-preview-${crypto.randomUUID()}`,
-        src,
+        src: source.src,
+        format: source.format,
         options: { ...effect.options },
       });
       setPlayRequested(true);
@@ -132,6 +148,7 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
           page={0}
           {...preview.options}
           src={preview.src}
+          format={preview.format}
           playOnLoad={false}
         />
       )}
