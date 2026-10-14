@@ -1,3 +1,11 @@
+import type { AudioEffectOptions } from 'activeBook-core/@types';
+
+export type BookAudioEffect = {
+  id: string;
+  slug: string;
+  options: Omit<AudioEffectOptions, 'id' | 'page'>;
+};
+
 export type BookMark = {
   type: string;
   attrs?: Record<string, unknown>;
@@ -19,5 +27,8 @@ export type BookNode = {
 
 export type BookDocument = {
   type: string;
+  attrs?: {
+    pageEffects?: BookAudioEffect[];
+  };
   content?: BookNode[];
 };

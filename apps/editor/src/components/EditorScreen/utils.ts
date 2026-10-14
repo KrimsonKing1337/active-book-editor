@@ -24,6 +24,14 @@ export const activeBookBlockNodes = [
 // И тогда при нажатии на Enter вставится именно он.
 export const ActiveBookDocument = Document.extend({
   content: '(activeBookP | activeBookBlock)+',
+
+  addAttributes() {
+    return {
+      pageEffects: {
+        default: [],
+      },
+    };
+  },
 });
 
 export const editorExtensions = [

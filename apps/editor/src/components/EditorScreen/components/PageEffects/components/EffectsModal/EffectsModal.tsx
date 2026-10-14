@@ -3,6 +3,8 @@ import { useEffect, useRef } from 'react';
 
 import { createPortal } from 'react-dom';
 
+import type { BookProject } from '@project/@types';
+
 import type { AudioEffectDraft } from '../../@types';
 
 import { AudioSettings } from '../AudioSettings';
@@ -13,6 +15,7 @@ import styles from './EffectsModal.module.scss';
 
 type EffectsModalProps = {
   effects: AudioEffectDraft[];
+  project: BookProject | null;
   selectedEffect: AudioEffectDraft | null;
   onClose: () => void;
   onBack: () => void;
@@ -25,6 +28,7 @@ type EffectsModalProps = {
 
 export const EffectsModal = ({
   effects,
+  project,
   selectedEffect,
 
   onClose,
@@ -76,12 +80,13 @@ export const EffectsModal = ({
 
   if (selectedEffect) {
     modalTitle = 'Настройки Audio';
-    modalDescription = 'Измените параметры звука. Пока изменения видны только в редакторе';
+    modalDescription = 'Параметры сохраняются в book.json и применяются в собранной книге';
 
     modalContent = (
       <AudioSettings
         key={selectedEffect.id}
         effect={selectedEffect}
+        project={project}
         existingIds={existingIds}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
@@ -164,7 +169,7 @@ export const EffectsModal = ({
       </div>
 
       <p className={styles.Notice}>
-        UI-прототип: эффекты не сохраняются в книге и пока не воспроизводятся.
+        Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».
       </p>
     </dialog>,
     document.body,

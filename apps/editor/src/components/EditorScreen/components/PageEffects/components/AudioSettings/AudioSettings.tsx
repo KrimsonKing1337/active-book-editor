@@ -2,12 +2,17 @@ import { type ChangeEvent, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
 
+import type { BookProject } from '@project/@types';
+
+import { AudioPreview } from '../AudioPreview';
+
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
 
 type AudioSettingsProps = {
   effect: AudioEffectDraft;
+  project: BookProject | null;
   existingIds: string[];
   onUpdate: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicate: () => void;
@@ -16,6 +21,7 @@ type AudioSettingsProps = {
 
 export const AudioSettings = ({
   effect,
+  project,
   existingIds,
   onUpdate,
   onDuplicate,
@@ -257,6 +263,12 @@ export const AudioSettings = ({
             Воспроизводить при открытии страницы
           </span>
         </label>
+
+        <small>
+          Автозапуск работает только в собранной книге (режим чтения). В редакторе доступно ручное прослушивание.
+        </small>
+
+        <AudioPreview effect={effect} project={project} />
 
         <label className={styles.Checkbox}>
           <input
