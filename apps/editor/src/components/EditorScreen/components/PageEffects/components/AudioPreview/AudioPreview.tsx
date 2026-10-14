@@ -32,21 +32,23 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
   const path = source.trim();
 
   if (!path) {
-    throw new Error('Укажите путь к аудиофайлу.');
+    throw new Error('Укажите путь к аудиофайлу');
   }
 
   if (/^(https?:|blob:|data:)/.test(path)) {
-    return { src: path };
+    return {
+      src: path,
+    };
   }
 
   if (!project) {
-    throw new Error('Сначала сохраните проект, чтобы загрузить файл из assets/.');
+    throw new Error('Сначала сохраните проект, чтобы загрузить файл из assets/');
   }
 
   const assetPath = path.replace(/^\.\//, '').replace(/^\//, '');
 
   if (!assetPath.startsWith('assets/') || assetPath.split('/').includes('..')) {
-    throw new Error('Укажите файл из папки assets/, например assets/audio/rain.ogg.');
+    throw new Error('Укажите файл из папки assets/, например assets/audio/rain.ogg');
   }
 
   for await (const file of project.storage.getBuildFiles()) {
@@ -54,7 +56,7 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
       const extension = assetPath.split('.').pop()?.toLowerCase();
 
       if (!extension) {
-        throw new Error('У аудиофайла должно быть расширение (например, .mp3 или .ogg).');
+        throw new Error('У аудиофайла должно быть расширение (например, .mp3 или .ogg)');
       }
 
       return {
@@ -64,7 +66,7 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
     }
   }
 
-  throw new Error('Аудиофайл не найден в папке проекта.');
+  throw new Error('Аудиофайл не найден в папке проекта');
 };
 
 export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
@@ -84,6 +86,7 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
     }
 
     void audioInstance.play();
+
     setPlayRequested(false);
   }, [playRequested, audioInstance]);
 
@@ -98,7 +101,9 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
   const handlePreview = async () => {
     if (preview) {
       setPlayRequested(false);
+
       void audioInstance?.stop();
+
       setPreview(null);
 
       return;
@@ -118,9 +123,11 @@ export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
         format: source.format,
         options: { ...effect.options },
       });
+
       setPlayRequested(true);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Не удалось загрузить аудио.';
+      const message = err instanceof Error ? err.message : 'Не удалось загрузить аудио';
+
       setError(message);
     } finally {
       setLoading(false);
