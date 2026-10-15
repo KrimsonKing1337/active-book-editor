@@ -1,6 +1,7 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
+import type { AudioEffectOptions } from 'activeBook-core/@types';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
@@ -12,6 +13,8 @@ import { AudioPreview } from '../AudioPreview';
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
+
+type NumericAudioOptionName = keyof Pick<AudioEffectOptions, 'relativeVolume' | 'delay' | 'stopBy'>;
 
 type AudioSettingsProps = {
   effect: AudioEffectDraft;
@@ -113,7 +116,7 @@ export const AudioSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const updateNumber = (name: 'relativeVolume' | 'delay' | 'stopBy', value: string) => {
+  const updateNumber = (name: NumericAudioOptionName, value: string) => {
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
