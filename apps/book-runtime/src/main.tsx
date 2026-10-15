@@ -1,20 +1,28 @@
 import ReactDOM from 'react-dom/client';
 
-import { App } from 'activeBook-core/components';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+
+import { AppWrapper } from 'activeBook-core/components';
+import { Page0 } from 'activeBook-core/pages/Page0';
+import { StoreProvider } from 'activeBook-core/store';
 import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
 import { BookPage } from '@components/BookPage';
+import { StartReading } from '@components/StartReading';
 
 import './styles.scss';
 
 import bookDocumentDefault from '../book.json';
 import type { BookDocument } from './@types';
 
+// Page0 uses a silent sound to unlock browser audio after the reader's first interaction.
+const AUDIO_UNLOCK_SRC = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
+
 const config: Config = {
   id: 'built-book',
   authorComments: 0,
-  pages: 0,
+  pages: 1,
   defaultTheme: 'dark',
   disableThemes: false,
 };
@@ -26,7 +34,28 @@ if (!root) {
 }
 
 ReactDOM.createRoot(root).render(
-  <App config={config} tableOfContents={[]} rangeEffects={[]}>
-    <BookPage document={bookDocumentDefault as BookDocument} />
-  </App>,
+  <StoreProvider>
+    <MemoryRouter>
+      <AppWrapper config={config} tableOfContents={[]} rangeEffects={[]}>
+        <Routes>
+          <Route
+            path="/"
+            element={(
+              <Page0
+                header="Добро пожаловать"
+                audioSrcForInit={AUDIO_UNLOCK_SRC}
+                showButton={false}
+                Footer={StartReading}
+              />
+            )}
+          />
+
+          <Route
+            path="/page-1"
+            element={<BookPage document={bookDocumentDefault as BookDocument} />}
+          />
+        </Routes>
+      </AppWrapper>
+    </MemoryRouter>
+  </StoreProvider>,
 );
