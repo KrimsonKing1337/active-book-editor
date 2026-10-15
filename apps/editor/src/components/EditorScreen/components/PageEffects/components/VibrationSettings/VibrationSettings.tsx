@@ -37,7 +37,13 @@ export const VibrationSettings = ({
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
   const idAlreadyExists = existingIds.some((id) => id !== effect.id && id === normalizedId);
-  const idError = idIsEmpty ? 'ID не может быть пустым' : idAlreadyExists ? 'Такой ID уже существует' : '';
+  let idError = '';
+
+  if (idIsEmpty) {
+    idError = 'ID не может быть пустым';
+  } else if (idAlreadyExists) {
+    idError = 'Такой ID уже существует';
+  }
   const canPreview = Boolean(isVibrationAvailable && vibrationIsEnabled && options.duration > 0);
 
   // A vibration started in the preview should stop when the settings dialog is closed.
