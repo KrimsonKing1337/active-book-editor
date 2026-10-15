@@ -15,6 +15,7 @@ export interface ProjectStorage {
   readBook(): Promise<JSONContent>;
   writeBook(document: JSONContent): Promise<void>;
   getBuildFiles(): AsyncIterable<ProjectBuildFile>;
+  importAudioFile(file: File): Promise<string>;
 }
 
 export type BookProject = {

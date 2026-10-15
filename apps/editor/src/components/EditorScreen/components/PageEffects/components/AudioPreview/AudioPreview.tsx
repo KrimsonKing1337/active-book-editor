@@ -1,24 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Audio } from 'activeBook-core/components/ProxyHooks';
-
 import { useAudioController } from 'activeBook-core/hooks/effects';
 
 import { useDispatch } from 'activeBook-core/store';
-
 import { mainActions } from 'activeBook-core/store/main';
+
 import type { BookProject } from '@project/@types';
 
-import type { AudioEffectDraft, AudioOptions } from '../../@types';
-
-type PreviewAudio = {
-  id: string;
-  src: string;
-  format?: string[];
-  options: AudioOptions;
-};
+import type { AudioEffectDraft } from '../../@types';
 
 type ResolvedSource = {
+  path: string;
+  project: BookProject | null;
   src: string;
   format?: string[];
 };
@@ -26,34 +20,35 @@ type ResolvedSource = {
 type AudioPreviewProps = {
   effect: AudioEffectDraft;
   project: BookProject | null;
+  onLoadingChange: (loading: boolean) => void;
 };
 
-type ScheduledRelease = {
-  id: string;
-  timeout: number;
+type PlayerProps = {
+  source: ResolvedSource;
+  delay: number;
+  stopBy: number;
+  relativeVolume: number;
+  screamer: boolean;
+  loopPreview: boolean;
+  onReady: () => void;
+  onError: (message: string) => void;
 };
 
 const resolveSource = async (source: string, project: BookProject | null): Promise<ResolvedSource> => {
   const path = source.trim();
 
-  if (!path) {
-    throw new Error('Укажите путь к аудиофайлу');
-  }
-
   if (/^(https?:|blob:|data:)/.test(path)) {
-    return {
-      src: path,
-    };
+    return { path: source, project, src: path };
   }
 
   if (!project) {
-    throw new Error('Сначала сохраните проект, чтобы загрузить файл из assets/');
+    throw new Error('Сначала сохрани проект, чтобы загрузить файл из assets/');
   }
 
   const assetPath = path.replace(/^\.\//, '').replace(/^\//, '');
 
   if (!assetPath.startsWith('assets/') || assetPath.split('/').includes('..')) {
-    throw new Error('Укажите файл из папки assets/, например assets/audio/rain.ogg');
+    throw new Error('Укажи путь внутри assets/, например assets/audio/rain.ogg');
   }
 
   for await (const file of project.storage.getBuildFiles()) {
@@ -61,10 +56,12 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
       const extension = assetPath.split('.').pop()?.toLowerCase();
 
       if (!extension) {
-        throw new Error('У аудиофайла должно быть расширение (например, .mp3 или .ogg)');
+        throw new Error('У аудиофайла должно быть расширение');
       }
 
       return {
+        path: source,
+        project,
         src: URL.createObjectURL(file.data),
         format: [extension],
       };
@@ -74,126 +71,246 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
   throw new Error('Аудиофайл не найден в папке проекта');
 };
 
-export const AudioPreview = ({ effect, project }: AudioPreviewProps) => {
-  const dispatch = useDispatch();
+const AudioPreviewPlayer = ({
+  source,
+  delay,
+  stopBy,
+  relativeVolume,
+  screamer,
+  loopPreview,
+  onReady,
+  onError,
+}: PlayerProps) => {
+  const [id] = useState(() => `editor-preview-${crypto.randomUUID()}`);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [isRequested, setIsRequested] = useState(false);
 
-  const [preview, setPreview] = useState<PreviewAudio | null>(null);
-  const [playRequested, setPlayRequested] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const scheduledReleaseRef = useRef<ScheduledRelease | null>(null);
-  const { audio, play, stop, remove } = useAudioController(preview?.id ?? '');
+  const { audio, play, stop, remove } = useAudioController(id);
 
   useEffect(() => {
-    if (!playRequested || !audio) {
+    return () => {
+      remove();
+    };
+  }, [remove]);
+
+  useEffect(() => {
+    if (!audio) {
       return;
     }
 
-    void play();
+    const handleReady = () => {
+      setIsReady(true);
+      onReady();
+    };
 
-    setPlayRequested(false);
-  }, [playRequested, audio, play]);
+    const handleError = () => {
+      setIsReady(false);
+      onError('Не удалось загрузить аудио в Howler');
+    };
 
-  useEffect(() => {
-    // StrictMode повторно запускает effects: не выгружаем звук между cleanup и следующим setup.
-    const scheduledRelease = scheduledReleaseRef.current;
+    const handlePlay = () => {
+      setIsPlaying(true);
+    };
 
-    if (scheduledRelease?.id === preview?.id) {
-      window.clearTimeout(scheduledRelease.timeout);
-      scheduledReleaseRef.current = null;
-    }
+    const handleStop = () => {
+      setIsPlaying(false);
+      setIsRequested(false);
+    };
 
-    if (!preview) {
-      return;
+    audio.howlInst.on('load', handleReady);
+    audio.howlInst.on('loaderror', handleError);
+    audio.howlInst.on('play', handlePlay);
+    audio.howlInst.on('end', handleStop);
+    audio.howlInst.on('stop', handleStop);
+    audio.howlInst.on('pause', handleStop);
+
+    if (audio.state() === 'loaded') {
+      handleReady();
     }
 
     return () => {
-      const releasedPreview = preview;
-      const releasedRemove = remove;
-
-      const timeout = window.setTimeout(() => {
-        releasedRemove();
-
-        if (releasedPreview.src.startsWith('blob:')) {
-          URL.revokeObjectURL(releasedPreview.src);
-        }
-
-        if (scheduledReleaseRef.current?.id === releasedPreview.id) {
-          scheduledReleaseRef.current = null;
-        }
-      }, 0);
-
-      scheduledReleaseRef.current = {
-        id: releasedPreview.id,
-        timeout,
-      };
+      audio.howlInst.off('load', handleReady);
+      audio.howlInst.off('loaderror', handleError);
+      audio.howlInst.off('play', handlePlay);
+      audio.howlInst.off('end', handleStop);
+      audio.howlInst.off('stop', handleStop);
+      audio.howlInst.off('pause', handleStop);
     };
-  }, [preview, remove]);
+  }, [audio, onReady, onError]);
 
-  const handlePreview = async () => {
-    if (preview) {
-      setPlayRequested(false);
-
-      void stop();
-      remove();
-
-      setPreview(null);
-
+  // Эти настройки можно оценить на слух без пересоздания Howler.
+  useEffect(() => {
+    if (!audio) {
       return;
     }
 
-    setLoading(true);
-    setError('');
+    audio.howlInst.loop(loopPreview);
+    audio.relativeVolume = relativeVolume;
 
-    try {
-      const source = await resolveSource(effect.options.src, project);
-
-      dispatch(mainActions.setIsAudioUnlocked(true));
-
-      setPreview({
-        id: `editor-preview-${crypto.randomUUID()}`,
-        src: source.src,
-        format: source.format,
-        options: { ...effect.options },
-      });
-
-      setPlayRequested(true);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Не удалось загрузить аудио';
-
-      setError(message);
-    } finally {
-      setLoading(false);
+    if (screamer) {
+      audio.howlInst.volume(1);
+    } else {
+      audio.volume(audio.getVolumeByType() / 100);
     }
-  };
+  }, [audio, loopPreview, relativeVolume, screamer]);
 
-  const buttonLabel = preview ? 'Остановить' : 'Прослушать';
+  const handlePlay = () => {
+    if (!audio || !isReady) {
+      return;
+    }
+
+    if (isPlaying || isRequested) {
+      // Отменяем отложенный play(), если пользователь нажал «Остановить» до его запуска.
+      if (audio.timers.delay) {
+        clearTimeout(audio.timers.delay);
+        audio.timers.delay = null;
+      }
+
+      if (audio.timers.stopBy) {
+        clearTimeout(audio.timers.stopBy);
+        audio.timers.stopBy = null;
+      }
+
+      void stop();
+      setIsRequested(false);
+      return;
+    }
+
+    setIsRequested(true);
+    void play();
+  };
 
   return (
     <div>
-      <button type="button" disabled={loading} onClick={handlePreview}>
-        {buttonLabel}
+      <Audio
+        id={id}
+        page={0}
+        src={source.src}
+        format={source.format}
+        type="sfx"
+        delay={delay}
+        stopBy={stopBy}
+        relativeVolume={relativeVolume}
+        loop={false}
+        screamer={false}
+        fadeOutWhenUnload={false}
+        playOnLoad={false}
+        lifecycle="manual"
+      />
+
+      <button type="button" disabled={!isReady} onClick={handlePlay}>
+        {isPlaying || isRequested ? 'Остановить' : 'Прослушать'}
       </button>
+    </div>
+  );
+};
 
-      {error && (
-        <small role="alert">
-          {error}
-        </small>
-      )}
+export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewProps) => {
+  const dispatch = useDispatch();
 
-      {preview && (
-        <Audio
-          key={preview.id}
-          id={preview.id}
-          page={0}
-          {...preview.options}
-          src={preview.src}
-          format={preview.format}
-          playOnLoad={false}
-          lifecycle="manual"
+  const [resolved, setResolved] = useState<ResolvedSource | null>(null);
+  const [readyKey, setReadyKey] = useState('');
+  const [error, setError] = useState('');
+  const [loopPreview, setLoopPreview] = useState(false);
+
+  const { src, delay, stopBy, relativeVolume, screamer } = effect.options;
+
+  useEffect(() => {
+    let cancelled = false;
+    let blobUrl: string | null = null;
+
+    setResolved(null);
+    setError('');
+
+    if (!src.trim()) {
+      return;
+    }
+
+    const prepare = async () => {
+      try {
+        const source = await resolveSource(src, project);
+
+        if (source.src.startsWith('blob:')) {
+          blobUrl = source.src;
+        }
+
+        if (cancelled) {
+          if (blobUrl) {
+            URL.revokeObjectURL(blobUrl);
+          }
+
+          return;
+        }
+
+        dispatch(mainActions.setIsAudioUnlocked(true));
+        setResolved(source);
+      } catch (reason) {
+        if (!cancelled) {
+          setError(reason instanceof Error ? reason.message : 'Не удалось прочитать аудиофайл');
+        }
+      }
+    };
+
+    void prepare();
+
+    return () => {
+      cancelled = true;
+
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [src, project, dispatch]);
+
+  const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
+  const playerKey = currentSource ? `${currentSource.src}:${delay}:${stopBy}` : '';
+  const isLoading = Boolean(src.trim()) && !error && (!currentSource || readyKey !== playerKey);
+
+  useEffect(() => {
+    onLoadingChange(isLoading);
+
+    return () => {
+      onLoadingChange(false);
+    };
+  }, [isLoading, onLoadingChange]);
+
+  const handleReady = useCallback((key: string) => {
+    setReadyKey(key);
+  }, []);
+
+  const handleError = useCallback((message: string) => {
+    setError(message);
+  }, []);
+
+  return (
+    <div>
+      {error && <small role="alert">{error}</small>}
+
+      {currentSource && (
+        <AudioPreviewPlayer
+          key={playerKey}
+          source={currentSource}
+          delay={delay}
+          stopBy={stopBy}
+          relativeVolume={relativeVolume}
+          screamer={screamer}
+          loopPreview={loopPreview}
+          onReady={() => handleReady(playerKey)}
+          onError={handleError}
         />
       )}
+
+      <label>
+        <input
+          type="checkbox"
+          checked={loopPreview}
+          onChange={(event) => setLoopPreview(event.target.checked)}
+        />
+        Зациклить только предпрослушивание
+      </label>
+
+      {!src.trim() && <small>Укажи путь к файлу или выбери аудио с компьютера.</small>}
     </div>
   );
 };

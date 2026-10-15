@@ -1,5 +1,5 @@
 import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
@@ -40,6 +40,7 @@ export const EffectsModal = ({
   onDeleteEffect,
 }: EffectsModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
@@ -88,6 +89,7 @@ export const EffectsModal = ({
         effect={selectedEffect}
         project={project}
         existingIds={existingIds}
+        onLoadingChange={setIsLoading}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}
@@ -112,6 +114,10 @@ export const EffectsModal = ({
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     event.preventDefault();
 
+    if (isLoading) {
+      return;
+    }
+
     if (isSettingsOpen) {
       onBack();
 
@@ -122,7 +128,7 @@ export const EffectsModal = ({
   };
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target !== event.currentTarget) {
+    if (isLoading || event.target !== event.currentTarget) {
       return;
     }
 
@@ -171,6 +177,13 @@ export const EffectsModal = ({
       <p className={styles.Notice}>
         Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».
       </p>
+
+      {isLoading && (
+        <div className={styles.LoadingOverlay} role="status" aria-live="polite">
+          <span className={styles.LoadingSpinner} aria-hidden="true" />
+          Загружаем аудио…
+        </div>
+      )}
     </dialog>,
     document.body,
   );
