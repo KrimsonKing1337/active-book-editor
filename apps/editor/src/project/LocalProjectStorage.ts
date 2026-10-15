@@ -163,15 +163,21 @@ export class LocalProjectStorage implements ProjectStorage {
     return fileHandle.getFile();
   }
 
-  async importAudioFile(file: File): Promise<string> {
+  async importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
     const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
       create: true,
     });
-    const audioDirectory = await assetsDirectory.getDirectoryHandle('audio', {
-      create: true,
-    });
 
-    const name = file.name.split(/[/\\]/).pop() || 'audio';
+    if (sourceHandle && assetsDirectory.resolve) {
+      const relativePath = await assetsDirectory.resolve(sourceHandle);
+
+      if (relativePath?.length) {
+        // A file already inside assets/ must not be copied, even when nested.
+        return [ASSETS_DIRECTORY_NAME, ...relativePath].join('/');
+      }
+    }
+
+    const name = file.name.split(/[/\\]/).pop() || 'asset';
     const dotIndex = name.lastIndexOf('.');
     const baseName = dotIndex > 0 ? name.slice(0, dotIndex) : name;
     const extension = dotIndex > 0 ? name.slice(dotIndex) : '';
@@ -179,10 +185,10 @@ export class LocalProjectStorage implements ProjectStorage {
     let candidate = name;
     let suffix = 1;
 
-    // Не перезаписываем уже импортированный файл с тем же именем.
+    // External files are copied into assets/ without overwriting existing names.
     while (true) {
       try {
-        await audioDirectory.getFileHandle(candidate);
+        await assetsDirectory.getFileHandle(candidate);
         candidate = `${baseName}-${suffix}${extension}`;
         suffix += 1;
       } catch (error) {
@@ -194,7 +200,7 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    const fileHandle = await audioDirectory.getFileHandle(candidate, { create: true });
+    const fileHandle = await assetsDirectory.getFileHandle(candidate, { create: true });
     const writable = await fileHandle.createWritable();
 
     try {
@@ -205,9 +211,8 @@ export class LocalProjectStorage implements ProjectStorage {
       throw error;
     }
 
-    return `assets/audio/${candidate}`;
+    return `${ASSETS_DIRECTORY_NAME}/${candidate}`;
   }
-
   async *getBuildFiles(): AsyncGenerator<ProjectBuildFile> {
     const bookFileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
     const bookFile = await bookFileHandle.getFile();

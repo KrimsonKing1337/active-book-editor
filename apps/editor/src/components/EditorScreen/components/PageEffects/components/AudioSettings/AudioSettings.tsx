@@ -3,6 +3,8 @@ import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Slider } from 'activeBook-core/components';
 
 import type { BookProject } from '@project/@types';
+import { isAbortError } from '@project/errors';
+import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
 
 import { AudioPreview } from '../AudioPreview';
 
@@ -138,8 +140,58 @@ export const AudioSettings = ({
     updateOption('src', event.target.value);
   };
 
-  const handleChooseFile = () => {
-    fileInputRef.current?.click();
+  const importAudioFile = async (file: File, fileHandle?: ProjectFileHandle) => {
+    if (!project) {
+      setImportError('Сначала создай или открой проект книги');
+      return;
+    }
+
+    setIsImporting(true);
+    setImportError('');
+
+    try {
+      const source = await project.storage.importAssetFile(file, fileHandle);
+      updateOption('src', source);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Не удалось импортировать аудиофайл');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleChooseFile = async () => {
+    const pickerWindow = window as FilePickerWindow;
+
+    if (typeof pickerWindow.showOpenFilePicker !== 'function') {
+      fileInputRef.current?.click();
+      return;
+    }
+
+    try {
+      const [fileHandle] = await pickerWindow.showOpenFilePicker({
+        id: 'active-book-audio',
+        types: [{
+          description: 'Аудиофайлы',
+          accept: {
+            'audio/*': ['.mp3', '.ogg', '.wav', '.flac', '.m4a', '.aac'],
+          },
+        }],
+      });
+
+      if (!fileHandle) {
+        return;
+      }
+
+      const file = await fileHandle.getFile();
+
+      await importAudioFile(file, fileHandle);
+    } catch (error) {
+      if (isAbortError(error)) {
+        return;
+      }
+
+      setImportError(error instanceof Error ? error.message : 'Не удалось выбрать аудиофайл');
+    }
   };
 
   const handleAudioFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -151,24 +203,8 @@ export const AudioSettings = ({
       return;
     }
 
-    if (!project) {
-      setImportError('Сначала создай или открой проект книги');
-      return;
-    }
-
-    setIsImporting(true);
-    setImportError('');
-
-    try {
-      const source = await project.storage.importAudioFile(file);
-      updateOption('src', source);
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Не удалось импортировать аудиофайл');
-    } finally {
-      setIsImporting(false);
-    }
+    await importAudioFile(file);
   };
-
   const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as AudioOptions['type'];
 
@@ -289,7 +325,7 @@ export const AudioSettings = ({
           </div>
 
           <small>
-            Выбранный файл копируется в assets/audio/ проекта, путь подставляется автоматически.
+            Файлы из assets/ используются без копирования. Внешние файлы копируются в корень assets/.
           </small>
 
           {importError && (
