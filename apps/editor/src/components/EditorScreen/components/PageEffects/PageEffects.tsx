@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
+import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
+import { normalizePageEffects } from '@active-book/book-builder/effects';
+
 import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from './@types';
@@ -12,6 +15,7 @@ import styles from './PageEffects.module.scss';
 
 const createAudioEffect = (): AudioEffectDraft => ({
   id: crypto.randomUUID(),
+  type: 'audio',
   slug: 'Новый звук',
   options: {
     src: '',
@@ -32,9 +36,21 @@ type PageEffectsProps = {
 };
 
 const getPageEffects = (editor: Editor | null): AudioEffectDraft[] => {
-  const effects: unknown = editor?.state.doc.attrs.pageEffects;
+  const pageEffects: unknown = editor?.state.doc.attrs.pageEffects;
 
-  return Array.isArray(effects) ? effects as AudioEffectDraft[] : [];
+  if (Array.isArray(pageEffects)) {
+    const normalizedPageEffects = normalizePageEffects(pageEffects);
+
+    return normalizedPageEffects.audio ?? [];
+  }
+
+  if (!pageEffects || typeof pageEffects !== 'object' || !('audio' in pageEffects)) {
+    return [];
+  }
+
+  const audio = (pageEffects as GroupedPageEffects).audio;
+
+  return Array.isArray(audio) ? audio : [];
 };
 
 export const PageEffects = ({ editor, project }: PageEffectsProps) => {
@@ -56,6 +72,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
     };
 
     editor.on('transaction', syncEffects);
+
     syncEffects();
 
     return () => {
@@ -68,13 +85,19 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       return;
     }
 
-    const event = editor.state.tr.setDocAttribute('pageEffects', nextEffects);
+    const currentPageEffects = normalizePageEffects(editor.state.doc.attrs.pageEffects);
 
-    editor.view.dispatch(event);
+    const groupedEffects: GroupedPageEffects = {
+      ...currentPageEffects,
+      audio: nextEffects,
+    };
+
+    const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
+
+    editor.view.dispatch(transaction);
   };
 
-  const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
-  const effectsCount = effects.length;
+  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId) ?? null;
 
   const openEffects = () => {
     setIsOpen(true);
@@ -163,9 +186,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       return;
     }
 
-    const effectId = selectedEffect.id;
-
-    const filteredEffects = effects.filter((cur) => cur.id !== effectId);
+    const filteredEffects = effects.filter((cur) => cur.id !== selectedEffect.id);
 
     writeEffects(filteredEffects);
 
@@ -191,7 +212,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
         </span>
 
         <span className={styles.Count}>
-          {effectsCount}
+          {effects.length}
         </span>
       </button>
 

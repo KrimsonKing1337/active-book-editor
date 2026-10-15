@@ -1,6 +1,6 @@
 import type { JSONContent } from '@tiptap/core';
 
-import type { ProjectDirectoryHandle } from './fileSystemAccess';
+import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
 
 export type ProjectBuildFile = {
   path: string;
@@ -16,7 +16,7 @@ export interface ProjectStorage {
   writeBook(document: JSONContent): Promise<void>;
   getBuildFiles(): AsyncIterable<ProjectBuildFile>;
   getAssetFile(path: string): Promise<File>;
-  importAudioFile(file: File): Promise<string>;
+  importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string>;
 }
 
 export type BookProject = {

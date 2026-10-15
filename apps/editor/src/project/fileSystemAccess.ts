@@ -35,6 +35,7 @@ export interface ProjectDirectoryHandle {
 
   getFileHandle(name: string, options?: FileHandleOptions): Promise<ProjectFileHandle>;
   getDirectoryHandle(name: string, options?: FileHandleOptions): Promise<ProjectDirectoryHandle>;
+  resolve?(possibleDescendant: ProjectFileSystemHandle): Promise<string[] | null>;
   values(): AsyncIterableIterator<ProjectFileSystemHandle>;
   queryPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
   requestPermission?(descriptor?: ProjectPermissionDescriptor): Promise<ProjectPermissionState>;
@@ -47,4 +48,16 @@ export type DirectoryPickerOptions = {
 
 export type DirectoryPickerWindow = Window & {
   showDirectoryPicker(options?: DirectoryPickerOptions): Promise<ProjectDirectoryHandle>;
+};
+
+export type FilePickerOptions = {
+  id?: string;
+  types?: {
+    description: string;
+    accept: Record<string, string[]>;
+  }[];
+};
+
+export type FilePickerWindow = Window & {
+  showOpenFilePicker(options?: FilePickerOptions): Promise<ProjectFileHandle[]>;
 };

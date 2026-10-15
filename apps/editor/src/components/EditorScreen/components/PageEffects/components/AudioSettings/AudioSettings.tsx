@@ -1,8 +1,12 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
+import type { AudioEffectOptions } from 'activeBook-core/@types';
 
 import type { BookProject } from '@project/@types';
+import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
+
+import { isAbortError } from '@project/errors';
 
 import { AudioPreview } from '../AudioPreview';
 
@@ -10,10 +14,13 @@ import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
 
+type NumericAudioOptionName = keyof Pick<AudioEffectOptions, 'relativeVolume' | 'delay' | 'stopBy'>;
+
 type AudioSettingsProps = {
   effect: AudioEffectDraft;
   project: BookProject | null;
   existingIds: string[];
+
   onLoadingChange: (loading: boolean) => void;
   onUpdate: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicate: () => void;
@@ -46,16 +53,15 @@ export const AudioSettings = ({
     return () => onLoadingChange(false);
   }, [onLoadingChange]);
 
-
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
 
-  const idAlreadyExists = existingIds.some((id) => {
-    if (id === effect.id) {
+  const idAlreadyExists = existingIds.some((idCur) => {
+    if (idCur === effect.id) {
       return false;
     }
 
-    return id === normalizedId;
+    return idCur === normalizedId;
   });
 
   let idError: string | null = null;
@@ -110,7 +116,7 @@ export const AudioSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const updateNumber = (name: 'relativeVolume' | 'delay' | 'stopBy', value: string) => {
+  const updateNumber = (name: NumericAudioOptionName, value: string) => {
     const number = Number(value);
 
     if (!Number.isFinite(number)) {
@@ -138,8 +144,70 @@ export const AudioSettings = ({
     updateOption('src', event.target.value);
   };
 
-  const handleChooseFile = () => {
-    fileInputRef.current?.click();
+  const importAudioFile = async (file: File, fileHandle?: ProjectFileHandle) => {
+    if (!project) {
+      setImportError('Сначала создайте или откройте проект книги');
+
+      return;
+    }
+
+    setIsImporting(true);
+    setImportError('');
+
+    try {
+      const source = await project.storage.importAssetFile(file, fileHandle);
+
+      updateOption('src', source);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Не удалось импортировать аудиофайл');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleChooseFile = async () => {
+    const pickerWindow = window as unknown as FilePickerWindow;
+
+    if (typeof pickerWindow.showOpenFilePicker !== 'function') {
+      fileInputRef.current?.click();
+
+      return;
+    }
+
+    try {
+      const [fileHandle] = await pickerWindow.showOpenFilePicker({
+        id: 'active-book-audio',
+        types: [{
+          description: 'Аудиофайлы',
+          accept: {
+            'audio/*': [
+              '.mp3',
+              '.ogg',
+              '.wav',
+              '.flac',
+              '.m4a',
+              '.aac',
+            ],
+          },
+        }],
+      });
+
+      if (!fileHandle) {
+        return;
+      }
+
+      const file = await fileHandle.getFile();
+
+      await importAudioFile(file, fileHandle);
+    } catch (error) {
+      if (isAbortError(error)) {
+        return;
+      }
+
+      const errorText = error instanceof Error ? error.message : 'Не удалось выбрать аудиофайл';
+
+      setImportError(errorText);
+    }
   };
 
   const handleAudioFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -151,24 +219,8 @@ export const AudioSettings = ({
       return;
     }
 
-    if (!project) {
-      setImportError('Сначала создай или открой проект книги');
-      return;
-    }
-
-    setIsImporting(true);
-    setImportError('');
-
-    try {
-      const source = await project.storage.importAudioFile(file);
-      updateOption('src', source);
-    } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'Не удалось импортировать аудиофайл');
-    } finally {
-      setIsImporting(false);
-    }
+    await importAudioFile(file);
   };
-
   const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as AudioOptions['type'];
 
@@ -219,7 +271,7 @@ export const AudioSettings = ({
           />
 
           <small>
-            Человекочитаемая подпись на плитке эффекта.
+            Человекочитаемая подпись на плитке эффекта
           </small>
         </label>
 
@@ -256,7 +308,7 @@ export const AudioSettings = ({
 
           {!idError && (
             <small>
-              ID должен быть уникальным. После изменения нажмите «Применить».
+              ID должен быть уникальным. После изменения нажмите «Применить»
             </small>
           )}
         </div>
@@ -271,7 +323,7 @@ export const AudioSettings = ({
               type="text"
               value={options.src}
               onChange={handleSourceChange}
-              placeholder="assets/audio/ambient.ogg"
+              placeholder="assets/ambient.mp3"
               spellCheck={false}
             />
 
@@ -289,7 +341,7 @@ export const AudioSettings = ({
           </div>
 
           <small>
-            Выбранный файл копируется в assets/audio/ проекта, путь подставляется автоматически.
+            Файлы из assets/ используются без копирования. Внешние файлы копируются в корень assets/
           </small>
 
           {importError && (
@@ -332,7 +384,8 @@ export const AudioSettings = ({
         </label>
 
         <small>
-          Автозапуск работает только в собранной книге (режим чтения). В редакторе доступно ручное прослушивание
+          Автозапуск работает только в собранной книге (режим чтения).
+          В редакторе доступно ручное прослушивание
         </small>
 
         <AudioPreview
@@ -362,10 +415,7 @@ export const AudioSettings = ({
             </strong>
           </span>
 
-          <Slider
-            value={options.relativeVolume}
-            onChange={handleVolumeChange}
-          />
+          <Slider value={options.relativeVolume} onChange={handleVolumeChange} />
         </div>
 
         <details className={styles.Advanced}>
@@ -426,7 +476,7 @@ export const AudioSettings = ({
               />
 
               <span>
-                Режим скримера (полная громкость)
+                Режим скримера (сверхгромкость)
               </span>
             </label>
           </div>

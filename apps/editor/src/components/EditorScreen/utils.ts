@@ -4,6 +4,8 @@ import StarterKit from '@tiptap/starter-kit';
 
 import type { Config } from 'activeBook-core/@types';
 
+import type { PageEffects } from '@active-book/book-builder/effects';
+
 import { CoreComponentNode } from '@components/CoreComponentNode';
 import { H1Node, H2Node, PNode } from '@components/EditableComponentNode';
 
@@ -28,7 +30,7 @@ export const ActiveBookDocument = Document.extend({
   addAttributes() {
     return {
       pageEffects: {
-        default: [],
+        default: { audio: [] } satisfies PageEffects,
       },
     };
   },

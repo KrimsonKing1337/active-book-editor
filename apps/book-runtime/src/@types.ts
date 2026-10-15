@@ -1,10 +1,4 @@
-import type { AudioEffectOptions } from 'activeBook-core/@types';
-
-export type BookAudioEffect = {
-  id: string;
-  slug: string;
-  options: Omit<AudioEffectOptions, 'id' | 'page'>;
-};
+import type { BuiltPageEffects } from '@active-book/book-builder/effects';
 
 export type BookMark = {
   type: string;
@@ -28,7 +22,7 @@ export type BookNode = {
 export type BookDocument = {
   type: string;
   attrs?: {
-    pageEffects?: BookAudioEffect[];
+    pageEffects?: BuiltPageEffects;
   };
   content?: BookNode[];
 };

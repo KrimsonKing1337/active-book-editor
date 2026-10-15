@@ -9,6 +9,8 @@ import {
 
 import type { Editor, JSONContent } from '@tiptap/core';
 
+import { normalizePageEffects } from '@active-book/book-builder/effects';
+
 import { buildProject } from '@build/buildProject';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
@@ -130,6 +132,13 @@ export const useAutosave = ({
     editor.commands.setContent(document, {
       emitUpdate: false,
     });
+
+    // setContent replaces child nodes, but does not restore root document attributes.
+    const pageEffects = normalizePageEffects(document.attrs?.pageEffects);
+    const transaction = editor.state.tr.setDocAttribute('pageEffects', pageEffects);
+
+    transaction.setMeta('preventUpdate', true);
+    editor.view.dispatch(transaction);
 
     setIsDirty(false);
     setShowSavedStatus(false);

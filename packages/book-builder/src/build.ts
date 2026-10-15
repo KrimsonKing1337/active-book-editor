@@ -4,6 +4,7 @@ import path from 'node:path';
 import { build } from 'vite';
 
 import { createViteConfig } from './vite.config.ts';
+import { compileBookDocument } from './effects.ts';
 
 type BuildBookParams = {
   projectRoot: string;
@@ -31,7 +32,11 @@ const prepareRuntime = async (
   const bookJsonSource = path.join(projectRoot, 'book.json');
   const bookJsonTarget = path.join(tempRoot, 'book.json');
 
-  await fs.copyFile(bookJsonSource, bookJsonTarget);
+  const bookJsonContent = await fs.readFile(bookJsonSource, 'utf8');
+  const projectDocument: unknown = JSON.parse(bookJsonContent);
+  const builtDocument = compileBookDocument(projectDocument);
+
+  await fs.writeFile(bookJsonTarget, `${JSON.stringify(builtDocument, null, 2)}\n`);
 
   const assetsSource = path.join(projectRoot, 'assets');
   const hasAssets = await getPathExists(assetsSource);
