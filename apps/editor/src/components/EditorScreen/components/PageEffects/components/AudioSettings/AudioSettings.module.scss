@@ -148,3 +148,39 @@
     }
   }
 }
+
+.SourceRow {
+  display: flex;
+  gap: 8px;
+
+  > input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    color: #f5f5f5;
+    background: #171717;
+    border: 1px solid #4b4b4b;
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  > button {
+    flex-shrink: 0;
+    padding: 8px 10px;
+    color: #f5f5f5;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+}
+
+.Field .ImportError {
+  color: #ffb3b3;
+}

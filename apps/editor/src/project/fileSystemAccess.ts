@@ -12,7 +12,7 @@ export type FileHandleOptions = {
 };
 
 export interface ProjectWritableFileStream {
-  write(data: string): Promise<void>;
+  write(data: string | Blob): Promise<void>;
   close(): Promise<void>;
   abort?(): Promise<void>;
 }

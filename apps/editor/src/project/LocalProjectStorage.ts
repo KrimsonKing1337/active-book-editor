@@ -139,6 +139,75 @@ export class LocalProjectStorage implements ProjectStorage {
     }
   }
 
+  async getAssetFile(path: string): Promise<File> {
+    const relativePath = path.replace(/^\.\//, '').replace(/^\//, '');
+    const parts = relativePath.split('/');
+
+    if (
+      parts[0] !== ASSETS_DIRECTORY_NAME
+      || parts.length < 2
+      || parts.some((part) => !part || part === '.' || part === '..')
+      || relativePath.includes('\\')
+    ) {
+      throw new Error('Путь должен указывать на файл внутри assets/');
+    }
+
+    let directory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+
+    for (const directoryName of parts.slice(1, -1)) {
+      directory = await directory.getDirectoryHandle(directoryName);
+    }
+
+    const fileHandle = await directory.getFileHandle(parts[parts.length - 1]);
+
+    return fileHandle.getFile();
+  }
+
+  async importAudioFile(file: File): Promise<string> {
+    const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
+      create: true,
+    });
+    const audioDirectory = await assetsDirectory.getDirectoryHandle('audio', {
+      create: true,
+    });
+
+    const name = file.name.split(/[/\\]/).pop() || 'audio';
+    const dotIndex = name.lastIndexOf('.');
+    const baseName = dotIndex > 0 ? name.slice(0, dotIndex) : name;
+    const extension = dotIndex > 0 ? name.slice(dotIndex) : '';
+
+    let candidate = name;
+    let suffix = 1;
+
+    // Не перезаписываем уже импортированный файл с тем же именем.
+    while (true) {
+      try {
+        await audioDirectory.getFileHandle(candidate);
+        candidate = `${baseName}-${suffix}${extension}`;
+        suffix += 1;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'NotFoundError') {
+          break;
+        }
+
+        throw error;
+      }
+    }
+
+    const fileHandle = await audioDirectory.getFileHandle(candidate, { create: true });
+    const writable = await fileHandle.createWritable();
+
+    try {
+      await writable.write(file);
+      await writable.close();
+    } catch (error) {
+      await writable.abort?.();
+      throw error;
+    }
+
+    return `assets/audio/${candidate}`;
+  }
+
   async *getBuildFiles(): AsyncGenerator<ProjectBuildFile> {
     const bookFileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME);
     const bookFile = await bookFileHandle.getFile();

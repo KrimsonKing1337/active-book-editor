@@ -169,14 +169,14 @@ export const EditorScreen = () => {
       </div>
 
       <main className={styles.Canvas}>
-        <PageEffects />
-
         <App
           config={editorConfig}
           appMode="editor"
           tableOfContents={[]}
           rangeEffects={[]}
         >
+          <PageEffects editor={editor} project={project} />
+
           <PageWrapper>
             <EditorContent editor={editor} />
           </PageWrapper>

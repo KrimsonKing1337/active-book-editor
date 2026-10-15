@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+import type { Editor } from '@tiptap/core';
+
+import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from './@types';
 
@@ -22,11 +26,52 @@ const createAudioEffect = (): AudioEffectDraft => ({
   },
 });
 
-export const PageEffects = () => {
-  // Пока это только UI-прототип: эффекты не сохраняются в проекте и не воспроизводятся.
-  const [effects, setEffects] = useState<AudioEffectDraft[]>([]);
+type PageEffectsProps = {
+  editor: Editor | null;
+  project: BookProject | null;
+};
+
+const getPageEffects = (editor: Editor | null): AudioEffectDraft[] => {
+  const effects: unknown = editor?.state.doc.attrs.pageEffects;
+
+  return Array.isArray(effects) ? effects as AudioEffectDraft[] : [];
+};
+
+export const PageEffects = ({ editor, project }: PageEffectsProps) => {
+  const [effects, setEffects] = useState<AudioEffectDraft[]>(() => getPageEffects(editor));
   const [isOpen, setIsOpen] = useState(false);
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!editor) {
+      setEffects([]);
+
+      return;
+    }
+
+    const syncEffects = () => {
+      const nextEffects = getPageEffects(editor);
+
+      setEffects((current) => current === nextEffects ? current : nextEffects);
+    };
+
+    editor.on('transaction', syncEffects);
+    syncEffects();
+
+    return () => {
+      editor.off('transaction', syncEffects);
+    };
+  }, [editor]);
+
+  const writeEffects = (nextEffects: AudioEffectDraft[]) => {
+    if (!editor || editor.isDestroyed) {
+      return;
+    }
+
+    const event = editor.state.tr.setDocAttribute('pageEffects', nextEffects);
+
+    editor.view.dispatch(event);
+  };
 
   const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
   const effectsCount = effects.length;
@@ -47,7 +92,8 @@ export const PageEffects = () => {
   const addAudio = () => {
     const effect = createAudioEffect();
 
-    setEffects((current) => [...current, effect]);
+    writeEffects([...effects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
@@ -72,15 +118,15 @@ export const PageEffects = () => {
       id: nextId,
     };
 
-    setEffects((current) => {
-      return current.map((effect) => {
-        if (effect.id !== previousId) {
-          return effect;
-        }
+    const nextEffects = effects.map((effectCur) => {
+      if (effectCur.id !== previousId) {
+        return effectCur;
+      }
 
-        return normalizedEffect;
-      });
+      return normalizedEffect;
     });
+
+    writeEffects(nextEffects);
 
     if (nextId !== previousId) {
       setSelectedEffectId(nextId);
@@ -96,10 +142,13 @@ export const PageEffects = () => {
       ...selectedEffect,
       id: crypto.randomUUID(),
       slug: `${selectedEffect.slug} (копия)`,
-      options: { ...selectedEffect.options },
+      options: {
+        ...selectedEffect.options,
+      },
     };
 
-    setEffects((current) => [...current, duplicate]);
+    writeEffects([...effects, duplicate]);
+
     setSelectedEffectId(duplicate.id);
   };
 
@@ -116,7 +165,10 @@ export const PageEffects = () => {
 
     const effectId = selectedEffect.id;
 
-    setEffects((current) => current.filter((effect) => effect.id !== effectId));
+    const filteredEffects = effects.filter((cur) => cur.id !== effectId);
+
+    writeEffects(filteredEffects);
+
     setSelectedEffectId(null);
   };
 
@@ -146,6 +198,7 @@ export const PageEffects = () => {
       {isOpen && (
         <EffectsModal
           effects={effects}
+          project={project}
           selectedEffect={selectedEffect}
           onClose={closeEffects}
           onBack={goBackToEffects}

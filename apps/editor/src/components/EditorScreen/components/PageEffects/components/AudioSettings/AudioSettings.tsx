@@ -1,6 +1,10 @@
-import { type ChangeEvent, useState } from 'react';
+import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
+
+import type { BookProject } from '@project/@types';
+
+import { AudioPreview } from '../AudioPreview';
 
 import type { AudioEffectDraft, AudioOptions } from '../../@types';
 
@@ -8,7 +12,9 @@ import styles from './AudioSettings.module.scss';
 
 type AudioSettingsProps = {
   effect: AudioEffectDraft;
+  project: BookProject | null;
   existingIds: string[];
+  onLoadingChange: (loading: boolean) => void;
   onUpdate: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -16,7 +22,9 @@ type AudioSettingsProps = {
 
 export const AudioSettings = ({
   effect,
+  project,
   existingIds,
+  onLoadingChange,
   onUpdate,
   onDuplicate,
   onDelete,
@@ -24,6 +32,20 @@ export const AudioSettings = ({
   const { options } = effect;
 
   const [idDraft, setIdDraft] = useState(effect.id);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isImporting, setIsImporting] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [importError, setImportError] = useState('');
+
+  useEffect(() => {
+    onLoadingChange(isImporting || isPreviewLoading);
+  }, [isImporting, isPreviewLoading, onLoadingChange]);
+
+  useEffect(() => {
+    return () => onLoadingChange(false);
+  }, [onLoadingChange]);
+
 
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
@@ -116,6 +138,37 @@ export const AudioSettings = ({
     updateOption('src', event.target.value);
   };
 
+  const handleChooseFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAudioFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = '';
+
+    if (!file) {
+      return;
+    }
+
+    if (!project) {
+      setImportError('Сначала создай или открой проект книги');
+      return;
+    }
+
+    setIsImporting(true);
+    setImportError('');
+
+    try {
+      const source = await project.storage.importAudioFile(file);
+      updateOption('src', source);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : 'Не удалось импортировать аудиофайл');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as AudioOptions['type'];
 
@@ -203,7 +256,7 @@ export const AudioSettings = ({
 
           {!idError && (
             <small>
-              ID должен быть уникальным. После изменения нажми «Применить».
+              ID должен быть уникальным. После изменения нажмите «Применить».
             </small>
           )}
         </div>
@@ -213,17 +266,37 @@ export const AudioSettings = ({
             Путь к аудиофайлу
           </span>
 
-          <input
-            type="text"
-            value={options.src}
-            onChange={handleSourceChange}
-            placeholder="assets/audio/ambient.ogg"
-            spellCheck={false}
-          />
+          <div className={styles.SourceRow}>
+            <input
+              type="text"
+              value={options.src}
+              onChange={handleSourceChange}
+              placeholder="assets/audio/ambient.ogg"
+              spellCheck={false}
+            />
+
+            <button type="button" onClick={handleChooseFile} disabled={!project}>
+              Выбрать файл
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.ogg,.wav,.flac,.m4a,.aac"
+              onChange={handleAudioFileChange}
+              hidden
+            />
+          </div>
 
           <small>
-            Пока можно указать путь вручную. Выбор файлов из проекта добавим позже.
+            Выбранный файл копируется в assets/audio/ проекта, путь подставляется автоматически.
           </small>
+
+          {importError && (
+            <small role="alert" className={styles.ImportError}>
+              {importError}
+            </small>
+          )}
         </label>
 
         <label className={styles.Field}>
@@ -257,6 +330,16 @@ export const AudioSettings = ({
             Воспроизводить при открытии страницы
           </span>
         </label>
+
+        <small>
+          Автозапуск работает только в собранной книге (режим чтения). В редакторе доступно ручное прослушивание
+        </small>
+
+        <AudioPreview
+          effect={effect}
+          project={project}
+          onLoadingChange={setIsPreviewLoading}
+        />
 
         <label className={styles.Checkbox}>
           <input

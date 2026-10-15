@@ -1,7 +1,9 @@
 import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';
+
+import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from '../../@types';
 
@@ -13,6 +15,7 @@ import styles from './EffectsModal.module.scss';
 
 type EffectsModalProps = {
   effects: AudioEffectDraft[];
+  project: BookProject | null;
   selectedEffect: AudioEffectDraft | null;
   onClose: () => void;
   onBack: () => void;
@@ -25,6 +28,7 @@ type EffectsModalProps = {
 
 export const EffectsModal = ({
   effects,
+  project,
   selectedEffect,
 
   onClose,
@@ -35,11 +39,14 @@ export const EffectsModal = ({
   onDuplicateEffect,
   onDeleteEffect,
 }: EffectsModalProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const mouseDownTargetRef = useRef<EventTarget | null>(null);
 
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
-  const existingIds = effects.map((effect) => effect.id);
+  const existingIds = effects.map((cur) => cur.id);
 
   let modalTitle = 'Эффекты страницы';
   let modalDescription = 'Невидимые эффекты, которые относятся к странице.';
@@ -76,13 +83,15 @@ export const EffectsModal = ({
 
   if (selectedEffect) {
     modalTitle = 'Настройки Audio';
-    modalDescription = 'Измените параметры звука. Пока изменения видны только в редакторе';
+    modalDescription = 'Параметры сохраняются в book.json и применяются в собранной книге';
 
     modalContent = (
       <AudioSettings
         key={selectedEffect.id}
         effect={selectedEffect}
+        project={project}
         existingIds={existingIds}
+        onLoadingChange={setIsLoading}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}
@@ -107,6 +116,10 @@ export const EffectsModal = ({
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     event.preventDefault();
 
+    if (isLoading) {
+      return;
+    }
+
     if (isSettingsOpen) {
       onBack();
 
@@ -116,8 +129,17 @@ export const EffectsModal = ({
     onClose();
   };
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target !== event.currentTarget) {
+  const handleBackdropMouseDown = (event: MouseEvent<HTMLDialogElement>) => {
+    mouseDownTargetRef.current = event.button === 0 ? event.target : null;
+  };
+
+  const handleBackdropMouseUp = (event: MouseEvent<HTMLDialogElement>) => {
+    const targetAndCurrentTargetAreEqual = event.target === event.currentTarget;
+    const startedOnBackdrop = mouseDownTargetRef.current === event.currentTarget;
+
+    mouseDownTargetRef.current = null;
+
+    if (isLoading || !startedOnBackdrop || !targetAndCurrentTargetAreEqual) {
       return;
     }
 
@@ -129,10 +151,12 @@ export const EffectsModal = ({
       ref={dialogRef}
       className={styles.Dialog}
       aria-label="Эффекты страницы"
+      aria-busy={isLoading}
       onCancel={handleCancel}
-      onClick={handleBackdropClick}
+      onMouseDown={handleBackdropMouseDown}
+      onMouseUp={handleBackdropMouseUp}
     >
-      <div className={styles.Header}>
+      <div className={styles.Header} inert={isLoading}>
         {isSettingsOpen && (
           <button className={styles.Back} type="button" onClick={onBack}>
             ← Назад
@@ -159,13 +183,20 @@ export const EffectsModal = ({
         </button>
       </div>
 
-      <div className={styles.Content}>
+      <div className={styles.Content} inert={isLoading}>
         {modalContent}
       </div>
 
-      <p className={styles.Notice}>
-        UI-прототип: эффекты не сохраняются в книге и пока не воспроизводятся.
+      <p className={styles.Notice} inert={isLoading}>
+        Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».
       </p>
+
+      {isLoading && (
+        <div className={styles.LoadingOverlay} role="status" aria-live="polite">
+          <span className={styles.LoadingSpinner} aria-hidden="true" />
+          Подготавливаем аудио...
+        </div>
+      )}
     </dialog>,
     document.body,
   );
