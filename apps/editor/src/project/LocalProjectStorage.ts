@@ -139,6 +139,30 @@ export class LocalProjectStorage implements ProjectStorage {
     }
   }
 
+  async getAssetFile(path: string): Promise<File> {
+    const relativePath = path.replace(/^\.\//, '').replace(/^\//, '');
+    const parts = relativePath.split('/');
+
+    if (
+      parts[0] !== ASSETS_DIRECTORY_NAME
+      || parts.length < 2
+      || parts.some((part) => !part || part === '.' || part === '..')
+      || relativePath.includes('\\')
+    ) {
+      throw new Error('Путь должен указывать на файл внутри assets/');
+    }
+
+    let directory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+
+    for (const directoryName of parts.slice(1, -1)) {
+      directory = await directory.getDirectoryHandle(directoryName);
+    }
+
+    const fileHandle = await directory.getFileHandle(parts[parts.length - 1]);
+
+    return fileHandle.getFile();
+  }
+
   async importAudioFile(file: File): Promise<string> {
     const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
       create: true,

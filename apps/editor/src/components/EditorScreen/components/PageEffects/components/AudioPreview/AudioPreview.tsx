@@ -53,29 +53,31 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
   }
 
   const assetPath = path.replace(/^\.\//, '').replace(/^\//, '');
+  const fileName = assetPath.split('/').pop() ?? '';
+  const extension = fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() : undefined;
 
-  if (!assetPath.startsWith('assets/') || assetPath.split('/').includes('..')) {
-    throw new Error('Укажи путь внутри assets/, например assets/audio/rain.ogg');
+  if (!extension) {
+    throw new Error('У аудиофайла должно быть расширение');
   }
 
-  for await (const file of project.storage.getBuildFiles()) {
-    if (file.path === assetPath) {
-      const extension = assetPath.split('.').pop()?.toLowerCase();
+  let file: File;
 
-      if (!extension) {
-        throw new Error('У аудиофайла должно быть расширение');
-      }
-
-      return {
-        path: source,
-        project,
-        src: URL.createObjectURL(file.data),
-        format: [extension],
-      };
+  try {
+    file = await project.storage.getAssetFile(assetPath);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'NotFoundError') {
+      throw new Error('Аудиофайл не найден в папке проекта');
     }
+
+    throw error;
   }
 
-  throw new Error('Аудиофайл не найден в папке проекта');
+  return {
+    path: source,
+    project,
+    src: URL.createObjectURL(file),
+    format: [extension],
+  };
 };
 
 const AudioPreviewPlayer = ({
