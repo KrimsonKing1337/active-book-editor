@@ -40,7 +40,11 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
   const path = source.trim();
 
   if (/^(https?:|blob:|data:)/.test(path)) {
-    return { path: source, project, src: path };
+    return {
+      path: source,
+      project,
+      src: path,
+    };
   }
 
   if (!project) {
@@ -103,11 +107,13 @@ const AudioPreviewPlayer = ({
 
     const handleReady = () => {
       setIsReady(true);
+
       onReady();
     };
 
     const handleError = () => {
       setIsReady(false);
+
       onError('Не удалось загрузить аудио в Howler');
     };
 
@@ -121,8 +127,10 @@ const AudioPreviewPlayer = ({
     };
 
     const handleEnd = () => {
-      // Howler отправляет end в конце КАЖДОГО повтора при loop=true.
-      if (!audio.howlInst.loop()) {
+      // Howler отправляет end в конце КАЖДОГО повтора при loop=true
+      const isLoop = audio.howlInst.loop();
+
+      if (!isLoop) {
         handleStop();
       }
     };
@@ -148,7 +156,7 @@ const AudioPreviewPlayer = ({
     };
   }, [audio, onReady, onError]);
 
-  // Эти настройки можно оценить на слух без пересоздания Howler.
+  // Эти настройки можно оценить на слух без пересоздания Howler
   useEffect(() => {
     if (!audio) {
       return;
@@ -170,25 +178,32 @@ const AudioPreviewPlayer = ({
     }
 
     if (isPlaying || isRequested) {
-      // Отменяем отложенный play(), если пользователь нажал «Остановить» до его запуска.
+      // Отменяем отложенный play(), если пользователь нажал «Остановить» до его запуска
       if (audio.timers.delay) {
         clearTimeout(audio.timers.delay);
+
         audio.timers.delay = null;
       }
 
       if (audio.timers.stopBy) {
         clearTimeout(audio.timers.stopBy);
+
         audio.timers.stopBy = null;
       }
 
       void stop();
+
       setIsRequested(false);
+
       return;
     }
 
     setIsRequested(true);
+
     void play();
   };
+
+  const playButtonLabel = isPlaying || isRequested ? 'Остановить' : 'Прослушать';
 
   return (
     <div className={styles.Player}>
@@ -208,8 +223,13 @@ const AudioPreviewPlayer = ({
         lifecycle="manual"
       />
 
-      <button className={styles.PlayButton} type="button" disabled={!isReady} onClick={handlePlay}>
-        {isPlaying || isRequested ? 'Остановить' : 'Прослушать'}
+      <button
+        className={styles.PlayButton}
+        type="button"
+        disabled={!isReady}
+        onClick={handlePlay}
+      >
+        {playButtonLabel}
       </button>
     </div>
   );
@@ -253,10 +273,13 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
         }
 
         dispatch(mainActions.setIsAudioUnlocked(true));
+
         setResolved(source);
       } catch (reason) {
         if (!cancelled) {
-          setError(reason instanceof Error ? reason.message : 'Не удалось прочитать аудиофайл');
+          const errorText = reason instanceof Error ? reason.message : 'Не удалось прочитать аудиофайл';
+
+          setError(errorText);
         }
       }
     };
@@ -272,9 +295,11 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
     };
   }, [src, project, dispatch]);
 
+  const trimmedSrc = src.trim();
+
   const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
   const playerKey = currentSource ? `${currentSource.src}:${delay}:${stopBy}` : '';
-  const isLoading = Boolean(src.trim()) && !error && (!currentSource || readyKey !== playerKey);
+  const isLoading = Boolean(trimmedSrc) && !error && (!currentSource || readyKey !== playerKey);
 
   useEffect(() => {
     onLoadingChange(isLoading);
@@ -290,7 +315,11 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
 
   return (
     <div className={styles.Preview}>
-      {error && <small className={styles.Error} role="alert">{error}</small>}
+      {error && (
+        <small className={styles.Error} role="alert">
+          {error}
+        </small>
+      )}
 
       {currentSource && (
         <AudioPreviewPlayer
@@ -315,9 +344,9 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
         Зациклить только предпрослушивание
       </label>
 
-      {!src.trim() && (
+      {!trimmedSrc && (
         <small className={styles.Hint}>
-          Укажи путь к файлу или выбери аудио с компьютера.
+          Укажите путь к файлу или выбери аудио с компьютера
         </small>
       )}
     </div>
