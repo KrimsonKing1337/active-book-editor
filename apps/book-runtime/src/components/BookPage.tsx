@@ -2,8 +2,6 @@ import { PageWrapper } from 'activeBook-core/components';
 
 import { Audio } from 'activeBook-core/components/ProxyHooks';
 
-import { EnableAudio } from './EnableAudio';
-
 import { renderNode } from '@utils/renderNode';
 
 import type { BookDocument } from '../@types';
@@ -18,15 +16,11 @@ export const BookPage = ({ document }: BookPageProps) => {
 
   return (
     <PageWrapper>
-      {audioEffects.length > 0 && (
-        <EnableAudio />
-      )}
-
       {audioEffects.map((effect) => (
         <Audio
           key={effect.id}
           id={effect.id}
-          page={0}
+          page={1}
           {...effect.options}
         />
       ))}
