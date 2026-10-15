@@ -40,6 +40,7 @@ export const EffectsModal = ({
   onDeleteEffect,
 }: EffectsModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const mouseDownTargetRef = useRef<EventTarget | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const isSettingsOpen = Boolean(selectedEffect);
@@ -127,8 +128,15 @@ export const EffectsModal = ({
     onClose();
   };
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (isLoading || event.target !== event.currentTarget) {
+  const handleBackdropMouseDown = (event: MouseEvent<HTMLDialogElement>) => {
+    mouseDownTargetRef.current = event.button === 0 ? event.target : null;
+  };
+
+  const handleBackdropMouseUp = (event: MouseEvent<HTMLDialogElement>) => {
+    const startedOnBackdrop = mouseDownTargetRef.current === event.currentTarget;
+    mouseDownTargetRef.current = null;
+
+    if (isLoading || !startedOnBackdrop || event.target !== event.currentTarget) {
       return;
     }
 
@@ -142,7 +150,8 @@ export const EffectsModal = ({
       aria-label="Эффекты страницы"
       aria-busy={isLoading}
       onCancel={handleCancel}
-      onClick={handleBackdropClick}
+      onMouseDown={handleBackdropMouseDown}
+      onMouseUp={handleBackdropMouseUp}
     >
       <div className={styles.Header} inert={isLoading}>
         {isSettingsOpen && (
