@@ -1,16 +1,22 @@
-import type { AudioEffectDraft } from '../../../../@types';
+import type { EditorEffectDraft } from '../../../../@types';
 
 import styles from '../../EffectsModal.module.scss';
 
 type EffectTileProps = {
-  effect: AudioEffectDraft;
+  effect: EditorEffectDraft;
   onSelect: (id: string) => void;
 };
 
 export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
-  const effectType = `Audio · ${effect.options.type}`;
   const effectSlug = effect.slug.trim() || 'Без названия';
-  const effectSource = effect.options.src || 'Файл не выбран';
+
+  let effectType = 'Vibration';
+  let effectDetails = `${effect.options.duration} мс`;
+
+  if (effect.type === 'audio') {
+    effectType = `Audio · ${effect.options.type}`;
+    effectDetails = effect.options.src || 'Файл не выбран';
+  }
 
   const handleSelect = () => {
     onSelect(effect.id);
@@ -27,7 +33,7 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
       </strong>
 
       <span className={styles.Source}>
-        {effectSource}
+        {effectDetails}
       </span>
 
       <code>
