@@ -10,6 +10,8 @@ import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from '../../@types';
 
+import styles from './AudioPreview.module.scss';
+
 type ResolvedSource = {
   path: string;
   project: BookProject | null;
@@ -189,7 +191,7 @@ const AudioPreviewPlayer = ({
   };
 
   return (
-    <div>
+    <div className={styles.Player}>
       <Audio
         id={id}
         page={0}
@@ -206,7 +208,7 @@ const AudioPreviewPlayer = ({
         lifecycle="manual"
       />
 
-      <button type="button" disabled={!isReady} onClick={handlePlay}>
+      <button className={styles.PlayButton} type="button" disabled={!isReady} onClick={handlePlay}>
         {isPlaying || isRequested ? 'Остановить' : 'Прослушать'}
       </button>
     </div>
@@ -287,8 +289,8 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
   }, []);
 
   return (
-    <div>
-      {error && <small role="alert">{error}</small>}
+    <div className={styles.Preview}>
+      {error && <small className={styles.Error} role="alert">{error}</small>}
 
       {currentSource && (
         <AudioPreviewPlayer
@@ -304,7 +306,7 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
         />
       )}
 
-      <label>
+      <label className={styles.LoopCheckbox}>
         <input
           type="checkbox"
           checked={loopPreview}
@@ -313,7 +315,11 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
         Зациклить только предпрослушивание
       </label>
 
-      {!src.trim() && <small>Укажи путь к файлу или выбери аудио с компьютера.</small>}
+      {!src.trim() && (
+        <small className={styles.Hint}>
+          Укажи путь к файлу или выбери аудио с компьютера.
+        </small>
+      )}
     </div>
   );
 };
