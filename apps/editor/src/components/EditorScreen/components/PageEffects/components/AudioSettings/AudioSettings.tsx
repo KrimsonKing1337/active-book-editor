@@ -307,7 +307,7 @@ export const AudioSettings = ({
               type="text"
               value={options.src}
               onChange={handleSourceChange}
-              placeholder="assets/audio/ambient.ogg"
+              placeholder="assets/ambient.ogg"
               spellCheck={false}
             />
 
