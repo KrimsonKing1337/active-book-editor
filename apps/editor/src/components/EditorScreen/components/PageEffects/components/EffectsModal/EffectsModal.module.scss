@@ -173,6 +173,12 @@
   font-size: 14px;
 }
 
+@keyframes AudioLoadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .LoadingSpinner {
   width: 28px;
   height: 28px;
@@ -180,8 +186,4 @@
   border-top-color: #fff;
   border-radius: 50%;
   animation: AudioLoadingSpin 0.7s linear infinite;
-}
-
-@keyframes AudioLoadingSpin {
-  to { transform: rotate(360deg); }
 }

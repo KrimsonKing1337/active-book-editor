@@ -39,13 +39,14 @@ export const EffectsModal = ({
   onDuplicateEffect,
   onDeleteEffect,
 }: EffectsModalProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const dialogRef = useRef<HTMLDialogElement>(null);
   const mouseDownTargetRef = useRef<EventTarget | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
-  const existingIds = effects.map((effect) => effect.id);
+  const existingIds = effects.map((cur) => cur.id);
 
   let modalTitle = 'Эффекты страницы';
   let modalDescription = 'Невидимые эффекты, которые относятся к странице.';
@@ -133,10 +134,12 @@ export const EffectsModal = ({
   };
 
   const handleBackdropMouseUp = (event: MouseEvent<HTMLDialogElement>) => {
+    const targetAndCurrentTargetAreEqual = event.target === event.currentTarget;
     const startedOnBackdrop = mouseDownTargetRef.current === event.currentTarget;
+
     mouseDownTargetRef.current = null;
 
-    if (isLoading || !startedOnBackdrop || event.target !== event.currentTarget) {
+    if (isLoading || !startedOnBackdrop || !targetAndCurrentTargetAreEqual) {
       return;
     }
 
@@ -191,7 +194,7 @@ export const EffectsModal = ({
       {isLoading && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
-          Подготавливаем аудио…
+          Подготавливаем аудио...
         </div>
       )}
     </dialog>,

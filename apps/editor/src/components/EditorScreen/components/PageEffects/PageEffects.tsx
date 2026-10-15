@@ -68,7 +68,9 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       return;
     }
 
-    editor.view.dispatch(editor.state.tr.setDocAttribute('pageEffects', nextEffects));
+    const event = editor.state.tr.setDocAttribute('pageEffects', nextEffects);
+
+    editor.view.dispatch(event);
   };
 
   const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
@@ -91,6 +93,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
     const effect = createAudioEffect();
 
     writeEffects([...effects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
@@ -115,9 +118,9 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       id: nextId,
     };
 
-    const nextEffects = effects.map((effect) => {
-      if (effect.id !== previousId) {
-        return effect;
+    const nextEffects = effects.map((effectCur) => {
+      if (effectCur.id !== previousId) {
+        return effectCur;
       }
 
       return normalizedEffect;
@@ -139,10 +142,13 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       ...selectedEffect,
       id: crypto.randomUUID(),
       slug: `${selectedEffect.slug} (копия)`,
-      options: { ...selectedEffect.options },
+      options: {
+        ...selectedEffect.options,
+      },
     };
 
     writeEffects([...effects, duplicate]);
+
     setSelectedEffectId(duplicate.id);
   };
 
@@ -159,7 +165,10 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
 
     const effectId = selectedEffect.id;
 
-    writeEffects(effects.filter((effect) => effect.id !== effectId));
+    const filteredEffects = effects.filter((cur) => cur.id !== effectId);
+
+    writeEffects(filteredEffects);
+
     setSelectedEffectId(null);
   };
 
