@@ -11,11 +11,13 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
   const effectSlug = effect.slug.trim() || 'Без названия';
 
   let effectType = 'Vibration';
-  let effectDetails = `${effect.options.duration} мс`;
+  let effectDetails = '';
 
   if (effect.type === 'audio') {
     effectType = `Audio · ${effect.options.type}`;
     effectDetails = effect.options.src || 'Файл не выбран';
+  } else {
+    effectDetails = `${effect.options.duration} мс`;
   }
 
   const handleSelect = () => {

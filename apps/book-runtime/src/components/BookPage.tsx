@@ -4,6 +4,8 @@ import { Audio } from 'activeBook-core/components/ProxyHooks';
 
 import { renderNode } from '@utils/renderNode';
 
+import { VibrationEffects } from './VibrationEffects';
+
 import type { BookDocument } from '../@types';
 
 type BookPageProps = {
@@ -16,6 +18,8 @@ export const BookPage = ({ document }: BookPageProps) => {
 
   return (
     <PageWrapper>
+      <VibrationEffects effects={document.attrs?.pageEffects?.vibration ?? []} />
+
       {audioEffects.map((effect) => (
         <Audio
           key={effect.id}
