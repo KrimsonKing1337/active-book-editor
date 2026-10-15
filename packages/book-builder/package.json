@@ -15,6 +15,7 @@
     "vite-tsconfig-paths": "^6.1.1"
   },
   "exports": {
-    "./plugin": "./src/plugin.ts"
+    "./plugin": "./src/plugin.ts",
+    "./effects": "./src/effects.ts"
   }
 }

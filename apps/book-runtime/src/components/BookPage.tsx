@@ -14,7 +14,7 @@ type BookPageProps = {
 
 export const BookPage = ({ document }: BookPageProps) => {
   const content = document.content ?? [];
-  const audioEffects = (document.attrs?.pageEffects ?? []).filter((effect) => effect.options.src?.trim());
+  const audioEffects = (document.attrs?.pageEffects?.audio ?? []).filter((effect) => effect.options.src?.trim());
 
   return (
     <PageWrapper>

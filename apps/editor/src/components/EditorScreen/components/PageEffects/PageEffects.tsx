@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
+import { normalizePageEffects } from '@active-book/book-builder/effects';
+import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
+
 import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from './@types';
@@ -12,6 +15,7 @@ import styles from './PageEffects.module.scss';
 
 const createAudioEffect = (): AudioEffectDraft => ({
   id: crypto.randomUUID(),
+  type: 'audio',
   slug: 'Новый звук',
   options: {
     src: '',
@@ -32,9 +36,19 @@ type PageEffectsProps = {
 };
 
 const getPageEffects = (editor: Editor | null): AudioEffectDraft[] => {
-  const effects: unknown = editor?.state.doc.attrs.pageEffects;
+  const pageEffects: unknown = editor?.state.doc.attrs.pageEffects;
 
-  return Array.isArray(effects) ? effects as AudioEffectDraft[] : [];
+  if (Array.isArray(pageEffects)) {
+    return normalizePageEffects(pageEffects).audio ?? [];
+  }
+
+  if (!pageEffects || typeof pageEffects !== 'object' || !('audio' in pageEffects)) {
+    return [];
+  }
+
+  const audio = (pageEffects as GroupedPageEffects).audio;
+
+  return Array.isArray(audio) ? audio : [];
 };
 
 export const PageEffects = ({ editor, project }: PageEffectsProps) => {
@@ -68,9 +82,15 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       return;
     }
 
-    const event = editor.state.tr.setDocAttribute('pageEffects', nextEffects);
+    const currentPageEffects = normalizePageEffects(editor.state.doc.attrs.pageEffects);
+    const groupedEffects: GroupedPageEffects = {
+      ...currentPageEffects,
+      audio: nextEffects,
+    };
 
-    editor.view.dispatch(event);
+    const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
+
+    editor.view.dispatch(transaction);
   };
 
   const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
