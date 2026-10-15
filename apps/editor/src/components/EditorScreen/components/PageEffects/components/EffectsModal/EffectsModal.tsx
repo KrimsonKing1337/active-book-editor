@@ -140,10 +140,11 @@ export const EffectsModal = ({
       ref={dialogRef}
       className={styles.Dialog}
       aria-label="Эффекты страницы"
+      aria-busy={isLoading}
       onCancel={handleCancel}
       onClick={handleBackdropClick}
     >
-      <div className={styles.Header}>
+      <div className={styles.Header} inert={isLoading}>
         {isSettingsOpen && (
           <button className={styles.Back} type="button" onClick={onBack}>
             ← Назад
@@ -170,18 +171,18 @@ export const EffectsModal = ({
         </button>
       </div>
 
-      <div className={styles.Content}>
+      <div className={styles.Content} inert={isLoading}>
         {modalContent}
       </div>
 
-      <p className={styles.Notice}>
+      <p className={styles.Notice} inert={isLoading}>
         Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».
       </p>
 
       {isLoading && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
-          Загружаем аудио…
+          Подготавливаем аудио…
         </div>
       )}
     </dialog>,

@@ -34,6 +34,7 @@ type PlayerProps = {
   loopPreview: boolean;
   onReady: () => void;
   onError: (message: string) => void;
+  onStartingChange: (starting: boolean) => void;
 };
 
 const resolveSource = async (source: string, project: BookProject | null): Promise<ResolvedSource> => {
@@ -86,19 +87,20 @@ const AudioPreviewPlayer = ({
   loopPreview,
   onReady,
   onError,
+  onStartingChange,
 }: PlayerProps) => {
   const [id] = useState(() => `editor-preview-${crypto.randomUUID()}`);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [isRequested, setIsRequested] = useState(false);
 
   const { audio, play, stop, remove } = useAudioController(id);
 
   useEffect(() => {
     return () => {
+      onStartingChange(false);
       remove();
     };
-  }, [remove]);
+  }, [onStartingChange, remove]);
 
   useEffect(() => {
     if (!audio) {
@@ -113,17 +115,23 @@ const AudioPreviewPlayer = ({
 
     const handleError = () => {
       setIsReady(false);
-
+      onStartingChange(false);
       onError('Не удалось загрузить аудио в Howler');
+    };
+
+    const handlePlayError = () => {
+      onStartingChange(false);
+      onError('Не удалось запустить воспроизведение');
     };
 
     const handlePlay = () => {
       setIsPlaying(true);
+      onStartingChange(false);
     };
 
     const handleStop = () => {
       setIsPlaying(false);
-      setIsRequested(false);
+      onStartingChange(false);
     };
 
     const handleEnd = () => {
@@ -137,6 +145,7 @@ const AudioPreviewPlayer = ({
 
     audio.howlInst.on('load', handleReady);
     audio.howlInst.on('loaderror', handleError);
+    audio.howlInst.on('playerror', handlePlayError);
     audio.howlInst.on('play', handlePlay);
     audio.howlInst.on('end', handleEnd);
     audio.howlInst.on('stop', handleStop);
@@ -149,12 +158,13 @@ const AudioPreviewPlayer = ({
     return () => {
       audio.howlInst.off('load', handleReady);
       audio.howlInst.off('loaderror', handleError);
+      audio.howlInst.off('playerror', handlePlayError);
       audio.howlInst.off('play', handlePlay);
       audio.howlInst.off('end', handleEnd);
       audio.howlInst.off('stop', handleStop);
       audio.howlInst.off('pause', handleStop);
     };
-  }, [audio, onReady, onError]);
+  }, [audio, onReady, onError, onStartingChange]);
 
   // Эти настройки можно оценить на слух без пересоздания Howler
   useEffect(() => {
@@ -177,33 +187,17 @@ const AudioPreviewPlayer = ({
       return;
     }
 
-    if (isPlaying || isRequested) {
-      // Отменяем отложенный play(), если пользователь нажал «Остановить» до его запуска
-      if (audio.timers.delay) {
-        clearTimeout(audio.timers.delay);
-
-        audio.timers.delay = null;
-      }
-
-      if (audio.timers.stopBy) {
-        clearTimeout(audio.timers.stopBy);
-
-        audio.timers.stopBy = null;
-      }
-
+    if (isPlaying) {
       void stop();
-
-      setIsRequested(false);
-
       return;
     }
 
-    setIsRequested(true);
-
+    // Пока Howler не отправил play, интерфейс заблокирован лоадером.
+    onStartingChange(true);
     void play();
   };
 
-  const playButtonLabel = isPlaying || isRequested ? 'Остановить' : 'Прослушать';
+  const playButtonLabel = isPlaying ? 'Остановить' : 'Прослушать';
 
   return (
     <div className={styles.Player}>
@@ -242,6 +236,7 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
   const [readyKey, setReadyKey] = useState('');
   const [error, setError] = useState('');
   const [loopPreview, setLoopPreview] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   const { src, delay, stopBy, relativeVolume, screamer } = effect.options;
 
@@ -299,7 +294,8 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
 
   const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
   const playerKey = currentSource ? `${currentSource.src}:${delay}:${stopBy}` : '';
-  const isLoading = Boolean(trimmedSrc) && !error && (!currentSource || readyKey !== playerKey);
+  const isPreparing = Boolean(trimmedSrc) && !error && (!currentSource || readyKey !== playerKey);
+  const isLoading = isPreparing || isStarting;
 
   useEffect(() => {
     onLoadingChange(isLoading);
@@ -332,6 +328,7 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
           loopPreview={loopPreview}
           onReady={handleReady}
           onError={handleError}
+          onStartingChange={setIsStarting}
         />
       )}
 
