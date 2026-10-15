@@ -118,10 +118,17 @@ const AudioPreviewPlayer = ({
       setIsRequested(false);
     };
 
+    const handleEnd = () => {
+      // Howler отправляет end в конце КАЖДОГО повтора при loop=true.
+      if (!audio.howlInst.loop()) {
+        handleStop();
+      }
+    };
+
     audio.howlInst.on('load', handleReady);
     audio.howlInst.on('loaderror', handleError);
     audio.howlInst.on('play', handlePlay);
-    audio.howlInst.on('end', handleStop);
+    audio.howlInst.on('end', handleEnd);
     audio.howlInst.on('stop', handleStop);
     audio.howlInst.on('pause', handleStop);
 
@@ -133,7 +140,7 @@ const AudioPreviewPlayer = ({
       audio.howlInst.off('load', handleReady);
       audio.howlInst.off('loaderror', handleError);
       audio.howlInst.off('play', handlePlay);
-      audio.howlInst.off('end', handleStop);
+      audio.howlInst.off('end', handleEnd);
       audio.howlInst.off('stop', handleStop);
       audio.howlInst.off('pause', handleStop);
     };
@@ -269,15 +276,11 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
 
   useEffect(() => {
     onLoadingChange(isLoading);
-
-    return () => {
-      onLoadingChange(false);
-    };
   }, [isLoading, onLoadingChange]);
 
-  const handleReady = useCallback((key: string) => {
-    setReadyKey(key);
-  }, []);
+  const handleReady = useCallback(() => {
+    setReadyKey(playerKey);
+  }, [playerKey]);
 
   const handleError = useCallback((message: string) => {
     setError(message);
@@ -296,7 +299,7 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
           relativeVolume={relativeVolume}
           screamer={screamer}
           loopPreview={loopPreview}
-          onReady={() => handleReady(playerKey)}
+          onReady={handleReady}
           onError={handleError}
         />
       )}
