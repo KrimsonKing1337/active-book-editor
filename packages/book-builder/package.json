@@ -16,6 +16,6 @@
   },
   "exports": {
     "./plugin": "./src/plugin.ts",
-    "./effects": "./src/effects.ts"
+    "./effects": "./src/effects/index.ts"
   }
 }

@@ -1,4 +1,4 @@
-import type { BuiltPageEffects } from '@active-book/book-builder/effects';
+import type { BuiltPageEffects } from '@root/packages/book-builder/src/effects';
 
 export type BookMark = {
   type: string;
