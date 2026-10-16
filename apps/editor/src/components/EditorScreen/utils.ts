@@ -30,7 +30,7 @@ export const ActiveBookDocument = Document.extend({
   addAttributes() {
     return {
       pageEffects: {
-        default: { audio: [] } satisfies PageEffects,
+        default: { audio: [], vibration: [] } satisfies PageEffects,
       },
     };
   },
