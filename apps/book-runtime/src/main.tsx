@@ -8,8 +8,7 @@ import { StoreProvider } from 'activeBook-core/store';
 import type { Config } from 'activeBook-core/@types';
 import 'activeBook-core/styles/styles.scss';
 
-import { BookPage } from '@components/BookPage';
-import { StartReading } from '@components/StartReading';
+import { BookPage, StartReading } from '@components';
 
 import './styles.scss';
 
