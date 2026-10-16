@@ -2,20 +2,23 @@ import ReactDOM from 'react-dom/client';
 
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
-import { AppWrapper } from 'activeBook-core/components';
+import type { Config } from 'activeBook-core/@types';
 import { Page0 } from 'activeBook-core/pages/Page0';
 import { StoreProvider } from 'activeBook-core/store';
-import type { Config } from 'activeBook-core/@types';
+import { AppWrapper } from 'activeBook-core/components';
+
 import 'activeBook-core/styles/styles.scss';
+
+import type { BookDocument } from '@types';
 
 import { BookPage, StartReading } from '@components';
 
+import bookDocumentDefault from '../book.json';
+
 import './styles.scss';
 
-import bookDocumentDefault from '../book.json';
-import type { BookDocument } from './@types';
-
 // Page0 uses a silent sound to unlock browser audio after the reader's first interaction.
+// eslint-disable-next-line max-len
 const AUDIO_UNLOCK_SRC = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
 
 const config: Config = {
