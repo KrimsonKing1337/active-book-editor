@@ -5,23 +5,25 @@ import { createPortal } from 'react-dom';
 
 import type { BookProject } from '@project/@types';
 
-import type { AudioEffectDraft } from '../../@types';
+import type { EditorEffectDraft } from '../../@types';
 
 import { AudioSettings } from '../AudioSettings';
+import { VibrationSettings } from '../VibrationSettings';
 
 import { EffectTile } from './components';
 
 import styles from './EffectsModal.module.scss';
 
 type EffectsModalProps = {
-  effects: AudioEffectDraft[];
+  effects: EditorEffectDraft[];
   project: BookProject | null;
-  selectedEffect: AudioEffectDraft | null;
+  selectedEffect: EditorEffectDraft | null;
   onClose: () => void;
   onBack: () => void;
   onAddAudio: () => void;
+  onAddVibration: () => void;
   onSelectEffect: (id: string) => void;
-  onUpdateEffect: (previousId: string, effect: AudioEffectDraft) => void;
+  onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;
   onDeleteEffect: () => void;
 };
@@ -34,6 +36,7 @@ export const EffectsModal = ({
   onClose,
   onBack,
   onAddAudio,
+  onAddVibration,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
@@ -46,29 +49,28 @@ export const EffectsModal = ({
 
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
-  const existingIds = effects.map((cur) => cur.id);
+  const existingIds = effects.map((effect) => effect.id);
 
   let modalTitle = 'Эффекты страницы';
   let modalDescription = 'Невидимые эффекты, которые относятся к странице.';
+  let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги.';
 
   let modalContent: ReactNode = (
     <>
       {isEffectsEmpty && (
         <div className={styles.Empty}>
-          Пока нет эффектов. Добавьте Audio, чтобы попробовать настройку звука
+          Пока нет эффектов. Добавьте Audio или Vibration
         </div>
       )}
 
       <div className={styles.Tiles}>
-        {effects.map((effectCur) => {
-          return (
-            <EffectTile
-              key={effectCur.id}
-              effect={effectCur}
-              onSelect={onSelectEffect}
-            />
-          );
-        })}
+        {effects.map((effect) => (
+          <EffectTile
+            key={effect.id}
+            effect={effect}
+            onSelect={onSelectEffect}
+          />
+        ))}
 
         <button className={styles.AddTile} type="button" onClick={onAddAudio}>
           <span className={styles.AddIcon} aria-hidden="true">
@@ -77,13 +79,22 @@ export const EffectsModal = ({
 
           Добавить Audio
         </button>
+
+        <button className={styles.AddTile} type="button" onClick={onAddVibration}>
+          <span className={styles.AddIcon} aria-hidden="true">
+            +
+          </span>
+
+          Добавить Vibration
+        </button>
       </div>
     </>
   );
 
-  if (selectedEffect) {
+  if (selectedEffect?.type === 'audio') {
     modalTitle = 'Настройки Audio';
     modalDescription = 'Параметры сохраняются в book.json и применяются в собранной книге';
+    notice = 'Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».';
 
     modalContent = (
       <AudioSettings
@@ -92,6 +103,21 @@ export const EffectsModal = ({
         project={project}
         existingIds={existingIds}
         onLoadingChange={setIsLoading}
+        onUpdate={onUpdateEffect}
+        onDuplicate={onDuplicateEffect}
+        onDelete={onDeleteEffect}
+      />
+    );
+  } else if (selectedEffect?.type === 'vibration') {
+    modalTitle = 'Настройки Vibration';
+    modalDescription = 'Вибрация запускается при открытии страницы на поддерживаемом устройстве';
+    notice = 'Для тестирования вибрации в редакторе нажмите «Проверить».';
+
+    modalContent = (
+      <VibrationSettings
+        key={selectedEffect.id}
+        effect={selectedEffect}
+        existingIds={existingIds}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}
@@ -188,12 +214,13 @@ export const EffectsModal = ({
       </div>
 
       <p className={styles.Notice} inert={isLoading}>
-        Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».
+        {notice}
       </p>
 
       {isLoading && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
+
           Подготавливаем аудио...
         </div>
       )}
