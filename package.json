@@ -16,7 +16,7 @@
     "lint:fix": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.7.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.8.tgz",
     "react-router-dom": "^7.10.1",
     "sass": "^1.96.0"
   },

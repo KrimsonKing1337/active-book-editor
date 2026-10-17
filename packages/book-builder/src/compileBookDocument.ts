@@ -1,6 +1,5 @@
 import type { BuiltAudioEffect, BuiltVibrationEffect } from './effects/index.ts';
-import { normalizePageEffects } from './effects/index.ts';
-import { isRecord } from './effects/utils.ts';
+import { normalizePageEffects, isRecord } from './effects/utils.ts';
 
 export const compileBookDocument = (document: unknown): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
