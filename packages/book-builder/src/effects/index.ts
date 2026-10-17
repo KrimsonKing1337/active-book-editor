@@ -1,3 +1,3 @@
-export * from './@types.ts';
-export * from './audio.ts';
-export * from './vibration.ts';
+export * from './@types';
+export * from './audio';
+export * from './vibration';

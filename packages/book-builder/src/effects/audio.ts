@@ -1,6 +1,6 @@
-import type { AudioEffectOptions } from 'activeBook-core/@types.d.ts';
+import type { AudioEffectOptions } from 'activeBook-core/@types';
 
-import { isRecord } from './utils.ts';
+import { isRecord } from './utils';
 
 export type AudioOptions = Required<Pick<
   AudioEffectOptions,

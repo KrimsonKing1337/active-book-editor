@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { normalizeAudioEffects } from './audio.ts';
+import { normalizeAudioEffects } from './audio';
 
 const audioOptions = {
   src: 'assets/audio/ambient.ogg',
