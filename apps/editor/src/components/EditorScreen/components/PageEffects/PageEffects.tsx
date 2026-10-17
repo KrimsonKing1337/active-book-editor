@@ -49,7 +49,8 @@ const createFlashlightEffect = (): FlashlightEffectDraft => ({
     duration: 200,
     delay: 0,
     playOnLoad: true,
-    sideShadow: true,
+    withSideShadow: true,
+    speed: 150,
   },
 });
 

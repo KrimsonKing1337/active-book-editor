@@ -20,7 +20,7 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
     effectDetails = `${effect.options.duration} мс`;
   } else {
     effectType = 'Flashlight';
-    effectDetails = `${effect.options.duration} мс · sideShadow: ${effect.options.sideShadow ? 'да' : 'нет'}`;
+    effectDetails = `${effect.options.duration} мс · sideShadow: ${effect.options.withSideShadow ? 'да' : 'нет'}`;
   }
 
   const handleSelect = () => {

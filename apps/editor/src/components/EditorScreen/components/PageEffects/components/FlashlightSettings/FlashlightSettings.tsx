@@ -9,7 +9,7 @@ import type { FlashlightEffectDraft, FlashlightOptions } from '../../@types';
 
 import styles from './FlashlightSettings.module.scss';
 
-type NumericFlashlightOptionName = keyof Pick<FlashlightOptions, 'duration' | 'delay'>;
+type NumericFlashlightOptionName = keyof Pick<FlashlightOptions, 'duration' | 'delay' | 'speed'>;
 
 type FlashlightSettingsProps = {
   effect: FlashlightEffectDraft;
@@ -29,7 +29,7 @@ export const FlashlightSettings = ({
   const { options } = effect;
 
   const [idDraft, setIdDraft] = useState(effect.id);
-  const { flashlightOn } = useFlashlight(options.sideShadow);
+  const { flashlightOn } = useFlashlight({ withSideShadow: options.withSideShadow, speed: options.speed });
 
   const isFlashlightAvailable = useSelector(mainSelectors.isFlashlightAvailable);
   const flashlightEnabled = useSelector(configSelectors.flashlight);
@@ -47,7 +47,7 @@ export const FlashlightSettings = ({
   }
 
   const canUseTorch = flashlightEnabled && isFlashlightAvailable !== false;
-  const canPreview = options.duration > 0 && (canUseTorch || options.sideShadow);
+  const canPreview = options.duration > 0 && (canUseTorch || options.withSideShadow);
 
   const updateId = () => {
     if (idError || idDraft === effect.id) {
@@ -76,6 +76,8 @@ export const FlashlightSettings = ({
 
     if (name === 'duration') {
       normalized = Math.min(10000, normalized);
+    } else if (name === 'speed') {
+      normalized = Math.max(1, normalized);
     }
 
     updateOption(name, normalized);
@@ -97,12 +99,16 @@ export const FlashlightSettings = ({
     updateNumber('delay', event.target.value);
   };
 
+  const handleSpeedChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateNumber('speed', event.target.value);
+  };
+
   const handlePlayOnLoadChange = (event: ChangeEvent<HTMLInputElement>) => {
     updateOption('playOnLoad', event.target.checked);
   };
 
   const handleSideShadowChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateOption('sideShadow', event.target.checked);
+    updateOption('withSideShadow', event.target.checked);
   };
 
   const handlePreview = () => {
@@ -222,7 +228,7 @@ export const FlashlightSettings = ({
         <label className={styles.Checkbox}>
           <input
             type="checkbox"
-            checked={options.sideShadow}
+            checked={options.withSideShadow}
             onChange={handleSideShadowChange}
           />
 
@@ -230,6 +236,22 @@ export const FlashlightSettings = ({
             Дублировать вспышку экранной подсветкой (sideShadow)
           </span>
         </label>
+
+        {options.withSideShadow && (
+          <label className={styles.Field}>
+            <span>
+              Период мерцания sideShadow (мс)
+            </span>
+
+            <input
+              type="number"
+              min={1}
+              step={10}
+              value={options.speed}
+              onChange={handleSpeedChange}
+            />
+          </label>
+        )}
 
         <div className={styles.Preview}>
           <button type="button" disabled={!canPreview} onClick={handlePreview}>

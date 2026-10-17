@@ -25,7 +25,8 @@ const flashlightOptions = {
   duration: 200,
   delay: 0,
   playOnLoad: true,
-  sideShadow: true,
+  withSideShadow: true,
+  speed: 150,
 };
 
 test('compiles audio, vibration and flashlight and strips editor-only slug', () => {

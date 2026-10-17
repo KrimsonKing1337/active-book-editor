@@ -7,7 +7,8 @@ const options = {
   duration: 200,
   delay: 300,
   playOnLoad: true,
-  sideShadow: true,
+  withSideShadow: true,
+  speed: 150,
 };
 
 test('normalizes grouped flashlight effects', () => {
@@ -25,7 +26,8 @@ test('rejects invalid flashlight effects', () => {
   const invalid = [
     { id: 'bad-duration', type: 'flashlight', options: { ...options, duration: -1 } },
     { id: 'bad-delay', type: 'flashlight', options: { ...options, delay: -1 } },
-    { id: 'bad-shadow', type: 'flashlight', options: { ...options, sideShadow: 'yes' } },
+    { id: 'bad-shadow', type: 'flashlight', options: { ...options, withSideShadow: 'yes' } },
+    { id: 'bad-speed', type: 'flashlight', options: { ...options, speed: 0 } },
     { id: '', type: 'flashlight', options },
   ];
 
