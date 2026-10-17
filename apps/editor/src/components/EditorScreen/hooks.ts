@@ -9,7 +9,7 @@ import {
 
 import type { Editor, JSONContent } from '@tiptap/core';
 
-import { normalizePageEffects } from '@active-book/book-builder/effects';
+import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import { buildProject } from '@build/buildProject';
 

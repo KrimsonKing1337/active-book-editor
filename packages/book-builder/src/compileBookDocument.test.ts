@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { compileBookDocument } from './compileBookDocument.ts';
+import { compileBookDocument } from './compileBookDocument';
 
 const audioOptions = {
   src: 'assets/rain.ogg',

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildBook } from './build.js';
+import { buildBook } from './build';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

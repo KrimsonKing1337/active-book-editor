@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { normalizeVibrationEffects } from './vibration.ts';
+import { normalizeVibrationEffects } from './vibration';
 
 const options = {
   duration: 250,

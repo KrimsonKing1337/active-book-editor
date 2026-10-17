@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Editor } from '@tiptap/core';
 
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
-import { normalizePageEffects } from '@active-book/book-builder/effects';
+import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type { BookProject } from '@project/@types';
 

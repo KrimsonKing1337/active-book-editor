@@ -1,7 +1,7 @@
-import type { PageEffects } from './@types.ts';
+import type { PageEffects } from './@types';
 
-import { normalizeAudioEffects } from './audio.ts';
-import { normalizeVibrationEffects } from './vibration.ts';
+import { normalizeAudioEffects } from './audio';
+import { normalizeVibrationEffects } from './vibration';
 
 export const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
