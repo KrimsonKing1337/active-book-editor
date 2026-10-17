@@ -3,7 +3,7 @@ import { type ChangeEvent, useEffect, useState } from 'react';
 import { useSelector } from 'activeBook-core/store';
 import { configSelectors } from 'activeBook-core/store/config';
 import { mainSelectors } from 'activeBook-core/store/main';
-import { useVibration } from 'activeBook-core/hooks/effects/vibration';
+import { useVibration } from 'activeBook-core/hooks/effects';
 
 import type { VibrationEffectDraft, VibrationOptions } from '../../@types';
 
