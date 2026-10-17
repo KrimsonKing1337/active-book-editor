@@ -16,8 +16,11 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
   if (effect.type === 'audio') {
     effectType = `Audio · ${effect.options.type}`;
     effectDetails = effect.options.src || 'Файл не выбран';
-  } else {
+  } else if (effect.type === 'vibration') {
     effectDetails = `${effect.options.duration} мс`;
+  } else {
+    effectType = 'Flashlight';
+    effectDetails = `${effect.options.duration} мс · sideShadow: ${effect.options.sideShadow ? 'да' : 'нет'}`;
   }
 
   const handleSelect = () => {

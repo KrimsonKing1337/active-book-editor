@@ -9,6 +9,7 @@ import type { EditorEffectDraft } from '../../@types';
 
 import { AudioSettings } from '../AudioSettings';
 import { VibrationSettings } from '../VibrationSettings';
+import { FlashlightSettings } from '../FlashlightSettings';
 
 import { EffectTile } from './components';
 
@@ -22,6 +23,7 @@ type EffectsModalProps = {
   onBack: () => void;
   onAddAudio: () => void;
   onAddVibration: () => void;
+  onAddFlashlight: () => void;
   onSelectEffect: (id: string) => void;
   onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;
@@ -37,6 +39,7 @@ export const EffectsModal = ({
   onBack,
   onAddAudio,
   onAddVibration,
+  onAddFlashlight,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
@@ -59,7 +62,7 @@ export const EffectsModal = ({
     <>
       {isEffectsEmpty && (
         <div className={styles.Empty}>
-          Пока нет эффектов. Добавьте Audio или Vibration
+          Пока нет эффектов. Добавьте Audio, Vibration или Flashlight
         </div>
       )}
 
@@ -86,6 +89,14 @@ export const EffectsModal = ({
           </span>
 
           Добавить Vibration
+        </button>
+
+        <button className={styles.AddTile} type="button" onClick={onAddFlashlight}>
+          <span className={styles.AddIcon} aria-hidden="true">
+            +
+          </span>
+
+          Добавить Flashlight
         </button>
       </div>
     </>
@@ -115,6 +126,21 @@ export const EffectsModal = ({
 
     modalContent = (
       <VibrationSettings
+        key={selectedEffect.id}
+        effect={selectedEffect}
+        existingIds={existingIds}
+        onUpdate={onUpdateEffect}
+        onDuplicate={onDuplicateEffect}
+        onDelete={onDeleteEffect}
+      />
+    );
+  } else if (selectedEffect?.type === 'flashlight') {
+    modalTitle = 'Настройки Flashlight';
+    modalDescription = 'Вспышка доступна на поддерживаемых устройствах; sideShadow имитирует её на экране';
+    notice = 'Для тестирования вспышки в редакторе нажмите «Проверить».';
+
+    modalContent = (
+      <FlashlightSettings
         key={selectedEffect.id}
         effect={selectedEffect}
         existingIds={existingIds}

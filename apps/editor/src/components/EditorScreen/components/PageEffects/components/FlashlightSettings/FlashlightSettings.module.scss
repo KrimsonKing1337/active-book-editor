@@ -1,0 +1,118 @@
+.FlashlightSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.Fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  > span,
+  > label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  > input {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    color: #f5f5f5;
+    background: #171717;
+    border: 1px solid #4b4b4b;
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  small {
+    color: #a8a8a8;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .Error {
+    color: #ffb3b3;
+  }
+}
+
+.IdRow {
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+    padding: 8px 10px;
+    color: #f5f5f5;
+    background: #171717;
+    border: 1px solid #4b4b4b;
+    border-radius: 6px;
+    font: inherit;
+  }
+}
+
+.Checkbox {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.Preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  small {
+    color: #a8a8a8;
+    font-size: 12px;
+  }
+}
+
+.Actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #404040;
+}
+
+.IdRow button,
+.Preview button,
+.Actions button {
+  padding: 9px 12px;
+  color: #f5f5f5;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &:not(:disabled):hover {
+    background: #444;
+  }
+}
+
+.Actions .Delete {
+  color: #ffb3b3;
+  border-color: #8e4545;
+
+  &:hover {
+    background: #592828;
+  }
+}
