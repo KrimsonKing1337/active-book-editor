@@ -1,4 +1,4 @@
-import type { BuiltAudioEffect, BuiltVibrationEffect } from './effects/index';
+import type { BuiltAudioEffect, BuiltVibrationEffect, BuiltFlashlightEffect } from './effects/index';
 import { normalizePageEffects, isRecord } from './effects/utils';
 
 export const compileBookDocument = (document: unknown): Record<string, unknown> => {
@@ -25,11 +25,19 @@ export const compileBookDocument = (document: unknown): Record<string, unknown> 
     };
   });
 
+  const flashlight: BuiltFlashlightEffect[] = (pageEffects.flashlight ?? []).map((effect) => {
+    return {
+      id: effect.id,
+      type: effect.type,
+      options: effect.options,
+    };
+  });
+
   return {
     ...document,
     attrs: {
       ...attributes,
-      pageEffects: { audio, vibration },
+      pageEffects: { audio, vibration, flashlight },
     },
   };
 };

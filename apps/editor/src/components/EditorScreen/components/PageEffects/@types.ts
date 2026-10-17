@@ -4,4 +4,6 @@ export type {
   EditorEffect as EditorEffectDraft,
   VibrationEffect as VibrationEffectDraft,
   VibrationOptions,
+  FlashlightEffect as FlashlightEffectDraft,
+  FlashlightOptions,
 } from '@active-book/book-builder/effects';
