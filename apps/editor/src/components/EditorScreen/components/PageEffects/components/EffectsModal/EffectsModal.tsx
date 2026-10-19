@@ -1,5 +1,5 @@
 import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
@@ -68,25 +68,23 @@ export const EffectsModal = ({
   const isEffectsEmpty = effects.length === 0;
   const existingIds = effects.map((cur) => cur.id);
 
-  const buttons = useMemo(() => {
-    return [
-      {
-        id: 'audio',
-        label: 'Добавить Audio',
-        onClick: onAddAudio,
-      },
-      {
-        id: 'vibration',
-        label: 'Добавить Vibration',
-        onClick: onAddVibration,
-      },
-      {
-        id: 'flashlight',
-        label: 'Добавить Flashlight',
-        onClick: onAddFlashlight,
-      },
-    ];
-  }, [onAddAudio, onAddVibration, onAddFlashlight]);
+  const buttons = [
+    {
+      id: 'audio',
+      label: 'Добавить Audio',
+      onClick: onAddAudio,
+    },
+    {
+      id: 'vibration',
+      label: 'Добавить Vibration',
+      onClick: onAddVibration,
+    },
+    {
+      id: 'flashlight',
+      label: 'Добавить Flashlight',
+      onClick: onAddFlashlight,
+    },
+  ];
 
   let modalTitle = 'Эффекты страницы';
   let modalDescription = 'Невидимые эффекты, которые относятся к странице';
