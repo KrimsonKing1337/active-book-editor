@@ -1,8 +1,8 @@
-import type { EditorEffectDraft } from '../../../../@types';
+import type { EditorEffectDraft } from '@components/EditorScreen/components/PageEffects/@types';
 
 import styles from '../../EffectsModal.module.scss';
 
-type EffectTileProps = {
+export type EffectTileProps = {
   effect: EditorEffectDraft;
   onSelect: (id: string) => void;
 };
@@ -20,7 +20,10 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
     effectDetails = `${effect.options.duration} мс`;
   } else {
     effectType = 'Flashlight';
-    effectDetails = `${effect.options.duration} мс · sideShadow: ${effect.options.withSideShadow ? 'да' : 'нет'}`;
+
+    const sideShadowLabel = effect.options.withSideShadow ? 'да' : 'нет';
+
+    effectDetails = `${effect.options.duration} мс · sideShadow: ${sideShadowLabel}`;
   }
 
   const handleSelect = () => {

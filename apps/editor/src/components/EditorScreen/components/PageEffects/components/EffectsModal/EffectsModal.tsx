@@ -1,5 +1,5 @@
 import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 
 import { createPortal } from 'react-dom';
 
@@ -50,54 +50,85 @@ export const EffectsModal = ({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const mouseDownTargetRef = useRef<EventTarget | null>(null);
 
+  useEffect(() => {
+    const dialogElement = dialogRef.current;
+
+    if (!dialogElement) {
+      return;
+    }
+
+    dialogElement.showModal();
+
+    return () => {
+      dialogElement.close();
+    };
+  }, []);
+
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
-  const existingIds = effects.map((effect) => effect.id);
+  const existingIds = effects.map((cur) => cur.id);
+
+  const buttons = useMemo(() => {
+    return [
+      {
+        id: 'audio',
+        label: 'Добавить Audio',
+        onClick: onAddAudio,
+      },
+      {
+        id: 'vibration',
+        label: 'Добавить Vibration',
+        onClick: onAddVibration,
+      },
+      {
+        id: 'flashlight',
+        label: 'Добавить Flashlight',
+        onClick: onAddFlashlight,
+      },
+    ];
+  }, [onAddAudio, onAddVibration, onAddFlashlight]);
 
   let modalTitle = 'Эффекты страницы';
-  let modalDescription = 'Невидимые эффекты, которые относятся к странице.';
-  let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги.';
+  let modalDescription = 'Невидимые эффекты, которые относятся к странице';
+  let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги';
 
   let modalContent: ReactNode = (
     <>
       {isEffectsEmpty && (
         <div className={styles.Empty}>
-          Пока нет эффектов. Добавьте Audio, Vibration или Flashlight
+          Пока нет эффектов
         </div>
       )}
 
       <div className={styles.Tiles}>
-        {effects.map((effect) => (
-          <EffectTile
-            key={effect.id}
-            effect={effect}
-            onSelect={onSelectEffect}
-          />
-        ))}
+        {effects.map((effectCur) => {
+          return (
+            <EffectTile
+              key={effectCur.id}
+              effect={effectCur}
+              onSelect={onSelectEffect}
+            />
+          );
+        })}
 
-        <button className={styles.AddTile} type="button" onClick={onAddAudio}>
-          <span className={styles.AddIcon} aria-hidden="true">
-            +
-          </span>
+        {buttons.map((buttonCur) => {
+          const { id, label, onClick } = buttonCur;
 
-          Добавить Audio
-        </button>
+          return (
+            <button
+              key={id}
+              className={styles.AddTile}
+              type="button"
+              onClick={onClick}
+            >
+              <span className={styles.AddIcon} aria-hidden="true">
+                +
+              </span>
 
-        <button className={styles.AddTile} type="button" onClick={onAddVibration}>
-          <span className={styles.AddIcon} aria-hidden="true">
-            +
-          </span>
-
-          Добавить Vibration
-        </button>
-
-        <button className={styles.AddTile} type="button" onClick={onAddFlashlight}>
-          <span className={styles.AddIcon} aria-hidden="true">
-            +
-          </span>
-
-          Добавить Flashlight
-        </button>
+              {label}
+            </button>
+          );
+        })}
       </div>
     </>
   );
@@ -105,7 +136,7 @@ export const EffectsModal = ({
   if (selectedEffect?.type === 'audio') {
     modalTitle = 'Настройки Audio';
     modalDescription = 'Параметры сохраняются в book.json и применяются в собранной книге';
-    notice = 'Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать».';
+    notice = 'Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать»';
 
     modalContent = (
       <AudioSettings
@@ -122,7 +153,7 @@ export const EffectsModal = ({
   } else if (selectedEffect?.type === 'vibration') {
     modalTitle = 'Настройки Vibration';
     modalDescription = 'Вибрация запускается при открытии страницы на поддерживаемом устройстве';
-    notice = 'Для тестирования вибрации в редакторе нажмите «Проверить».';
+    notice = 'Для тестирования вибрации в редакторе нажмите «Проверить»';
 
     modalContent = (
       <VibrationSettings
@@ -137,7 +168,7 @@ export const EffectsModal = ({
   } else if (selectedEffect?.type === 'flashlight') {
     modalTitle = 'Настройки Flashlight';
     modalDescription = 'Вспышка доступна на поддерживаемых устройствах; sideShadow имитирует её на экране';
-    notice = 'Для тестирования вспышки в редакторе нажмите «Проверить».';
+    notice = 'Для тестирования вспышки в редакторе нажмите «Проверить»';
 
     modalContent = (
       <FlashlightSettings
@@ -150,20 +181,6 @@ export const EffectsModal = ({
       />
     );
   }
-
-  useEffect(() => {
-    const dialogElement = dialogRef.current;
-
-    if (!dialogElement) {
-      return;
-    }
-
-    dialogElement.showModal();
-
-    return () => {
-      dialogElement.close();
-    };
-  }, []);
 
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     event.preventDefault();

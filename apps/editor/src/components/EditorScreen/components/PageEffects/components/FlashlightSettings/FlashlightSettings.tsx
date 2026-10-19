@@ -1,19 +1,22 @@
 import { type ChangeEvent, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
+
 import { configSelectors } from 'activeBook-core/store/config';
 import { mainSelectors } from 'activeBook-core/store/main';
+
 import { useFlashlight } from 'activeBook-core/hooks/effects';
 
-import type { FlashlightEffectDraft, FlashlightOptions } from '../../@types';
+import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
 
 import styles from './FlashlightSettings.module.scss';
 
 type NumericFlashlightOptionName = keyof Pick<FlashlightOptions, 'duration' | 'delay' | 'speed'>;
 
-type FlashlightSettingsProps = {
+export type FlashlightSettingsProps = {
   effect: FlashlightEffectDraft;
   existingIds: string[];
+
   onUpdate: (previousId: string, effect: FlashlightEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -29,14 +32,21 @@ export const FlashlightSettings = ({
   const { options } = effect;
 
   const [idDraft, setIdDraft] = useState(effect.id);
-  const { flashlightOn } = useFlashlight({ withSideShadow: options.withSideShadow, speed: options.speed });
+
+  const { flashlightOn } = useFlashlight({
+    withSideShadow: options.withSideShadow,
+    speed: options.speed,
+  });
 
   const isFlashlightAvailable = useSelector(mainSelectors.isFlashlightAvailable);
   const flashlightEnabled = useSelector(configSelectors.flashlight);
 
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
-  const idAlreadyExists = existingIds.some((id) => id !== effect.id && id === normalizedId);
+
+  const idAlreadyExists = existingIds.some((idCur) => {
+    return idCur !== effect.id && idCur === normalizedId;
+  });
 
   let idError = '';
 
@@ -54,15 +64,34 @@ export const FlashlightSettings = ({
       return;
     }
 
-    onUpdate(effect.id, { ...effect, id: normalizedId });
+    const updatedEffect = {
+      ...effect,
+      id: normalizedId,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateSlug = (slug: string) => {
-    onUpdate(effect.id, { ...effect, slug });
+    const updatedEffect = {
+      ...effect,
+      slug,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
-  const updateOption = <K extends keyof FlashlightOptions>(name: K, value: FlashlightOptions[K]) => {
-    onUpdate(effect.id, { ...effect, options: { ...options, [name]: value } });
+  const updateOption: OptionUpdater<FlashlightOptions> = (name, value) => {
+    const updatedEffect = {
+      ...effect,
+
+      options: {
+        ...options,
+        [name]: value,
+      },
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateNumber = (name: NumericFlashlightOptionName, value: string) => {
@@ -120,17 +149,20 @@ export const FlashlightSettings = ({
     void flashlightOn(options.duration);
   };
 
-  let previewDescription = 'Фонарик недоступен. Включи sideShadow для экранной имитации.';
+  let previewDescription = 'Фонарик недоступен. Включите sideShadow для экранной имитации';
 
   if (!options.duration) {
-    previewDescription = 'Установи длительность больше нуля для проверки.';
+    previewDescription = 'Установите длительность больше нуля для проверки';
   } else if (canPreview && canUseTorch && isFlashlightAvailable === null) {
-    previewDescription = 'Проверка запускается сразу. Браузер может запросить доступ к камере.';
+    previewDescription = 'Проверка запускается сразу. Браузер может запросить доступ к камере';
   } else if (canPreview) {
-    previewDescription = 'Проверка запускается сразу, без задержки.';
+    previewDescription = 'Проверка запускается сразу, без задержки';
   } else if (!flashlightEnabled) {
-    previewDescription = 'Фонарик отключён в настройках. Можно использовать sideShadow.';
+    previewDescription = 'Фонарик отключён в настройках. Можно использовать sideShadow';
   }
+
+  const flashLightEffectIdAriaDescribedBy = idError ? 'flashlight-effect-id-error' : undefined;
+  const flashLightEffectIdButtonIsDisabled = Boolean(idError) || idDraft === effect.id;
 
   return (
     <div className={styles.FlashlightSettings}>
@@ -164,11 +196,11 @@ export const FlashlightSettings = ({
               value={idDraft}
               onChange={handleIdChange}
               aria-invalid={Boolean(idError)}
-              aria-describedby={idError ? 'flashlight-effect-id-error' : undefined}
+              aria-describedby={flashLightEffectIdAriaDescribedBy}
               spellCheck={false}
             />
 
-            <button type="button" disabled={Boolean(idError) || idDraft === effect.id} onClick={updateId}>
+            <button type="button" disabled={flashLightEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
             </button>
           </div>

@@ -5,15 +5,16 @@ import { configSelectors } from 'activeBook-core/store/config';
 import { mainSelectors } from 'activeBook-core/store/main';
 import { useVibration } from 'activeBook-core/hooks/effects';
 
-import type { VibrationEffectDraft, VibrationOptions } from '../../@types';
+import type { VibrationEffectDraft, VibrationOptions, OptionUpdater } from '../../@types';
 
 import styles from './VibrationSettings.module.scss';
 
 type NumericVibrationOptionName = keyof Pick<VibrationOptions, 'duration' | 'delay'>;
 
-type VibrationSettingsProps = {
+export type VibrationSettingsProps = {
   effect: VibrationEffectDraft;
   existingIds: string[];
+
   onUpdate: (previousId: string, effect: VibrationEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -60,16 +61,29 @@ export const VibrationSettings = ({
       return;
     }
 
-    onUpdate(effect.id, { ...effect, id: normalizedId });
+    const updatedEffect = {
+      ...effect,
+      id: normalizedId,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateSlug = (slug: string) => {
     onUpdate(effect.id, { ...effect, slug });
   };
 
-  const updateOption = <K extends keyof VibrationOptions>(name: K, value: VibrationOptions[K]) => {
-    const nextOptions = { ...options, [name]: value };
-    onUpdate(effect.id, { ...effect, options: nextOptions });
+  const updateOption: OptionUpdater<VibrationOptions> = (name, value) => {
+    const updatedEffect = {
+      ...effect,
+
+      options: {
+        ...options,
+        [name]: value,
+      },
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateNumber = (name: NumericVibrationOptionName, value: string) => {
@@ -117,6 +131,8 @@ export const VibrationSettings = ({
     vibrationOn(options.duration);
   };
 
+
+
   let previewDescription = 'Вибрация недоступна в этом браузере или на этом устройстве.';
 
   if (isVibrationAvailable && !vibrationIsEnabled) {
@@ -126,6 +142,9 @@ export const VibrationSettings = ({
   } else if (isVibrationAvailable) {
     previewDescription = 'Установите длительность больше нуля для проверки.';
   }
+
+  const vibrationEffectIdAriaDescribedBy = idError ? 'vibration-effect-id-error' : undefined;
+  const vibrationEffectIdButtonIsDisabled = Boolean(idError) || idDraft === effect.id;
 
   return (
     <div className={styles.VibrationSettings}>
@@ -159,11 +178,11 @@ export const VibrationSettings = ({
               value={idDraft}
               onChange={handleIdChange}
               aria-invalid={Boolean(idError)}
-              aria-describedby={idError ? 'vibration-effect-id-error' : undefined}
+              aria-describedby={vibrationEffectIdAriaDescribedBy}
               spellCheck={false}
             />
 
-            <button type="button" disabled={Boolean(idError) || idDraft === effect.id} onClick={updateId}>
+            <button type="button" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
             </button>
           </div>
