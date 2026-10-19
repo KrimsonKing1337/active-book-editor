@@ -1,0 +1,1 @@
+export { FlashlightSettings } from './FlashlightSettings';

@@ -1,11 +1,11 @@
 import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration } from 'activeBook-core/components/ProxyHooks';
+import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
 
 import type { BookDocument } from '@types';
 
 import { renderNode } from '@utils/renderNode';
 
-import { getAudioEffects, getVibrationEffects } from './utils';
+import { getAudioEffects, getVibrationEffects, getFlashlightEffects } from './utils';
 
 type BookPageProps = {
   document: BookDocument;
@@ -16,6 +16,7 @@ export const BookPage = ({ document }: BookPageProps) => {
 
   const audioEffects = getAudioEffects(document);
   const vibrationEffects = getVibrationEffects(document);
+  const flashlightEffects = getFlashlightEffects(document);
 
   return (
     <PageWrapper>
@@ -24,6 +25,17 @@ export const BookPage = ({ document }: BookPageProps) => {
         {audioEffects.map((effectCur) => {
           return (
             <Audio
+              key={effectCur.id}
+              id={effectCur.id}
+              page={1}
+              {...effectCur.options}
+            />
+          );
+        })}
+
+        {flashlightEffects.map((effectCur) => {
+          return (
+            <Flashlight
               key={effectCur.id}
               id={effectCur.id}
               page={1}

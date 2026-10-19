@@ -7,41 +7,24 @@ import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type { BookProject } from '@project/@types';
 
-import type { AudioEffectDraft, EditorEffectDraft, VibrationEffectDraft } from './@types';
+import {
+  createAudioEffect,
+  createFlashlightEffect,
+  createVibrationEffect,
+} from '@components/EditorScreen/components/PageEffects/utils';
+
+import type {
+  AudioEffectDraft,
+  EditorEffectDraft,
+  VibrationEffectDraft,
+  FlashlightEffectDraft,
+} from './@types';
 
 import { EffectsModal } from './components';
 
 import styles from './PageEffects.module.scss';
 
-const createAudioEffect = (): AudioEffectDraft => ({
-  id: crypto.randomUUID(),
-  type: 'audio',
-  slug: 'Новый звук',
-  options: {
-    src: '',
-    type: 'sfx',
-    loop: false,
-    playOnLoad: false,
-    stopBy: 0,
-    delay: 0,
-    relativeVolume: 100,
-    screamer: false,
-    fadeOutWhenUnload: true,
-  },
-});
-
-const createVibrationEffect = (): VibrationEffectDraft => ({
-  id: crypto.randomUUID(),
-  type: 'vibration',
-  slug: 'Новая вибрация',
-  options: {
-    duration: 200,
-    delay: 0,
-    playOnLoad: true,
-  },
-});
-
-type PageEffectsProps = {
+export type PageEffectsProps = {
   editor: Editor | null;
   project: BookProject | null;
 };
@@ -52,7 +35,15 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   if (Array.isArray(raw)) {
     const grouped = normalizePageEffects(raw);
 
-    return [...(grouped.audio ?? []), ...(grouped.vibration ?? [])];
+    const groupedAudio = grouped.audio ?? [];
+    const groupedVibration = grouped.vibration ?? [];
+    const groupedFlashlight = grouped.flashlight ?? [];
+
+    return [
+      ...groupedAudio,
+      ...groupedVibration,
+      ...groupedFlashlight,
+    ];
   }
 
   if (!raw || typeof raw !== 'object') {
@@ -60,10 +51,16 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   }
 
   const grouped = raw as GroupedPageEffects;
+
   const audio = Array.isArray(grouped.audio) ? grouped.audio : [];
   const vibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
+  const flashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
 
-  return [...audio, ...vibration];
+  return [
+    ...audio,
+    ...vibration,
+    ...flashlight,
+  ];
 };
 
 export const PageEffects = ({ editor, project }: PageEffectsProps) => {
@@ -82,8 +79,13 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       const nextEffects = getPageEffects(editor);
 
       setEffects((current) => {
-        const isUnchanged = current.length === nextEffects.length
-          && current.every((effect, index) => effect === nextEffects[index]);
+        const currentAndNextEffectsHaveEqualLength = current.length === nextEffects.length;
+
+        const everyEffectsAreEqual = current.every((effectCur, index) => {
+          return effectCur === nextEffects[index];
+        });
+
+        const isUnchanged = currentAndNextEffectsHaveEqualLength && everyEffectsAreEqual;
 
         return isUnchanged ? current : nextEffects;
       });
@@ -107,8 +109,9 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
 
     const groupedEffects: GroupedPageEffects = {
       ...currentPageEffects,
-      audio: nextEffects.filter((effect): effect is AudioEffectDraft => effect.type === 'audio'),
-      vibration: nextEffects.filter((effect): effect is VibrationEffectDraft => effect.type === 'vibration'),
+      audio: nextEffects.filter((cur): cur is AudioEffectDraft => cur.type === 'audio'),
+      vibration: nextEffects.filter((cur): cur is VibrationEffectDraft => cur.type === 'vibration'),
+      flashlight: nextEffects.filter((cur): cur is FlashlightEffectDraft => cur.type === 'flashlight'),
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
@@ -116,7 +119,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
     editor.view.dispatch(transaction);
   };
 
-  const selectedEffect = effects.find((effect) => effect.id === selectedEffectId) ?? null;
+  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId) ?? null;
 
   const openEffects = () => {
     setIsOpen(true);
@@ -140,6 +143,13 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
 
   const addVibration = () => {
     const effect = createVibrationEffect();
+
+    writeEffects([...effects, effect]);
+    setSelectedEffectId(effect.id);
+  };
+
+  const addFlashlight = () => {
+    const effect = createFlashlightEffect();
 
     writeEffects([...effects, effect]);
     setSelectedEffectId(effect.id);
@@ -190,16 +200,31 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
         ...selectedEffect,
         id,
         slug,
-        options: { ...selectedEffect.options },
+        options: {
+          ...selectedEffect.options,
+        },
       };
 
       writeEffects([...effects, duplicate]);
-    } else {
+    } else if (selectedEffect.type === 'vibration') {
       const duplicate: VibrationEffectDraft = {
         ...selectedEffect,
         id,
         slug,
-        options: { ...selectedEffect.options },
+        options: {
+          ...selectedEffect.options,
+        },
+      };
+
+      writeEffects([...effects, duplicate]);
+    } else {
+      const duplicate: FlashlightEffectDraft = {
+        ...selectedEffect,
+        id,
+        slug,
+        options: {
+          ...selectedEffect.options,
+        },
       };
 
       writeEffects([...effects, duplicate]);
@@ -257,6 +282,7 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
           onBack={goBackToEffects}
           onAddAudio={addAudio}
           onAddVibration={addVibration}
+          onAddFlashlight={addFlashlight}
           onSelectEffect={setSelectedEffectId}
           onUpdateEffect={updateEffect}
           onDuplicateEffect={duplicateEffect}

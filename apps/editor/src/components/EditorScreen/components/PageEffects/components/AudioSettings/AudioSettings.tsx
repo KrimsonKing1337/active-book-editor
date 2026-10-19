@@ -10,13 +10,13 @@ import { isAbortError } from '@project/errors';
 
 import { AudioPreview } from '../AudioPreview';
 
-import type { AudioEffectDraft, AudioOptions } from '../../@types';
+import type { AudioEffectDraft, AudioOptions, OptionUpdater } from '../../@types';
 
 import styles from './AudioSettings.module.scss';
 
 type NumericAudioOptionName = keyof Pick<AudioEffectOptions, 'relativeVolume' | 'delay' | 'stopBy'>;
 
-type AudioSettingsProps = {
+export type AudioSettingsProps = {
   effect: AudioEffectDraft;
   project: BookProject | null;
   existingIds: string[];
@@ -50,7 +50,9 @@ export const AudioSettings = ({
   }, [isImporting, isPreviewLoading, onLoadingChange]);
 
   useEffect(() => {
-    return () => onLoadingChange(false);
+    return () => {
+      onLoadingChange(false);
+    };
   }, [onLoadingChange]);
 
   const normalizedId = idDraft.trim();
@@ -102,7 +104,7 @@ export const AudioSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const updateOption = <K extends keyof AudioOptions>(name: K, value: AudioOptions[K]) => {
+  const updateOption: OptionUpdater<AudioOptions> = (name, value) => {
     const updatedOptions = {
       ...options,
       [name]: value,

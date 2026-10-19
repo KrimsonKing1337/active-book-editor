@@ -1,5 +1,27 @@
-import type { BuiltAudioEffect, BuiltVibrationEffect } from './effects/index';
+import type {
+  BuiltAudioEffect,
+  BuiltVibrationEffect,
+  BuiltFlashlightEffect,
+
+  AudioEffect,
+  VibrationEffect,
+  FlashlightEffect,
+} from './effects';
+
 import { normalizePageEffects, isRecord } from './effects/utils';
+
+type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect;
+type MappedEffect<T extends EffectForGetMappedEffects> = Pick<T, 'id' | 'type' | 'options'>;
+
+const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): MappedEffect<T>[] => {
+  return effects.map((effectCur) => {
+    return {
+      id: effectCur.id,
+      type: effectCur.type,
+      options: effectCur.options,
+    };
+  });
+};
 
 export const compileBookDocument = (document: unknown): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
@@ -9,27 +31,25 @@ export const compileBookDocument = (document: unknown): Record<string, unknown> 
   const attributes = isRecord(document.attrs) ? document.attrs : {};
   const pageEffects = normalizePageEffects(attributes.pageEffects);
 
-  const audio: BuiltAudioEffect[] = (pageEffects.audio ?? []).map((effect) => {
-    return {
-      id: effect.id,
-      type: effect.type,
-      options: effect.options,
-    };
-  });
+  const effectsAudio = pageEffects.audio ?? [];
+  const effectsVibration = pageEffects.vibration ?? [];
+  const effectsFlashlight = pageEffects.flashlight ?? [];
 
-  const vibration: BuiltVibrationEffect[] = (pageEffects.vibration ?? []).map((effect) => {
-    return {
-      id: effect.id,
-      type: effect.type,
-      options: effect.options,
-    };
-  });
+  const audio: BuiltAudioEffect[] = getMappedEffects(effectsAudio);
+  const vibration: BuiltVibrationEffect[] = getMappedEffects(effectsVibration);
+  const flashlight: BuiltFlashlightEffect[] = getMappedEffects(effectsFlashlight);
 
   return {
     ...document,
+
     attrs: {
       ...attributes,
-      pageEffects: { audio, vibration },
+
+      pageEffects: {
+        audio,
+        vibration,
+        flashlight,
+      },
     },
   };
 };

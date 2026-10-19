@@ -1,4 +1,4 @@
-import type { BuiltAudioEffect, BuiltVibrationEffect } from '@active-book/book-builder/effects';
+import type { BuiltAudioEffect, BuiltVibrationEffect, BuiltFlashlightEffect } from '@active-book/book-builder/effects';
 
 import type { BookDocument } from '@types';
 
@@ -13,4 +13,10 @@ export const getVibrationEffects = (document: BookDocument): BuiltVibrationEffec
   const pageEffects = document.attrs?.pageEffects;
 
   return pageEffects?.vibration ?? [];
+};
+
+export const getFlashlightEffects = (document: BookDocument): BuiltFlashlightEffect[] => {
+  const pageEffects = document.attrs?.pageEffects;
+
+  return pageEffects?.flashlight ?? [];
 };
