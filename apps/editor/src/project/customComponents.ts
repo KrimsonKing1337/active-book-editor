@@ -113,8 +113,6 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
   await trustArchive(file);
 
   const path = await storage.importDependencyFile(file, handle);
-  const previousDescription = await storage.readPackageJson();
-
   description.dependencies = {
     ...description.dependencies,
     [packageName]: `file:./${path}`,
