@@ -6,15 +6,19 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
+import { activeBookCustomComponentsPlugin } from './customComponents/plugin';
+
 type CreateViteConfigParams = {
   root: string;
   repoRoot: string;
+  projectRoot: string;
   outDir: string;
 };
 
 export const createViteConfig = ({
   root,
   repoRoot,
+  projectRoot,
   outDir,
 }: CreateViteConfigParams): InlineConfig => {
   const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
@@ -28,6 +32,8 @@ export const createViteConfig = ({
       }),
 
       react(),
+
+      activeBookCustomComponentsPlugin({ projectRoot, repoRoot }),
 
       svgr({
         include: '**/*.svg',
@@ -62,6 +68,7 @@ export const createViteConfig = ({
     },
 
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
         styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
