@@ -269,7 +269,17 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+    let assetsDirectory: ProjectDirectoryHandle;
+
+    try {
+      assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'NotFoundError') {
+        return;
+      }
+
+      throw error;
+    }
 
     yield* this.getDirectoryBuildFiles(
       assetsDirectory,
