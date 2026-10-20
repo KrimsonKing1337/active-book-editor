@@ -17,6 +17,7 @@ import {
 const BOOK_FILE_NAME = 'book.json';
 const PACKAGE_FILE_NAME = 'package.json';
 const ASSETS_DIRECTORY_NAME = 'assets';
+const DEPENDENCIES_DIRECTORY_NAME = 'dependencies';
 
 const getIsBookDocument = (value: unknown): value is JSONContent => {
   type Value = { type?: unknown };
@@ -115,6 +116,7 @@ export class LocalProjectStorage implements ProjectStorage {
 
     await this.ensurePackageJson();
     await this.writeBook(document);
+    await this.writePackageJson(await this.readPackageJson());
   }
 
   async readBook(): Promise<JSONContent> {
@@ -169,6 +171,92 @@ export class LocalProjectStorage implements ProjectStorage {
 
       throw error;
     }
+  }
+
+  async readPackageJson(): Promise<string> {
+    try {
+      const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME);
+
+      return (await handle.getFile()).text();
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+        throw error;
+      }
+
+      return JSON.stringify({ name: 'active-book-project', private: true, dependencies: {} });
+    }
+  }
+
+  async writePackageJson(content: string): Promise<void> {
+    const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, { create: true });
+    const writable = await handle.createWritable();
+
+    try {
+      await writable.write(content);
+      await writable.close();
+    } catch (error) {
+      await writable.abort?.();
+      throw error;
+    }
+  }
+
+  async importDependencyFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
+    const directory = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME, {
+      create: true,
+    });
+
+    if (sourceHandle && directory.resolve) {
+      const relativePath = await directory.resolve(sourceHandle);
+
+      if (relativePath?.length === 1 && relativePath[0].endsWith('.tgz')) {
+        return `${DEPENDENCIES_DIRECTORY_NAME}/${relativePath[0]}`;
+      }
+    }
+
+    const filename = file.name.split(/[/\\]/).pop() ?? 'components.tgz';
+    const base = filename.replace(/\.tgz$/i, '');
+    let candidate = filename;
+    let index = 1;
+
+    while (true) {
+      try {
+        await directory.getFileHandle(candidate);
+        candidate = `${base}-${index}.tgz`;
+        index += 1;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'NotFoundError') {
+          break;
+        }
+
+        throw error;
+      }
+    }
+
+    const handle = await directory.getFileHandle(candidate, { create: true });
+    const writable = await handle.createWritable();
+
+    try {
+      await writable.write(file);
+      await writable.close();
+    } catch (error) {
+      await writable.abort?.();
+      throw error;
+    }
+
+    return `${DEPENDENCIES_DIRECTORY_NAME}/${candidate}`;
+  }
+
+  async getDependencyFile(relativePath: string): Promise<File> {
+    const parts = relativePath.replaceAll('\\', '/').split('/');
+
+    if (parts[0] !== DEPENDENCIES_DIRECTORY_NAME || parts.length !== 2
+      || !parts[1].toLowerCase().endsWith('.tgz') || parts[1] === '..') {
+      throw new Error(`Недопустимый путь библиотеки: ${relativePath}`);
+    }
+
+    const directory = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME);
+
+    return (await directory.getFileHandle(parts[1])).getFile();
   }
 
   async getAssetFile(path: string): Promise<File> {
@@ -285,5 +373,15 @@ export class LocalProjectStorage implements ProjectStorage {
       assetsDirectory,
       ASSETS_DIRECTORY_NAME,
     );
+
+    try {
+      const dependencies = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME);
+
+      yield* this.getDirectoryBuildFiles(dependencies, DEPENDENCIES_DIRECTORY_NAME);
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+        throw error;
+      }
+    }
   }
 }
