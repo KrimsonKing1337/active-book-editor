@@ -126,6 +126,20 @@ export const insertComponent = (editor: Editor | null, name: string): void => {
   insertEditorContent(editor, componentContent);
 };
 
+export const insertCustomComponent = (
+  editor: Editor | null,
+  packageName: string,
+  name: string,
+): void => {
+  insertEditorContent(editor, {
+    type: 'coreComponent',
+    attrs: {
+      name,
+      package: packageName,
+    },
+  });
+};
+
 export const insertTextComponent = (editor: Editor | null, name: TextComponentName): void => {
   const typeMap = {
     P: 'activeBookP',
