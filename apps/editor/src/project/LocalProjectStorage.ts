@@ -116,7 +116,6 @@ export class LocalProjectStorage implements ProjectStorage {
 
     await this.ensurePackageJson();
     await this.writeBook(document);
-    await this.writePackageJson(await this.readPackageJson());
   }
 
   async readBook(): Promise<JSONContent> {
@@ -357,22 +356,15 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    let assetsDirectory: ProjectDirectoryHandle;
-
     try {
-      assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+      const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
+
+      yield* this.getDirectoryBuildFiles(assetsDirectory, ASSETS_DIRECTORY_NAME);
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'NotFoundError') {
-        return;
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+        throw error;
       }
-
-      throw error;
     }
-
-    yield* this.getDirectoryBuildFiles(
-      assetsDirectory,
-      ASSETS_DIRECTORY_NAME,
-    );
 
     try {
       const dependencies = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME);
