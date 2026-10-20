@@ -8,15 +8,11 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
 import { activeBookBuildPlugin } from '@active-book/book-builder/plugin';
-import { activeBookCustomComponentsPlugin } from '@active-book/book-builder/customComponents/plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const repoRoot = path.resolve(__dirname, '../..');
 const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
-const customProjectRoot = process.env.ACTIVE_BOOK_CUSTOM_PROJECT_ROOT
-  ? path.resolve(process.env.ACTIVE_BOOK_CUSTOM_PROJECT_ROOT)
-  : path.resolve(repoRoot, 'example-book');
 
 export default defineConfig(({ mode }) => {
   return {
@@ -48,14 +44,7 @@ export default defineConfig(({ mode }) => {
       }),
 
       activeBookBuildPlugin({ repoRoot }),
-      activeBookCustomComponentsPlugin({ projectRoot: customProjectRoot, repoRoot }),
     ],
-    // Vite must be allowed to serve libraries installed inside an external book directory.
-    server: {
-      fs: {
-        allow: [repoRoot, customProjectRoot],
-      },
-    },
     define: {
       'process.env.mode': JSON.stringify(mode),
     },
