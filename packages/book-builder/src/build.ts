@@ -38,6 +38,37 @@ const prepareRuntime = async (
 
   await fs.writeFile(bookJsonTarget, `${JSON.stringify(builtDocument, null, 2)}\n`);
 
+  let dependencies: Record<string, string> = {};
+
+  try {
+    const packageRaw = await fs.readFile(path.join(projectRoot, 'package.json'), 'utf8');
+    const packageJson = JSON.parse(packageRaw) as { dependencies?: Record<string, string> };
+
+    dependencies = packageJson.dependencies ?? {};
+  } catch (error) {
+    if (!(error instanceof Error) || !('code' in error) || error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  await fs.writeFile(
+    path.join(tempRoot, 'custom-components.json'),
+    `${JSON.stringify({ dependencies }, null, 2)}\n`,
+  );
+
+  const dependenciesSource = path.join(projectRoot, 'dependencies');
+
+  if (Object.keys(dependencies).length > 0 && !await getPathExists(dependenciesSource)) {
+    throw new Error('Книга с кастомными компонентами должна содержать папку dependencies/');
+  }
+
+  if (await getPathExists(dependenciesSource)) {
+    const dependenciesTarget = path.join(tempRoot, 'public', 'dependencies');
+
+    await fs.mkdir(path.dirname(dependenciesTarget), { recursive: true });
+    await fs.cp(dependenciesSource, dependenciesTarget, { recursive: true });
+  }
+
   const assetsSource = path.join(projectRoot, 'assets');
   const hasAssets = await getPathExists(assetsSource);
 
