@@ -4,6 +4,8 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
+import { customComponentDefinitions } from 'virtual:active-book-custom-components';
+
 import { App, PageWrapper } from 'activeBook-core/components';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
@@ -28,6 +30,7 @@ import {
   createEmptyDocument,
   getBuildStateLabel,
   insertComponent,
+  insertCustomComponent,
   insertTextComponent,
 } from './utils';
 
@@ -129,6 +132,10 @@ export const EditorScreen = () => {
     insertComponent(editor, name);
   };
 
+  const handleInsertCustomComponent = (packageName: string, name: string) => {
+    insertCustomComponent(editor, packageName, name);
+  };
+
   const handleInsertTextComponent = (name: TextComponentName) => {
     insertTextComponent(editor, name);
   };
@@ -151,6 +158,8 @@ export const EditorScreen = () => {
         onSaveProject={handleSaveProject}
         onToggleStructure={toggleStructure}
         onInsertComponent={handleInsertComponent}
+        onInsertCustomComponent={handleInsertCustomComponent}
+        customComponentDefinitions={customComponentDefinitions}
         onInsertTextComponent={handleInsertTextComponent}
         onBuildBook={buildBook}
       />
