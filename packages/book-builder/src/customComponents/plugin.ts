@@ -44,24 +44,6 @@ const readJson = <T>(filePath: string): T => {
   return JSON.parse(fs.readFileSync(filePath, 'utf8')) as T;
 };
 
-const getPackageDirectory = (
-  packageName: string,
-  projectRoot: string,
-  repoRoot: string,
-): { directory: string; installRoot: string } => {
-  for (const installRoot of [projectRoot, repoRoot]) {
-    const directory = path.join(installRoot, 'node_modules', packageName);
-
-    if (fs.existsSync(path.join(directory, 'package.json'))) {
-      return { directory, installRoot };
-    }
-  }
-
-  throw new Error(
-    `Custom package "${packageName}" is not installed. Install it in the book or editor workspace before starting Vite.`,
-  );
-};
-
 const loadRegistry = ({ projectRoot, repoRoot }: CustomComponentsPluginParams): RegistryComponent[] => {
   const packagePath = path.join(projectRoot, 'package.json');
 
@@ -73,11 +55,7 @@ const loadRegistry = ({ projectRoot, repoRoot }: CustomComponentsPluginParams): 
   const components: RegistryComponent[] = [];
 
   for (const packageName of Object.keys(projectPackage.dependencies ?? {}).sort()) {
-    const { directory, installRoot } = getPackageDirectoryIfCustom(packageName, projectRoot, repoRoot);
-
-    if (!directory) {
-      continue;
-    }
+    const { directory, installRoot } = getPackageDirectory(packageName, projectRoot, repoRoot);
 
     const packageDescription = readJson<PackageDescription>(path.join(directory, 'package.json'));
     const manifestName = packageDescription.activeBook;
@@ -131,11 +109,11 @@ const loadRegistry = ({ projectRoot, repoRoot }: CustomComponentsPluginParams): 
 
 // An unrelated npm dependency does not need an Active Book manifest.
 // The actual installation of archives is intentionally outside this proof of concept.
-const getPackageDirectoryIfCustom = (
+const getPackageDirectory = (
   packageName: string,
   projectRoot: string,
   repoRoot: string,
-): { directory: string | null; installRoot: string } => {
+): { directory: string; installRoot: string } => {
   for (const installRoot of [projectRoot, repoRoot]) {
     const directory = path.join(installRoot, 'node_modules', packageName);
 
