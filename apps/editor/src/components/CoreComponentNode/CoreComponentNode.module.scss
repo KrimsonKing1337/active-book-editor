@@ -5,13 +5,26 @@
   border-radius: 8px;
 
   &.isSelected {
-    outline: 2px solid currentColor;
+    outline: 2px solid #94b9f2;
+    outline-offset: 3px;
   }
 
   .Label {
+    display: block;
     margin-bottom: 8px;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: none;
     font-size: 12px;
+    text-align: left;
     opacity: 0.7;
     text-transform: uppercase;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      opacity: 1;
+    }
   }
 }
