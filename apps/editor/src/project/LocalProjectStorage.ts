@@ -15,6 +15,7 @@ import {
 } from './errors';
 
 const BOOK_FILE_NAME = 'book.json';
+const PACKAGE_FILE_NAME = 'package.json';
 const ASSETS_DIRECTORY_NAME = 'assets';
 
 const getIsBookDocument = (value: unknown): value is JSONContent => {
@@ -75,6 +76,36 @@ export class LocalProjectStorage implements ProjectStorage {
     }
   }
 
+  private async ensurePackageJson(): Promise<void> {
+    try {
+      await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME);
+
+      return;
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+        throw error;
+      }
+    }
+
+    const fileHandle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, { create: true });
+    const writable = await fileHandle.createWritable();
+
+    try {
+      const packageJson = {
+        name: 'active-book-project',
+        private: true,
+        version: '0.0.0',
+        dependencies: {},
+      };
+
+      await writable.write(`${JSON.stringify(packageJson, null, 2)}\n`);
+      await writable.close();
+    } catch (error) {
+      await writable.abort?.();
+      throw error;
+    }
+  }
+
   async initialize(document: JSONContent): Promise<void> {
     const hasBook = await this.getHasBook();
 
@@ -82,6 +113,7 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new ExistingProjectError();
     }
 
+    await this.ensurePackageJson();
     await this.writeBook(document);
   }
 
@@ -221,6 +253,21 @@ export class LocalProjectStorage implements ProjectStorage {
       path: BOOK_FILE_NAME,
       data: bookFile,
     };
+
+    // A book's npm dependencies are part of the project description, not its media assets.
+    try {
+      const packageHandle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME);
+      const packageFile = await packageHandle.getFile();
+
+      yield {
+        path: PACKAGE_FILE_NAME,
+        data: packageFile,
+      };
+    } catch (error) {
+      if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
+        throw error;
+      }
+    }
 
     const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
 
