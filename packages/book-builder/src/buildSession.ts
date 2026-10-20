@@ -69,10 +69,12 @@ export const getBuildSessionFilePath = (
   const isProjectManifest = safePath === 'book.json' || safePath === 'package.json';
 
   const isAsset = safePath.startsWith('assets/');
+  const isDependencyArchive = safePath.startsWith('dependencies/') && safePath.endsWith('.tgz');
 
-  const isOutsideProject = safePath.startsWith('../') || path.posix.isAbsolute(safePath);
+  const isOutsideProject = safePath.startsWith('../') || path.posix.isAbsolute(safePath)
+    || normalizedPath.split('/').includes('..');
 
-  if (isOutsideProject || (!isProjectManifest && !isAsset)) {
+  if (isOutsideProject || (!isProjectManifest && !isAsset && !isDependencyArchive)) {
     throw new Error('Invalid project file path');
   }
 
