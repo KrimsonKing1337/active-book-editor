@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-import type { CustomComponentDefinition } from 'virtual:active-book-custom-components';
+import type { BrowserComponentDefinition } from '@active-book/book-builder/customComponents/browser';
 
 import type { BuildState, TextComponentName } from '../../@types';
 
@@ -22,9 +22,10 @@ type HeaderProps = {
   onToggleStructure: () => void;
   onInsertComponent: (name: string) => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
-  customComponentDefinitions: CustomComponentDefinition[];
+  customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
   onBuildBook: () => Promise<void>;
+  onImportCustomComponents: () => Promise<void>;
 };
 
 export const Header = ({
@@ -46,6 +47,7 @@ export const Header = ({
   customComponentDefinitions,
   onInsertTextComponent,
   onBuildBook,
+  onImportCustomComponents,
 }: HeaderProps) => {
   const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
   const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
@@ -105,6 +107,10 @@ export const Header = ({
           onClick={() => onInsertComponent('Counter')}
         >
           Добавить Counter
+        </button>
+
+        <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>
+          Импортировать .tgz
         </button>
 
         {customComponentDefinitions.map((component) => {
