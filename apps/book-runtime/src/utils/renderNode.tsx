@@ -1,6 +1,7 @@
 import { type Key, type ReactNode, Fragment } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
+import { customComponents } from 'virtual:active-book-custom-components';
 
 import type { BookNode } from '@types';
 
@@ -49,6 +50,15 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
   }
 
   if (node.type === 'paragraph') return <P key={key} data-active-book-node="P">{children}</P>;
+
+  if (node.type === 'coreComponent' && typeof node.attrs?.package === 'string') {
+    const componentId = `${node.attrs.package}/${node.attrs.name}`;
+    const CustomComponent = customComponents[componentId];
+
+    return CustomComponent
+      ? <CustomComponent key={key} />
+      : <span key={key}>Unknown custom component: {componentId}</span>;
+  }
 
   if (node.type === 'coreComponent' && node.attrs?.name === 'Counter') {
     return <Counter key={key} />;
