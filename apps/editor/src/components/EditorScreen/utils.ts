@@ -1,4 +1,6 @@
-import type { Editor, JSONContent } from '@tiptap/core';
+import { Extension, type Editor, type JSONContent } from '@tiptap/core';
+import { NodeSelection, Plugin } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import Document from '@tiptap/extension-document';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -36,6 +38,45 @@ export const ActiveBookDocument = Document.extend({
   },
 });
 
+const ACTIVE_BLOCK_NAMES = new Set(['activeBookP', 'activeBookH1', 'activeBookH2', 'coreComponent']);
+
+export const ActiveBlockHighlight = Extension.create({
+  name: 'activeBookActiveBlockHighlight',
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        props: {
+          decorations(state) {
+            const { selection } = state;
+            let blockPosition: number;
+
+            if (selection instanceof NodeSelection) {
+              blockPosition = selection.from;
+            } else if (selection.$head.depth > 0) {
+              blockPosition = selection.$head.before(1);
+            } else {
+              return DecorationSet.empty;
+            }
+
+            const block = state.doc.nodeAt(blockPosition);
+
+            if (!block || !ACTIVE_BLOCK_NAMES.has(block.type.name)) {
+              return DecorationSet.empty;
+            }
+
+            const decoration = Decoration.node(blockPosition, blockPosition + block.nodeSize, {
+              class: 'active-book-current-block',
+            });
+
+            return DecorationSet.create(state.doc, [decoration]);
+          },
+        },
+      }),
+    ];
+  },
+});
+
 export const editorExtensions = [
   StarterKit.configure({
     document: false,
@@ -54,6 +95,7 @@ export const editorExtensions = [
   }),
 
   ActiveBookDocument,
+  ActiveBlockHighlight,
   ...activeBookBlockNodes,
 ];
 
