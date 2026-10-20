@@ -1,8 +1,6 @@
 import type { ComponentType } from 'react';
 
-import { loadBrowserLibrary } from '@active-book/book-builder/customComponents/browser';
-
-import type { BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
+import { loadBrowserLibrary, type BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
 
 import customPackageList from '../../custom-components.json';
 
