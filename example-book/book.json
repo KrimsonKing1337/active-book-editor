@@ -2,10 +2,7 @@
   "type": "doc",
   "content": [
     {
-      "type": "heading",
-      "attrs": {
-        "level": 1
-      },
+      "type": "activeBookH1",
       "content": [
         {
           "type": "text",
@@ -14,7 +11,7 @@
       ]
     },
     {
-      "type": "paragraph",
+      "type": "activeBookP",
       "content": [
         {
           "type": "text",
@@ -29,7 +26,7 @@
       }
     },
     {
-      "type": "paragraph",
+      "type": "activeBookP",
       "content": [
         {
           "type": "text",
