@@ -21,7 +21,7 @@ import {
   useSaveShortcut,
 } from './hooks';
 
-import { Header, PageEffects, RestoreBanner } from './components';
+import { CustomComponentsWarningModal, Header, PageEffects, RestoreBanner } from './components';
 
 import styles from './EditorScreen.module.scss';
 
@@ -36,12 +36,14 @@ import {
 } from './utils';
 
 const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
+const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
 
 export const EditorScreen = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
   const [librariesRevision, setLibrariesRevision] = useState(0);
+  const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
   const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [isDirty, setIsDirty] = useState(false);
@@ -165,7 +167,7 @@ export const EditorScreen = () => {
     insertComponent(editor, name);
   };
 
-  const handleImportCustomComponents = async () => {
+  const importCustomComponents = async () => {
     if (isProjectBusy) {
       return;
     }
@@ -193,6 +195,29 @@ export const EditorScreen = () => {
     } finally {
       setIsProjectBusy(false);
     }
+  };
+
+  const handleImportCustomComponents = () => {
+    if (isProjectBusy) {
+      return;
+    }
+
+    if (localStorage.getItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY) === 'true') {
+      void importCustomComponents();
+
+      return;
+    }
+
+    setIsImportWarningOpen(true);
+  };
+
+  const handleConfirmCustomComponentsImport = (doNotShowAgain: boolean) => {
+    if (doNotShowAgain) {
+      localStorage.setItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY, 'true');
+    }
+
+    setIsImportWarningOpen(false);
+    void importCustomComponents();
   };
 
   const handleInsertCustomComponent = (packageName: string, name: string) => {
@@ -227,6 +252,13 @@ export const EditorScreen = () => {
         onBuildBook={buildBook}
         onImportCustomComponents={handleImportCustomComponents}
       />
+
+      {isImportWarningOpen && (
+        <CustomComponentsWarningModal
+          onClose={() => setIsImportWarningOpen(false)}
+          onConfirm={handleConfirmCustomComponentsImport}
+        />
+      )}
 
       {pendingRestore && (
         <RestoreBanner
