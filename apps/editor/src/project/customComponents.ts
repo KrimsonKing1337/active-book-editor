@@ -30,27 +30,6 @@ const getArchivePath = (specifier: string): string => {
   return path;
 };
 
-const trustArchive = async (archive: File): Promise<void> => {
-  const hash = await crypto.subtle.digest('SHA-256', await archive.arrayBuffer());
-  const digest = [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  const trustKey = `activeBook-editor:trusted-tgz:${digest}`;
-
-  if (localStorage.getItem(trustKey) === 'true') {
-    return;
-  }
-
-  const approved = window.confirm(
-    `Библиотека ${archive.name} содержит сторонний JavaScript, который будет выполняться в редакторе. `
-    + 'Подключать только проверенные библиотеки. Продолжить?',
-  );
-
-  if (!approved) {
-    throw new Error('Запуск сторонней библиотеки отменён');
-  }
-
-  localStorage.setItem(trustKey, 'true');
-};
-
 export const loadProjectLibraries = async (storage: ProjectStorage): Promise<BrowserLibrary[]> => {
   const description = await getDependencies(storage);
   const libraries: BrowserLibrary[] = [];
@@ -59,8 +38,6 @@ export const loadProjectLibraries = async (storage: ProjectStorage): Promise<Bro
     for (const [packageName, specifier] of Object.entries(description.dependencies ?? {})) {
       const archivePath = getArchivePath(specifier);
       const file = await storage.getDependencyFile(archivePath);
-
-      await trustArchive(file);
 
       const library = await loadBrowserLibrary(file);
 
@@ -112,8 +89,6 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
   if (existing && !window.confirm(`Библиотека ${packageName} уже подключена. Заменить её?`)) {
     return null;
   }
-
-  await trustArchive(file);
 
   const path = await storage.importDependencyFile(file, handle);
   description.dependencies = {
