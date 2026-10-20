@@ -1,7 +1,6 @@
-import { type Key, type ReactNode, Fragment } from 'react';
+import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
-import { customComponents } from 'virtual:active-book-custom-components';
 
 import type { BookNode } from '@types';
 
@@ -20,7 +19,11 @@ const renderText = (node: BookNode): ReactNode => {
   return result;
 };
 
-export const renderNode = (node: BookNode, key: Key): ReactNode => {
+export const renderNode = (
+  node: BookNode,
+  key: Key,
+  customComponents: Record<string, ComponentType>,
+): ReactNode => {
   if (node.type === 'text') {
     return (
       <Fragment key={key}>
@@ -36,7 +39,7 @@ export const renderNode = (node: BookNode, key: Key): ReactNode => {
   const content = node.content ?? [];
 
   const children = content.map((child, index) => {
-    return renderNode(child, index);
+    return renderNode(child, index, customComponents);
   });
 
   if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
