@@ -68,6 +68,7 @@ export async function buildBook({
     const viteConfig = {
       root: tempRoot,
       repoRoot,
+      projectRoot,
       outDir: outDirSafe,
     };
 
