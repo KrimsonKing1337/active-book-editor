@@ -3,16 +3,46 @@
   "content": [
     {
       "type": "heading",
-      "attrs": { "level": 1 },
-      "content": [{ "type": "text", "text": "Собранная активная книга" }]
+      "attrs": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Собранная активная книга"
+        }
+      ]
     },
     {
       "type": "paragraph",
-      "content": [{ "type": "text", "text": "Этот файл используется командой npm run build:book как минимальный пример." }]
+      "content": [
+        {
+          "type": "text",
+          "text": "Этот файл используется командой npm run build:book как минимальный пример."
+        }
+      ]
     },
     {
       "type": "coreComponent",
-      "attrs": { "name": "Counter" }
+      "attrs": {
+        "name": "Counter"
+      }
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Ниже — компонент из внешнего npm-пакета:"
+        }
+      ]
+    },
+    {
+      "type": "coreComponent",
+      "attrs": {
+        "package": "activebook-custom-test",
+        "name": "Counter"
+      }
     }
   ]
 }
