@@ -1,5 +1,8 @@
-import { inspectBrowserArchive, loadBrowserLibrary } from '@active-book/book-builder/customComponents/browser';
-import type { BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
+import {
+  inspectBrowserArchive,
+  loadBrowserLibrary,
+  type BrowserLibrary,
+} from '@active-book/book-builder/customComponents/browser';
 
 import type { ProjectStorage } from './@types';
 import type { FilePickerWindow, ProjectFileHandle } from './fileSystemAccess';
