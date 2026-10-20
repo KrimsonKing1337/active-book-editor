@@ -1,5 +1,7 @@
 import classNames from 'classnames';
 
+import type { CustomComponentDefinition } from 'virtual:active-book-custom-components';
+
 import type { BuildState, TextComponentName } from '../../@types';
 
 import styles from './Header.module.scss';
@@ -19,6 +21,8 @@ type HeaderProps = {
   onSaveProject: () => Promise<void>;
   onToggleStructure: () => void;
   onInsertComponent: (name: string) => void;
+  onInsertCustomComponent: (packageName: string, name: string) => void;
+  customComponentDefinitions: CustomComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
   onBuildBook: () => Promise<void>;
 };
@@ -38,6 +42,8 @@ export const Header = ({
   onSaveProject,
   onToggleStructure,
   onInsertComponent,
+  onInsertCustomComponent,
+  customComponentDefinitions,
   onInsertTextComponent,
   onBuildBook,
 }: HeaderProps) => {
@@ -100,6 +106,20 @@ export const Header = ({
         >
           Добавить Counter
         </button>
+
+        {customComponentDefinitions.map((component) => {
+          return (
+            <button
+              key={component.id}
+              type="button"
+              disabled={buttonIsDisabled}
+              title={component.description}
+              onClick={() => onInsertCustomComponent(component.packageName, component.name)}
+            >
+              Добавить {component.title}
+            </button>
+          );
+        })}
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextComponent('P')}>
           Добавить параграф
