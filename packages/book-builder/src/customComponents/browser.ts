@@ -1,5 +1,3 @@
-import type { ComponentType } from 'react';
-
 import * as React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
 import * as jsxDevRuntime from 'react/jsx-dev-runtime';
@@ -33,7 +31,7 @@ export type BrowserComponentDefinition = {
 export type BrowserLibrary = {
   packageName: string;
   definitions: BrowserComponentDefinition[];
-  components: Record<string, ComponentType>;
+  components: Record<string, React.ComponentType>;
   dispose: () => void;
 };
 
@@ -211,7 +209,7 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
 
   try {
     const definitions: BrowserComponentDefinition[] = [];
-    const components: Record<string, ComponentType> = {};
+    const components: Record<string, React.ComponentType> = {};
 
     for (const [name, component] of Object.entries(manifest.components)) {
       const id = `${packageName}/${name}`;
@@ -237,7 +235,7 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
         throw new Error(`Экспорт ${id} отсутствует в браузерном ESM`);
       }
 
-      components[id] = exported as ComponentType;
+      components[id] = exported as React.ComponentType;
       definitions.push({
         id,
         name,
