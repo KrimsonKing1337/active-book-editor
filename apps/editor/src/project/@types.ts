@@ -17,6 +17,10 @@ export interface ProjectStorage {
   getBuildFiles(): AsyncIterable<ProjectBuildFile>;
   getAssetFile(path: string): Promise<File>;
   importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string>;
+  readPackageJson(): Promise<string>;
+  writePackageJson(content: string): Promise<void>;
+  importDependencyFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string>;
+  getDependencyFile(relativePath: string): Promise<File>;
 }
 
 export type BookProject = {
