@@ -12,6 +12,7 @@ import 'activeBook-core/styles/styles.scss';
 import type { BookDocument } from '@types';
 
 import { BookPage, StartReading } from '@components';
+import { loadCustomComponents } from './utils/loadCustomComponents';
 
 import bookDocumentDefault from '../book.json';
 
@@ -35,29 +36,40 @@ if (!root) {
   throw new Error('Root element was not found');
 }
 
-ReactDOM.createRoot(root).render(
-  <StoreProvider>
-    <MemoryRouter>
-      <AppWrapper config={config} tableOfContents={[]} rangeEffects={[]}>
-        <Routes>
-          <Route
-            path="/"
-            element={(
-              <Page0
-                header="Добро пожаловать"
-                audioSrcForInit={AUDIO_UNLOCK_SRC}
-                showButton={false}
-                Footer={StartReading}
-              />
-            )}
-          />
+const start = async (): Promise<void> => {
+  const { components } = await loadCustomComponents();
 
-          <Route
-            path="/page-1"
-            element={<BookPage document={bookDocumentDefault as BookDocument} />}
-          />
-        </Routes>
-      </AppWrapper>
-    </MemoryRouter>
-  </StoreProvider>,
-);
+  ReactDOM.createRoot(root).render(
+    <StoreProvider>
+      <MemoryRouter>
+        <AppWrapper config={config} tableOfContents={[]} rangeEffects={[]}>
+          <Routes>
+            <Route
+              path="/"
+              element={(
+                <Page0
+                  header="Добро пожаловать"
+                  audioSrcForInit={AUDIO_UNLOCK_SRC}
+                  showButton={false}
+                  Footer={StartReading}
+                />
+              )}
+            />
+  
+            <Route
+              path="/page-1"
+              element={<BookPage document={bookDocumentDefault as BookDocument} customComponents={components} />}
+            />
+          </Routes>
+        </AppWrapper>
+      </MemoryRouter>
+    </StoreProvider>,
+  );
+  
+};
+
+void start().catch((error: unknown) => {
+  console.error('[active-book] Cannot load custom browser components.', error);
+
+  root.textContent = error instanceof Error ? error.message : 'Не удалось загрузить книгу';
+});
