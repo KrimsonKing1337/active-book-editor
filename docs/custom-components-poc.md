@@ -1,3 +1,5 @@
+> **Исторический PoC (npm + Vite virtual module).** Актуальный эксперимент без npm см. [browser-custom-components-poc.md](./browser-custom-components-poc.md).
+
 # Custom components: manifest proof of concept
 
 This branch demonstrates the **library registration and render path**, not the import-button workflow.
