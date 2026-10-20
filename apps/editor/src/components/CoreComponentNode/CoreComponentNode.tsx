@@ -1,4 +1,5 @@
 import { Node, mergeAttributes } from '@tiptap/core';
+import { NodeSelection } from '@tiptap/pm/state';
 import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 
 import classNames from 'classnames';
@@ -14,7 +15,7 @@ const componentRegistry = {
 
 type ComponentName = keyof typeof componentRegistry;
 
-function CoreComponentView({ node, selected }: NodeViewProps) {
+function CoreComponentView({ node, selected, editor, getPos }: NodeViewProps) {
   const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
   const name = node.attrs.name as ComponentName;
   const packageName = node.attrs.package as string | null;
@@ -28,6 +29,16 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
     [styles.isSelected]: selected,
   });
 
+  const handleSelectComponent = () => {
+    const position = getPos();
+
+    if (typeof position !== 'number') {
+      return;
+    }
+
+    editor.chain().focus().setNodeSelection(position).run();
+  };
+
   const unknownComponent = (
     <div>
       Unknown component: {customId ?? name}
@@ -36,9 +47,9 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name} data-active-book-node={name}>
-      <div className={styles.Label}>
+      <button className={styles.Label} type="button" onClick={handleSelectComponent}>
         {componentLabel}
-      </div>
+      </button>
 
       {Component ? <Component /> : unknownComponent}
     </NodeViewWrapper>
@@ -47,6 +58,7 @@ function CoreComponentView({ node, selected }: NodeViewProps) {
 
 export const CoreComponentNode = Node.create({
   name: 'coreComponent',
+  priority: 110,
   group: 'activeBookBlock',
   atom: true,
   selectable: true,
@@ -81,5 +93,30 @@ export const CoreComponentNode = Node.create({
 
   addNodeView() {
     return ReactNodeViewRenderer(CoreComponentView);
+  },
+
+  addKeyboardShortcuts() {
+    const deleteSelectedComponent = () => {
+      const { doc, selection } = this.editor.state;
+      const isSelectedComponent = selection instanceof NodeSelection && selection.node.type.name === this.name;
+
+      if (!isSelectedComponent) {
+        return false;
+      }
+
+      if (doc.childCount === 1) {
+        return this.editor.commands.insertContentAt(
+          { from: selection.from, to: selection.to },
+          { type: 'activeBookP' },
+        );
+      }
+
+      return this.editor.commands.deleteSelection();
+    };
+
+    return {
+      Backspace: deleteSelectedComponent,
+      Delete: deleteSelectedComponent,
+    };
   },
 });
