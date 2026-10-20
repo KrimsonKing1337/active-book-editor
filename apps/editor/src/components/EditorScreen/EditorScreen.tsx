@@ -4,7 +4,8 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-import { customComponentDefinitions } from 'virtual:active-book-custom-components';
+import { useCustomComponents, replaceCustomLibraries } from '@project/customComponentRegistry';
+import { importBrowserLibrary, loadProjectLibraries } from '@project/customComponents';
 
 import { App, PageWrapper } from 'activeBook-core/components';
 
@@ -40,6 +41,8 @@ export const EditorScreen = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
+  const [librariesRevision, setLibrariesRevision] = useState(0);
+  const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
@@ -114,6 +117,36 @@ export const EditorScreen = () => {
     localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
   }, [showStructure]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const libraries = project ? await loadProjectLibraries(project.storage) : [];
+
+        if (cancelled) {
+          libraries.forEach((library) => library.dispose());
+
+          return;
+        }
+
+        replaceCustomLibraries(libraries);
+      } catch (error) {
+        if (!cancelled) {
+          console.error('[custom-components] Load failed.', error);
+          setProjectMessage(error instanceof Error ? error.message : 'Ошибка загрузки библиотек');
+          replaceCustomLibraries([]);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [project, librariesRevision]);
+
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
   const structureButtonIsDisabled = !editor;
@@ -130,6 +163,36 @@ export const EditorScreen = () => {
 
   const handleInsertComponent = (name: string) => {
     insertComponent(editor, name);
+  };
+
+  const handleImportCustomComponents = async () => {
+    if (isProjectBusy) {
+      return;
+    }
+
+    setIsProjectBusy(true);
+
+    try {
+      const savedProject = await saveCurrentProject();
+
+      if (!savedProject) {
+        return;
+      }
+
+      const message = await importBrowserLibrary(savedProject.storage);
+
+      if (message) {
+        setLibrariesRevision((revision) => revision + 1);
+        setProjectMessage(`Подключена библиотека ${message}`);
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        console.error('[custom-components] Import failed.', error);
+        setProjectMessage(error instanceof Error ? error.message : 'Ошибка импорта TGZ');
+      }
+    } finally {
+      setIsProjectBusy(false);
+    }
   };
 
   const handleInsertCustomComponent = (packageName: string, name: string) => {
@@ -162,6 +225,7 @@ export const EditorScreen = () => {
         customComponentDefinitions={customComponentDefinitions}
         onInsertTextComponent={handleInsertTextComponent}
         onBuildBook={buildBook}
+        onImportCustomComponents={handleImportCustomComponents}
       />
 
       {pendingRestore && (
