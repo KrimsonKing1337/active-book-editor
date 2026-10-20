@@ -1,0 +1,8 @@
+{
+  "name": "active-book-example",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "activebook-custom-test": "file:./dependencies/activebook-custom-test-0.0.5.tgz"
+  }
+}
