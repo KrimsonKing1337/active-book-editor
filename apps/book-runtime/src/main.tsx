@@ -55,7 +55,6 @@ const start = async (): Promise<void> => {
                 />
               )}
             />
-  
             <Route
               path="/page-1"
               element={<BookPage document={bookDocumentDefault as BookDocument} customComponents={components} />}
@@ -65,7 +64,6 @@ const start = async (): Promise<void> => {
       </MemoryRouter>
     </StoreProvider>,
   );
-  
 };
 
 void start().catch((error: unknown) => {
