@@ -50,6 +50,12 @@ export default defineConfig(({ mode }) => {
       activeBookBuildPlugin({ repoRoot }),
       activeBookCustomComponentsPlugin({ projectRoot: customProjectRoot, repoRoot }),
     ],
+    // Vite must be allowed to serve libraries installed inside an external book directory.
+    server: {
+      fs: {
+        allow: [repoRoot, customProjectRoot],
+      },
+    },
     define: {
       'process.env.mode': JSON.stringify(mode),
     },
