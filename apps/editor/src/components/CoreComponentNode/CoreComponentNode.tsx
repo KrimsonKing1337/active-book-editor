@@ -26,7 +26,7 @@ function CoreComponentView({ node, selected, editor, getPos }: NodeViewProps) {
 
   const nodeViewWrapperClassNames = classNames({
     [styles.CoreComponentNode]: true,
-    [styles.isSelected]: selected,
+    'isSelected': selected, // EditorScreen.module.scss
   });
 
   const handleSelectComponent = () => {
