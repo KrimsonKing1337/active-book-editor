@@ -4,7 +4,7 @@ import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tip
 import classNames from 'classnames';
 
 import { Counter } from '@components/Counter';
-import { customComponents, customComponentDefinitions } from 'virtual:active-book-custom-components';
+import { useCustomComponents } from '@project/customComponentRegistry';
 
 import styles from './CoreComponentNode.module.scss';
 
@@ -15,6 +15,7 @@ const componentRegistry = {
 type ComponentName = keyof typeof componentRegistry;
 
 function CoreComponentView({ node, selected }: NodeViewProps) {
+  const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
   const name = node.attrs.name as ComponentName;
   const packageName = node.attrs.package as string | null;
   const customId = packageName ? `${packageName}/${name}` : null;
