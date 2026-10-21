@@ -13,7 +13,7 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { Counter } from '@components/Counter';
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
-import type { BookComponentProps } from '@active-book/book-builder/customComponents/runtime';
+import type { BookComponentProps } from '@active-book/types';
 
 import styles from './CoreComponentNode.module.scss';
 
