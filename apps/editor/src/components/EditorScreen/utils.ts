@@ -8,10 +8,10 @@ import type { Config } from 'activeBook-core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
 
+import { ExistingProjectError, FileSystemAccessUnsupportedError, InvalidProjectError } from '@project/errors';
+
 import { CoreComponentNode } from '@components/CoreComponentNode';
 import { H1Node, H2Node, PNode } from '@components/EditableComponentNode';
-
-import { ExistingProjectError, FileSystemAccessUnsupportedError, InvalidProjectError } from '@project/errors';
 
 import type { BuildState, TextComponentName } from './@types';
 
@@ -49,6 +49,7 @@ export const ActiveBlockHighlight = Extension.create({
         props: {
           decorations(state) {
             const { selection } = state;
+
             let blockPosition: number;
 
             if (selection instanceof NodeSelection) {
@@ -66,7 +67,7 @@ export const ActiveBlockHighlight = Extension.create({
             }
 
             const decoration = Decoration.node(blockPosition, blockPosition + block.nodeSize, {
-              class: 'active-book-current-block',
+              class: 'isActive',
             });
 
             return DecorationSet.create(state.doc, [decoration]);

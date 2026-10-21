@@ -8,6 +8,8 @@ import {
   ReactNodeViewRenderer,
 } from '@tiptap/react';
 
+import classNames from 'classnames';
+
 import { P, H1, H2 } from 'activeBook-core/components';
 
 import styles from './EditableComponentNode.module.scss';
@@ -18,7 +20,22 @@ export const createCoreTextNode = (
   tag: string,
   Component: ComponentType<PropsWithChildren>,
 ) => {
-  const className = label === 'P' ? styles.P : undefined;
+  const EditableView = () => {
+    const componentClassNames = classNames({
+      [styles.P]: label === 'P',
+    });
+
+    return (
+      <NodeViewWrapper
+        className={componentClassNames}
+        data-active-book-node={label}
+      >
+        <Component>
+          <NodeViewContent />
+        </Component>
+      </NodeViewWrapper>
+    );
+  };
 
   return Node.create({
     name,
@@ -34,13 +51,7 @@ export const createCoreTextNode = (
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(() => (
-        <NodeViewWrapper className={className} data-active-book-node={label}>
-          <Component>
-            <NodeViewContent />
-          </Component>
-        </NodeViewWrapper>
-      ));
+      return ReactNodeViewRenderer(EditableView);
     },
   });
 };

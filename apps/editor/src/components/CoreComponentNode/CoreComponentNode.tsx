@@ -1,11 +1,15 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 
-import classNames from 'classnames';
+import {
+  type NodeViewProps,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from '@tiptap/react';
+
+import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { Counter } from '@components/Counter';
-import { useCustomComponents } from '@project/customComponentRegistry';
 
 import styles from './CoreComponentNode.module.scss';
 
@@ -15,19 +19,16 @@ const componentRegistry = {
 
 type ComponentName = keyof typeof componentRegistry;
 
-function CoreComponentView({ node, selected, editor, getPos }: NodeViewProps) {
+const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
+
   const name = node.attrs.name as ComponentName;
   const packageName = node.attrs.package as string | null;
   const customId = packageName ? `${packageName}/${name}` : null;
-  const Component = customId ? customComponents[customId] : componentRegistry[name];
-  const definition = customComponentDefinitions.find((component) => component.id === customId);
+  const definition = customComponentDefinitions.find((cur) => cur.id === customId);
   const componentLabel = definition?.title ?? name;
 
-  const nodeViewWrapperClassNames = classNames({
-    [styles.CoreComponentNode]: true,
-    'isSelected': selected, // EditorScreen.module.scss
-  });
+  const Component = customId ? customComponents[customId] : componentRegistry[name];
 
   const handleSelectComponent = () => {
     const position = getPos();
@@ -46,7 +47,7 @@ function CoreComponentView({ node, selected, editor, getPos }: NodeViewProps) {
   );
 
   return (
-    <NodeViewWrapper className={nodeViewWrapperClassNames} data-component={name} data-active-book-node={name}>
+    <NodeViewWrapper className={styles.CoreComponentNode} data-component={name} data-active-book-node={name}>
       <button className={styles.Label} type="button" onClick={handleSelectComponent}>
         {componentLabel}
       </button>
@@ -54,7 +55,7 @@ function CoreComponentView({ node, selected, editor, getPos }: NodeViewProps) {
       {Component ? <Component /> : unknownComponent}
     </NodeViewWrapper>
   );
-}
+};
 
 export const CoreComponentNode = Node.create({
   name: 'coreComponent',

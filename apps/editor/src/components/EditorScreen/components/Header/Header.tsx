@@ -25,7 +25,7 @@ type HeaderProps = {
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
   onBuildBook: () => Promise<void>;
-  onImportCustomComponents: () => Promise<void>;
+  onImportCustomComponents: () => void;
 };
 
 export const Header = ({
