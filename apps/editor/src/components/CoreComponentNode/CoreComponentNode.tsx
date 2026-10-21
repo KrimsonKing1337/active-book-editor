@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react';
+
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 
@@ -11,6 +13,7 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { Counter } from '@components/Counter';
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import type { BookComponentProps } from '@active-book/book-builder/customComponents/runtime';
 
 import styles from './CoreComponentNode.module.scss';
 
@@ -31,7 +34,8 @@ const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   const definition = customComponentDefinitions.find((cur) => cur.id === customId);
   const componentLabel = definition?.title ?? name;
 
-  const Component = customId ? customComponents[customId] : componentRegistry[name];
+  const Component = (customId ? customComponents[customId] : componentRegistry[name]) as
+    ComponentType<BookComponentProps> | undefined;
 
   const handleSelectComponent = () => {
     const position = getPos();
