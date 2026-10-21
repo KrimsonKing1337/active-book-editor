@@ -61,9 +61,9 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
         })}
       </>
 
-      {content.map((node, index) => {
+      {content.map((nodeCur, index) => {
         return renderNode({
-          node,
+          node: nodeCur,
           key: index,
           customComponents,
           bookRuntime,

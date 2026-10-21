@@ -2,8 +2,8 @@ import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
-import type { BookNode } from '@types';
-import type { BookRuntime, BookComponentProps } from '@active-book/types';
+import type { BookNode, CustomComponentType } from '@types';
+import type { BookRuntime } from '@active-book/types';
 
 const renderText = (node: BookNode): ReactNode => {
   const marks = node.marks ?? [];
@@ -66,15 +66,18 @@ export const renderNode = ({
       : <H2 key={key}>{children}</H2>;
   }
 
-  if (node.type === 'paragraph') return <P key={key} data-active-book-node="P">{children}</P>;
-
   if (node.type === 'coreComponent' && typeof node.attrs?.package === 'string') {
     const componentId = `${node.attrs.package}/${node.attrs.name}`;
-    const CustomComponent = customComponents[componentId] as ComponentType<BookComponentProps> | undefined;
 
-    return CustomComponent
-      ? <CustomComponent key={key} book={bookRuntime} />
-      : <span key={key}>Unknown custom component: {componentId}</span>;
+    const CustomComponent = customComponents[componentId] as CustomComponentType;
+
+    const unknownComponent = (
+      <span key={key}>
+        Unknown custom component: {componentId}
+      </span>
+    );
+
+    return CustomComponent ? <CustomComponent key={key} book={bookRuntime} /> : unknownComponent;
   }
 
   if (node.type === 'coreComponent' && node.attrs?.name === 'Counter') {
