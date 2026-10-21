@@ -3,7 +3,7 @@ import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
 import type { BookNode } from '@types';
-import type { BookRuntime, BookComponentProps } from '@active-book/book-builder/customComponents/runtime';
+import type { BookRuntime, BookComponentProps } from '@active-book/types';
 
 const renderText = (node: BookNode): ReactNode => {
   const marks = node.marks ?? [];
