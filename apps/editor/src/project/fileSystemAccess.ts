@@ -50,12 +50,14 @@ export type DirectoryPickerWindow = Window & {
   showDirectoryPicker(options?: DirectoryPickerOptions): Promise<ProjectDirectoryHandle>;
 };
 
+export type FilePickerOptionsType = {
+  description: string;
+  accept: Record<string, string[]>;
+};
+
 export type FilePickerOptions = {
   id?: string;
-  types?: {
-    description: string;
-    accept: Record<string, string[]>;
-  }[];
+  types?: FilePickerOptionsType[];
 };
 
 export type FilePickerWindow = Window & {

@@ -10,7 +10,7 @@ const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => {
     request.addEventListener('success', () => resolve(request.result));
     request.addEventListener('error', () => reject(request.error));
   });
-}
+};
 
 const transactionToPromise = (transaction: IDBTransaction): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ const transactionToPromise = (transaction: IDBTransaction): Promise<void> => {
     transaction.addEventListener('abort', () => reject(transaction.error));
     transaction.addEventListener('error', () => reject(transaction.error));
   });
-}
+};
 
 const openDatabase = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
@@ -49,6 +49,7 @@ const withStore = async <T>(
 
   try {
     const transaction = database.transaction(STORE_NAME, mode);
+
     const transactionDone = transactionToPromise(transaction);
     const request = operation(transaction.objectStore(STORE_NAME));
     const result = await requestToPromise(request);
@@ -66,7 +67,7 @@ export const saveLastProjectHandle = async (
 ): Promise<void> => {
   const actionFunction = (store: IDBObjectStore) => {
     return store.put(handle, LAST_PROJECT_KEY);
-  }
+  };
 
   await withStore('readwrite', actionFunction);
 };
@@ -74,7 +75,7 @@ export const saveLastProjectHandle = async (
 export const getLastProjectHandle = async (): Promise<ProjectDirectoryHandle | null> => {
   const actionFunction = (store: IDBObjectStore) => {
     return store.get(LAST_PROJECT_KEY);
-  }
+  };
 
   const handle = await withStore('readonly', actionFunction);
 

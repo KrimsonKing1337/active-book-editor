@@ -24,4 +24,4 @@ export class InvalidProjectError extends Error {
 
 export const isAbortError = (error: unknown): boolean => {
   return error instanceof DOMException && error.name === 'AbortError';
-}
+};
