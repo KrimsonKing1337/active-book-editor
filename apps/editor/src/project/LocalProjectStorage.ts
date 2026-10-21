@@ -57,7 +57,7 @@ export class LocalProjectStorage implements ProjectStorage {
         const file = await entryHandle.getFile();
 
         yield {
-          path: entryPath;
+          path: entryPath,
           data: file,
         };
 
