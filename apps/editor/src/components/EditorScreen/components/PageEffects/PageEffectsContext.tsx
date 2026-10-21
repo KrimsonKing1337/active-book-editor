@@ -12,9 +12,16 @@ import type {
   VibrationEffectDraft,
 } from './@types';
 
+export type AudioPreviewStatus = {
+  state: 'empty' | 'loading' | 'ready' | 'error';
+  error?: string;
+};
+
 type PageEffectsContextValue = {
   effects: EditorEffectDraft[];
   writeEffects: (effects: EditorEffectDraft[]) => void;
+  audioPreviewStatuses: Record<string, AudioPreviewStatus>;
+  setAudioPreviewStatus: (id: string, status: AudioPreviewStatus | null) => void;
 };
 
 type PageEffectsProviderProps = PropsWithChildren<{
@@ -51,6 +58,31 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
 
 export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
+  const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
+
+  const setAudioPreviewStatus = useCallback((id: string, status: AudioPreviewStatus | null) => {
+    setAudioPreviewStatuses((current) => {
+      const previous = current[id];
+
+      if (previous?.state === status?.state && previous?.error === status?.error) {
+        return current;
+      }
+
+      if (!previous && !status) {
+        return current;
+      }
+
+      const next = { ...current };
+
+      if (status) {
+        next[id] = status;
+      } else {
+        delete next[id];
+      }
+
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (!editor) {
@@ -102,7 +134,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   const value = useMemo(() => ({
     effects,
     writeEffects,
-  }), [effects, writeEffects]);
+    audioPreviewStatuses,
+    setAudioPreviewStatus,
+  }), [effects, writeEffects, audioPreviewStatuses, setAudioPreviewStatus]);
 
   return (
     <PageEffectsContext.Provider value={value}>
