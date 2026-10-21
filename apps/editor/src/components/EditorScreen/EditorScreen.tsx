@@ -21,7 +21,7 @@ import {
   useSaveShortcut,
 } from './hooks';
 
-import { CustomComponentsWarningModal, Header, PageEffects, RestoreBanner } from './components';
+import { CustomComponentsWarningModal, Header, PageEffects, PageEffectsProvider, RestoreBanner } from './components';
 
 import styles from './EditorScreen.module.scss';
 
@@ -229,64 +229,66 @@ export const EditorScreen = () => {
   };
 
   return (
-    <div className={editorScreenClassNames}>
-      <Header
-        projectName={projectName}
-        projectMessage={projectMessage}
-        isDirty={isDirty}
-        isProjectBusy={isProjectBusy}
-        showSavedStatus={showSavedStatus}
-        showStructure={showStructure}
-        buildState={buildState}
-        buttonIsDisabled={buttonIsDisabled}
-        structureButtonIsDisabled={structureButtonIsDisabled}
-
-        onNewProject={handleNewProject}
-        onOpenProject={handleOpenProject}
-        onSaveProject={handleSaveProject}
-        onToggleStructure={toggleStructure}
-        onInsertComponent={handleInsertComponent}
-        onInsertCustomComponent={handleInsertCustomComponent}
-        customComponentDefinitions={customComponentDefinitions}
-        onInsertTextComponent={handleInsertTextComponent}
-        onBuildBook={buildBook}
-        onImportCustomComponents={handleImportCustomComponents}
-      />
-
-      {isImportWarningOpen && (
-        <CustomComponentsWarningModal
-          onClose={() => setIsImportWarningOpen(false)}
-          onConfirm={handleConfirmCustomComponentsImport}
-        />
-      )}
-
-      {pendingRestore && (
-        <RestoreBanner
-          pendingRestore={pendingRestore}
+    <PageEffectsProvider editor={editor}>
+      <div className={editorScreenClassNames}>
+        <Header
+          projectName={projectName}
+          projectMessage={projectMessage}
+          isDirty={isDirty}
           isProjectBusy={isProjectBusy}
-          onContinueLastProject={handleContinueLastProject}
-          onForgetLastProject={handleForgetLastProject}
+          showSavedStatus={showSavedStatus}
+          showStructure={showStructure}
+          buildState={buildState}
+          buttonIsDisabled={buttonIsDisabled}
+          structureButtonIsDisabled={structureButtonIsDisabled}
+
+          onNewProject={handleNewProject}
+          onOpenProject={handleOpenProject}
+          onSaveProject={handleSaveProject}
+          onToggleStructure={toggleStructure}
+          onInsertComponent={handleInsertComponent}
+          onInsertCustomComponent={handleInsertCustomComponent}
+          customComponentDefinitions={customComponentDefinitions}
+          onInsertTextComponent={handleInsertTextComponent}
+          onBuildBook={buildBook}
+          onImportCustomComponents={handleImportCustomComponents}
         />
-      )}
 
-      <div className={styles.BuildStatus} data-state={buildState}>
-        {buildStateLabel}
+        {isImportWarningOpen && (
+          <CustomComponentsWarningModal
+            onClose={() => setIsImportWarningOpen(false)}
+            onConfirm={handleConfirmCustomComponentsImport}
+          />
+        )}
+
+        {pendingRestore && (
+          <RestoreBanner
+            pendingRestore={pendingRestore}
+            isProjectBusy={isProjectBusy}
+            onContinueLastProject={handleContinueLastProject}
+            onForgetLastProject={handleForgetLastProject}
+          />
+        )}
+
+        <div className={styles.BuildStatus} data-state={buildState}>
+          {buildStateLabel}
+        </div>
+
+        <main className={styles.Canvas}>
+          <App
+            config={editorConfig}
+            appMode="editor"
+            tableOfContents={[]}
+            rangeEffects={[]}
+          >
+            <PageEffects project={project} />
+
+            <PageWrapper>
+              <EditorContent editor={editor} />
+            </PageWrapper>
+          </App>
+        </main>
       </div>
-
-      <main className={styles.Canvas}>
-        <App
-          config={editorConfig}
-          appMode="editor"
-          tableOfContents={[]}
-          rangeEffects={[]}
-        >
-          <PageEffects editor={editor} project={project} />
-
-          <PageWrapper>
-            <EditorContent editor={editor} />
-          </PageWrapper>
-        </App>
-      </main>
-    </div>
+    </PageEffectsProvider>
   );
 };
