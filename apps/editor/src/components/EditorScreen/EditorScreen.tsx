@@ -22,6 +22,7 @@ import {
 } from './hooks';
 
 import { CustomComponentsWarningModal, Header, PageEffects, PageEffectsProvider, RestoreBanner } from './components';
+import { AudioInstances } from './components/PageEffects/components/AudioInstances';
 
 import styles from './EditorScreen.module.scss';
 
@@ -281,6 +282,7 @@ export const EditorScreen = () => {
             tableOfContents={[]}
             rangeEffects={[]}
           >
+            <AudioInstances project={project} />
             <PageEffects project={project} />
 
             <PageWrapper>
