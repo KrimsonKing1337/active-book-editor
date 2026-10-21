@@ -21,6 +21,7 @@
     "sass": "^1.96.0"
   },
   "devDependencies": {
+    "@active-book/types": "file:../activeBook-types",
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
     "@types/node": "^26.5.1",
