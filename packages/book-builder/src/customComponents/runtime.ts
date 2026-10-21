@@ -1,27 +1,18 @@
-import type { ComponentType, PropsWithChildren } from 'react';
+import type { BookRuntime } from '@active-book/types';
 
 import { H1, H2, P } from 'activeBook-core/components';
+import { useAudioController } from 'activeBook-core/hooks/effects';
 
-// Public contract mirrored by the standalone @active-book/types package.
-// Keep the host implementation and type-only consumer declarations compatible.
-export type BookRuntime = {
-  mode: 'editor' | 'reader';
-  components: {
-    P: ComponentType<PropsWithChildren>;
-    H1: ComponentType<PropsWithChildren>;
-    H2: ComponentType<PropsWithChildren>;
-  };
-};
-
-export type BookComponentProps = {
-  book: BookRuntime;
-};
-
+// One host-owned implementation. Custom components import only the @active-book/types
+// declaration and receive these runtime values via the "book" prop.
 export const createBookRuntime = (mode: BookRuntime['mode']): BookRuntime => ({
   mode,
   components: {
     P,
     H1,
     H2,
+  },
+  hooks: {
+    useAudioController,
   },
 });
