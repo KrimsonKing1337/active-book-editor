@@ -35,10 +35,10 @@ export const replaceCustomLibraries = (libraries: BrowserLibrary[]): void => {
   const components: Record<string, ComponentType> = {};
   const definitions: BrowserComponentDefinition[] = [];
 
-  for (const libraryCur of libraries) {
-    Object.assign(components, libraryCur.components);
+  for (const library of libraries) {
+    Object.assign(components, library.components);
 
-    definitions.push(...libraryCur.definitions);
+    definitions.push(...library.definitions);
   }
 
   installedLibraries = libraries;
@@ -52,7 +52,7 @@ export const replaceCustomLibraries = (libraries: BrowserLibrary[]): void => {
     listener();
   }
 
-  for (const libraryCur of oldLibraries) {
-    libraryCur.dispose();
+  for (const library of oldLibraries) {
+    library.dispose();
   }
 };

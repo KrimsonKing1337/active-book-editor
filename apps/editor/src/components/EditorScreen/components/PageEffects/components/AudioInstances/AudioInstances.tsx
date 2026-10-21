@@ -46,14 +46,14 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     let cancelled = false;
     let blobUrl: string | null = null;
 
-    const srcTrimmed = src.trim();
+    const trimmedSource = src.trim();
 
-    const state = srcTrimmed ? 'loading' : 'empty';
+    const initialState = trimmedSource ? 'loading' : 'empty';
 
     setResolved(null);
-    setAudioPreviewStatus(id, { state });
+    setAudioPreviewStatus(id, { state: initialState });
 
-    if (!srcTrimmed) {
+    if (!trimmedSource) {
       return;
     }
 
@@ -61,7 +61,7 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
       try {
         const source = await resolveAudioSource(src, project);
 
-        if (source.src.startsWith('blob:') && source.src !== srcTrimmed) {
+        if (source.src.startsWith('blob:') && source.src !== trimmedSource) {
           blobUrl = source.src;
         }
 
@@ -109,8 +109,8 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     };
   }, [id, setAudioPreviewStatus]);
 
-  const pathAndProjectAreEqual = resolved?.path === src && resolved.project === project;
-  const currentSource = pathAndProjectAreEqual ? resolved : null;
+  const isCurrentResolvedSource = resolved?.path === src && resolved.project === project;
+  const currentSource = isCurrentResolvedSource ? resolved : null;
 
   const audioSrc = audio?.src;
   const registeredSource = Array.isArray(audioSrc) ? audioSrc[0] : audioSrc;
@@ -169,13 +169,13 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     return null;
   }
 
-  const key = `${id}:${currentSource.src}:${delay}:${stopBy}`;
+  const audioInstanceKey = `${id}:${currentSource.src}:${delay}:${stopBy}`;
 
   // The editor owns the audio instance, not the settings modal.
   // In auto lifecycle core removes it from Redux and unloads it on unmount.
   return (
     <Audio
-      key={key}
+      key={audioInstanceKey}
       id={id}
       page={0}
       src={currentSource.src}

@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { App, PageWrapper } from 'activeBook-core/components';
 
-import { BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
+import type { BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
 
 import { importBrowserLibrary, loadProjectLibraries } from '@project/customComponents';
 
@@ -142,7 +142,7 @@ export const EditorScreen = () => {
         }
 
         if (cancelled) {
-          libraries.forEach((cur) => cur.dispose());
+          libraries.forEach((library) => library.dispose());
 
           return;
         }

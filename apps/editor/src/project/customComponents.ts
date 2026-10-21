@@ -54,8 +54,8 @@ export const loadProjectLibraries = async (storage: ProjectStorage): Promise<Bro
 
     return libraries;
   } catch (error) {
-    for (const libraryCur of libraries) {
-      libraryCur.dispose();
+    for (const library of libraries) {
+      library.dispose();
     }
 
     throw error;
@@ -101,12 +101,14 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   const { packageName, manifest } = await inspectBrowserArchive(file);
   const description = await getDependencies(storage);
-  const existing = description.dependencies?.[packageName];
+  const existingDependency = description.dependencies?.[packageName];
 
-  const confirm = window.confirm(`Библиотека ${packageName} уже подключена. Заменить её?`);
+  if (existingDependency) {
+    const replacementConfirmed = window.confirm(`Библиотека ${packageName} уже подключена. Заменить её?`);
 
-  if (existing && !confirm) {
-    return null;
+    if (!replacementConfirmed) {
+      return null;
+    }
   }
 
   const path = await storage.importDependencyFile(file, handle);
@@ -120,7 +122,7 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   await storage.writePackageJson(`${descriptionJson}\n`);
 
-  const componentsLength = Object.keys(manifest.components).length;
+  const componentCount = Object.keys(manifest.components).length;
 
-  return `${packageName} (${componentsLength} компонентов)`;
+  return `${packageName} (${componentCount} компонентов)`;
 };

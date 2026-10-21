@@ -50,21 +50,21 @@ export class LocalProjectStorage implements ProjectStorage {
     directoryHandle: ProjectDirectoryHandle,
     relativePath: string,
   ): AsyncGenerator<ProjectBuildFile> {
-    for await (const handleCur of directoryHandle.values()) {
-      const handlePath = `${relativePath}/${handleCur.name}`;
+    for await (const entryHandle of directoryHandle.values()) {
+      const entryPath = `${relativePath}/${entryHandle.name}`;
 
-      if (handleCur.kind === 'file') {
-        const file = await handleCur.getFile();
+      if (entryHandle.kind === 'file') {
+        const file = await entryHandle.getFile();
 
         yield {
-          path: handlePath,
+          path: entryPath;
           data: file,
         };
 
         continue;
       }
 
-      yield* this.getDirectoryBuildFiles(handleCur, handlePath);
+      yield* this.getDirectoryBuildFiles(entryHandle, entryPath);
     }
   }
 
@@ -194,13 +194,13 @@ export class LocalProjectStorage implements ProjectStorage {
         throw error;
       }
 
-      const params = {
+      const defaultPackageDescription = {
         name: 'active-book-project',
         private: true,
         dependencies: {},
       };
 
-      return JSON.stringify(params);
+      return JSON.stringify(defaultPackageDescription);
     }
   }
 
@@ -293,14 +293,14 @@ export class LocalProjectStorage implements ProjectStorage {
     const relativePath = path.replace(/^\.\//, '').replace(/^\//, '');
     const parts = relativePath.split('/');
 
-    const filePathIsNotInside = parts.some((partCur) => {
-      return !partCur || partCur === '.' || partCur === '..';
+    const hasInvalidPathSegment = parts.some((segment) => {
+      return !segment || segment === '.' || segment === '..';
     });
 
     if (
       parts[0] !== ASSETS_DIRECTORY_NAME
       || parts.length < 2
-      || filePathIsNotInside
+      || hasInvalidPathSegment
       || relativePath.includes('\\')
     ) {
       throw new Error('Путь должен указывать на файл внутри assets/');
@@ -328,10 +328,10 @@ export class LocalProjectStorage implements ProjectStorage {
       const relativePath = await assetsDirectory.resolve(sourceHandle);
 
       if (relativePath?.length) {
-        const arr = [ASSETS_DIRECTORY_NAME, ...relativePath];
+        const assetPathSegments = [ASSETS_DIRECTORY_NAME, ...relativePath];
 
         // A file already inside assets/ must not be copied, even when nested.
-        return arr.join('/');
+        return assetPathSegments.join('/');
       }
     }
 

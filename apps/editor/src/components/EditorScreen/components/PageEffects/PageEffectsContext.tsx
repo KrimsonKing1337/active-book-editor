@@ -111,15 +111,13 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       const nextEffects = getPageEffects(editor);
 
       setEffects((current) => {
-        const currentAndNextEffectsAreEqual = current.length === nextEffects.length;
+        const hasSameEffectCount = current.length === nextEffects.length;
 
-        const currentEveryAndNextEffectsAreEqual = current.every((effectCur, index) => {
-          return effectCur === nextEffects[index];
+        const allEffectReferencesMatch = hasSameEffectCount && current.every((currentEffect, index) => {
+          return currentEffect === nextEffects[index];
         });
 
-        const isUnchanged = currentAndNextEffectsAreEqual && currentEveryAndNextEffectsAreEqual;
-
-        return isUnchanged ? current : nextEffects;
+        return allEffectReferencesMatch ? current : nextEffects;
       });
     };
 
