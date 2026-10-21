@@ -26,6 +26,7 @@ type AudioPreviewProps = {
 };
 
 type PlayerProps = {
+  id: string;
   source: ResolvedSource;
   delay: number;
   stopBy: number;
@@ -81,6 +82,7 @@ const resolveSource = async (source: string, project: BookProject | null): Promi
 };
 
 const AudioPreviewPlayer = ({
+  id,
   source,
   delay,
   stopBy,
@@ -91,7 +93,6 @@ const AudioPreviewPlayer = ({
   onError,
   onStartingChange,
 }: PlayerProps) => {
-  const [id] = useState(() => `editor-preview-${crypto.randomUUID()}`);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -321,7 +322,8 @@ export const AudioPreview = ({ effect, project, onLoadingChange }: AudioPreviewP
 
       {currentSource && (
         <AudioPreviewPlayer
-          key={playerKey}
+          key={`${effect.id}:${playerKey}`}
+          id={effect.id}
           source={currentSource}
           delay={delay}
           stopBy={stopBy}
