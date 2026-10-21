@@ -75,13 +75,13 @@ export const AudioPreview = ({ effect, onLoadingChange }: AudioPreviewProps) => 
     };
   }, [audio]);
 
-  // Preview-only looping is temporary. Closing settings restores the saved option.
+  // A preview-only override must not change playback already running on the page.
   useEffect(() => {
-    if (!audio) {
+    if (!audio || !loopPreview) {
       return;
     }
 
-    audio.howlInst.loop(loopPreview);
+    audio.howlInst.loop(true);
 
     return () => {
       if (!audio.isUnloading) {
