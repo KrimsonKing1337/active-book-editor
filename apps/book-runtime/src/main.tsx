@@ -13,6 +13,7 @@ import type { BookDocument } from '@types';
 
 import { BookPage, StartReading } from '@components';
 import { loadCustomComponents } from './utils/loadCustomComponents';
+import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
 
 import bookDocumentDefault from '../book.json';
 
@@ -36,6 +37,8 @@ if (!root) {
   throw new Error('Root element was not found');
 }
 
+const bookRuntime = createBookRuntime('reader');
+
 const start = async (): Promise<void> => {
   const { components } = await loadCustomComponents();
 
@@ -57,7 +60,7 @@ const start = async (): Promise<void> => {
             />
             <Route
               path="/page-1"
-              element={<BookPage document={bookDocumentDefault as BookDocument} customComponents={components} />}
+              element={<BookPage document={bookDocumentDefault as BookDocument} customComponents={components} bookRuntime={bookRuntime} />}
             />
           </Routes>
         </AppWrapper>
