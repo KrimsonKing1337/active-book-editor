@@ -1,0 +1,186 @@
+import { useEffect, useState } from 'react';
+
+import { Audio } from 'activeBook-core/components/ProxyHooks';
+import { useAudioController } from 'activeBook-core/hooks/effects';
+import { useDispatch } from 'activeBook-core/store';
+import { mainActions } from 'activeBook-core/store/main';
+
+import type { BookProject } from '@project/@types';
+
+import type { AudioEffectDraft } from '../../@types';
+import { usePageEffects } from '../../PageEffectsContext';
+
+import { resolveAudioSource, type ResolvedAudioSource } from './utils';
+
+type AudioInstanceProps = {
+  effect: AudioEffectDraft;
+  project: BookProject | null;
+};
+
+type AudioInstancesProps = {
+  project: BookProject | null;
+};
+
+const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
+  const dispatch = useDispatch();
+  const { setAudioPreviewStatus } = usePageEffects();
+  const { audio } = useAudioController(effect.id);
+
+  const [resolved, setResolved] = useState<ResolvedAudioSource | null>(null);
+
+  const { id, options } = effect;
+  const {
+    src,
+    type = 'sfx',
+    loop = false,
+    relativeVolume = 100,
+    screamer = false,
+    delay = 0,
+    stopBy = 0,
+  } = options;
+
+  useEffect(() => {
+    let cancelled = false;
+    let blobUrl: string | null = null;
+
+    setResolved(null);
+    setAudioPreviewStatus(id, src.trim() ? { state: 'loading' } : { state: 'empty' });
+
+    if (!src.trim()) {
+      return;
+    }
+
+    const prepare = async () => {
+      try {
+        const source = await resolveAudioSource(src, project);
+
+        if (source.src.startsWith('blob:') && source.src !== src.trim()) {
+          blobUrl = source.src;
+        }
+
+        if (cancelled) {
+          if (blobUrl) {
+            URL.revokeObjectURL(blobUrl);
+          }
+
+          return;
+        }
+
+        // useAudio creates its HowlWrapper once the core's audio gate is open.
+        // Auto-play remains disabled in the editor.
+        dispatch(mainActions.setIsAudioUnlocked(true));
+        setResolved(source);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : 'Не удалось прочитать аудиофайл';
+
+        setAudioPreviewStatus(id, { state: 'error', error: message });
+      }
+    };
+
+    void prepare();
+
+    return () => {
+      cancelled = true;
+
+      if (blobUrl) {
+        URL.revokeObjectURL(blobUrl);
+      }
+    };
+  }, [id, src, project, dispatch, setAudioPreviewStatus]);
+
+  useEffect(() => {
+    return () => {
+      setAudioPreviewStatus(id, null);
+    };
+  }, [id, setAudioPreviewStatus]);
+
+  const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
+
+  useEffect(() => {
+    if (!audio || !currentSource) {
+      return;
+    }
+
+    const handleReady = () => {
+      setAudioPreviewStatus(id, { state: 'ready' });
+    };
+
+    const handleError = () => {
+      setAudioPreviewStatus(id, { state: 'error', error: 'Не удалось загрузить аудио в Howler' });
+    };
+
+    audio.howlInst.on('load', handleReady);
+    audio.howlInst.on('loaderror', handleError);
+
+    if (audio.state() === 'loaded') {
+      handleReady();
+    }
+
+    return () => {
+      audio.howlInst.off('load', handleReady);
+      audio.howlInst.off('loaderror', handleError);
+    };
+  }, [audio, currentSource, id, setAudioPreviewStatus]);
+
+  // These options can be changed without replacing a registered HowlWrapper.
+  useEffect(() => {
+    if (!audio || !currentSource) {
+      return;
+    }
+
+    audio.howlInst.loop(loop);
+    audio.type = type;
+    audio.relativeVolume = relativeVolume;
+
+    if (screamer) {
+      audio.howlInst.volume(1);
+    } else {
+      audio.volume(audio.getVolumeByType() / 100);
+    }
+  }, [audio, currentSource, loop, type, relativeVolume, screamer]);
+
+  if (!currentSource) {
+    return null;
+  }
+
+  // The editor owns the audio instance, not the settings modal.
+  // In auto lifecycle core removes it from Redux and unloads it on unmount.
+  return (
+    <Audio
+      key={`${id}:${currentSource.src}:${delay}:${stopBy}`}
+      id={id}
+      page={0}
+      src={currentSource.src}
+      format={currentSource.format}
+      type={type}
+      loop={loop}
+      playOnLoad={false}
+      relativeVolume={relativeVolume}
+      screamer={screamer}
+      delay={delay}
+      stopBy={stopBy}
+      fadeOutWhenUnload={false}
+      lifecycle="auto"
+    />
+  );
+};
+
+export const AudioInstances = ({ project }: AudioInstancesProps) => {
+  const { effects } = usePageEffects();
+
+  const audioEffects = effects.filter((effectCur): effectCur is AudioEffectDraft => effectCur.type === 'audio');
+
+  return (
+    <>
+      {audioEffects.map((effectCur) => {
+        return (
+          <AudioInstance key={effectCur.id} effect={effectCur} project={project} />
+        );
+      })}
+    </>
+  );
+};
