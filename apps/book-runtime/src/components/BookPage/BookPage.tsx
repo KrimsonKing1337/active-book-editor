@@ -4,7 +4,7 @@ import { PageWrapper } from 'activeBook-core/components';
 import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
 
 import type { BookDocument } from '@types';
-import type { BookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import type { BookRuntime } from '@active-book/types';
 
 import { renderNode } from '@utils/renderNode';
 
