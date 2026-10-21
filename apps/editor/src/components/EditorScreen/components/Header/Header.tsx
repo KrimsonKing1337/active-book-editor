@@ -20,7 +20,6 @@ type HeaderProps = {
   onOpenProject: () => Promise<void>;
   onSaveProject: () => Promise<void>;
   onToggleStructure: () => void;
-  onInsertComponent: (name: string) => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
@@ -42,7 +41,6 @@ export const Header = ({
   onOpenProject,
   onSaveProject,
   onToggleStructure,
-  onInsertComponent,
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextComponent,
@@ -98,15 +96,6 @@ export const Header = ({
           onClick={onToggleStructure}
         >
           {structureButtonLabel}
-        </button>
-
-        <button
-          className={styles.Button}
-          type="button"
-          disabled={buttonIsDisabled}
-          onClick={() => onInsertComponent('Counter')}
-        >
-          Добавить Counter
         </button>
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>

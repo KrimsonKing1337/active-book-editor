@@ -11,30 +11,23 @@ import {
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { Counter } from '@components/Counter';
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
 import type { BookComponentProps } from '@active-book/types';
 
-import styles from './CoreComponentNode.module.scss';
+import styles from './ComponentNode.module.scss';
 
 const bookRuntime = createBookRuntime('editor');
 
-const componentRegistry = {
-  Counter,
-} as const;
-
-type ComponentName = keyof typeof componentRegistry;
-
-const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
+const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
 
-  const name = node.attrs.name as ComponentName;
+  const name = node.attrs.name as string;
   const packageName = node.attrs.package as string | null;
   const customId = packageName ? `${packageName}/${name}` : null;
   const definition = customComponentDefinitions.find((cur) => cur.id === customId);
   const componentLabel = definition?.title ?? name;
 
-  const Component = (customId ? customComponents[customId] : componentRegistry[name]) as
+  const Component = (customId ? customComponents[customId] : undefined) as
     ComponentType<BookComponentProps> | undefined;
 
   const handleSelectComponent = () => {
@@ -54,7 +47,7 @@ const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   );
 
   return (
-    <NodeViewWrapper className={styles.CoreComponentNode} data-component={name} data-active-book-node={name}>
+    <NodeViewWrapper className={styles.ComponentNode} data-component={name} data-active-book-node={name}>
       <button className={styles.Label} type="button" onClick={handleSelectComponent}>
         {componentLabel}
       </button>
@@ -64,7 +57,7 @@ const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   );
 };
 
-export const CoreComponentNode = Node.create({
+export const ComponentNode = Node.create({
   name: 'coreComponent',
   priority: 110,
   group: 'activeBookBlock',
@@ -74,7 +67,7 @@ export const CoreComponentNode = Node.create({
   addAttributes() {
     return {
       name: {
-        default: 'Counter',
+        default: null,
       },
       package: {
         default: null,
@@ -100,7 +93,7 @@ export const CoreComponentNode = Node.create({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(CoreComponentView);
+    return ReactNodeViewRenderer(ComponentView);
   },
 
   addKeyboardShortcuts() {

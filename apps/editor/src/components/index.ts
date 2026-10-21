@@ -1,4 +1,3 @@
-export * from './CoreComponentNode';
-export * from './Counter';
+export * from './ComponentNode';
 export * from './EditorScreen';
 export * from './EditableComponentNode';

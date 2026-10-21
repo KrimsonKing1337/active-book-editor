@@ -10,7 +10,7 @@ import type { PageEffects } from '@active-book/book-builder/effects';
 
 import { ExistingProjectError, FileSystemAccessUnsupportedError, InvalidProjectError } from '@project/errors';
 
-import { CoreComponentNode } from '@components/CoreComponentNode';
+import { ComponentNode } from '@components/ComponentNode';
 import { H1Node, H2Node, PNode } from '@components/EditableComponentNode';
 
 import type { BuildState, TextComponentName } from './@types';
@@ -18,7 +18,7 @@ import type { BuildState, TextComponentName } from './@types';
 export const AUTO_SAVE_DELAY = 1500;
 
 export const activeBookBlockNodes = [
-  CoreComponentNode,
+  ComponentNode,
   PNode,
   H1Node,
   H2Node,
@@ -156,17 +156,6 @@ export const insertEditorContent = (editor: Editor | null, content: JSONContent)
   const contentEditorChain = focusedEditorChain.insertContent(content);
 
   contentEditorChain.run();
-};
-
-export const insertComponent = (editor: Editor | null, name: string): void => {
-  const componentContent: JSONContent = {
-    type: 'coreComponent',
-    attrs: {
-      name,
-    },
-  };
-
-  insertEditorContent(editor, componentContent);
 };
 
 export const insertCustomComponent = (

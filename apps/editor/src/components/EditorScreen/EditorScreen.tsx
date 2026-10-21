@@ -31,7 +31,6 @@ import {
   editorExtensions,
   createEmptyDocument,
   getBuildStateLabel,
-  insertComponent,
   insertCustomComponent,
   insertTextComponent,
 } from './utils';
@@ -164,10 +163,6 @@ export const EditorScreen = () => {
     setShowStructure((structureIsVisible) => !structureIsVisible);
   };
 
-  const handleInsertComponent = (name: string) => {
-    insertComponent(editor, name);
-  };
-
   const importCustomComponents = async () => {
     if (isProjectBusy) {
       return;
@@ -247,7 +242,6 @@ export const EditorScreen = () => {
           onOpenProject={handleOpenProject}
           onSaveProject={handleSaveProject}
           onToggleStructure={toggleStructure}
-          onInsertComponent={handleInsertComponent}
           onInsertCustomComponent={handleInsertCustomComponent}
           customComponentDefinitions={customComponentDefinitions}
           onInsertTextComponent={handleInsertTextComponent}
