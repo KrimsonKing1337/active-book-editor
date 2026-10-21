@@ -4,17 +4,21 @@ import {
   FileSystemAccessUnsupportedError,
   isAbortError,
 } from './errors';
+
 import type {
   DirectoryPickerWindow,
   ProjectDirectoryHandle,
   ProjectPermissionState,
 } from './fileSystemAccess';
+
 import { LocalProjectStorage } from './LocalProjectStorage';
+
 import {
   clearLastProjectHandle,
   getLastProjectHandle,
   saveLastProjectHandle,
 } from './recentProjectStore';
+
 import type {
   BookProject,
   OpenedBookProject,
@@ -27,7 +31,9 @@ const pickProjectDirectory = async (): Promise<ProjectDirectoryHandle> => {
     throw new FileSystemAccessUnsupportedError();
   }
 
-  return (window as DirectoryPickerWindow).showDirectoryPicker({
+  const directoryPickerWindow = window as DirectoryPickerWindow;
+
+  return directoryPickerWindow.showDirectoryPicker({
     id: 'active-book-project',
     mode: 'readwrite',
   });
@@ -40,7 +46,9 @@ const queryWritePermission = async (
     return 'prompt';
   }
 
-  return handle.queryPermission({ mode: 'readwrite' });
+  return handle.queryPermission({
+    mode: 'readwrite',
+  });
 };
 
 const requestWritePermission = async (
@@ -108,6 +116,7 @@ export const createLocalProject = async (
 
 export const openLocalProject = async (): Promise<OpenedBookProject> => {
   const directoryHandle = await pickProjectDirectory();
+
   return openProjectFromHandle(directoryHandle);
 };
 
@@ -129,11 +138,16 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
     directoryHandle = await getLastProjectHandle();
   } catch (error) {
     console.warn('[project] Could not read the last project.', error);
-    return { status: 'none' };
+
+    return {
+      status: 'none',
+    };
   }
 
   if (!directoryHandle) {
-    return { status: 'none' };
+    return {
+      status: 'none',
+    };
   }
 
   const permission = await queryWritePermission(directoryHandle);
@@ -146,8 +160,13 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
       };
     } catch (error) {
       console.warn('[project] Could not restore the last project.', error);
+
+
       await forgetProject();
-      return { status: 'unavailable' };
+
+      return {
+        status: 'unavailable',
+      };
     }
   }
 
@@ -163,15 +182,15 @@ export const restoreLastProject = async (): Promise<RestoreLastProjectResult> =>
     };
   }
 
-  return { status: 'unavailable' };
+  return {
+    status: 'unavailable',
+  };
 };
 
 export const continueLastProject = async (
   pendingProject: PendingLocalProject,
 ): Promise<OpenedBookProject | null> => {
-  const permission = await requestWritePermission(
-    pendingProject.directoryHandle,
-  );
+  const permission = await requestWritePermission(pendingProject.directoryHandle);
 
   if (permission !== 'granted') {
     return null;
@@ -180,4 +199,6 @@ export const continueLastProject = async (
   return openProjectFromHandle(pendingProject.directoryHandle);
 };
 
-export { isAbortError };
+export {
+  isAbortError,
+};

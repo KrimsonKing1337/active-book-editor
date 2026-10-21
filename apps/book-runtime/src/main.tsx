@@ -3,15 +3,18 @@ import ReactDOM from 'react-dom/client';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import type { Config } from 'activeBook-core/@types';
-import { Page0 } from 'activeBook-core/pages/Page0';
 import { StoreProvider } from 'activeBook-core/store';
+import { Page0 } from 'activeBook-core/pages/Page0';
 import { AppWrapper } from 'activeBook-core/components';
 
 import 'activeBook-core/styles/styles.scss';
 
 import type { BookDocument } from '@types';
 
+import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+
 import { BookPage, StartReading } from '@components';
+
 import { loadCustomComponents } from './utils/loadCustomComponents';
 
 import bookDocumentDefault from '../book.json';
@@ -36,8 +39,20 @@ if (!root) {
   throw new Error('Root element was not found');
 }
 
+const bookRuntime = createBookRuntime('reader');
+
 const start = async (): Promise<void> => {
   const { components } = await loadCustomComponents();
+
+  const document = bookDocumentDefault as BookDocument;
+
+  const element = (
+    <BookPage
+      document={document}
+      customComponents={components}
+      bookRuntime={bookRuntime}
+    />
+  );
 
   ReactDOM.createRoot(root).render(
     <StoreProvider>
@@ -55,9 +70,10 @@ const start = async (): Promise<void> => {
                 />
               )}
             />
+
             <Route
               path="/page-1"
-              element={<BookPage document={bookDocumentDefault as BookDocument} customComponents={components} />}
+              element={element}
             />
           </Routes>
         </AppWrapper>

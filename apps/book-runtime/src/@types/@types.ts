@@ -1,3 +1,7 @@
+import type { ComponentType } from 'react';
+
+import type { BookComponentProps } from '@active-book/types';
+
 import type { BuiltPageEffects } from '@root/packages/book-builder/src/effects';
 
 export type BookMark = {
@@ -26,3 +30,5 @@ export type BookDocument = {
   };
   content?: BookNode[];
 };
+
+export type CustomComponentType = ComponentType<BookComponentProps> | undefined;

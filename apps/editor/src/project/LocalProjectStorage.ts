@@ -9,10 +9,13 @@ import type {
   ProjectDirectoryHandle,
   ProjectFileHandle,
 } from './fileSystemAccess';
+
 import {
   ExistingProjectError,
   InvalidProjectError,
 } from './errors';
+
+import { normalizeLegacyNodeNames } from './normalizeBookDocument';
 
 const BOOK_FILE_NAME = 'book.json';
 const PACKAGE_FILE_NAME = 'package.json';
@@ -20,7 +23,9 @@ const ASSETS_DIRECTORY_NAME = 'assets';
 const DEPENDENCIES_DIRECTORY_NAME = 'dependencies';
 
 const getIsBookDocument = (value: unknown): value is JSONContent => {
-  type Value = { type?: unknown };
+  type Value = {
+    type?: unknown;
+  };
 
   return typeof value === 'object'
     && value !== null
@@ -45,21 +50,21 @@ export class LocalProjectStorage implements ProjectStorage {
     directoryHandle: ProjectDirectoryHandle,
     relativePath: string,
   ): AsyncGenerator<ProjectBuildFile> {
-    for await (const handle of directoryHandle.values()) {
-      const handlePath = `${relativePath}/${handle.name}`;
+    for await (const entryHandle of directoryHandle.values()) {
+      const entryPath = `${relativePath}/${entryHandle.name}`;
 
-      if (handle.kind === 'file') {
-        const file = await handle.getFile();
+      if (entryHandle.kind === 'file') {
+        const file = await entryHandle.getFile();
 
         yield {
-          path: handlePath,
+          path: entryPath,
           data: file,
         };
 
         continue;
       }
 
-      yield* this.getDirectoryBuildFiles(handle, handlePath);
+      yield* this.getDirectoryBuildFiles(entryHandle, entryPath);
     }
   }
 
@@ -88,18 +93,23 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    const fileHandle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, { create: true });
+    const fileHandle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, {
+      create: true,
+    });
+
     const writable = await fileHandle.createWritable();
 
     try {
-      const packageJson = {
+      const packageMeta = {
         name: 'active-book-project',
         private: true,
         version: '0.0.0',
         dependencies: {},
       };
 
-      await writable.write(`${JSON.stringify(packageJson, null, 2)}\n`);
+      const packageMetaJson = JSON.stringify(packageMeta, null, 2);
+
+      await writable.write(`${packageMetaJson}\n`);
       await writable.close();
     } catch (error) {
       await writable.abort?.();
@@ -148,7 +158,7 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new InvalidProjectError('book.json не содержит документ Active Book.');
     }
 
-    return document as JSONContent;
+    return normalizeLegacyNodeNames(document as JSONContent);
   }
 
   async writeBook(document: JSONContent): Promise<void> {
@@ -157,13 +167,13 @@ export class LocalProjectStorage implements ProjectStorage {
     const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, {
       create: true,
     });
+
     const writable = await fileHandle.createWritable();
 
     try {
-      const jsonString = `${JSON.stringify(document, null, 2)}\n`;
+      const documentJson = JSON.stringify(document, null, 2);
 
-      await writable.write(jsonString);
-
+      await writable.write(`${documentJson}\n`);
       await writable.close();
     } catch (error) {
       await writable.abort?.();
@@ -176,18 +186,29 @@ export class LocalProjectStorage implements ProjectStorage {
     try {
       const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME);
 
-      return (await handle.getFile()).text();
+      const file = await handle.getFile();
+
+      return file.text();
     } catch (error) {
       if (!(error instanceof DOMException) || error.name !== 'NotFoundError') {
         throw error;
       }
 
-      return JSON.stringify({ name: 'active-book-project', private: true, dependencies: {} });
+      const defaultPackageDescription = {
+        name: 'active-book-project',
+        private: true,
+        dependencies: {},
+      };
+
+      return JSON.stringify(defaultPackageDescription);
     }
   }
 
   async writePackageJson(content: string): Promise<void> {
-    const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, { create: true });
+    const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, {
+      create: true,
+    });
+
     const writable = await handle.createWritable();
 
     try {
@@ -214,12 +235,14 @@ export class LocalProjectStorage implements ProjectStorage {
 
     const filename = file.name.split(/[/\\]/).pop() ?? 'components.tgz';
     const base = filename.replace(/\.tgz$/i, '');
+
     let candidate = filename;
     let index = 1;
 
     while (true) {
       try {
         await directory.getFileHandle(candidate);
+
         candidate = `${base}-${index}.tgz`;
         index += 1;
       } catch (error) {
@@ -231,7 +254,10 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    const handle = await directory.getFileHandle(candidate, { create: true });
+    const handle = await directory.getFileHandle(candidate, {
+      create: true,
+    });
+
     const writable = await handle.createWritable();
 
     try {
@@ -248,24 +274,33 @@ export class LocalProjectStorage implements ProjectStorage {
   async getDependencyFile(relativePath: string): Promise<File> {
     const parts = relativePath.replaceAll('\\', '/').split('/');
 
-    if (parts[0] !== DEPENDENCIES_DIRECTORY_NAME || parts.length !== 2
-      || !parts[1].toLowerCase().endsWith('.tgz') || parts[1] === '..') {
+    const isInvalidDirectory = parts[0] !== DEPENDENCIES_DIRECTORY_NAME;
+    const isInvalidPathLength = parts.length !== 2;
+    const isInvalidFileName = parts[1] === '..' || !parts[1]?.toLowerCase().endsWith('.tgz');
+
+    if (isInvalidDirectory || isInvalidPathLength || isInvalidFileName) {
       throw new Error(`Недопустимый путь библиотеки: ${relativePath}`);
     }
 
     const directory = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME);
 
-    return (await directory.getFileHandle(parts[1])).getFile();
+    const fileHandle = await directory.getFileHandle(parts[1]);
+
+    return fileHandle.getFile();
   }
 
   async getAssetFile(path: string): Promise<File> {
     const relativePath = path.replace(/^\.\//, '').replace(/^\//, '');
     const parts = relativePath.split('/');
 
+    const hasInvalidPathSegment = parts.some((segment) => {
+      return !segment || segment === '.' || segment === '..';
+    });
+
     if (
       parts[0] !== ASSETS_DIRECTORY_NAME
       || parts.length < 2
-      || parts.some((part) => !part || part === '.' || part === '..')
+      || hasInvalidPathSegment
       || relativePath.includes('\\')
     ) {
       throw new Error('Путь должен указывать на файл внутри assets/');
@@ -273,7 +308,9 @@ export class LocalProjectStorage implements ProjectStorage {
 
     let directory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME);
 
-    for (const directoryName of parts.slice(1, -1)) {
+    const directories = parts.slice(1, -1);
+
+    for (const directoryName of directories) {
       directory = await directory.getDirectoryHandle(directoryName);
     }
 
@@ -291,13 +328,16 @@ export class LocalProjectStorage implements ProjectStorage {
       const relativePath = await assetsDirectory.resolve(sourceHandle);
 
       if (relativePath?.length) {
+        const assetPathSegments = [ASSETS_DIRECTORY_NAME, ...relativePath];
+
         // A file already inside assets/ must not be copied, even when nested.
-        return [ASSETS_DIRECTORY_NAME, ...relativePath].join('/');
+        return assetPathSegments.join('/');
       }
     }
 
     const name = file.name.split(/[/\\]/).pop() || 'asset';
     const dotIndex = name.lastIndexOf('.');
+
     const baseName = dotIndex > 0 ? name.slice(0, dotIndex) : name;
     const extension = dotIndex > 0 ? name.slice(dotIndex) : '';
 
@@ -308,6 +348,7 @@ export class LocalProjectStorage implements ProjectStorage {
     while (true) {
       try {
         await assetsDirectory.getFileHandle(candidate);
+
         candidate = `${baseName}-${suffix}${extension}`;
         suffix += 1;
       } catch (error) {
@@ -319,7 +360,10 @@ export class LocalProjectStorage implements ProjectStorage {
       }
     }
 
-    const fileHandle = await assetsDirectory.getFileHandle(candidate, { create: true });
+    const fileHandle = await assetsDirectory.getFileHandle(candidate, {
+      create: true,
+    });
+
     const writable = await fileHandle.createWritable();
 
     try {
@@ -327,6 +371,7 @@ export class LocalProjectStorage implements ProjectStorage {
       await writable.close();
     } catch (error) {
       await writable.abort?.();
+
       throw error;
     }
 

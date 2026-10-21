@@ -8,7 +8,4 @@ export type {
   FlashlightOptions,
 } from '@active-book/book-builder/effects';
 
-export type OptionUpdater<T> = <K extends keyof T>(
-  name: K,
-  value: T[K]
-) => void;
+export type OptionUpdater<T> = <K extends keyof T>(name: K, value: T[K]) => void;

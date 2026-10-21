@@ -1,4 +1,4 @@
-import { useSyncExternalStore, type ComponentType } from 'react';
+import { type ComponentType, useSyncExternalStore } from 'react';
 
 import type { BrowserLibrary, BrowserComponentDefinition } from '@active-book/book-builder/customComponents/browser';
 
@@ -31,16 +31,22 @@ export const useCustomComponents = (): CustomComponentRegistry => {
 
 export const replaceCustomLibraries = (libraries: BrowserLibrary[]): void => {
   const oldLibraries = installedLibraries;
+
   const components: Record<string, ComponentType> = {};
   const definitions: BrowserComponentDefinition[] = [];
 
   for (const library of libraries) {
     Object.assign(components, library.components);
+
     definitions.push(...library.definitions);
   }
 
   installedLibraries = libraries;
-  current = { components, definitions };
+
+  current = {
+    components,
+    definitions,
+  };
 
   for (const listener of subscribers) {
     listener();

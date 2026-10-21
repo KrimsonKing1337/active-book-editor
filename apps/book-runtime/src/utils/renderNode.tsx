@@ -2,7 +2,8 @@ import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
-import type { BookNode } from '@types';
+import type { BookNode, CustomComponentType } from '@types';
+import type { BookRuntime } from '@active-book/types';
 
 const renderText = (node: BookNode): ReactNode => {
   const marks = node.marks ?? [];
@@ -19,11 +20,19 @@ const renderText = (node: BookNode): ReactNode => {
   return result;
 };
 
-export const renderNode = (
-  node: BookNode,
-  key: Key,
-  customComponents: Record<string, ComponentType>,
-): ReactNode => {
+type RenderNodeParams = {
+  node: BookNode;
+  key: Key;
+  customComponents: Record<string, ComponentType>;
+  bookRuntime: BookRuntime;
+};
+
+export const renderNode = ({
+  node,
+  key,
+  customComponents,
+  bookRuntime,
+}: RenderNodeParams): ReactNode => {
   if (node.type === 'text') {
     return (
       <Fragment key={key}>
@@ -39,12 +48,19 @@ export const renderNode = (
   const content = node.content ?? [];
 
   const children = content.map((child, index) => {
-    return renderNode(child, index, customComponents);
+    return renderNode({
+      node: child,
+      key: index,
+      customComponents,
+      bookRuntime,
+    });
   });
 
-  if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
-  if (node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
-  if (node.type === 'activeBookP') return <P key={key} data-active-book-node="P">{children}</P>;
+  if (node.type === 'H1' || node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
+  if (node.type === 'H2' || node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
+  if (node.type === 'P' || node.type === 'activeBookP' || node.type === 'paragraph') {
+    return <P key={key} data-active-book-node="P">{children}</P>;
+  }
 
   if (node.type === 'heading') {
     return node.attrs?.level === 1
@@ -52,15 +68,18 @@ export const renderNode = (
       : <H2 key={key}>{children}</H2>;
   }
 
-  if (node.type === 'paragraph') return <P key={key} data-active-book-node="P">{children}</P>;
-
   if (node.type === 'coreComponent' && typeof node.attrs?.package === 'string') {
     const componentId = `${node.attrs.package}/${node.attrs.name}`;
-    const CustomComponent = customComponents[componentId];
 
-    return CustomComponent
-      ? <CustomComponent key={key} />
-      : <span key={key}>Unknown custom component: {componentId}</span>;
+    const CustomComponent = customComponents[componentId] as CustomComponentType;
+
+    const unknownComponent = (
+      <span key={key}>
+        Unknown custom component: {componentId}
+      </span>
+    );
+
+    return CustomComponent ? <CustomComponent key={key} book={bookRuntime} /> : unknownComponent;
   }
 
   if (node.type === 'coreComponent' && node.attrs?.name === 'Counter') {

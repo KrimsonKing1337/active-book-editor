@@ -4,10 +4,13 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-import { useCustomComponents, replaceCustomLibraries } from '@project/customComponentRegistry';
+import { App, PageWrapper } from 'activeBook-core/components';
+
+import type { BrowserLibrary } from '@active-book/book-builder/customComponents/browser';
+
 import { importBrowserLibrary, loadProjectLibraries } from '@project/customComponents';
 
-import { App, PageWrapper } from 'activeBook-core/components';
+import { useCustomComponents, replaceCustomLibraries } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
@@ -21,7 +24,15 @@ import {
   useSaveShortcut,
 } from './hooks';
 
-import { CustomComponentsWarningModal, Header, PageEffects, RestoreBanner } from './components';
+import {
+  CustomComponentsWarningModal,
+  Header,
+  PageEffects,
+  PageEffectsProvider,
+  RestoreBanner,
+} from './components';
+
+import { AudioInstances } from './components/PageEffects/components/AudioInstances';
 
 import styles from './EditorScreen.module.scss';
 
@@ -30,7 +41,6 @@ import {
   editorExtensions,
   createEmptyDocument,
   getBuildStateLabel,
-  insertComponent,
   insertCustomComponent,
   insertTextComponent,
 } from './utils';
@@ -44,16 +54,17 @@ export const EditorScreen = () => {
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
   const [librariesRevision, setLibrariesRevision] = useState(0);
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
+
   const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
+  const [showSavedStatus, setShowSavedStatus] = useState(false);
+  const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
+
   const [showStructure, setShowStructure] = useState(() => {
     return localStorage.getItem(SHOW_STRUCTURE_STORAGE_KEY) === 'true';
   });
-  const [showSavedStatus, setShowSavedStatus] = useState(false);
-
-  const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
   const editor = useEditor({
     content: createEmptyDocument(),
@@ -124,7 +135,11 @@ export const EditorScreen = () => {
 
     const load = async () => {
       try {
-        const libraries = project ? await loadProjectLibraries(project.storage) : [];
+        let libraries: BrowserLibrary[] = [];
+
+        if (project) {
+          libraries = await loadProjectLibraries(project.storage);
+        }
 
         if (cancelled) {
           libraries.forEach((library) => library.dispose());
@@ -136,7 +151,10 @@ export const EditorScreen = () => {
       } catch (error) {
         if (!cancelled) {
           console.error('[custom-components] Load failed.', error);
-          setProjectMessage(error instanceof Error ? error.message : 'Ошибка загрузки библиотек');
+
+          const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки библиотек';
+
+          setProjectMessage(errorMessage);
           replaceCustomLibraries([]);
         }
       }
@@ -163,10 +181,6 @@ export const EditorScreen = () => {
     setShowStructure((structureIsVisible) => !structureIsVisible);
   };
 
-  const handleInsertComponent = (name: string) => {
-    insertComponent(editor, name);
-  };
-
   const importCustomComponents = async () => {
     if (isProjectBusy) {
       return;
@@ -190,6 +204,7 @@ export const EditorScreen = () => {
     } catch (error) {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
         console.error('[custom-components] Import failed.', error);
+
         setProjectMessage(error instanceof Error ? error.message : 'Ошибка импорта TGZ');
       }
     } finally {
@@ -229,64 +244,66 @@ export const EditorScreen = () => {
   };
 
   return (
-    <div className={editorScreenClassNames}>
-      <Header
-        projectName={projectName}
-        projectMessage={projectMessage}
-        isDirty={isDirty}
-        isProjectBusy={isProjectBusy}
-        showSavedStatus={showSavedStatus}
-        showStructure={showStructure}
-        buildState={buildState}
-        buttonIsDisabled={buttonIsDisabled}
-        structureButtonIsDisabled={structureButtonIsDisabled}
-
-        onNewProject={handleNewProject}
-        onOpenProject={handleOpenProject}
-        onSaveProject={handleSaveProject}
-        onToggleStructure={toggleStructure}
-        onInsertComponent={handleInsertComponent}
-        onInsertCustomComponent={handleInsertCustomComponent}
-        customComponentDefinitions={customComponentDefinitions}
-        onInsertTextComponent={handleInsertTextComponent}
-        onBuildBook={buildBook}
-        onImportCustomComponents={handleImportCustomComponents}
-      />
-
-      {isImportWarningOpen && (
-        <CustomComponentsWarningModal
-          onClose={() => setIsImportWarningOpen(false)}
-          onConfirm={handleConfirmCustomComponentsImport}
-        />
-      )}
-
-      {pendingRestore && (
-        <RestoreBanner
-          pendingRestore={pendingRestore}
+    <PageEffectsProvider editor={editor}>
+      <div className={editorScreenClassNames}>
+        <Header
+          projectName={projectName}
+          projectMessage={projectMessage}
+          isDirty={isDirty}
           isProjectBusy={isProjectBusy}
-          onContinueLastProject={handleContinueLastProject}
-          onForgetLastProject={handleForgetLastProject}
+          showSavedStatus={showSavedStatus}
+          showStructure={showStructure}
+          buildState={buildState}
+          buttonIsDisabled={buttonIsDisabled}
+          structureButtonIsDisabled={structureButtonIsDisabled}
+
+          onNewProject={handleNewProject}
+          onOpenProject={handleOpenProject}
+          onSaveProject={handleSaveProject}
+          onToggleStructure={toggleStructure}
+          onInsertCustomComponent={handleInsertCustomComponent}
+          customComponentDefinitions={customComponentDefinitions}
+          onInsertTextComponent={handleInsertTextComponent}
+          onBuildBook={buildBook}
+          onImportCustomComponents={handleImportCustomComponents}
         />
-      )}
 
-      <div className={styles.BuildStatus} data-state={buildState}>
-        {buildStateLabel}
+        {isImportWarningOpen && (
+          <CustomComponentsWarningModal
+            onClose={() => setIsImportWarningOpen(false)}
+            onConfirm={handleConfirmCustomComponentsImport}
+          />
+        )}
+
+        {pendingRestore && (
+          <RestoreBanner
+            pendingRestore={pendingRestore}
+            isProjectBusy={isProjectBusy}
+            onContinueLastProject={handleContinueLastProject}
+            onForgetLastProject={handleForgetLastProject}
+          />
+        )}
+
+        <div className={styles.BuildStatus} data-state={buildState}>
+          {buildStateLabel}
+        </div>
+
+        <main className={styles.Canvas}>
+          <App
+            config={editorConfig}
+            appMode="editor"
+            tableOfContents={[]}
+            rangeEffects={[]}
+          >
+            <AudioInstances project={project} />
+            <PageEffects project={project} />
+
+            <PageWrapper>
+              <EditorContent editor={editor} />
+            </PageWrapper>
+          </App>
+        </main>
       </div>
-
-      <main className={styles.Canvas}>
-        <App
-          config={editorConfig}
-          appMode="editor"
-          tableOfContents={[]}
-          rangeEffects={[]}
-        >
-          <PageEffects editor={editor} project={project} />
-
-          <PageWrapper>
-            <EditorContent editor={editor} />
-          </PageWrapper>
-        </App>
-      </main>
-    </div>
+    </PageEffectsProvider>
   );
 };

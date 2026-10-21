@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react';
+
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 
@@ -9,26 +11,24 @@ import {
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { Counter } from '@components/Counter';
+import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import type { BookComponentProps } from '@active-book/types';
 
-import styles from './CoreComponentNode.module.scss';
+import styles from './ComponentNode.module.scss';
 
-const componentRegistry = {
-  Counter,
-} as const;
+const bookRuntime = createBookRuntime('editor');
 
-type ComponentName = keyof typeof componentRegistry;
-
-const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
+const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
 
-  const name = node.attrs.name as ComponentName;
+  const name = node.attrs.name as string;
   const packageName = node.attrs.package as string | null;
   const customId = packageName ? `${packageName}/${name}` : null;
   const definition = customComponentDefinitions.find((cur) => cur.id === customId);
   const componentLabel = definition?.title ?? name;
 
-  const Component = customId ? customComponents[customId] : componentRegistry[name];
+  const Component = (customId ? customComponents[customId] : undefined) as
+    ComponentType<BookComponentProps> | undefined;
 
   const handleSelectComponent = () => {
     const position = getPos();
@@ -47,27 +47,27 @@ const CoreComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   );
 
   return (
-    <NodeViewWrapper className={styles.CoreComponentNode} data-component={name} data-active-book-node={name}>
+    <NodeViewWrapper className={styles.ComponentNode} data-component={name} data-active-book-node={name}>
       <button className={styles.Label} type="button" onClick={handleSelectComponent}>
         {componentLabel}
       </button>
 
-      {Component ? <Component /> : unknownComponent}
+      {Component ? <Component book={bookRuntime} /> : unknownComponent}
     </NodeViewWrapper>
   );
 };
 
-export const CoreComponentNode = Node.create({
+export const ComponentNode = Node.create({
   name: 'coreComponent',
   priority: 110,
-  group: 'activeBookBlock',
+  group: 'bookBlock',
   atom: true,
   selectable: true,
 
   addAttributes() {
     return {
       name: {
-        default: 'Counter',
+        default: null,
       },
       package: {
         default: null,
@@ -93,7 +93,7 @@ export const CoreComponentNode = Node.create({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(CoreComponentView);
+    return ReactNodeViewRenderer(ComponentView);
   },
 
   addKeyboardShortcuts() {
@@ -108,7 +108,7 @@ export const CoreComponentNode = Node.create({
       if (doc.childCount === 1) {
         return this.editor.commands.insertContentAt(
           { from: selection.from, to: selection.to },
-          { type: 'activeBookP' },
+          { type: 'P' },
         );
       }
 

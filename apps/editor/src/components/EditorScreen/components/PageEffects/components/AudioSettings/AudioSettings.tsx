@@ -392,7 +392,6 @@ export const AudioSettings = ({
 
         <AudioPreview
           effect={effect}
-          project={project}
           onLoadingChange={setIsPreviewLoading}
         />
 

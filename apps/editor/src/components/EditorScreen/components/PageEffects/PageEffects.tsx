@@ -1,9 +1,4 @@
-import { useEffect, useState } from 'react';
-
-import type { Editor } from '@tiptap/core';
-
-import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
-import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
+import { useState } from 'react';
 
 import type { BookProject } from '@project/@types';
 
@@ -20,104 +15,21 @@ import type {
   FlashlightEffectDraft,
 } from './@types';
 
+import { usePageEffects } from './PageEffectsContext';
+
 import { EffectsModal } from './components';
 
 import styles from './PageEffects.module.scss';
 
 export type PageEffectsProps = {
-  editor: Editor | null;
   project: BookProject | null;
 };
 
-const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
-  const raw: unknown = editor?.state.doc.attrs.pageEffects;
+export const PageEffects = ({ project }: PageEffectsProps) => {
+  const { effects, writeEffects } = usePageEffects();
 
-  if (Array.isArray(raw)) {
-    const grouped = normalizePageEffects(raw);
-
-    const groupedAudio = grouped.audio ?? [];
-    const groupedVibration = grouped.vibration ?? [];
-    const groupedFlashlight = grouped.flashlight ?? [];
-
-    return [
-      ...groupedAudio,
-      ...groupedVibration,
-      ...groupedFlashlight,
-    ];
-  }
-
-  if (!raw || typeof raw !== 'object') {
-    return [];
-  }
-
-  const grouped = raw as GroupedPageEffects;
-
-  const audio = Array.isArray(grouped.audio) ? grouped.audio : [];
-  const vibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
-  const flashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
-
-  return [
-    ...audio,
-    ...vibration,
-    ...flashlight,
-  ];
-};
-
-export const PageEffects = ({ editor, project }: PageEffectsProps) => {
-  const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [isOpen, setIsOpen] = useState(false);
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!editor) {
-      setEffects([]);
-
-      return;
-    }
-
-    const syncEffects = () => {
-      const nextEffects = getPageEffects(editor);
-
-      setEffects((current) => {
-        const currentAndNextEffectsHaveEqualLength = current.length === nextEffects.length;
-
-        const everyEffectsAreEqual = current.every((effectCur, index) => {
-          return effectCur === nextEffects[index];
-        });
-
-        const isUnchanged = currentAndNextEffectsHaveEqualLength && everyEffectsAreEqual;
-
-        return isUnchanged ? current : nextEffects;
-      });
-    };
-
-    editor.on('transaction', syncEffects);
-
-    syncEffects();
-
-    return () => {
-      editor.off('transaction', syncEffects);
-    };
-  }, [editor]);
-
-  const writeEffects = (nextEffects: EditorEffectDraft[]) => {
-    if (!editor || editor.isDestroyed) {
-      return;
-    }
-
-    const currentPageEffects = normalizePageEffects(editor.state.doc.attrs.pageEffects);
-
-    const groupedEffects: GroupedPageEffects = {
-      ...currentPageEffects,
-      audio: nextEffects.filter((cur): cur is AudioEffectDraft => cur.type === 'audio'),
-      vibration: nextEffects.filter((cur): cur is VibrationEffectDraft => cur.type === 'vibration'),
-      flashlight: nextEffects.filter((cur): cur is FlashlightEffectDraft => cur.type === 'flashlight'),
-    };
-
-    const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
-
-    editor.view.dispatch(transaction);
-  };
 
   const selectedEffect = effects.find((cur) => cur.id === selectedEffectId) ?? null;
 
@@ -159,12 +71,12 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
     const nextId = updatedEffect.id.trim();
     const idIsEmpty = nextId.length === 0;
 
-    const idAlreadyExists = effects.some((effect) => {
-      if (effect.id === previousId) {
+    const idAlreadyExists = effects.some((effectCur) => {
+      if (effectCur.id === previousId) {
         return false;
       }
 
-      return effect.id === nextId;
+      return effectCur.id === nextId;
     });
 
     if (idIsEmpty || idAlreadyExists) {
@@ -244,7 +156,9 @@ export const PageEffects = ({ editor, project }: PageEffectsProps) => {
       return;
     }
 
-    const filteredEffects = effects.filter((effect) => effect.id !== selectedEffect.id);
+    const filteredEffects = effects.filter((effectCur) => {
+      return effectCur.id !== selectedEffect.id;
+    });
 
     writeEffects(filteredEffects);
     setSelectedEffectId(null);

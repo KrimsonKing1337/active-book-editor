@@ -48,8 +48,10 @@
     outline: none;
   }
 
-  :global(.isActive) {
-    outline: 2px solid #94b9f2;
-    border-radius: 5px;
+  &:focus-within {
+    :global(.isActive) {
+      outline: 2px solid #94b9f2;
+      border-radius: 5px;
+    }
   }
 }

@@ -1,7 +1,7 @@
 import {
+  type BrowserLibrary,
   inspectBrowserArchive,
   loadBrowserLibrary,
-  type BrowserLibrary,
 } from '@active-book/book-builder/customComponents/browser';
 
 import type { ProjectStorage } from './@types';
@@ -13,7 +13,9 @@ type PackageDescription = {
 };
 
 const getDependencies = async (storage: ProjectStorage): Promise<PackageDescription> => {
-  return JSON.parse(await storage.readPackageJson()) as PackageDescription;
+  const packageJson = await storage.readPackageJson();
+
+  return JSON.parse(packageJson) as PackageDescription;
 };
 
 const getArchivePath = (specifier: string): string => {
@@ -43,6 +45,7 @@ export const loadProjectLibraries = async (storage: ProjectStorage): Promise<Bro
 
       if (library.packageName !== packageName) {
         library.dispose();
+
         throw new Error(`Имя библиотеки в TGZ отличается от package.json: ${packageName}`);
       }
 
@@ -59,20 +62,34 @@ export const loadProjectLibraries = async (storage: ProjectStorage): Promise<Bro
   }
 };
 
-const pickArchive = async (): Promise<{ file: File; handle: ProjectFileHandle }> => {
+type PickedArchive = {
+  file: File;
+  handle: ProjectFileHandle;
+};
+
+const pickArchive = async (): Promise<PickedArchive> => {
   if (!('showOpenFilePicker' in window)) {
     throw new Error('Браузер не поддерживает выбор TGZ через File System Access API');
   }
 
-  const [handle] = await (window as FilePickerWindow).showOpenFilePicker({
+  const filePickerWindow = window as FilePickerWindow;
+
+  const [handle] = await filePickerWindow.showOpenFilePicker({
     id: 'active-book-custom-package',
     types: [{
       description: 'Готовые библиотеки Active Book (.tgz)',
-      accept: { 'application/gzip': ['.tgz'] },
+      accept: {
+        'application/gzip': ['.tgz'],
+      },
     }],
   });
 
-  return { file: await handle.getFile(), handle };
+  const file = await handle.getFile();
+
+  return {
+    file,
+    handle,
+  };
 };
 
 export const importBrowserLibrary = async (storage: ProjectStorage): Promise<string | null> => {
@@ -84,19 +101,28 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   const { packageName, manifest } = await inspectBrowserArchive(file);
   const description = await getDependencies(storage);
-  const existing = description.dependencies?.[packageName];
+  const existingDependency = description.dependencies?.[packageName];
 
-  if (existing && !window.confirm(`Библиотека ${packageName} уже подключена. Заменить её?`)) {
-    return null;
+  if (existingDependency) {
+    const replacementConfirmed = window.confirm(`Библиотека ${packageName} уже подключена. Заменить её?`);
+
+    if (!replacementConfirmed) {
+      return null;
+    }
   }
 
   const path = await storage.importDependencyFile(file, handle);
+
   description.dependencies = {
     ...description.dependencies,
     [packageName]: `file:./${path}`,
   };
 
-  await storage.writePackageJson(`${JSON.stringify(description, null, 2)}\n`);
+  const descriptionJson = JSON.stringify(description, null, 2);
 
-  return `${packageName} (${Object.keys(manifest.components).length} компонентов)`;
+  await storage.writePackageJson(`${descriptionJson}\n`);
+
+  const componentCount = Object.keys(manifest.components).length;
+
+  return `${packageName} (${componentCount} компонентов)`;
 };

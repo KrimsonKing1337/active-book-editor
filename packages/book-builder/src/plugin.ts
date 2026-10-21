@@ -20,7 +20,7 @@ import {
   removeBuildSession,
 } from './buildSession';
 
-type ActiveBookBuildPluginParams = {
+type BuildPluginParams = {
   repoRoot: string;
 };
 
@@ -182,7 +182,7 @@ const withErrorHandling = (
   };
 };
 
-export function activeBookBuildPlugin({ repoRoot }: ActiveBookBuildPluginParams): Plugin {
+export function bookBuildPlugin({ repoRoot }: BuildPluginParams): Plugin {
   return {
     name: 'active-book-build-endpoint',
 
