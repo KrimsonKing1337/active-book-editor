@@ -4,6 +4,7 @@ import { PageWrapper } from 'activeBook-core/components';
 import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
 
 import type { BookDocument } from '@types';
+import type { BookRuntime } from '@active-book/book-builder/customComponents/runtime';
 
 import { renderNode } from '@utils/renderNode';
 
@@ -12,9 +13,10 @@ import { getAudioEffects, getVibrationEffects, getFlashlightEffects } from './ut
 type BookPageProps = {
   document: BookDocument;
   customComponents: Record<string, ComponentType>;
+  bookRuntime: BookRuntime;
 };
 
-export const BookPage = ({ document, customComponents }: BookPageProps) => {
+export const BookPage = ({ document, customComponents, bookRuntime }: BookPageProps) => {
   const content = document.content ?? [];
 
   const audioEffects = getAudioEffects(document);
@@ -60,7 +62,7 @@ export const BookPage = ({ document, customComponents }: BookPageProps) => {
       </>
 
       {content.map((node, index) => {
-        return renderNode(node, index, customComponents);
+        return renderNode(node, index, customComponents, bookRuntime);
       })}
     </PageWrapper>
   );
