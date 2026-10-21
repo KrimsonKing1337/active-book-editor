@@ -62,7 +62,12 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
       </>
 
       {content.map((node, index) => {
-        return renderNode(node, index, customComponents, bookRuntime);
+        return renderNode({
+          node,
+          key: index,
+          customComponents,
+          bookRuntime,
+        });
       })}
     </PageWrapper>
   );

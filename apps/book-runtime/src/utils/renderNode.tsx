@@ -20,12 +20,19 @@ const renderText = (node: BookNode): ReactNode => {
   return result;
 };
 
-export const renderNode = (
-  node: BookNode,
-  key: Key,
-  customComponents: Record<string, ComponentType>,
-  bookRuntime: BookRuntime,
-): ReactNode => {
+type RenderNodeParams = {
+  node: BookNode;
+  key: Key;
+  customComponents: Record<string, ComponentType>;
+  bookRuntime: BookRuntime;
+};
+
+export const renderNode = ({
+  node,
+  key,
+  customComponents,
+  bookRuntime,
+}: RenderNodeParams): ReactNode => {
   if (node.type === 'text') {
     return (
       <Fragment key={key}>
@@ -41,7 +48,12 @@ export const renderNode = (
   const content = node.content ?? [];
 
   const children = content.map((child, index) => {
-    return renderNode(child, index, customComponents, bookRuntime);
+    return renderNode({
+      node: child,
+      key: index,
+      customComponents,
+      bookRuntime,
+    });
   });
 
   if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
