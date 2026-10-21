@@ -15,8 +15,9 @@ import type {
   FlashlightEffectDraft,
 } from './@types';
 
-import { EffectsModal } from './components';
 import { usePageEffects } from './PageEffectsContext';
+
+import { EffectsModal } from './components';
 
 import styles from './PageEffects.module.scss';
 
@@ -70,12 +71,12 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
     const nextId = updatedEffect.id.trim();
     const idIsEmpty = nextId.length === 0;
 
-    const idAlreadyExists = effects.some((effect) => {
-      if (effect.id === previousId) {
+    const idAlreadyExists = effects.some((effectCur) => {
+      if (effectCur.id === previousId) {
         return false;
       }
 
-      return effect.id === nextId;
+      return effectCur.id === nextId;
     });
 
     if (idIsEmpty || idAlreadyExists) {
@@ -155,7 +156,9 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
       return;
     }
 
-    const filteredEffects = effects.filter((effect) => effect.id !== selectedEffect.id);
+    const filteredEffects = effects.filter((effectCur) => {
+      return effectCur.id !== selectedEffect.id;
+    });
 
     writeEffects(filteredEffects);
     setSelectedEffectId(null);

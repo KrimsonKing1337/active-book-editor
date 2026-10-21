@@ -8,7 +8,11 @@ import type { Config } from 'activeBook-core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
 
-import { ExistingProjectError, FileSystemAccessUnsupportedError, InvalidProjectError } from '@project/errors';
+import {
+  ExistingProjectError,
+  FileSystemAccessUnsupportedError,
+  InvalidProjectError,
+} from '@project/errors';
 
 import { ComponentNode } from '@components/ComponentNode';
 import { H1Node, H2Node, PNode } from '@components/EditableComponentNode';
@@ -38,7 +42,12 @@ export const ActiveBookDocument = Document.extend({
   },
 });
 
-const ACTIVE_BLOCK_NAMES = new Set(['activeBookP', 'activeBookH1', 'activeBookH2', 'coreComponent']);
+const ACTIVE_BLOCK_NAMES = new Set([
+  'activeBookP',
+  'activeBookH1',
+  'activeBookH2',
+  'coreComponent',
+]);
 
 export const ActiveBlockHighlight = Extension.create({
   name: 'activeBookActiveBlockHighlight',

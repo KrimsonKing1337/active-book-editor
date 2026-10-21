@@ -27,7 +27,12 @@ export const resolveAudioSource = async (
 
   const assetPath = path.replace(/^\.\//, '').replace(/^\//, '');
   const fileName = assetPath.split('/').pop() ?? '';
-  const extension = fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() : undefined;
+
+  let extension;
+
+  if (fileName.includes('.')) {
+    extension = fileName.split('.').pop()?.toLowerCase();
+  }
 
   if (!extension) {
     throw new Error('У аудиофайла должно быть расширение');

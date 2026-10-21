@@ -1,8 +1,16 @@
-import { createContext, type PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { type PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  createContext,
+} from 'react';
 
 import type { Editor } from '@tiptap/core';
 
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
+
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type {
@@ -36,10 +44,14 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   if (Array.isArray(raw)) {
     const grouped = normalizePageEffects(raw);
 
+    const groupedAudio = grouped.audio ?? [];
+    const groupedVibration = grouped.vibration ?? [];
+    const groupedFlashlight = grouped.flashlight ?? [];
+
     return [
-      ...(grouped.audio ?? []),
-      ...(grouped.vibration ?? []),
-      ...(grouped.flashlight ?? []),
+      ...groupedAudio,
+      ...groupedVibration,
+      ...groupedFlashlight,
     ];
   }
 
@@ -49,10 +61,14 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
 
   const grouped = raw as GroupedPageEffects;
 
+  const groupedAudio = Array.isArray(grouped.audio) ? grouped.audio : [];
+  const groupedVibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
+  const groupedFlashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
+
   return [
-    ...(Array.isArray(grouped.audio) ? grouped.audio : []),
-    ...(Array.isArray(grouped.vibration) ? grouped.vibration : []),
-    ...(Array.isArray(grouped.flashlight) ? grouped.flashlight : []),
+    ...groupedAudio,
+    ...groupedVibration,
+    ...groupedFlashlight,
   ];
 };
 
@@ -95,14 +111,20 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       const nextEffects = getPageEffects(editor);
 
       setEffects((current) => {
-        const isUnchanged = current.length === nextEffects.length
-          && current.every((effectCur, index) => effectCur === nextEffects[index]);
+        const currentAndNextEffectsAreEqual = current.length === nextEffects.length;
+
+        const currentEveryAndNextEffectsAreEqual = current.every((effectCur, index) => {
+          return effectCur === nextEffects[index];
+        });
+
+        const isUnchanged = currentAndNextEffectsAreEqual && currentEveryAndNextEffectsAreEqual;
 
         return isUnchanged ? current : nextEffects;
       });
     };
 
     editor.on('transaction', syncEffects);
+
     syncEffects();
 
     return () => {
@@ -117,13 +139,23 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
     const currentPageEffects = normalizePageEffects(editor.state.doc.attrs.pageEffects);
 
+    const audioEffects = nextEffects.filter((effectCur): effectCur is AudioEffectDraft => {
+      return effectCur.type === 'audio';
+    });
+
+    const vibrationEffects = nextEffects.filter((effectCur): effectCur is VibrationEffectDraft => {
+      return effectCur.type === 'vibration';
+    });
+
+    const flashlightEffects = nextEffects.filter((effectCur): effectCur is FlashlightEffectDraft => {
+      return effectCur.type === 'flashlight';
+    });
+
     const groupedEffects: GroupedPageEffects = {
       ...currentPageEffects,
-      audio: nextEffects.filter((effectCur): effectCur is AudioEffectDraft => effectCur.type === 'audio'),
-      vibration: nextEffects.filter((effectCur): effectCur is VibrationEffectDraft => effectCur.type === 'vibration'),
-      flashlight: nextEffects.filter((effectCur): effectCur is FlashlightEffectDraft => {
-        return effectCur.type === 'flashlight';
-      }),
+      audio: audioEffects,
+      vibration: vibrationEffects,
+      flashlight: flashlightEffects,
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);

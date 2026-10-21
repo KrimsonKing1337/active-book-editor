@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 
-import { Audio } from 'activeBook-core/components/ProxyHooks';
-import { useAudioController } from 'activeBook-core/hooks/effects';
 import { useDispatch } from 'activeBook-core/store';
 import { mainActions } from 'activeBook-core/store/main';
+import { useAudioController } from 'activeBook-core/hooks/effects';
+import { Audio } from 'activeBook-core/components/ProxyHooks';
 
 import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from '../../@types';
+
 import { usePageEffects } from '../../PageEffectsContext';
 
-import { resolveAudioSource, type ResolvedAudioSource } from './utils';
+import { type ResolvedAudioSource, resolveAudioSource } from './utils';
 
 type AudioInstanceProps = {
   effect: AudioEffectDraft;
@@ -23,12 +24,14 @@ type AudioInstancesProps = {
 
 const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
   const dispatch = useDispatch();
+
   const { setAudioPreviewStatus } = usePageEffects();
   const { audio } = useAudioController(effect.id);
 
   const [resolved, setResolved] = useState<ResolvedAudioSource | null>(null);
 
   const { id, options } = effect;
+
   const {
     src,
     type = 'sfx',
@@ -43,10 +46,14 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     let cancelled = false;
     let blobUrl: string | null = null;
 
-    setResolved(null);
-    setAudioPreviewStatus(id, src.trim() ? { state: 'loading' } : { state: 'empty' });
+    const srcTrimmed = src.trim();
 
-    if (!src.trim()) {
+    const state = srcTrimmed ? 'loading' : 'empty';
+
+    setResolved(null);
+    setAudioPreviewStatus(id, { state });
+
+    if (!srcTrimmed) {
       return;
     }
 
@@ -54,7 +61,7 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
       try {
         const source = await resolveAudioSource(src, project);
 
-        if (source.src.startsWith('blob:') && source.src !== src.trim()) {
+        if (source.src.startsWith('blob:') && source.src !== srcTrimmed) {
           blobUrl = source.src;
         }
 
@@ -69,6 +76,7 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
         // useAudio creates its HowlWrapper once the core's audio gate is open.
         // Auto-play remains disabled in the editor.
         dispatch(mainActions.setIsAudioUnlocked(true));
+
         setResolved(source);
       } catch (error) {
         if (cancelled) {
@@ -77,7 +85,10 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
 
         const message = error instanceof Error ? error.message : 'Не удалось прочитать аудиофайл';
 
-        setAudioPreviewStatus(id, { state: 'error', error: message });
+        setAudioPreviewStatus(id, {
+          state: 'error',
+          error: message,
+        });
       }
     };
 
@@ -98,8 +109,12 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     };
   }, [id, setAudioPreviewStatus]);
 
-  const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
-  const registeredSource = audio && (Array.isArray(audio.src) ? audio.src[0] : audio.src);
+  const pathAndProjectAreEqual = resolved?.path === src && resolved.project === project;
+  const currentSource = pathAndProjectAreEqual ? resolved : null;
+
+  const audioSrc = audio?.src;
+  const registeredSource = Array.isArray(audioSrc) ? audioSrc[0] : audioSrc;
+
   const currentAudio = registeredSource === currentSource?.src ? audio : null;
 
   useEffect(() => {
@@ -108,11 +123,16 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     }
 
     const handleReady = () => {
-      setAudioPreviewStatus(id, { state: 'ready' });
+      setAudioPreviewStatus(id, {
+        state: 'ready',
+      });
     };
 
     const handleError = () => {
-      setAudioPreviewStatus(id, { state: 'error', error: 'Не удалось загрузить аудио в Howler' });
+      setAudioPreviewStatus(id, {
+        state: 'error',
+        error: 'Не удалось загрузить аудио в Howler',
+      });
     };
 
     currentAudio.howlInst.on('load', handleReady);
@@ -149,11 +169,13 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     return null;
   }
 
+  const key = `${id}:${currentSource.src}:${delay}:${stopBy}`;
+
   // The editor owns the audio instance, not the settings modal.
   // In auto lifecycle core removes it from Redux and unloads it on unmount.
   return (
     <Audio
-      key={`${id}:${currentSource.src}:${delay}:${stopBy}`}
+      key={key}
       id={id}
       page={0}
       src={currentSource.src}
@@ -174,7 +196,9 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
 export const AudioInstances = ({ project }: AudioInstancesProps) => {
   const { effects } = usePageEffects();
 
-  const audioEffects = effects.filter((effectCur): effectCur is AudioEffectDraft => effectCur.type === 'audio');
+  const audioEffects = effects.filter((effectCur): effectCur is AudioEffectDraft => {
+    return effectCur.type === 'audio';
+  });
 
   return (
     <>

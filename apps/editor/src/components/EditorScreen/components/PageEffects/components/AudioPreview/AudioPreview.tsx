@@ -146,7 +146,7 @@ export const AudioPreview = ({ effect, onLoadingChange }: AudioPreviewProps) => 
         <input
           type="checkbox"
           checked={loopPreview}
-          onChange={(event) => handleLoopChange(event.target.checked)}
+          onChange={(e) => handleLoopChange(e.target.checked)}
         />
         Зациклить только предпрослушивание
       </label>
