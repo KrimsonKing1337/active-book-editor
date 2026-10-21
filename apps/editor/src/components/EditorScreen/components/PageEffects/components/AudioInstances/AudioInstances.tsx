@@ -99,9 +99,11 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
   }, [id, setAudioPreviewStatus]);
 
   const currentSource = resolved?.path === src && resolved.project === project ? resolved : null;
+  const registeredSource = audio && (Array.isArray(audio.src) ? audio.src[0] : audio.src);
+  const currentAudio = registeredSource === currentSource?.src ? audio : null;
 
   useEffect(() => {
-    if (!audio || !currentSource) {
+    if (!currentAudio || !currentSource) {
       return;
     }
 
@@ -113,35 +115,35 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
       setAudioPreviewStatus(id, { state: 'error', error: 'Не удалось загрузить аудио в Howler' });
     };
 
-    audio.howlInst.on('load', handleReady);
-    audio.howlInst.on('loaderror', handleError);
+    currentAudio.howlInst.on('load', handleReady);
+    currentAudio.howlInst.on('loaderror', handleError);
 
-    if (audio.state() === 'loaded') {
+    if (currentAudio.state() === 'loaded') {
       handleReady();
     }
 
     return () => {
-      audio.howlInst.off('load', handleReady);
-      audio.howlInst.off('loaderror', handleError);
+      currentAudio.howlInst.off('load', handleReady);
+      currentAudio.howlInst.off('loaderror', handleError);
     };
-  }, [audio, currentSource, id, setAudioPreviewStatus]);
+  }, [currentAudio, currentSource, id, setAudioPreviewStatus]);
 
   // These options can be changed without replacing a registered HowlWrapper.
   useEffect(() => {
-    if (!audio || !currentSource) {
+    if (!currentAudio || !currentSource) {
       return;
     }
 
-    audio.howlInst.loop(loop);
-    audio.type = type;
-    audio.relativeVolume = relativeVolume;
+    currentAudio.howlInst.loop(loop);
+    currentAudio.type = type;
+    currentAudio.relativeVolume = relativeVolume;
 
     if (screamer) {
-      audio.howlInst.volume(1);
+      currentAudio.howlInst.volume(1);
     } else {
-      audio.volume(audio.getVolumeByType() / 100);
+      currentAudio.volume(currentAudio.getVolumeByType() / 100);
     }
-  }, [audio, currentSource, loop, type, relativeVolume, screamer]);
+  }, [currentAudio, currentSource, loop, type, relativeVolume, screamer]);
 
   if (!currentSource) {
     return null;
