@@ -3,6 +3,7 @@ import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 import { Counter, H1, H2, P } from 'activeBook-core/components';
 
 import type { BookNode } from '@types';
+import type { BookRuntime } from '@active-book/book-builder/customComponents/runtime';
 
 const renderText = (node: BookNode): ReactNode => {
   const marks = node.marks ?? [];
@@ -23,6 +24,7 @@ export const renderNode = (
   node: BookNode,
   key: Key,
   customComponents: Record<string, ComponentType>,
+  bookRuntime: BookRuntime,
 ): ReactNode => {
   if (node.type === 'text') {
     return (
@@ -39,7 +41,7 @@ export const renderNode = (
   const content = node.content ?? [];
 
   const children = content.map((child, index) => {
-    return renderNode(child, index, customComponents);
+    return renderNode(child, index, customComponents, bookRuntime);
   });
 
   if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
@@ -59,7 +61,7 @@ export const renderNode = (
     const CustomComponent = customComponents[componentId];
 
     return CustomComponent
-      ? <CustomComponent key={key} />
+      ? <CustomComponent key={key} book={bookRuntime} />
       : <span key={key}>Unknown custom component: {componentId}</span>;
   }
 
