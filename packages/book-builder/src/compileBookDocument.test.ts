@@ -39,7 +39,7 @@ test('compiles audio, vibration and flashlight and strips editor-only slug', () 
         flashlight: [{ id: 'f', type: 'flashlight', slug: 'Вспышка', options: flashlightOptions }],
       },
     },
-    content: [{ type: 'activeBookP' }],
+    content: [{ type: 'P' }],
   };
 
   const built = compileBookDocument(document);
@@ -53,7 +53,7 @@ test('compiles audio, vibration and flashlight and strips editor-only slug', () 
         flashlight: [{ id: 'f', type: 'flashlight', options: flashlightOptions }],
       },
     },
-    content: [{ type: 'activeBookP' }],
+    content: [{ type: 'P' }],
   });
 
   assert.equal(document.attrs.pageEffects.audio[0].slug, 'Звук');

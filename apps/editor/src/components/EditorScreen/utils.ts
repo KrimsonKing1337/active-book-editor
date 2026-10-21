@@ -21,7 +21,7 @@ import type { BuildState, TextComponentName } from './@types';
 
 export const AUTO_SAVE_DELAY = 1500;
 
-export const activeBookBlockNodes = [
+export const bookBlockNodes = [
   ComponentNode,
   PNode,
   H1Node,
@@ -30,8 +30,8 @@ export const activeBookBlockNodes = [
 
 // Чтобы явно указать, что дефолтный текстовый узел - это P, пишем его первым.
 // И тогда при нажатии на Enter вставится именно он.
-export const ActiveBookDocument = Document.extend({
-  content: '(activeBookP | activeBookBlock)+',
+export const BookDocument = Document.extend({
+  content: '(P | bookBlock)+',
 
   addAttributes() {
     return {
@@ -43,14 +43,14 @@ export const ActiveBookDocument = Document.extend({
 });
 
 const ACTIVE_BLOCK_NAMES = new Set([
-  'activeBookP',
-  'activeBookH1',
-  'activeBookH2',
+  'P',
+  'H1',
+  'H2',
   'coreComponent',
 ]);
 
 export const ActiveBlockHighlight = Extension.create({
-  name: 'activeBookActiveBlockHighlight',
+  name: 'activeBlockHighlight',
 
   addProseMirrorPlugins() {
     return [
@@ -104,9 +104,9 @@ export const editorExtensions = [
     },
   }),
 
-  ActiveBookDocument,
+  BookDocument,
   ActiveBlockHighlight,
-  ...activeBookBlockNodes,
+  ...bookBlockNodes,
 ];
 
 export const editorConfig: Config = {
@@ -121,7 +121,7 @@ export const createEmptyDocument = (): JSONContent => ({
   type: 'doc',
   content: [
     {
-      type: 'activeBookP',
+      type: 'P',
     },
   ],
 });
@@ -182,17 +182,7 @@ export const insertCustomComponent = (
 };
 
 export const insertTextComponent = (editor: Editor | null, name: TextComponentName): void => {
-  const typeMap = {
-    P: 'activeBookP',
-    H1: 'activeBookH1',
-    H2: 'activeBookH2',
-  } as const;
-
-  const nodeType = typeMap[name];
-
-  const textContent: JSONContent = {
-    type: nodeType,
-  };
-
-  insertEditorContent(editor, textContent);
+  insertEditorContent(editor, {
+    type: name,
+  });
 };

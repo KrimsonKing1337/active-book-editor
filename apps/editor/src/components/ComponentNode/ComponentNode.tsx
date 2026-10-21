@@ -60,7 +60,7 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
 export const ComponentNode = Node.create({
   name: 'coreComponent',
   priority: 110,
-  group: 'activeBookBlock',
+  group: 'bookBlock',
   atom: true,
   selectable: true,
 
@@ -108,7 +108,7 @@ export const ComponentNode = Node.create({
       if (doc.childCount === 1) {
         return this.editor.commands.insertContentAt(
           { from: selection.from, to: selection.to },
-          { type: 'activeBookP' },
+          { type: 'P' },
         );
       }
 

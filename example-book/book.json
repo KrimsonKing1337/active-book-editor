@@ -2,7 +2,7 @@
   "type": "doc",
   "content": [
     {
-      "type": "activeBookH1",
+      "type": "H1",
       "content": [
         {
           "type": "text",
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "type": "activeBookP",
+      "type": "P",
       "content": [
         {
           "type": "text",
@@ -26,7 +26,7 @@
       }
     },
     {
-      "type": "activeBookP",
+      "type": "P",
       "content": [
         {
           "type": "text",

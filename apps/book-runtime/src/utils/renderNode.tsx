@@ -56,9 +56,11 @@ export const renderNode = ({
     });
   });
 
-  if (node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
-  if (node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
-  if (node.type === 'activeBookP') return <P key={key} data-active-book-node="P">{children}</P>;
+  if (node.type === 'H1' || node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
+  if (node.type === 'H2' || node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
+  if (node.type === 'P' || node.type === 'activeBookP') {
+    return <P key={key} data-active-book-node="P">{children}</P>;
+  }
 
   if (node.type === 'heading') {
     return node.attrs?.level === 1

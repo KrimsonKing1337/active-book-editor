@@ -39,7 +39,7 @@ export const createCoreTextNode = (
 
   return Node.create({
     name,
-    group: 'activeBookBlock',
+    group: 'bookBlock',
     content: 'inline*',
 
     parseHTML() {
@@ -56,6 +56,6 @@ export const createCoreTextNode = (
   });
 };
 
-export const PNode = createCoreTextNode('activeBookP', 'P', 'div', P);
-export const H1Node = createCoreTextNode('activeBookH1', 'H1', 'div', H1);
-export const H2Node = createCoreTextNode('activeBookH2', 'H2', 'div', H2);
+export const PNode = createCoreTextNode('P', 'P', 'div', P);
+export const H1Node = createCoreTextNode('H1', 'H1', 'div', H1);
+export const H2Node = createCoreTextNode('H2', 'H2', 'div', H2);
