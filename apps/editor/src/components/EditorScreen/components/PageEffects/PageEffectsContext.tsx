@@ -89,7 +89,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       ...currentPageEffects,
       audio: nextEffects.filter((effectCur): effectCur is AudioEffectDraft => effectCur.type === 'audio'),
       vibration: nextEffects.filter((effectCur): effectCur is VibrationEffectDraft => effectCur.type === 'vibration'),
-      flashlight: nextEffects.filter((effectCur): effectCur is FlashlightEffectDraft => effectCur.type === 'flashlight'),
+      flashlight: nextEffects.filter((effectCur): effectCur is FlashlightEffectDraft => {
+        return effectCur.type === 'flashlight';
+      }),
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
