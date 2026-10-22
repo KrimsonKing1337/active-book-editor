@@ -18,25 +18,20 @@
   },
   "dependencies": {
     "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.12.tgz",
-    "react-router-dom": "^7.10.1",
-    "sass": "^1.96.0"
+    "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
     "@active-book/types": "file:../activeBook-types",
-    "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-svgo": "^8.1.0",
-    "@types/node": "^26.5.1",
-    "vite-plugin-svgr": "^5.2.0",
     "@eslint/compat": "^2.0.0",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.0",
+    "@types/node": "^26.5.1",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.0",
-    "jiti": "^2.6.1"
+    "eslint-plugin-react-hooks": "^7.0.0"
   }
 }
