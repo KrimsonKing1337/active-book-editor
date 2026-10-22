@@ -15,6 +15,7 @@ import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type {
   AudioEffectDraft,
+  BackgroundEffectDraft,
   EditorEffectDraft,
   FlashlightEffectDraft,
   VibrationEffectDraft,
@@ -47,11 +48,13 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
     const groupedAudio = grouped.audio ?? [];
     const groupedVibration = grouped.vibration ?? [];
     const groupedFlashlight = grouped.flashlight ?? [];
+    const groupedBackground = grouped.background ?? [];
 
     return [
       ...groupedAudio,
       ...groupedVibration,
       ...groupedFlashlight,
+      ...groupedBackground,
     ];
   }
 
@@ -64,11 +67,13 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedAudio = Array.isArray(grouped.audio) ? grouped.audio : [];
   const groupedVibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
   const groupedFlashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
+  const groupedBackground = Array.isArray(grouped.background) ? grouped.background : [];
 
   return [
     ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
+    ...groupedBackground,
   ];
 };
 
@@ -149,11 +154,16 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return effectCur.type === 'flashlight';
     });
 
+    const backgroundEffects = nextEffects.filter((effectCur): effectCur is BackgroundEffectDraft => {
+      return effectCur.type === 'background';
+    });
+
     const groupedEffects: GroupedPageEffects = {
       ...currentPageEffects,
       audio: audioEffects,
       vibration: vibrationEffects,
       flashlight: flashlightEffects,
+      background: backgroundEffects,
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);

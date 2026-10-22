@@ -1,4 +1,4 @@
-import type { AudioEffectDraft, VibrationEffectDraft, FlashlightEffectDraft } from './@types';
+import type { AudioEffectDraft, VibrationEffectDraft, FlashlightEffectDraft, BackgroundEffectDraft } from './@types';
 
 export const createAudioEffect = (): AudioEffectDraft => {
   return {
@@ -43,6 +43,20 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
       playOnLoad: true,
       withSideShadow: true,
       speed: 150,
+    },
+  };
+};
+
+export const createBackgroundEffect = (): BackgroundEffectDraft => {
+  return {
+    id: crypto.randomUUID(),
+    type: 'background',
+    slug: 'Новый фон',
+    options: {
+      images: [],
+      videos: [],
+      shadow: { show: false, style: {} },
+      style: { zIndex: 0 },
     },
   };
 };

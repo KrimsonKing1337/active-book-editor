@@ -4,12 +4,14 @@ import type { BookProject } from '@project/@types';
 
 import {
   createAudioEffect,
+  createBackgroundEffect,
   createFlashlightEffect,
   createVibrationEffect,
 } from '@components/EditorScreen/components/PageEffects/utils';
 
 import type {
   AudioEffectDraft,
+  BackgroundEffectDraft,
   EditorEffectDraft,
   VibrationEffectDraft,
   FlashlightEffectDraft,
@@ -55,6 +57,13 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
 
   const addVibration = () => {
     const effect = createVibrationEffect();
+
+    writeEffects([...effects, effect]);
+    setSelectedEffectId(effect.id);
+  };
+
+  const addBackground = () => {
+    const effect = createBackgroundEffect();
 
     writeEffects([...effects, effect]);
     setSelectedEffectId(effect.id);
@@ -129,6 +138,15 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
       };
 
       writeEffects([...effects, duplicate]);
+    } else if (selectedEffect.type === 'background') {
+      const duplicate: BackgroundEffectDraft = {
+        ...selectedEffect,
+        id,
+        slug,
+        options: structuredClone(selectedEffect.options),
+      };
+
+      writeEffects([...effects, duplicate]);
     } else {
       const duplicate: FlashlightEffectDraft = {
         ...selectedEffect,
@@ -197,6 +215,7 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
           onAddAudio={addAudio}
           onAddVibration={addVibration}
           onAddFlashlight={addFlashlight}
+          onAddBackground={addBackground}
           onSelectEffect={setSelectedEffectId}
           onUpdateEffect={updateEffect}
           onDuplicateEffect={duplicateEffect}
