@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { BackgroundOptions } from '../../../../@types';
+import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
 
@@ -14,33 +14,41 @@ export type ShadowProps = {
 };
 
 export const Shadow = ({ shadow, onChange }: ShadowProps) => {
+  const { show, style } = shadow;
+
   const handleShowChange = (show: boolean) => {
-    onChange({ ...shadow, show });
+    onChange({
+      ...shadow,
+      show,
+    });
   };
 
   const handleStyleChange = (style: CSSProperties) => {
-    onChange({ ...shadow, style });
+    onChange({
+      ...shadow,
+      style,
+    });
   };
 
   return (
-      <section className={styles.Section}>
-        <h3>
+    <section className={styles.Section}>
+      <h3>
           Затемнение и фильтры
-        </h3>
+      </h3>
 
-        <label>
-          <input
-            type="checkbox"
-            checked={shadow.show ?? false}
-            onChange={(e) => handleShowChange(e.target.checked)}
-          />
-          Показывать слой
-        </label>
-
-        <StyleEditor
-          value={shadow.style ?? {}}
-          onChange={(val) => handleStyleChange(val)}
+      <label>
+        <input
+          type="checkbox"
+          checked={show ?? false}
+          onChange={(e) => handleShowChange(e.target.checked)}
         />
-      </section>
+          Показывать слой
+      </label>
+
+      <StyleEditor
+        value={style ?? {}}
+        onChange={(val) => handleStyleChange(val)}
+      />
+    </section>
   );
 };

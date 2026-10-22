@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { BackgroundOptions } from '../../../../@types';
+import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
 
@@ -71,7 +71,10 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
   };
 
   const handleAdd = () => {
-    onChange([...videos, { id: crypto.randomUUID(), src: '' }]);
+    onChange([...videos, {
+      id: crypto.randomUUID(),
+      src: '',
+    }]);
   };
 
   return (
@@ -81,15 +84,17 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
       </h3>
 
       {videos.map((videoCur, index) => {
+        const { autoPlay, id, loop, muted, src, style } = videoCur;
+
         return (
-          <div key={videoCur.id} className={styles.Media}>
+          <div key={id} className={styles.Media}>
             <label className={styles.Field}>
               <span>
                 Путь к видео
               </span>
 
               <input
-                value={videoCur.src}
+                value={src}
                 placeholder="assets/fog.webm"
                 onChange={(e) => handlePathChange(index, e.target.value)}
               />
@@ -111,7 +116,7 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
               <label>
                 <input
                   type="checkbox"
-                  checked={videoCur.loop ?? true}
+                  checked={loop ?? true}
                   onChange={(e) => handleLoopChange(index, e.target.checked)}
                 />
                 Зациклить
@@ -120,7 +125,7 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
               <label>
                 <input
                   type="checkbox"
-                  checked={videoCur.autoPlay ?? true}
+                  checked={autoPlay ?? true}
                   onChange={(e) => handleAutoPlayChange(index, e.target.checked)}
                 />
                 Автозапуск
@@ -129,7 +134,7 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
               <label>
                 <input
                   type="checkbox"
-                  checked={videoCur.muted ?? true}
+                  checked={muted ?? true}
                   onChange={(e) => handleMutedChange(index, e.target.checked)}
                 />
                 Без звука
@@ -142,7 +147,7 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
               </summary>
 
               <StyleEditor
-                value={videoCur.style ?? {}}
+                value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
               />
             </details>

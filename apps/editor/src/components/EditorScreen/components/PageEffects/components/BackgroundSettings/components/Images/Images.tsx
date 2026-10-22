@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { BackgroundOptions } from '../../../../@types';
+import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
 
@@ -53,7 +53,9 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
   };
 
   const handleDelete = (index: number) => {
-    const remaining = images.filter((_, itemIndex) => itemIndex !== index);
+    const remaining = images.filter((_, imageCurIndex) => {
+      return imageCurIndex !== index;
+    });
 
     onChange(remaining);
   };
@@ -69,6 +71,8 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
       </h3>
 
       {images.map((imageCur, index) => {
+        const { src, style } = imageCur;
+
         return (
           <div key={index} className={styles.Media}>
             <label className={styles.Field}>
@@ -77,7 +81,7 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
               </span>
 
               <input
-                value={imageCur.src}
+                value={src}
                 placeholder="assets/forest.webp"
                 onChange={(e) => handlePathChange(index, e.target.value)}
               />
@@ -100,7 +104,7 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
               </summary>
 
               <StyleEditor
-                value={imageCur.style ?? {}}
+                value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
               />
             </details>
