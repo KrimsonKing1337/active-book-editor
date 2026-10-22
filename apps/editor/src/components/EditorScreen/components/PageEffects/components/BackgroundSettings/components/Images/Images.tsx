@@ -74,10 +74,10 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
       </h3>
 
       {images.map((imageCur, index) => {
-        const { src, style } = imageCur;
+        const { id, src, style } = imageCur;
 
         return (
-          <div key={imageCur.id} className={styles.Media}>
+          <div key={id} className={styles.Media}>
             <label className={styles.Field}>
               <span>
                 Путь к изображению
@@ -101,6 +101,7 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
                 onChange={(e) => void handleFileChange(index, e.target.files)}
               />
             </label>
+
             <details>
               <summary>
                 Стили изображения
