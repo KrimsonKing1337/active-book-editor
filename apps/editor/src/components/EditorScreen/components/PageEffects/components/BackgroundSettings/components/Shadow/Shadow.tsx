@@ -17,9 +17,13 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
   const { show, style } = shadow;
 
   const handleShowChange = (show: boolean) => {
+    const hasNoStyles = !style || Object.keys(style).length === 0;
+    const nextStyle = hasNoStyles ? { zIndex: 2, backdropFilter: 'blur(10px)' } : style;
+
     onChange({
       ...shadow,
       show,
+      style: nextStyle,
     });
   };
 
@@ -31,10 +35,10 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
   };
 
   return (
-    <section className={styles.Section}>
-      <h3>
-          Затемнение и фильтры
-      </h3>
+    <details className={styles.Section}>
+      <summary>
+        Затемнение и фильтры
+      </summary>
 
       <label>
         <input
@@ -46,9 +50,10 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
       </label>
 
       <StyleEditor
+        defaultZIndex={2}
         value={style ?? {}}
         onChange={(val) => handleStyleChange(val)}
       />
-    </section>
+    </details>
   );
 };

@@ -21,12 +21,54 @@
   }
 }
 
+.ColorFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.RangeFields,
+.LayerControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.RangeFields {
+  input[type='range'] {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+  }
+
+  input[type='number'] {
+    flex: 0 0 84px;
+    width: 84px;
+  }
+}
+
+.LayerControls {
+  input[type='number'] {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  button {
+    flex: 0 0 36px;
+  }
+}
+
 .Advanced {
   margin-top: 8px;
 
   summary {
     cursor: pointer;
   }
+}
+
+.RuleContainer {
+  margin-top: 8px;
 }
 
 .Rule {
@@ -43,4 +85,11 @@
   button {
     min-width: 30px;
   }
+}
+
+.Error {
+  display: block;
+  margin-top: 4px;
+  color: #f5a4a4;
+  font-size: 12px;
 }

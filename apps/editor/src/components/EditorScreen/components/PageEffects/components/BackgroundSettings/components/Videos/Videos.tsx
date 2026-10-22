@@ -78,10 +78,10 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
   };
 
   return (
-    <section className={styles.Section}>
-      <h3>
+    <details className={styles.Section}>
+      <summary>
         Видео
-      </h3>
+      </summary>
 
       {videos.map((videoCur, index) => {
         const { autoPlay, id, loop, muted, src, style } = videoCur;
@@ -147,6 +147,7 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
               </summary>
 
               <StyleEditor
+                defaultZIndex={1}
                 value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
               />
@@ -162,6 +163,6 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
       <button type="button" onClick={handleAdd}>
         Добавить видео
       </button>
-    </section>
+    </details>
   );
 };

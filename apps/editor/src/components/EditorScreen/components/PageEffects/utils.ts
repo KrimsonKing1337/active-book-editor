@@ -60,7 +60,7 @@ export const createBackgroundEffect = (): BackgroundEffectDraft => {
     options: {
       images: [],
       videos: [],
-      shadow: { show: false, style: {} },
+      shadow: { show: false, style: { zIndex: 2, backdropFilter: 'blur(10px)' } },
       style: { zIndex: 0 },
     },
   };

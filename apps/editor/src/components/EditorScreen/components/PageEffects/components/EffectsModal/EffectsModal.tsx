@@ -338,8 +338,12 @@ export const EffectsModal = ({
 
   const panelMinWidth = getMinimumWidth();
   const panelMinHeight = isCollapsed ? 60 : 240;
+  const panelMaxWidth = Math.max(240, window.innerWidth - 32);
+  const panelMaxHeight = Math.max(240, window.innerHeight - 32);
 
   const panelStyle: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
     position: 'fixed',
     zIndex: 1000,
   };
@@ -362,6 +366,8 @@ export const EffectsModal = ({
       position={panelPosition}
       minWidth={panelMinWidth}
       minHeight={panelMinHeight}
+      maxWidth={panelMaxWidth}
+      maxHeight={panelMaxHeight}
       enableResizing={!isCollapsed}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}

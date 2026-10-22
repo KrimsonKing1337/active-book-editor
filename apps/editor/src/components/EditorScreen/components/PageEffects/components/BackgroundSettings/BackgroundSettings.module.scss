@@ -38,9 +38,14 @@
   border: 1px solid #464646;
   border-radius: 8px;
 
-  h3 {
-    margin: 0 0 12px;
+  summary {
+    cursor: pointer;
     font-size: 15px;
+    font-weight: 600;
+  }
+
+  &[open] > summary {
+    margin-bottom: 12px;
   }
 }
 

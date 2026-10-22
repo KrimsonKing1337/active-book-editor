@@ -68,10 +68,10 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
   };
 
   return (
-    <section className={styles.Section}>
-      <h3>
+    <details className={styles.Section}>
+      <summary>
         Изображения
-      </h3>
+      </summary>
 
       {images.map((imageCur, index) => {
         const { id, src, style } = imageCur;
@@ -108,6 +108,7 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
               </summary>
 
               <StyleEditor
+                defaultZIndex={1}
                 value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
               />
@@ -123,6 +124,6 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
       <button type="button" onClick={handleAdd}>
         Добавить изображение
       </button>
-    </section>
+    </details>
   );
 };
