@@ -48,21 +48,33 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
     onChange(updated as CSSProperties);
   };
 
-  const renameProperty = (oldName: string, newName: string) => {
+  const normalizePropertyName = (name: string) => {
+    const trimmed = name.trim();
+
+    if (trimmed.startsWith('--')) {
+      return trimmed;
+    }
+
+    return trimmed.replace(/-([a-z])/g, (_full, letter: string) => letter.toUpperCase());
+  };
+
+  const renameProperty = (oldName: string, nextName: string) => {
+    const normalizedName = normalizePropertyName(nextName);
+
+    if (!normalizedName || normalizedName === oldName) {
+      return;
+    }
+
     const updated = { ...value } as Record<string, string | number | undefined>;
     const previousValue = updated[oldName];
 
     delete updated[oldName];
-
-    if (newName.trim()) {
-      updated[newName.trim()] = previousValue;
-    }
-
+    updated[normalizedName] = previousValue;
     onChange(updated as CSSProperties);
   };
 
   const addProperty = () => {
-    const name = newProperty.trim();
+    const name = normalizePropertyName(newProperty);
 
     if (!name) {
       return;
@@ -117,8 +129,8 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
             <div className={styles.Rule} key={property}>
               <input
                 aria-label="Имя свойства"
-                value={property}
-                onChange={(event) => renameProperty(property, event.target.value)}
+                defaultValue={property}
+                onBlur={(event) => renameProperty(property, event.target.value)}
               />
               <input
                 aria-label="Значение свойства"
