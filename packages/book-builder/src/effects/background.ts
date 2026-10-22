@@ -49,20 +49,24 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     const images = Array.isArray(effect.options.images) ? effect.options.images : [];
     const videos = Array.isArray(effect.options.videos) ? effect.options.videos : [];
 
-    const imagesAreValid = images.every((image) => isRecord(image) && typeof image.src === 'string');
-    const videosAreValid = videos.every((video) => {
-      return isRecord(video) && typeof video.id === 'string' && typeof video.src === 'string';
+    const imagesAreValid = images.every((cur) => isRecord(cur) && typeof cur.src === 'string');
+
+    const videosAreValid = videos.every((videoCur) => {
+      return isRecord(videoCur) && typeof videoCur.id === 'string' && typeof videoCur.src === 'string';
     });
 
     if (!imagesAreValid || !videosAreValid) {
       continue;
     }
 
+    const slug = typeof effect.slug === 'string' ? effect.slug : 'Новый фон';
+    const options = effect.options as BackgroundOptions;
+
     result.push({
       id: effect.id,
       type: 'background',
-      slug: typeof effect.slug === 'string' ? effect.slug : 'Новый фон',
-      options: effect.options as BackgroundOptions,
+      slug,
+      options,
     });
   }
 

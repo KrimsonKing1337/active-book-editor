@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { type ComponentType, useEffect, useMemo, useState } from 'react';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
 import type { BookComponentProps } from '@active-book/types';
 
-import type { BookProject } from '@project/@types';
-import { useCustomComponents } from '@project/customComponentRegistry';
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+
+import type { BookProject } from '@project/@types';
+
+import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundEffectDraft } from '../../@types';
 import { usePageEffects } from '../../PageEffectsContext';
@@ -39,19 +41,23 @@ const resolveSource = async (src: string, project: BookProject | null): Promise<
   return URL.createObjectURL(file);
 };
 
+export type UseResolvedMediaResolvedState = {
+  pathsKey: string;
+  project: BookProject | null;
+  media: ResolvedMedia;
+};
+
 const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | null): ResolvedMedia | null => {
   const imagePaths = effect.options.images?.map((image) => image.src) ?? [];
   const videoPaths = effect.options.videos?.map((video) => video.src) ?? [];
+
   const pathsKey = JSON.stringify([imagePaths, videoPaths]);
 
-  const [resolved, setResolved] = useState<{
-    pathsKey: string;
-    project: BookProject | null;
-    media: ResolvedMedia;
-  } | null>(null);
+  const [resolved, setResolved] = useState<UseResolvedMediaResolvedState | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
     const objectUrls = new Set<string>();
 
     const load = async () => {
@@ -60,10 +66,10 @@ const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | 
       const resolvePaths = async (paths: string[]) => {
         const sources: string[] = [];
 
-        for (const path of paths) {
-          const resolvedSrc = await resolveSource(path, project);
+        for (const pathCur of paths) {
+          const resolvedSrc = await resolveSource(pathCur, project);
 
-          if (resolvedSrc.startsWith('blob:') && !path.startsWith('blob:')) {
+          if (resolvedSrc.startsWith('blob:') && !pathCur.startsWith('blob:')) {
             objectUrls.add(resolvedSrc);
           }
 
@@ -78,11 +84,21 @@ const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | 
         const videos = await resolvePaths(videoSources);
 
         if (!cancelled) {
-          setResolved({ pathsKey, project, media: { images, videos } });
+          const resolvedMedia = {
+            images,
+            videos,
+          };
+
+          setResolved({
+            pathsKey,
+            project,
+            media: resolvedMedia,
+          });
         }
       } catch (error) {
         if (!cancelled) {
           console.error('[background] Failed to load media assets', error);
+
           setResolved(null);
         }
       }
@@ -93,8 +109,8 @@ const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | 
     return () => {
       cancelled = true;
 
-      for (const url of objectUrls) {
-        URL.revokeObjectURL(url);
+      for (const urlCur of objectUrls) {
+        URL.revokeObjectURL(urlCur);
       }
     };
   }, [pathsKey, project]);
@@ -115,9 +131,24 @@ type BackgroundInstanceProps = {
 const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceProps) => {
   const media = useResolvedMedia(effect, project);
 
-  const { component, images = [], videos = [], ...options } = effect.options;
-  const componentId = component ? `${component.package}/${component.name}` : null;
-  const CustomComponent = componentId ? components[componentId] as ComponentType<BookComponentProps> : undefined;
+  const {
+    component,
+    images = [],
+    videos = [],
+    ...options
+  } = effect.options;
+
+  let componentId = null;
+
+  if (component) {
+    componentId = `${component.package}/${component.name}`;
+  }
+
+  let CustomComponent: ComponentType<BookComponentProps> | undefined;
+
+  if (componentId) {
+    CustomComponent = components[componentId] as ComponentType<BookComponentProps>;
+  }
 
   const componentElement = useMemo(() => {
     return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
@@ -127,11 +158,25 @@ const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceP
     return null;
   }
 
+  const backgroundImages = images.map((imageCur, index) => {
+    return {
+      ...imageCur,
+      src: media.images[index],
+    };
+  });
+
+  const backgroundVideos = videos.map((videoCur, index) => {
+    return {
+      ...videoCur,
+      src: media.videos[index],
+    };
+  });
+
   const background: CoreBackgroundEffect = {
     id: effect.id,
     ...options,
-    images: images.map((image, index) => ({ ...image, src: media.images[index] })),
-    videos: videos.map((video, index) => ({ ...video, src: media.videos[index] })),
+    images: backgroundImages,
+    videos: backgroundVideos,
     Component: componentElement,
   };
 
@@ -142,12 +187,21 @@ export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {
   const { effects } = usePageEffects();
   const { components } = useCustomComponents();
 
-  const backgrounds = effects.filter((effect): effect is BackgroundEffectDraft => effect.type === 'background');
+  const backgrounds = effects.filter((effectCur): effectCur is BackgroundEffectDraft => {
+    return effectCur.type === 'background';
+  });
 
   return (
     <>
       {backgrounds.map((effect) => {
-        return <BackgroundInstance key={effect.id} effect={effect} project={project} components={components} />;
+        return (
+          <BackgroundInstance
+            key={effect.id}
+            effect={effect}
+            project={project}
+            components={components}
+          />
+        );
       })}
     </>
   );

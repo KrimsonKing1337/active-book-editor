@@ -1,4 +1,9 @@
-import type { AudioEffectDraft, VibrationEffectDraft, FlashlightEffectDraft, BackgroundEffectDraft } from './@types';
+import type {
+  AudioEffectDraft,
+  VibrationEffectDraft,
+  FlashlightEffectDraft,
+  BackgroundEffectDraft,
+} from './@types';
 
 export const createAudioEffect = (): AudioEffectDraft => {
   return {

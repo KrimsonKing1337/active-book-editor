@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { type CSSProperties, useState } from 'react';
 
 import { HexAlphaColorPicker } from 'react-colorful';
 
@@ -9,19 +9,58 @@ type StyleEditorProps = {
   onChange: (style: CSSProperties) => void;
 };
 
+type UpdatedValue = Record<string, string | number | undefined>;
+
 const getHexColor = (value: string): string => {
+  /*
+ * Проверяем, что строка содержит цвет в формате HEX:
+ * #RRGGBB или #RRGGBBAA.
+ *
+ * ^ — начало строки
+ * # — обязательный символ #
+ * [\da-f] — шестнадцатеричная цифра (0–9 или a–f)
+ * {6} — ровно 6 символов (RRGGBB)
+ * ([\da-f]{2})? — необязательные 2 символа прозрачности (AA)
+ * $ — конец строки
+ * i — регистронезависимый поиск (a–f и A–F)
+ */
   if (/^#[\da-f]{6}([\da-f]{2})?$/i.test(value)) {
     return value.length === 7 ? `${value}ff` : value;
   }
 
+  /*
+ * Разбираем цвет в формате rgb(...) или rgba(...).
+ *
+ * ^rgba?  — строка начинается с rgb или rgba (a необязательна)
+ * \( — открывающая круглая скобка
+ * \s* — любое количество пробельных символов
+ * (\d+) — первая группа: красный канал
+ * [,\s]+ — один или несколько разделителей (запятая/пробел)
+ * (\d+) — вторая группа: зелёный канал
+ * [,\s]+ — разделитель
+ * (\d+) — третья группа: синий канал
+ *
+ * (?: ... )? — необязательная группа для альфа-канала
+ * [,\/\s]+ — разделитель: запятая, / или пробел
+ * ([\d.]+) — четвёртая группа: прозрачность (число с точкой)
+ *
+ * \s* — необязательные пробелы перед закрывающей скобкой
+ * \) — закрывающая круглая скобка
+ * $ — конец строки
+ * i — регистронезависимый поиск
+ */
   const match = value.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\/\s]+([\d.]+))?\s*\)$/i);
 
   if (!match) {
     return '#000000ff';
   }
 
-  const channels = match.slice(1, 4).map((channel) => {
-    return Math.max(0, Math.min(255, Number(channel))).toString(16).padStart(2, '0');
+  const slicedChannels = match.slice(1, 4);
+
+  const channels = slicedChannels.map((channelCur) => {
+    const n = Math.max(0, Math.min(255, Number(channelCur)));
+
+    return n.toString(16).padStart(2, '0');
   });
 
   const alpha = Math.round(Math.max(0, Math.min(1, Number(match[4] ?? 1))) * 255);
@@ -37,7 +76,9 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
   const rules = Object.entries(value ?? {});
 
   const setProperty = (name: string, nextValue: string | number | undefined) => {
-    const updated = { ...value } as Record<string, string | number | undefined>;
+    const updated: UpdatedValue = {
+      ...value,
+    };
 
     if (nextValue === undefined || nextValue === '') {
       delete updated[name];
@@ -65,11 +106,16 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
       return;
     }
 
-    const updated = { ...value } as Record<string, string | number | undefined>;
+    const updated: UpdatedValue = {
+      ...value,
+    };
+
     const previousValue = updated[oldName];
 
     delete updated[oldName];
+
     updated[normalizedName] = previousValue;
+
     onChange(updated as CSSProperties);
   };
 
@@ -85,17 +131,35 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
     setNewValue('');
   };
 
+  const blurValueChangeHandler = (val: string) => {
+    const blur = Number(val);
+
+    if (Number.isFinite(blur) && blur >= 0) {
+      const blurValuesAsString = `blur(${blur}px)`;
+      const newProperty = blur ? blurValuesAsString : undefined;
+
+      setProperty('backdropFilter', newProperty);
+    }
+  };
+
   const backgroundColor = String(value?.backgroundColor ?? '');
   const parsedBackgroundColor = getHexColor(backgroundColor);
+
+  const backdropFilter = String(value?.backdropFilter ?? '');
+  const blurMatch = backdropFilter.match(/blur\(([\d.]+)px\)/);
+  const blurValue = Number(blurMatch?.[1] ?? 0);
 
   return (
     <div className={styles.StyleEditor}>
       <label className={styles.Field}>
-        <span>Цвет фона (HEX, RGB, RGBA)</span>
+        <span>
+          Цвет фона (HEX, RGB, RGBA)
+        </span>
+
         <input
           type="text"
           value={backgroundColor}
-          onChange={(event) => setProperty('backgroundColor', event.target.value)}
+          onChange={(e) => setProperty('backgroundColor', e.target.value)}
           placeholder="#00000080"
         />
       </label>
@@ -106,37 +170,39 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
       />
 
       <label className={styles.Field}>
-        <span>Размытие (условные единицы)</span>
+        <span>
+          Размытие (условные единицы)
+        </span>
+
         <input
           type="number"
           min={0}
           step={1}
-          value={String(value?.backdropFilter ?? '').match(/blur\(([\d.]+)px\)/)?.[1] ?? 0}
-          onChange={(event) => {
-            const blur = Number(event.target.value);
-
-            if (Number.isFinite(blur) && blur >= 0) {
-              setProperty('backdropFilter', blur ? `blur(${blur}px)` : undefined);
-            }
-          }}
+          value={blurValue}
+          onChange={(e) => blurValueChangeHandler(e.target.value)}
         />
       </label>
 
       <details className={styles.Advanced}>
-        <summary>Дополнительные CSS-свойства</summary>
+        <summary>
+          Дополнительные CSS-свойства
+        </summary>
+
         {rules.map(([property, ruleValue]) => {
           return (
             <div className={styles.Rule} key={property}>
               <input
                 aria-label="Имя свойства"
                 defaultValue={property}
-                onBlur={(event) => renameProperty(property, event.target.value)}
+                onBlur={(e) => renameProperty(property, e.target.value)}
               />
+
               <input
                 aria-label="Значение свойства"
                 value={String(ruleValue)}
-                onChange={(event) => setProperty(property, event.target.value)}
+                onChange={(e) => setProperty(property, e.target.value)}
               />
+
               <button type="button" aria-label="Удалить свойство" onClick={() => setProperty(property, undefined)}>
                 ×
               </button>
@@ -149,15 +215,19 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
             aria-label="Новое CSS-свойство"
             value={newProperty}
             placeholder="opacity"
-            onChange={(event) => setNewProperty(event.target.value)}
+            onChange={(e) => setNewProperty(e.target.value)}
           />
+
           <input
             aria-label="Значение нового свойства"
             value={newValue}
             placeholder="0.8"
-            onChange={(event) => setNewValue(event.target.value)}
+            onChange={(e) => setNewValue(e.target.value)}
           />
-          <button type="button" onClick={addProperty}>+</button>
+
+          <button type="button" onClick={addProperty}>
+            +
+          </button>
         </div>
       </details>
     </div>

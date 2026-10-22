@@ -13,47 +13,68 @@ type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
+
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
+};
+
+const shadowDefaultOptions = {
+  show: false,
+  style: undefined,
 };
 
 export const BackgroundSettings = ({
   effect,
   effects,
   project,
+
   onUpdate,
   onDuplicate,
   onDelete,
 }: BackgroundSettingsProps) => {
   const { definitions } = useCustomComponents();
+
   const [idDraft, setIdDraft] = useState(effect.id);
 
   const options = effect.options;
+
   const images = options.images ?? [];
   const videos = options.videos ?? [];
   const style = options.style ?? {};
-  const shadow = options.shadow ?? { show: false };
+  const shadow = options.shadow ?? shadowDefaultOptions;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
+    const newOptions = {
+      ...options,
+      ...updates,
+    };
+
     onUpdate(effect.id, {
       ...effect,
-      options: { ...options, ...updates },
+      options: newOptions,
     });
   };
 
   const updateStyle = (value: CSSProperties) => {
-    updateOptions({ style: value });
+    updateOptions({
+      style: value,
+    });
   };
 
   const updateZIndex = (value: number) => {
     if (Number.isFinite(value)) {
-      updateStyle({ ...style, zIndex: value });
+      updateStyle({
+        ...style,
+        zIndex: value,
+      });
     }
   };
 
-  const otherZIndexes = effects.filter((current) => current.id !== effect.id).map((current) => {
-    return Number(current.options.style?.zIndex ?? 0);
+  const otherEffects = effects.filter((cur) => cur.id !== effect.id);
+
+  const otherZIndexes = otherEffects.map((effectCur) => {
+    return Number(effectCur.options.style?.zIndex ?? 0);
   });
 
   const zIndex = Number(style.zIndex ?? 0);
@@ -61,62 +82,110 @@ export const BackgroundSettings = ({
   const moveLayer = (direction: 'forward' | 'backward' | 'top' | 'bottom') => {
     if (direction === 'top') {
       updateZIndex(Math.max(zIndex, ...otherZIndexes, 0) + 1);
+
       return;
     }
 
     if (direction === 'bottom') {
       updateZIndex(Math.min(zIndex, ...otherZIndexes, 0) - 1);
+
       return;
     }
 
     if (direction === 'forward') {
-      const next = otherZIndexes.filter((current) => current > zIndex).sort((a, b) => a - b)[0];
-      updateZIndex(next === undefined ? zIndex + 1 : next + 1);
+      const filteredNextZIndexes = otherZIndexes.filter((cur) => cur > zIndex);
+
+      const next = filteredNextZIndexes.sort((a, b) => a - b);
+
+      let nextSafe = zIndex + 1;
+
+      if (next[0]) {
+        nextSafe = next[0] + 1;
+      }
+
+      updateZIndex(nextSafe);
+
       return;
     }
 
-    const previous = otherZIndexes.filter((current) => current < zIndex).sort((a, b) => b - a)[0];
-    updateZIndex(previous === undefined ? zIndex - 1 : previous - 1);
+    const filteredPrevZIndexes = otherZIndexes.filter((cur) => cur < zIndex);
+
+    const prev = filteredPrevZIndexes.sort((a, b) => b - a);
+
+    let prevSafe = zIndex + 1;
+
+    if (prev[0]) {
+      prevSafe = prev[0] - 1;
+    }
+
+    updateZIndex(prevSafe);
   };
 
   const updateId = () => {
     const normalized = idDraft.trim();
-    const alreadyExists = effects.some((current) => current.id === normalized && current.id !== effect.id);
+
+    const alreadyExists = effects.some((effectCur) => {
+      return effectCur.id === normalized && effectCur.id !== effect.id;
+    });
 
     if (!normalized || alreadyExists) {
       return;
     }
 
-    onUpdate(effect.id, { ...effect, id: normalized });
+    onUpdate(effect.id, {
+      ...effect,
+      id: normalized,
+    });
   };
 
   const updateImage = (index: number, changes: Partial<(typeof images)[number]>) => {
-    const next = images.map((image, currentIndex) => {
-      return currentIndex === index ? { ...image, ...changes } : image;
+    const next = images.map((imageCur, imageCurIndex) => {
+      if (imageCurIndex === index) {
+        return {
+          ...imageCur,
+          ...changes,
+        };
+      }
+
+      return imageCur;
     });
 
-    updateOptions({ images: next });
+    updateOptions({
+      images: next,
+    });
   };
 
   const updateVideo = (index: number, changes: Partial<(typeof videos)[number]>) => {
-    const next = videos.map((video, currentIndex) => {
-      return currentIndex === index ? { ...video, ...changes } : video;
+    const next = videos.map((videoCur, videoCurIndex) => {
+      if (videoCurIndex === index) {
+        return {
+          ...videoCur,
+          ...changes,
+        };
+      }
+
+      return videoCur;
     });
 
-    updateOptions({ videos: next });
+    updateOptions({
+      videos: next,
+    });
   };
 
   const importAsset = async (file: File, updateSource: (src: string) => void) => {
     if (!project) {
       window.alert('Сначала сохрани проект, чтобы добавить файл в assets/');
+
       return;
     }
 
     try {
       const path = await project.storage.importAssetFile(file);
+
       updateSource(path);
     } catch (error) {
       console.error('[background] Failed to import media asset', error);
+
       window.alert(error instanceof Error ? error.message : 'Не удалось импортировать файл');
     }
   };
@@ -128,200 +197,413 @@ export const BackgroundSettings = ({
   const updateComponent = (id: string) => {
     if (!id) {
       updateOptions({ component: undefined });
+
       return;
     }
 
-    const definition = definitions.find((item) => item.id === id);
+    const definition = definitions.find((cur) => cur.id === id);
 
     if (definition) {
-      updateOptions({ component: { package: definition.packageName, name: definition.name } });
+      const component = {
+        package: definition.packageName,
+        name: definition.name,
+      };
+
+      updateOptions({
+        component,
+      });
     }
   };
 
-  const componentId = options.component ? `${options.component.package}/${options.component.name}` : '';
+  let componentId = '';
+
+  if (options.component) {
+    componentId = `${options.component.package}/${options.component.name}`;
+  }
+
+  const effectNameChangeHandler = (val: string) => {
+    onUpdate(effect.id, {
+      ...effect,
+      slug: val,
+    });
+  };
+
+  const imagePathChangeHandler = (index: number, val: string) => {
+    updateImage(index, {
+      src: val,
+    });
+  };
+
+  const imageFileChangeHandler = (index: number, files: FileList | null) => {
+    const file = files?.[0];
+
+    if (file) {
+      void importAsset(file, (src) => {
+        updateImage(index, {
+          src,
+        });
+      });
+    }
+  };
+
+  const imageStyleEditorChangeHandler = (index: number, val: CSSProperties) => {
+    updateImage(index, {
+      style: val,
+    });
+  };
+
+  const imageDeleteButtonClickHandler = (index: number) => {
+    const filteredImages = images.filter((_, imageIndex) => imageIndex !== index);
+
+    updateOptions({
+      images: filteredImages,
+    });
+  };
+
+  const imageAddButtonClickHandler = () => {
+    const newImages = [...images, {
+      src: '',
+    }];
+
+    updateOptions({
+      images: newImages,
+    });
+  };
+
+  const videoPathChangeHandler = (index: number, val: string) => {
+    updateVideo(index, {
+      src: val,
+    });
+  };
+
+  const videoFileChangeHandler = (index: number, files: FileList | null) => {
+    const file = files?.[0];
+
+    if (file) {
+      void importAsset(file, (src) => {
+        updateVideo(index, {
+          src,
+        });
+      });
+    }
+  };
+
+  const videoOptionLoopChangeHandler = (index: number, val: boolean) => {
+    updateVideo(index, {
+      loop: val,
+    });
+  };
+
+  const videoOptionAutoplayChangeHandler = (index: number, val: boolean) => {
+    updateVideo(index, {
+      autoPlay: val,
+    });
+  };
+
+  const videoOptionMutedChangeHandler = (index: number, val: boolean) => {
+    updateVideo(index, {
+      muted: val,
+    });
+  };
+
+  const videoStyleEditorChangeHandler = (index: number, val: CSSProperties) => {
+    updateVideo(index, {
+      style: val,
+    });
+  };
+
+  const videoDeleteButtonClickHandler = (index: number) => {
+    const filteredVideos = videos.filter((_, videoIndex) => videoIndex !== index);
+
+    updateOptions({
+      videos: filteredVideos,
+    });
+  };
+
+  const videoAddButtonClickHandler = () => {
+    const newVideos = [...videos, {
+      id: crypto.randomUUID(),
+      src: '',
+    }];
+
+    updateOptions({
+      videos: newVideos,
+    });
+  };
+
+  const shadowOptionShowChangeHandler = (val: boolean) => {
+    const newShadow = {
+      ...shadow,
+      show: val,
+    };
+
+    updateOptions({
+      shadow: newShadow,
+    });
+  };
+
+  const shadowStyleEditorChangeHandler = (val: CSSProperties) => {
+    const newShadow = {
+      ...shadow,
+      style: val,
+    };
+
+    updateOptions({
+      shadow: newShadow,
+    });
+  };
+
+  const customComponentOptions = definitions.map((definitionCur) => {
+    const { id, title } = definitionCur;
+
+    return (
+      <option key={id} value={id}>
+        {title}
+      </option>
+    );
+  });
 
   return (
     <div className={styles.Settings}>
       <label className={styles.Field}>
-        <span>Название эффекта</span>
+        <span>
+          Название эффекта
+        </span>
+
         <input
           type="text"
           value={effect.slug}
-          onChange={(event) => onUpdate(effect.id, { ...effect, slug: event.target.value })}
+          onChange={(e) => effectNameChangeHandler(e.target.value)}
         />
       </label>
 
       <div className={styles.Field}>
-        <span>ID эффекта</span>
+        <span>
+          ID эффекта
+        </span>
+
         <div className={styles.Row}>
-          <input value={idDraft} onChange={(event) => setIdDraft(event.target.value)} />
-          <button type="button" onClick={updateId}>Применить</button>
+          <input value={idDraft} onChange={(e) => setIdDraft(e.target.value)} />
+
+          <button type="button" onClick={updateId}>
+            Применить
+          </button>
         </div>
       </div>
 
       <section className={styles.Section}>
-        <h3>Слой</h3>
+        <h3>
+          Слой
+        </h3>
+
         <div className={styles.Row}>
-          <button type="button" title="В самый низ" onClick={() => moveLayer('bottom')}>⇤</button>
-          <button type="button" title="На один слой назад" onClick={() => moveLayer('backward')}>←</button>
-          <input type="number" aria-label="z-index" value={zIndex} onChange={handleZIndexChange} />
-          <button type="button" title="На один слой вперёд" onClick={() => moveLayer('forward')}>→</button>
-          <button type="button" title="На самый верх" onClick={() => moveLayer('top')}>⇥</button>
+          <button type="button" title="В самый низ" onClick={() => moveLayer('bottom')}>
+            ⇤
+          </button>
+
+          <button type="button" title="На один слой назад" onClick={() => moveLayer('backward')}>
+            ←
+          </button>
+
+          <input
+            type="number"
+            aria-label="z-index"
+            value={zIndex}
+            onChange={handleZIndexChange}
+          />
+
+          <button type="button" title="На один слой вперёд" onClick={() => moveLayer('forward')}>
+            →
+          </button>
+
+          <button type="button" title="На самый верх" onClick={() => moveLayer('top')}>
+            ⇥
+          </button>
         </div>
+
         <StyleEditor value={style} onChange={updateStyle} />
       </section>
 
       <section className={styles.Section}>
-        <h3>Изображения</h3>
-        {images.map((image, index) => {
+        <h3>
+          Изображения
+        </h3>
+
+        {images.map((imageCur, index) => {
           return (
             <div key={index} className={styles.Media}>
               <label className={styles.Field}>
-                <span>Путь к изображению</span>
+                <span>
+                  Путь к изображению
+                </span>
+
                 <input
-                  value={image.src}
+                  value={imageCur.src}
                   placeholder="assets/forest.webp"
-                  onChange={(event) => updateImage(index, { src: event.target.value })}
+                  onChange={(e) => imagePathChangeHandler(index, e.target.value)}
                 />
               </label>
+
               <label className={styles.Field}>
-                <span>Или выбрать файл</span>
+                <span>
+                  Или выбрать файл
+                </span>
+
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-
-                    if (file) {
-                      void importAsset(file, (src) => updateImage(index, { src }));
-                    }
-                  }}
+                  onChange={(e) => imageFileChangeHandler(index, e.target.files)}
                 />
               </label>
               <details>
-                <summary>Стили изображения</summary>
+                <summary>
+                  Стили изображения
+                </summary>
+
                 <StyleEditor
-                  value={image.style ?? {}}
-                  onChange={(value) => updateImage(index, { style: value })}
+                  value={imageCur.style ?? {}}
+                  onChange={(val) => imageStyleEditorChangeHandler(index, val)}
                 />
               </details>
-              <button type="button" onClick={() => updateOptions({ images: images.filter((_, i) => i !== index) })}>
+
+              <button type="button" onClick={() => imageDeleteButtonClickHandler(index)}>
                 Удалить изображение
               </button>
             </div>
           );
         })}
-        <button
-          type="button"
-          onClick={() => updateOptions({ images: [...images, { src: '' }] })}
-        >
+
+        <button type="button" onClick={imageAddButtonClickHandler}>
           Добавить изображение
         </button>
       </section>
 
       <section className={styles.Section}>
-        <h3>Видео</h3>
-        {videos.map((video, index) => {
+        <h3>
+          Видео
+        </h3>
+
+        {videos.map((videoCur, index) => {
           return (
-            <div key={video.id} className={styles.Media}>
+            <div key={videoCur.id} className={styles.Media}>
               <label className={styles.Field}>
-                <span>Путь к видео</span>
+                <span>
+                  Путь к видео
+                </span>
+
                 <input
-                  value={video.src}
+                  value={videoCur.src}
                   placeholder="assets/fog.webm"
-                  onChange={(event) => updateVideo(index, { src: event.target.value })}
+                  onChange={(e) => videoPathChangeHandler(index, e.target.value)}
                 />
               </label>
+
               <label className={styles.Field}>
-                <span>Или выбрать видеофайл</span>
+                <span>
+                  Или выбрать видеофайл
+                </span>
+
                 <input
                   type="file"
                   accept="video/*"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-
-                    if (file) {
-                      void importAsset(file, (src) => updateVideo(index, { src }));
-                    }
-                  }}
+                  onChange={(e) => videoFileChangeHandler(index, e.target.files)}
                 />
               </label>
+
               <div className={styles.Checkboxes}>
                 <label>
                   <input
                     type="checkbox"
-                    checked={video.loop ?? true}
-                    onChange={(event) => updateVideo(index, { loop: event.target.checked })}
+                    checked={videoCur.loop ?? true}
+                    onChange={(e) => videoOptionLoopChangeHandler(index, e.target.checked)}
                   />
                   Зациклить
                 </label>
+
                 <label>
                   <input
                     type="checkbox"
-                    checked={video.autoPlay ?? true}
-                    onChange={(event) => updateVideo(index, { autoPlay: event.target.checked })}
+                    checked={videoCur.autoPlay ?? true}
+                    onChange={(e) => videoOptionAutoplayChangeHandler(index, e.target.checked)}
                   />
                   Автозапуск
                 </label>
+
                 <label>
                   <input
                     type="checkbox"
-                    checked={video.muted ?? true}
-                    onChange={(event) => updateVideo(index, { muted: event.target.checked })}
+                    checked={videoCur.muted ?? true}
+                    onChange={(e) => videoOptionMutedChangeHandler(index, e.target.checked)}
                   />
                   Без звука
                 </label>
               </div>
+
               <details>
-                <summary>Стили видео</summary>
+                <summary>
+                  Стили видео
+                </summary>
+
                 <StyleEditor
-                  value={video.style ?? {}}
-                  onChange={(value) => updateVideo(index, { style: value })}
+                  value={videoCur.style ?? {}}
+                  onChange={(val) => videoStyleEditorChangeHandler(index, val)}
                 />
               </details>
-              <button type="button" onClick={() => updateOptions({ videos: videos.filter((_, i) => i !== index) })}>
+
+              <button type="button" onClick={() => videoDeleteButtonClickHandler(index)}>
                 Удалить видео
               </button>
             </div>
           );
         })}
-        <button
-          type="button"
-          onClick={() => updateOptions({ videos: [...videos, { id: crypto.randomUUID(), src: '' }] })}
-        >
+
+        <button type="button" onClick={videoAddButtonClickHandler}>
           Добавить видео
         </button>
       </section>
 
       <section className={styles.Section}>
-        <h3>Затемнение и фильтры</h3>
+        <h3>
+          Затемнение и фильтры
+        </h3>
+
         <label>
           <input
             type="checkbox"
             checked={shadow.show ?? false}
-            onChange={(event) => updateOptions({ shadow: { ...shadow, show: event.target.checked } })}
+            onChange={(e) => shadowOptionShowChangeHandler(e.target.checked)}
           />
           Показывать слой
         </label>
+
         <StyleEditor
           value={shadow.style ?? {}}
-          onChange={(value) => updateOptions({ shadow: { ...shadow, style: value } })}
+          onChange={(val) => shadowStyleEditorChangeHandler(val)}
         />
       </section>
 
       <section className={styles.Section}>
-        <h3>Кастомный компонент</h3>
-        <select value={componentId} onChange={(event) => updateComponent(event.target.value)}>
-          <option value="">Не использовать</option>
-          {definitions.map((definition) => {
-            return <option key={definition.id} value={definition.id}>{definition.title}</option>;
-          })}
+        <h3>
+          Кастомный компонент
+        </h3>
+
+        <select value={componentId} onChange={(e) => updateComponent(e.target.value)}>
+          <option value="">
+            Не использовать
+          </option>
+
+          {customComponentOptions}
         </select>
       </section>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>Дублировать</button>
-        <button type="button" onClick={onDelete}>Удалить эффект</button>
+        <button type="button" onClick={onDuplicate}>
+          Дублировать
+        </button>
+
+        <button type="button" onClick={onDelete}>
+          Удалить эффект
+        </button>
       </div>
     </div>
   );

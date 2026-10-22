@@ -1,16 +1,19 @@
-import { useState, type ReactNode } from 'react';
+import { type ReactNode, type CSSProperties, useState } from 'react';
 
 import { createPortal } from 'react-dom';
+
 import { Rnd } from 'react-rnd';
 
 import type { BookProject } from '@project/@types';
 
 import type { EditorEffectDraft, BackgroundEffectDraft } from '../../@types';
 
-import { AudioSettings } from '../AudioSettings';
-import { VibrationSettings } from '../VibrationSettings';
-import { FlashlightSettings } from '../FlashlightSettings';
-import { BackgroundSettings } from '../BackgroundSettings';
+import {
+  AudioSettings,
+  VibrationSettings,
+  FlashlightSettings,
+  BackgroundSettings,
+} from '../';
 
 import { EffectTile } from './components';
 
@@ -20,6 +23,7 @@ type EffectsModalProps = {
   effects: EditorEffectDraft[];
   project: BookProject | null;
   selectedEffect: EditorEffectDraft | null;
+
   onClose: () => void;
   onBack: () => void;
   onAddAudio: () => void;
@@ -32,20 +36,43 @@ type EffectsModalProps = {
   onDeleteEffect: () => void;
 };
 
-type PanelGeometry = { x: number; y: number; width: number; height: number };
+type PanelGeometry = {
+  x: number;
+  y: number;
+  width: number;
+  height: number,
+};
+
+type Position = {
+  x: number;
+  y: number;
+};
 
 const PANEL_GEOMETRY_KEY = 'activeBook-editor:effectsPanelGeometry';
 
-const getMinimumWidth = () => Math.min(320, Math.max(240, window.innerWidth - 32));
+const getMinimumWidth = () => {
+  const width = window.innerWidth - 32;
+
+  return Math.min(320, Math.max(240, width));
+};
 
 const getDefaultGeometry = (): PanelGeometry => {
-  const width = Math.min(500, Math.max(240, window.innerWidth - 32));
-  const height = Math.min(680, Math.max(240, window.innerHeight - 32));
+  const innerWidth = window.innerWidth - 32;
+
+  const width = Math.min(500, Math.max(240, innerWidth));
+  const height = Math.min(680, Math.max(240, innerWidth));
+
   const pageBounds = document.querySelector('#main-content-wrapper')?.getBoundingClientRect();
+
   const preferredX = pageBounds ? pageBounds.right + 20 : window.innerWidth - width - 20;
   const x = Math.max(16, Math.min(window.innerWidth - width - 16, preferredX));
 
-  return { x, y: 32, width, height };
+  return {
+    x,
+    y: 32,
+    width,
+    height,
+  };
 };
 
 const getSavedGeometry = (): PanelGeometry => {
@@ -59,20 +86,36 @@ const getSavedGeometry = (): PanelGeometry => {
     }
 
     const value = JSON.parse(raw) as Partial<PanelGeometry>;
-    const valid = [value.x, value.y, value.width, value.height].every((number) => {
-      return typeof number === 'number' && Number.isFinite(number);
+
+    const geometryAsArray = [
+      value.x,
+      value.y,
+      value.width,
+      value.height,
+    ];
+
+    const valid = geometryAsArray.every((itemCur) => {
+      return typeof itemCur === 'number' && Number.isFinite(itemCur);
     });
 
     if (!valid) {
       return fallback;
     }
 
-    const width = Math.min(Math.max(getMinimumWidth(), value.width!), window.innerWidth - 32);
-    const height = Math.min(Math.max(240, value.height!), Math.max(240, window.innerHeight - 32));
+    const innerWidth = window.innerWidth - 32;
+
+    const width = Math.min(Math.max(getMinimumWidth(), value.width!), innerWidth);
+    const height = Math.min(Math.max(240, value.height!), Math.max(240, innerWidth));
+
     const x = Math.max(16, Math.min(value.x!, window.innerWidth - width - 16));
     const y = Math.max(16, Math.min(value.y!, window.innerHeight - 60));
 
-    return { x, y, width, height };
+    return {
+      x,
+      y,
+      width,
+      height,
+    };
   } catch {
     return fallback;
   }
@@ -100,6 +143,7 @@ export const EffectsModal = ({
 
   const saveGeometry = (next: PanelGeometry) => {
     setGeometry(next);
+
     localStorage.setItem(PANEL_GEOMETRY_KEY, JSON.stringify(next));
   };
 
@@ -123,7 +167,11 @@ export const EffectsModal = ({
       label: 'Добавить Flashlight',
       onClick: onAddFlashlight,
     },
-    { id: 'background', label: 'Добавить Background', onClick: onAddBackground },
+    {
+      id: 'background',
+      label: 'Добавить Background',
+      onClick: onAddBackground,
+    },
   ];
 
   let modalTitle = 'Эффекты страницы';
@@ -242,8 +290,12 @@ export const EffectsModal = ({
     );
   }
 
-  const handleDragStop = (_event: unknown, position: { x: number; y: number }) => {
-    saveGeometry({ ...geometry, x: position.x, y: position.y });
+  const handleDragStop = (_event: unknown, position: Position) => {
+    saveGeometry({
+      ...geometry,
+      x: position.x,
+      y: position.y,
+    });
   };
 
   const handleResizeStop = (
@@ -251,10 +303,49 @@ export const EffectsModal = ({
     _direction: unknown,
     element: HTMLElement,
     _delta: unknown,
-    position: { x: number; y: number },
+    position: Position,
   ) => {
-    saveGeometry({ x: position.x, y: position.y, width: element.offsetWidth, height: element.offsetHeight });
+    saveGeometry({
+      x: position.x,
+      y: position.y,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+    });
   };
+
+  const dialogRndCancelOptions = [
+    'button',
+    'input',
+    'textarea',
+    'select',
+    'summary',
+    'label',
+  ];
+
+  const dialogRndHeight = isCollapsed ? 60 : geometry.height;
+
+  const dialogRndSize = {
+    width: geometry.width,
+    height: dialogRndHeight,
+  };
+
+  const dialogRndPosition = {
+    x: geometry.x,
+    y: geometry.y,
+  };
+
+  const dialogRndMinWidth = getMinimumWidth();
+  const dialogRndMinHeight = isCollapsed ? 60 : 240;
+
+  const dialogRndStyle: CSSProperties = {
+    position: 'fixed',
+    zIndex: 1000,
+  };
+
+  const showBackButton = isSettingsOpen && !isCollapsed;
+  const windowControlButtonAriaLabel = isCollapsed ? 'Развернуть окно' : 'Свернуть окно';
+  const windowControlButtonLabel = isCollapsed ? '▢' : '−';
+  const isAudioLoading = isLoading && !isCollapsed;
 
   return createPortal(
     <Rnd
@@ -264,45 +355,70 @@ export const EffectsModal = ({
       aria-modal={false}
       bounds="window"
       dragHandleClassName={styles.Header}
-      cancel="button,input,textarea,select,summary,label"
-      size={{ width: geometry.width, height: isCollapsed ? 60 : geometry.height }}
-      position={{ x: geometry.x, y: geometry.y }}
-      minWidth={getMinimumWidth()}
-      minHeight={isCollapsed ? 60 : 240}
+      cancel={dialogRndCancelOptions.join(',')}
+      size={dialogRndSize}
+      position={dialogRndPosition}
+      minWidth={dialogRndMinWidth}
+      minHeight={dialogRndMinHeight}
       enableResizing={!isCollapsed}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
-      style={{ position: 'fixed', zIndex: 1000 }}
+      style={dialogRndStyle}
     >
       <div className={styles.Header}>
-        {isSettingsOpen && !isCollapsed && (
-          <button className={styles.Back} type="button" onClick={onBack}>← Назад</button>
+        {showBackButton && (
+          <button className={styles.Back} type="button" onClick={onBack}>
+            ← Назад
+          </button>
         )}
+
         <div className={styles.Title}>
-          <h2>{modalTitle}</h2>
-          {!isCollapsed && <p>{modalDescription}</p>}
+          <h2>
+            {modalTitle}
+          </h2>
+
+          {!isCollapsed && (
+            <p>
+              {modalDescription}
+            </p>
+          )}
         </div>
+
         <button
           className={styles.Close}
           type="button"
-          aria-label={isCollapsed ? 'Развернуть окно' : 'Свернуть окно'}
-          onClick={() => setIsCollapsed((current) => !current)}
+          aria-label={windowControlButtonAriaLabel}
+          onClick={() => setIsCollapsed((cur) => !cur)}
         >
-          {isCollapsed ? '▢' : '−'}
+          {windowControlButtonLabel}
         </button>
-        <button className={styles.Close} type="button" onClick={onClose} aria-label="Закрыть">×</button>
+
+        <button
+          className={styles.Close}
+          type="button"
+          onClick={onClose}
+          aria-label="Закрыть"
+        >
+          ×
+        </button>
       </div>
 
       {!isCollapsed && (
         <div className={styles.PanelBody}>
-          <div className={styles.Content} inert={isLoading}>{modalContent}</div>
-          <p className={styles.Notice} inert={isLoading}>{notice}</p>
+          <div className={styles.Content} inert={isLoading}>
+            {modalContent}
+          </div>
+
+          <p className={styles.Notice} inert={isLoading}>
+            {notice}
+          </p>
         </div>
       )}
 
-      {isLoading && !isCollapsed && (
+      {isAudioLoading && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
+
           Подготавливаем аудио...
         </div>
       )}
