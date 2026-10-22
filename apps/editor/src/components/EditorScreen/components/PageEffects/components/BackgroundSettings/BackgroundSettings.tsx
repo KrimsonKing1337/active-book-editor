@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type CSSProperties } from 'react';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
+import type { BookProject } from '@project/@types';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
@@ -11,6 +12,7 @@ import styles from './BackgroundSettings.module.scss';
 type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
+  project: BookProject | null;
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -19,6 +21,7 @@ type BackgroundSettingsProps = {
 export const BackgroundSettings = ({
   effect,
   effects,
+  project,
   onUpdate,
   onDuplicate,
   onDelete,
@@ -103,6 +106,21 @@ export const BackgroundSettings = ({
     updateOptions({ videos: next });
   };
 
+  const importAsset = async (file: File, updateSource: (src: string) => void) => {
+    if (!project) {
+      window.alert('Сначала сохрани проект, чтобы добавить файл в assets/');
+      return;
+    }
+
+    try {
+      const path = await project.storage.importAssetFile(file);
+      updateSource(path);
+    } catch (error) {
+      console.error('[background] Failed to import media asset', error);
+      window.alert(error instanceof Error ? error.message : 'Не удалось импортировать файл');
+    }
+  };
+
   const handleZIndexChange = (event: ChangeEvent<HTMLInputElement>) => {
     updateZIndex(Number(event.target.value));
   };
@@ -166,6 +184,20 @@ export const BackgroundSettings = ({
                   onChange={(event) => updateImage(index, { src: event.target.value })}
                 />
               </label>
+              <label className={styles.Field}>
+                <span>Или выбрать файл</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+
+                    if (file) {
+                      void importAsset(file, (src) => updateImage(index, { src }));
+                    }
+                  }}
+                />
+              </label>
               <details>
                 <summary>Стили изображения</summary>
                 <StyleEditor
@@ -198,6 +230,20 @@ export const BackgroundSettings = ({
                   value={video.src}
                   placeholder="assets/fog.webm"
                   onChange={(event) => updateVideo(index, { src: event.target.value })}
+                />
+              </label>
+              <label className={styles.Field}>
+                <span>Или выбрать видеофайл</span>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+
+                    if (file) {
+                      void importAsset(file, (src) => updateVideo(index, { src }));
+                    }
+                  }}
                 />
               </label>
               <div className={styles.Checkboxes}>

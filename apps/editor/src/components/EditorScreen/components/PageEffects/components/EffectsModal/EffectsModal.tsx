@@ -234,6 +234,7 @@ export const EffectsModal = ({
         key={selectedEffect.id}
         effect={selectedEffect}
         effects={backgrounds}
+        project={project}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}
