@@ -26,6 +26,7 @@ test('assigns stable IDs to images in older books', () => {
   const second = normalizeBackgroundEffects({ background });
 
   assert.deepEqual(first, second);
+  assert.equal('id' in background[0].options.images[0], false);
   assert.deepEqual(first[0].options.images?.map((image) => image.id), [
     'legacy-image:forest:0',
     'legacy-image:forest:1',

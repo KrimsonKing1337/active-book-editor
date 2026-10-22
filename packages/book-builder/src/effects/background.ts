@@ -60,16 +60,19 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     }
 
     const slug = typeof effect.slug === 'string' ? effect.slug : 'Новый фон';
-    const options = effect.options as BackgroundOptions;
+    let options = effect.options as BackgroundOptions;
 
     // Older book.json files can contain background images without IDs.
     if (options.images?.some((image) => !image.id?.trim())) {
-      options.images = options.images.map((image, index) => {
-        return {
-          ...image,
-          id: image.id?.trim() || `legacy-image:${effect.id}:${index}`,
-        };
-      });
+      options = {
+        ...options,
+        images: options.images.map((image, index) => {
+          return {
+            ...image,
+            id: image.id?.trim() || `legacy-image:${effect.id}:${index}`,
+          };
+        }),
+      };
     }
 
     result.push({
