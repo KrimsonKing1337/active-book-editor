@@ -1,15 +1,16 @@
-import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { createPortal } from 'react-dom';
+import { Rnd } from 'react-rnd';
 
 import type { BookProject } from '@project/@types';
 
-import type { EditorEffectDraft } from '../../@types';
+import type { EditorEffectDraft, BackgroundEffectDraft } from '../../@types';
 
 import { AudioSettings } from '../AudioSettings';
 import { VibrationSettings } from '../VibrationSettings';
 import { FlashlightSettings } from '../FlashlightSettings';
+import { BackgroundSettings } from '../BackgroundSettings';
 
 import { EffectTile } from './components';
 
@@ -24,10 +25,55 @@ type EffectsModalProps = {
   onAddAudio: () => void;
   onAddVibration: () => void;
   onAddFlashlight: () => void;
+  onAddBackground: () => void;
   onSelectEffect: (id: string) => void;
   onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;
   onDeleteEffect: () => void;
+};
+
+type PanelGeometry = { x: number; y: number; width: number; height: number };
+
+const PANEL_GEOMETRY_KEY = 'activeBook-editor:effectsPanelGeometry';
+
+const getDefaultGeometry = (): PanelGeometry => {
+  const width = Math.min(500, Math.max(320, window.innerWidth - 32));
+  const height = Math.min(680, Math.max(240, window.innerHeight - 32));
+  const pageBounds = document.querySelector('#main-content-wrapper')?.getBoundingClientRect();
+  const preferredX = pageBounds ? pageBounds.right + 20 : window.innerWidth - width - 20;
+  const x = Math.max(16, Math.min(window.innerWidth - width - 16, preferredX));
+
+  return { x, y: 32, width, height };
+};
+
+const getSavedGeometry = (): PanelGeometry => {
+  const fallback = getDefaultGeometry();
+
+  try {
+    const raw = localStorage.getItem(PANEL_GEOMETRY_KEY);
+
+    if (!raw) {
+      return fallback;
+    }
+
+    const value = JSON.parse(raw) as Partial<PanelGeometry>;
+    const valid = [value.x, value.y, value.width, value.height].every((number) => {
+      return typeof number === 'number' && Number.isFinite(number);
+    });
+
+    if (!valid) {
+      return fallback;
+    }
+
+    const width = Math.min(Math.max(320, value.width!), Math.max(320, window.innerWidth - 32));
+    const height = Math.min(Math.max(240, value.height!), Math.max(240, window.innerHeight - 32));
+    const x = Math.max(16, Math.min(value.x!, window.innerWidth - width - 16));
+    const y = Math.max(16, Math.min(value.y!, window.innerHeight - 60));
+
+    return { x, y, width, height };
+  } catch {
+    return fallback;
+  }
 };
 
 export const EffectsModal = ({
@@ -40,29 +86,20 @@ export const EffectsModal = ({
   onAddAudio,
   onAddVibration,
   onAddFlashlight,
+  onAddBackground,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,
 }: EffectsModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [geometry, setGeometry] = useState(getSavedGeometry);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const mouseDownTargetRef = useRef<EventTarget | null>(null);
-
-  useEffect(() => {
-    const dialogElement = dialogRef.current;
-
-    if (!dialogElement) {
-      return;
-    }
-
-    dialogElement.showModal();
-
-    return () => {
-      dialogElement.close();
-    };
-  }, []);
+  const saveGeometry = (next: PanelGeometry) => {
+    setGeometry(next);
+    localStorage.setItem(PANEL_GEOMETRY_KEY, JSON.stringify(next));
+  };
 
   const isSettingsOpen = Boolean(selectedEffect);
   const isEffectsEmpty = effects.length === 0;
@@ -84,10 +121,11 @@ export const EffectsModal = ({
       label: 'Добавить Flashlight',
       onClick: onAddFlashlight,
     },
+    { id: 'background', label: 'Добавить Background', onClick: onAddBackground },
   ];
 
   let modalTitle = 'Эффекты страницы';
-  let modalDescription = 'Невидимые эффекты, которые относятся к странице';
+  let modalDescription = 'Эффекты, которые относятся к странице';
   let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги';
 
   let modalContent: ReactNode = (
@@ -180,92 +218,92 @@ export const EffectsModal = ({
     );
   }
 
-  const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
-    event.preventDefault();
+  if (selectedEffect?.type === 'background') {
+    const backgrounds = effects.filter((effectCur): effectCur is BackgroundEffectDraft => {
+      return effectCur.type === 'background';
+    });
 
-    if (isLoading) {
-      return;
-    }
+    modalTitle = 'Настройки Background';
+    modalDescription = 'Фон отображается прямо на странице книги';
+    notice = 'В редакторе можно независимо скрывать фон и нарратив';
 
-    if (isSettingsOpen) {
-      onBack();
+    modalContent = (
+      <BackgroundSettings
+        key={selectedEffect.id}
+        effect={selectedEffect}
+        effects={backgrounds}
+        onUpdate={onUpdateEffect}
+        onDuplicate={onDuplicateEffect}
+        onDelete={onDeleteEffect}
+      />
+    );
+  }
 
-      return;
-    }
-
-    onClose();
+  const handleDragStop = (_event: unknown, position: { x: number; y: number }) => {
+    saveGeometry({ ...geometry, x: position.x, y: position.y });
   };
 
-  const handleBackdropMouseDown = (event: MouseEvent<HTMLDialogElement>) => {
-    mouseDownTargetRef.current = event.button === 0 ? event.target : null;
-  };
-
-  const handleBackdropMouseUp = (event: MouseEvent<HTMLDialogElement>) => {
-    const targetAndCurrentTargetAreEqual = event.target === event.currentTarget;
-    const startedOnBackdrop = mouseDownTargetRef.current === event.currentTarget;
-
-    mouseDownTargetRef.current = null;
-
-    if (isLoading || !startedOnBackdrop || !targetAndCurrentTargetAreEqual) {
-      return;
-    }
-
-    onClose();
+  const handleResizeStop = (
+    _event: unknown,
+    _direction: unknown,
+    element: HTMLElement,
+    _delta: unknown,
+    position: { x: number; y: number },
+  ) => {
+    saveGeometry({ x: position.x, y: position.y, width: element.offsetWidth, height: element.offsetHeight });
   };
 
   return createPortal(
-    <dialog
-      ref={dialogRef}
+    <Rnd
       className={styles.Dialog}
+      role="dialog"
       aria-label="Эффекты страницы"
-      aria-busy={isLoading}
-      onCancel={handleCancel}
-      onMouseDown={handleBackdropMouseDown}
-      onMouseUp={handleBackdropMouseUp}
+      aria-modal={false}
+      bounds="window"
+      dragHandleClassName={styles.Header}
+      cancel="button,input,textarea,select,summary,label"
+      size={{ width: geometry.width, height: isCollapsed ? 60 : geometry.height }}
+      position={{ x: geometry.x, y: geometry.y }}
+      minWidth={320}
+      minHeight={isCollapsed ? 60 : 240}
+      enableResizing={!isCollapsed}
+      onDragStop={handleDragStop}
+      onResizeStop={handleResizeStop}
+      style={{ position: 'fixed', zIndex: 1000 }}
     >
-      <div className={styles.Header} inert={isLoading}>
-        {isSettingsOpen && (
-          <button className={styles.Back} type="button" onClick={onBack}>
-            ← Назад
-          </button>
+      <div className={styles.Header}>
+        {isSettingsOpen && !isCollapsed && (
+          <button className={styles.Back} type="button" onClick={onBack}>← Назад</button>
         )}
-
         <div className={styles.Title}>
-          <h2>
-            {modalTitle}
-          </h2>
-
-          <p>
-            {modalDescription}
-          </p>
+          <h2>{modalTitle}</h2>
+          {!isCollapsed && <p>{modalDescription}</p>}
         </div>
-
         <button
           className={styles.Close}
           type="button"
-          onClick={onClose}
-          aria-label="Закрыть"
+          aria-label={isCollapsed ? 'Развернуть окно' : 'Свернуть окно'}
+          onClick={() => setIsCollapsed((current) => !current)}
         >
-          ×
+          {isCollapsed ? '▢' : '−'}
         </button>
+        <button className={styles.Close} type="button" onClick={onClose} aria-label="Закрыть">×</button>
       </div>
 
-      <div className={styles.Content} inert={isLoading}>
-        {modalContent}
-      </div>
+      {!isCollapsed && (
+        <div className={styles.PanelBody}>
+          <div className={styles.Content} inert={isLoading}>{modalContent}</div>
+          <p className={styles.Notice} inert={isLoading}>{notice}</p>
+        </div>
+      )}
 
-      <p className={styles.Notice} inert={isLoading}>
-        {notice}
-      </p>
-
-      {isLoading && (
+      {isLoading && !isCollapsed && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
-
           Подготавливаем аудио...
         </div>
       )}
-    </dialog>,
+    </Rnd>,
     document.body,
   );
 };

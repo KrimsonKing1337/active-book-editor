@@ -18,6 +18,13 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
     effectDetails = effect.options.src || 'Файл не выбран';
   } else if (effect.type === 'vibration') {
     effectDetails = `${effect.options.duration} мс`;
+  } else if (effect.type === 'background') {
+    effectType = 'Background';
+
+    const imageCount = effect.options.images?.length ?? 0;
+    const videoCount = effect.options.videos?.length ?? 0;
+
+    effectDetails = `${imageCount} изображений · ${videoCount} видео`;
   } else {
     effectType = 'Flashlight';
 
