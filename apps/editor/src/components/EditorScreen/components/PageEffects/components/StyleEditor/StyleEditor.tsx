@@ -171,7 +171,7 @@ export const StyleEditor = ({ value, onChange }: StyleEditorProps) => {
 
       <label className={styles.Field}>
         <span>
-          Размытие (условные единицы)
+          Размытие (px)
         </span>
 
         <input

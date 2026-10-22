@@ -41,9 +41,10 @@ export const BackgroundSettings = ({
 
   const options = effect.options;
 
+  const style = options.style ?? {};
+
   const images = options.images ?? [];
   const videos = options.videos ?? [];
-  const style = options.style ?? {};
   const shadow = options.shadow ?? defaultShadowOptions;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
@@ -142,7 +143,7 @@ export const BackgroundSettings = ({
 
   const importAsset = async (file: File): Promise<string | null> => {
     if (!project) {
-      window.alert('Сначала сохрани проект, чтобы добавить файл в assets/');
+      window.alert('Сначала сохраните проект, чтобы добавить файл в assets/');
 
       return null;
     }
@@ -151,6 +152,7 @@ export const BackgroundSettings = ({
       return await project.storage.importAssetFile(file);
     } catch (error) {
       console.error('[background] Failed to import media asset', error);
+
       window.alert(error instanceof Error ? error.message : 'Не удалось импортировать файл');
 
       return null;
@@ -247,7 +249,7 @@ export const BackgroundSettings = ({
 
       <section className={styles.Section}>
         <h3>
-          Слой
+          Фон
         </h3>
 
         <div className={styles.Row}>
@@ -279,9 +281,7 @@ export const BackgroundSettings = ({
       </section>
 
       <Images images={images} onChange={handleImagesChange} onImportAsset={importAsset} />
-
       <Videos videos={videos} onChange={handleVideosChange} onImportAsset={importAsset} />
-
       <Shadow shadow={shadow} onChange={handleShadowChange} />
 
       <section className={styles.Section}>
