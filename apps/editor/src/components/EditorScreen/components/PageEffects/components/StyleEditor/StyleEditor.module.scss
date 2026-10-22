@@ -1,0 +1,46 @@
+.StyleEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+
+  :global(.react-colorful) {
+    width: 100%;
+    min-height: 160px;
+  }
+}
+
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  input {
+    width: 100%;
+    padding: 7px;
+  }
+}
+
+.Advanced {
+  margin-top: 8px;
+
+  summary {
+    cursor: pointer;
+  }
+}
+
+.Rule {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+
+  input {
+    width: 0;
+    flex: 1;
+    padding: 7px;
+  }
+
+  button {
+    min-width: 30px;
+  }
+}
