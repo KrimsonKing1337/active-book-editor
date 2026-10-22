@@ -60,7 +60,8 @@ const getDefaultGeometry = (): PanelGeometry => {
   const innerWidth = window.innerWidth - 32;
 
   const width = Math.min(500, Math.max(240, innerWidth));
-  const height = Math.min(680, Math.max(240, innerWidth));
+  const availableHeight = window.innerHeight - 32;
+  const height = Math.min(680, Math.max(240, availableHeight));
 
   const pageBounds = document.querySelector('#main-content-wrapper')?.getBoundingClientRect();
 
@@ -94,8 +95,8 @@ const getSavedGeometry = (): PanelGeometry => {
       value.height,
     ];
 
-    const valid = geometryAsArray.every((itemCur) => {
-      return typeof itemCur === 'number' && Number.isFinite(itemCur);
+    const valid = geometryAsArray.every((coordinateOrSize) => {
+      return typeof coordinateOrSize === 'number' && Number.isFinite(coordinateOrSize);
     });
 
     if (!valid) {
@@ -105,7 +106,8 @@ const getSavedGeometry = (): PanelGeometry => {
     const innerWidth = window.innerWidth - 32;
 
     const width = Math.min(Math.max(getMinimumWidth(), value.width!), innerWidth);
-    const height = Math.min(Math.max(240, value.height!), Math.max(240, innerWidth));
+    const availableHeight = window.innerHeight - 32;
+    const height = Math.min(Math.max(240, value.height!), Math.max(240, availableHeight));
 
     const x = Math.max(16, Math.min(value.x!, window.innerWidth - width - 16));
     const y = Math.max(16, Math.min(value.y!, window.innerHeight - 60));
@@ -313,7 +315,7 @@ export const EffectsModal = ({
     });
   };
 
-  const dialogRndCancelOptions = [
+  const panelDragCancelSelectors = [
     'button',
     'input',
     'textarea',
@@ -322,29 +324,29 @@ export const EffectsModal = ({
     'label',
   ];
 
-  const dialogRndHeight = isCollapsed ? 60 : geometry.height;
+  const panelHeight = isCollapsed ? 60 : geometry.height;
 
-  const dialogRndSize = {
+  const panelSize = {
     width: geometry.width,
-    height: dialogRndHeight,
+    height: panelHeight,
   };
 
-  const dialogRndPosition = {
+  const panelPosition = {
     x: geometry.x,
     y: geometry.y,
   };
 
-  const dialogRndMinWidth = getMinimumWidth();
-  const dialogRndMinHeight = isCollapsed ? 60 : 240;
+  const panelMinWidth = getMinimumWidth();
+  const panelMinHeight = isCollapsed ? 60 : 240;
 
-  const dialogRndStyle: CSSProperties = {
+  const panelStyle: CSSProperties = {
     position: 'fixed',
     zIndex: 1000,
   };
 
   const showBackButton = isSettingsOpen && !isCollapsed;
-  const windowControlButtonAriaLabel = isCollapsed ? 'Развернуть окно' : 'Свернуть окно';
-  const windowControlButtonLabel = isCollapsed ? '▢' : '−';
+  const collapseButtonAriaLabel = isCollapsed ? 'Развернуть окно' : 'Свернуть окно';
+  const collapseButtonLabel = isCollapsed ? '▢' : '−';
   const isAudioLoading = isLoading && !isCollapsed;
 
   return createPortal(
@@ -355,15 +357,15 @@ export const EffectsModal = ({
       aria-modal={false}
       bounds="window"
       dragHandleClassName={styles.Header}
-      cancel={dialogRndCancelOptions.join(',')}
-      size={dialogRndSize}
-      position={dialogRndPosition}
-      minWidth={dialogRndMinWidth}
-      minHeight={dialogRndMinHeight}
+      cancel={panelDragCancelSelectors.join(',')}
+      size={panelSize}
+      position={panelPosition}
+      minWidth={panelMinWidth}
+      minHeight={panelMinHeight}
       enableResizing={!isCollapsed}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
-      style={dialogRndStyle}
+      style={panelStyle}
     >
       <div className={styles.Header}>
         {showBackButton && (
@@ -387,10 +389,10 @@ export const EffectsModal = ({
         <button
           className={styles.Close}
           type="button"
-          aria-label={windowControlButtonAriaLabel}
+          aria-label={collapseButtonAriaLabel}
           onClick={() => setIsCollapsed((cur) => !cur)}
         >
-          {windowControlButtonLabel}
+          {collapseButtonLabel}
         </button>
 
         <button
