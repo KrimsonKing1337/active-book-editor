@@ -12,6 +12,7 @@ import type { Editor } from '@tiptap/core';
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
+import { normalizeBackgroundEffects } from '@active-book/book-builder/effects/background';
 
 import type {
   AudioEffectDraft,
@@ -67,7 +68,15 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedAudio = Array.isArray(grouped.audio) ? grouped.audio : [];
   const groupedVibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
   const groupedFlashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
-  const groupedBackground = Array.isArray(grouped.background) ? grouped.background : [];
+  const rawBackgrounds = Array.isArray(grouped.background) ? grouped.background : [];
+
+  const hasImagesWithoutIds = rawBackgrounds.some((background) => {
+    return background.options.images?.some((image) => !image.id);
+  });
+
+  const groupedBackground = hasImagesWithoutIds
+    ? normalizeBackgroundEffects({ background: rawBackgrounds })
+    : rawBackgrounds;
 
   return [
     ...groupedAudio,

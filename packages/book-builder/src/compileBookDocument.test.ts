@@ -23,7 +23,7 @@ const vibrationOptions = {
 
 const backgroundOptions = {
   style: { zIndex: 4 },
-  images: [{ src: 'assets/forest.webp', style: { zIndex: 1 } }],
+  images: [{ id: 'forest-image', src: 'assets/forest.webp', style: { zIndex: 1 } }],
   videos: [],
   shadow: { show: true, style: { backgroundColor: 'rgba(0,0,0,0.3)' } },
 };

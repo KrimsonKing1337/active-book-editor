@@ -61,7 +61,10 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
   };
 
   const handleAdd = () => {
-    onChange([...images, { src: '' }]);
+    onChange([...images, {
+      id: crypto.randomUUID(),
+      src: '',
+    }]);
   };
 
   return (
@@ -74,7 +77,7 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
         const { src, style } = imageCur;
 
         return (
-          <div key={index} className={styles.Media}>
+          <div key={imageCur.id} className={styles.Media}>
             <label className={styles.Field}>
               <span>
                 Путь к изображению

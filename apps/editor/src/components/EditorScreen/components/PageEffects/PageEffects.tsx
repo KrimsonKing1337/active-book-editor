@@ -139,11 +139,21 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
 
       writeEffects([...effects, duplicate]);
     } else if (selectedEffect.type === 'background') {
+      const options = structuredClone(selectedEffect.options);
+
+      options.images = options.images?.map((image) => {
+        return { ...image, id: crypto.randomUUID() };
+      });
+
+      options.videos = options.videos?.map((video) => {
+        return { ...video, id: crypto.randomUUID() };
+      });
+
       const duplicate: BackgroundEffectDraft = {
         ...selectedEffect,
         id,
         slug,
-        options: structuredClone(selectedEffect.options),
+        options,
       };
 
       writeEffects([...effects, duplicate]);
