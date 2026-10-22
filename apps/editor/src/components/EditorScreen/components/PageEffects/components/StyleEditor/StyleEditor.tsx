@@ -1,6 +1,8 @@
-import { type CSSProperties, type KeyboardEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, type CSSProperties, type KeyboardEvent, useEffect, useState } from 'react';
 
 import { HexAlphaColorPicker } from 'react-colorful';
+
+import { Slider } from 'activeBook-core/components';
 
 import styles from './StyleEditor.module.scss';
 
@@ -43,6 +45,16 @@ const isValidCssRule = (property: string, ruleValue: string): boolean => {
     return CSS.supports(cssProperty, ruleValue);
   } catch {
     return false;
+  }
+};
+
+const removeLeadingZeros = (value: string): string => {
+  return value.replace(/^(-?)0+(?=\d)/, '$1');
+};
+
+const handleInputEnter = (event: KeyboardEvent<HTMLDivElement>) => {
+  if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
+    event.target.blur();
   }
 };
 
@@ -241,7 +253,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
     const cleaned = input.replace(/[(),]/g, ' ').replace(/[^\d./\s]/g, '')
       .replace(/\/+/g, ' / ').replace(/\s+/g, ' ').trimStart();
 
-    const parts = cleaned.split(/[\s/]+/).filter(Boolean).slice(0, 4);
+    const parts = cleaned.split(/[\s/]+/).filter(Boolean).slice(0, 4).map(removeLeadingZeros);
 
     let nextRgba = parts.slice(0, 3).join(' ');
 
@@ -272,6 +284,14 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
     }
   };
 
+  const handleBlurInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const normalized = removeLeadingZeros(event.target.value);
+
+    event.target.value = normalized;
+
+    handleBlurChange(Number(normalized));
+  };
+
   const backdropFilter = String(value.backdropFilter ?? '');
   const blurMatch = backdropFilter.match(/blur\((\d+(?:\.\d+)?)px\)/);
   const blurValue = Number(blurMatch?.[1] ?? 0);
@@ -286,8 +306,16 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
     }
   };
 
+  const handleZIndexInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const normalized = removeLeadingZeros(event.target.value);
+
+    event.target.value = normalized;
+
+    handleZIndexChange(Number(normalized));
+  };
+
   return (
-    <div className={styles.StyleEditor}>
+    <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
       <div className={styles.ColorFields}>
         <label className={styles.Field}>
           <span>HEX</span>
@@ -328,13 +356,10 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
         <span>Размытие (px)</span>
 
         <div className={styles.RangeFields}>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
+          <Slider
+            className={styles.BlurSlider}
             value={sliderBlur}
-            onChange={(event) => handleBlurChange(Number(event.target.value))}
+            onAfterChange={handleBlurChange}
           />
 
           <input
@@ -343,7 +368,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
             step={1}
             aria-label="Размытие в пикселях"
             value={blurValue}
-            onChange={(event) => handleBlurChange(Number(event.target.value))}
+            onChange={handleBlurInputChange}
           />
         </div>
       </label>
@@ -360,7 +385,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
             type="number"
             step={1}
             value={zIndex}
-            onChange={(event) => handleZIndexChange(Number(event.target.value))}
+            onChange={handleZIndexInputChange}
           />
 
           <button type="button" onClick={() => handleZIndexChange(zIndex + 1)} aria-label="На слой вперёд">

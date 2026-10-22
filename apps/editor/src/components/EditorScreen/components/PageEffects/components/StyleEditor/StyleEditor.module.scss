@@ -35,12 +35,6 @@
 }
 
 .RangeFields {
-  input[type='range'] {
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-  }
-
   input[type='number'] {
     flex: 0 0 84px;
     width: 84px;
@@ -92,4 +86,9 @@
   margin-top: 4px;
   color: #f5a4a4;
   font-size: 12px;
+}
+
+.BlurSlider {
+  flex: 1;
+  min-width: 0;
 }
