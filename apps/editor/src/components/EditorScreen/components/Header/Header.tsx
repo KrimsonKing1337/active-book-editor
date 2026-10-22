@@ -13,6 +13,8 @@ type HeaderProps = {
   isProjectBusy: boolean;
   showSavedStatus: boolean;
   showStructure: boolean;
+  showNarrative: boolean;
+  showBackgrounds: boolean;
   buildState: BuildState;
   buttonIsDisabled: boolean;
   structureButtonIsDisabled: boolean;
@@ -20,6 +22,8 @@ type HeaderProps = {
   onOpenProject: () => Promise<void>;
   onSaveProject: () => Promise<void>;
   onToggleStructure: () => void;
+  onToggleNarrative: () => void;
+  onToggleBackgrounds: () => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
@@ -34,6 +38,8 @@ export const Header = ({
   isProjectBusy,
   showSavedStatus,
   showStructure,
+  showNarrative,
+  showBackgrounds,
   buildState,
   buttonIsDisabled,
   structureButtonIsDisabled,
@@ -41,6 +47,8 @@ export const Header = ({
   onOpenProject,
   onSaveProject,
   onToggleStructure,
+  onToggleNarrative,
+  onToggleBackgrounds,
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextComponent,
@@ -96,6 +104,14 @@ export const Header = ({
           onClick={onToggleStructure}
         >
           {structureButtonLabel}
+        </button>
+
+        <button type="button" aria-pressed={showNarrative} onClick={onToggleNarrative}>
+          {showNarrative ? 'Скрыть нарратив' : 'Показать нарратив'}
+        </button>
+
+        <button type="button" aria-pressed={showBackgrounds} onClick={onToggleBackgrounds}>
+          {showBackgrounds ? 'Скрыть фон' : 'Показать фон'}
         </button>
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>
