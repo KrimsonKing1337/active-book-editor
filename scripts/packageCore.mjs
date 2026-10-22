@@ -29,7 +29,7 @@ const main = () => {
   }
 
   const editorPackage = readJson(editorPackagePath);
-  const previousArchive = editorPackage.dependencies['activeBook-core'];
+  const previousArchive = editorPackage.dependencies['activeBook-core']?.replace(/^file:/, '');
 
   run('npm', ['run', 'make'], coreRoot);
 
