@@ -25,18 +25,13 @@ export type AudioEffect = {
 export type BuiltAudioEffect = Omit<AudioEffect, 'slug'>;
 
 export const normalizeAudioEffects = (value: unknown): AudioEffect[] => {
-  let effects: unknown[] = [];
-
-  // Older projects stored pageEffects as an ungrouped audio array.
-  if (Array.isArray(value)) {
-    effects = value;
-  } else if (isRecord(value) && Array.isArray(value.audio)) {
-    effects = value.audio;
+  if (!isRecord(value) || !Array.isArray(value.audio)) {
+    return [];
   }
 
   const audio: AudioEffect[] = [];
 
-  for (const effect of effects) {
+  for (const effect of value.audio) {
     if (!isRecord(effect) || !isRecord(effect.options)) {
       continue;
     }
@@ -45,7 +40,7 @@ export const normalizeAudioEffects = (value: unknown): AudioEffect[] => {
       continue;
     }
 
-    if (effect.type !== undefined && effect.type !== 'audio') {
+    if (effect.type !== 'audio') {
       continue;
     }
 

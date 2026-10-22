@@ -12,7 +12,6 @@ import type { Editor } from '@tiptap/core';
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
-import { normalizeBackgroundEffects } from '@active-book/book-builder/effects/background';
 
 import type {
   AudioEffectDraft,
@@ -41,42 +40,16 @@ type PageEffectsProviderProps = PropsWithChildren<{
 const PageEffectsContext = createContext<PageEffectsContextValue | null>(null);
 
 const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
-  const raw: unknown = editor?.state.doc.attrs.pageEffects;
+  const grouped = editor?.state.doc.attrs.pageEffects as GroupedPageEffects | undefined;
 
-  if (Array.isArray(raw)) {
-    const grouped = normalizePageEffects(raw);
-
-    const groupedAudio = grouped.audio ?? [];
-    const groupedVibration = grouped.vibration ?? [];
-    const groupedFlashlight = grouped.flashlight ?? [];
-    const groupedBackground = grouped.background ?? [];
-
-    return [
-      ...groupedAudio,
-      ...groupedVibration,
-      ...groupedFlashlight,
-      ...groupedBackground,
-    ];
-  }
-
-  if (!raw || typeof raw !== 'object') {
+  if (!grouped) {
     return [];
   }
 
-  const grouped = raw as GroupedPageEffects;
-
-  const groupedAudio = Array.isArray(grouped.audio) ? grouped.audio : [];
-  const groupedVibration = Array.isArray(grouped.vibration) ? grouped.vibration : [];
-  const groupedFlashlight = Array.isArray(grouped.flashlight) ? grouped.flashlight : [];
-  const rawBackgrounds = Array.isArray(grouped.background) ? grouped.background : [];
-
-  const hasImagesWithoutIds = rawBackgrounds.some((background) => {
-    return background.options.images?.some((image) => !image.id);
-  });
-
-  const groupedBackground = hasImagesWithoutIds
-    ? normalizeBackgroundEffects({ background: rawBackgrounds })
-    : rawBackgrounds;
+  const groupedAudio = grouped.audio ?? [];
+  const groupedVibration = grouped.vibration ?? [];
+  const groupedFlashlight = grouped.flashlight ?? [];
+  const groupedBackground = grouped.background ?? [];
 
   return [
     ...groupedAudio,

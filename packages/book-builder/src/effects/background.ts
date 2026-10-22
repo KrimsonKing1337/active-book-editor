@@ -49,7 +49,9 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     const images = Array.isArray(effect.options.images) ? effect.options.images : [];
     const videos = Array.isArray(effect.options.videos) ? effect.options.videos : [];
 
-    const imagesAreValid = images.every((cur) => isRecord(cur) && typeof cur.src === 'string');
+    const imagesAreValid = images.every((cur) => {
+      return isRecord(cur) && typeof cur.id === 'string' && !!cur.id.trim() && typeof cur.src === 'string';
+    });
 
     const videosAreValid = videos.every((videoCur) => {
       return isRecord(videoCur) && typeof videoCur.id === 'string' && typeof videoCur.src === 'string';
@@ -60,20 +62,7 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     }
 
     const slug = typeof effect.slug === 'string' ? effect.slug : 'Новый фон';
-    let options = effect.options as BackgroundOptions;
-
-    // Older book.json files can contain background images without IDs.
-    if (options.images?.some((image) => !image.id?.trim())) {
-      options = {
-        ...options,
-        images: options.images.map((image, index) => {
-          return {
-            ...image,
-            id: image.id?.trim() || `legacy-image:${effect.id}:${index}`,
-          };
-        }),
-      };
-    }
+    const options = effect.options as BackgroundOptions;
 
     result.push({
       id: effect.id,

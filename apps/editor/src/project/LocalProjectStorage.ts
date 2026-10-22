@@ -15,8 +15,6 @@ import {
   InvalidProjectError,
 } from './errors';
 
-import { normalizeLegacyNodeNames } from './normalizeBookDocument';
-
 const BOOK_FILE_NAME = 'book.json';
 const PACKAGE_FILE_NAME = 'package.json';
 const ASSETS_DIRECTORY_NAME = 'assets';
@@ -158,7 +156,7 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new InvalidProjectError('book.json не содержит документ Active Book.');
     }
 
-    return normalizeLegacyNodeNames(document as JSONContent);
+    return document;
   }
 
   async writeBook(document: JSONContent): Promise<void> {

@@ -15,20 +15,12 @@ test('preserves background image IDs', () => {
   assert.equal(normalized[0].options.images?.[0].id, 'tree');
 });
 
-test('assigns stable IDs to images in older books', () => {
+test('rejects background images without IDs', () => {
   const background = [{
     id: 'forest',
     type: 'background',
-    options: { images: [{ src: 'assets/tree.webp' }, { src: 'assets/tree.webp' }] },
+    options: { images: [{ src: 'assets/tree.webp' }] },
   }];
 
-  const first = normalizeBackgroundEffects({ background });
-  const second = normalizeBackgroundEffects({ background });
-
-  assert.deepEqual(first, second);
-  assert.equal('id' in background[0].options.images[0], false);
-  assert.deepEqual(first[0].options.images?.map((image) => image.id), [
-    'legacy-image:forest:0',
-    'legacy-image:forest:1',
-  ]);
+  assert.deepEqual(normalizeBackgroundEffects({ background }), []);
 });
