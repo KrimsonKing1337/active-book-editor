@@ -13,7 +13,8 @@
     "build:editor": "npm run build -w @active-book/editor",
     "build:book": "npm run build -w @active-book/book-builder",
     "lint": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix"
+    "lint:fix": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix",
+    "core:package": "node scripts/packageCore.mjs"
   },
   "dependencies": {
     "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.10.tgz",
