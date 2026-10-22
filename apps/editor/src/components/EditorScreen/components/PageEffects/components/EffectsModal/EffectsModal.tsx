@@ -36,8 +36,10 @@ type PanelGeometry = { x: number; y: number; width: number; height: number };
 
 const PANEL_GEOMETRY_KEY = 'activeBook-editor:effectsPanelGeometry';
 
+const getMinimumWidth = () => Math.min(320, Math.max(240, window.innerWidth - 32));
+
 const getDefaultGeometry = (): PanelGeometry => {
-  const width = Math.min(500, Math.max(320, window.innerWidth - 32));
+  const width = Math.min(500, Math.max(240, window.innerWidth - 32));
   const height = Math.min(680, Math.max(240, window.innerHeight - 32));
   const pageBounds = document.querySelector('#main-content-wrapper')?.getBoundingClientRect();
   const preferredX = pageBounds ? pageBounds.right + 20 : window.innerWidth - width - 20;
@@ -65,7 +67,7 @@ const getSavedGeometry = (): PanelGeometry => {
       return fallback;
     }
 
-    const width = Math.min(Math.max(320, value.width!), Math.max(320, window.innerWidth - 32));
+    const width = Math.min(Math.max(getMinimumWidth(), value.width!), window.innerWidth - 32);
     const height = Math.min(Math.max(240, value.height!), Math.max(240, window.innerHeight - 32));
     const x = Math.max(16, Math.min(value.x!, window.innerWidth - width - 16));
     const y = Math.max(16, Math.min(value.y!, window.innerHeight - 60));
@@ -264,7 +266,7 @@ export const EffectsModal = ({
       cancel="button,input,textarea,select,summary,label"
       size={{ width: geometry.width, height: isCollapsed ? 60 : geometry.height }}
       position={{ x: geometry.x, y: geometry.y }}
-      minWidth={320}
+      minWidth={getMinimumWidth()}
       minHeight={isCollapsed ? 60 : 240}
       enableResizing={!isCollapsed}
       onDragStop={handleDragStop}
