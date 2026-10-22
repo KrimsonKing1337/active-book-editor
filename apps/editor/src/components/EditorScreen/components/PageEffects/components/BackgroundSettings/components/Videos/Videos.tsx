@@ -75,88 +75,88 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
   };
 
   return (
-      <section className={styles.Section}>
-        <h3>
-          Видео
-        </h3>
+    <section className={styles.Section}>
+      <h3>
+        Видео
+      </h3>
 
-        {videos.map((videoCur, index) => {
-          return (
-            <div key={videoCur.id} className={styles.Media}>
-              <label className={styles.Field}>
-                <span>
-                  Путь к видео
-                </span>
+      {videos.map((videoCur, index) => {
+        return (
+          <div key={videoCur.id} className={styles.Media}>
+            <label className={styles.Field}>
+              <span>
+                Путь к видео
+              </span>
 
+              <input
+                value={videoCur.src}
+                placeholder="assets/fog.webm"
+                onChange={(e) => handlePathChange(index, e.target.value)}
+              />
+            </label>
+
+            <label className={styles.Field}>
+              <span>
+                Или выбрать видеофайл
+              </span>
+
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => void handleFileChange(index, e.target.files)}
+              />
+            </label>
+
+            <div className={styles.Checkboxes}>
+              <label>
                 <input
-                  value={videoCur.src}
-                  placeholder="assets/fog.webm"
-                  onChange={(e) => handlePathChange(index, e.target.value)}
+                  type="checkbox"
+                  checked={videoCur.loop ?? true}
+                  onChange={(e) => handleLoopChange(index, e.target.checked)}
                 />
+                Зациклить
               </label>
 
-              <label className={styles.Field}>
-                <span>
-                  Или выбрать видеофайл
-                </span>
-
+              <label>
                 <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => void handleFileChange(index, e.target.files)}
+                  type="checkbox"
+                  checked={videoCur.autoPlay ?? true}
+                  onChange={(e) => handleAutoPlayChange(index, e.target.checked)}
                 />
+                Автозапуск
               </label>
 
-              <div className={styles.Checkboxes}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={videoCur.loop ?? true}
-                    onChange={(e) => handleLoopChange(index, e.target.checked)}
-                  />
-                  Зациклить
-                </label>
-
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={videoCur.autoPlay ?? true}
-                    onChange={(e) => handleAutoPlayChange(index, e.target.checked)}
-                  />
-                  Автозапуск
-                </label>
-
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={videoCur.muted ?? true}
-                    onChange={(e) => handleMutedChange(index, e.target.checked)}
-                  />
-                  Без звука
-                </label>
-              </div>
-
-              <details>
-                <summary>
-                  Стили видео
-                </summary>
-
-                <StyleEditor
-                  value={videoCur.style ?? {}}
-                  onChange={(val) => handleStyleChange(index, val)}
+              <label>
+                <input
+                  type="checkbox"
+                  checked={videoCur.muted ?? true}
+                  onChange={(e) => handleMutedChange(index, e.target.checked)}
                 />
-              </details>
-
-              <button type="button" onClick={() => handleDelete(index)}>
-                Удалить видео
-              </button>
+                Без звука
+              </label>
             </div>
-          );
-        })}
 
-        <button type="button" onClick={handleAdd}>
-          Добавить видео
-        </button>
-      </section>
+            <details>
+              <summary>
+                Стили видео
+              </summary>
+
+              <StyleEditor
+                value={videoCur.style ?? {}}
+                onChange={(val) => handleStyleChange(index, val)}
+              />
+            </details>
+
+            <button type="button" onClick={() => handleDelete(index)}>
+              Удалить видео
+            </button>
+          </div>
+        );
+      })}
+
+      <button type="button" onClick={handleAdd}>
+        Добавить видео
+      </button>
+    </section>
   );
 };

@@ -42,7 +42,7 @@ const getHexColor = (value: string): string => {
  *
  * (?: ... )? — необязательная группа для альфа-канала
  * [,\/\s]+ — разделитель: запятая, / или пробел
- * ([\d.]+) — четвёртая группа: прозрачность (число с точкой)
+ * (\d+(?:\.\d*)?|\.\d+) — четвёртая группа: прозрачность (число с точкой)
  *
  * \s* — необязательные пробелы перед закрывающей скобкой
  * \) — закрывающая круглая скобка
@@ -55,12 +55,12 @@ const getHexColor = (value: string): string => {
     return '#000000ff';
   }
 
-  const slicedChannels = match.slice(1, 4);
+  const rgbChannels = match.slice(1, 4);
 
-  const channels = slicedChannels.map((channelCur) => {
-    const n = Math.max(0, Math.min(255, Number(channelCur)));
+  const channels = rgbChannels.map((channel) => {
+    const clampedChannel = Math.max(0, Math.min(255, Number(channel)));
 
-    return n.toString(16).padStart(2, '0');
+    return clampedChannel.toString(16).padStart(2, '0');
   });
 
   const alpha = Math.round(Math.max(0, Math.min(1, Number(match[4] ?? 1))) * 255);

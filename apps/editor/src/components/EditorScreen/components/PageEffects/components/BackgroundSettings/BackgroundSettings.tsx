@@ -47,14 +47,14 @@ export const BackgroundSettings = ({
   const shadow = options.shadow ?? defaultShadowOptions;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
-    const newOptions = {
+    const updatedOptions = {
       ...options,
       ...updates,
     };
 
     onUpdate(effect.id, {
       ...effect,
-      options: newOptions,
+      options: updatedOptions,
     });
   };
 
@@ -97,30 +97,30 @@ export const BackgroundSettings = ({
     if (direction === 'forward') {
       const filteredNextZIndexes = otherZIndexes.filter((cur) => cur > zIndex);
 
-      const next = filteredNextZIndexes.sort((a, b) => a - b);
+      const sortedFollowingZIndexes = filteredNextZIndexes.sort((a, b) => a - b);
 
-      let nextSafe = zIndex + 1;
+      let nextZIndex = zIndex + 1;
 
-      if (next[0] !== undefined) {
-        nextSafe = next[0] + 1;
+      if (sortedFollowingZIndexes[0] !== undefined) {
+        nextZIndex = sortedFollowingZIndexes[0] + 1;
       }
 
-      updateZIndex(nextSafe);
+      updateZIndex(nextZIndex);
 
       return;
     }
 
     const filteredPrevZIndexes = otherZIndexes.filter((cur) => cur < zIndex);
 
-    const prev = filteredPrevZIndexes.sort((a, b) => b - a);
+    const sortedPrecedingZIndexes = filteredPrevZIndexes.sort((a, b) => b - a);
 
-    let prevSafe = zIndex - 1;
+    let previousZIndex = zIndex - 1;
 
-    if (prev[0] !== undefined) {
-      prevSafe = prev[0] - 1;
+    if (sortedPrecedingZIndexes[0] !== undefined) {
+      previousZIndex = sortedPrecedingZIndexes[0] - 1;
     }
 
-    updateZIndex(prevSafe);
+    updateZIndex(previousZIndex);
   };
 
   const updateId = () => {
@@ -188,10 +188,10 @@ export const BackgroundSettings = ({
     componentId = `${options.component.package}/${options.component.name}`;
   }
 
-  const effectNameChangeHandler = (val: string) => {
+  const handleNameChange = (name: string) => {
     onUpdate(effect.id, {
       ...effect,
-      slug: val,
+      slug: name,
     });
   };
 
@@ -227,7 +227,7 @@ export const BackgroundSettings = ({
         <input
           type="text"
           value={effect.slug}
-          onChange={(e) => effectNameChangeHandler(e.target.value)}
+          onChange={(e) => handleNameChange(e.target.value)}
         />
       </label>
 

@@ -88,18 +88,18 @@ const getSavedGeometry = (): PanelGeometry => {
 
     const value = JSON.parse(raw) as Partial<PanelGeometry>;
 
-    const geometryAsArray = [
+    const geometryValues = [
       value.x,
       value.y,
       value.width,
       value.height,
     ];
 
-    const valid = geometryAsArray.every((coordinateOrSize) => {
+    const hasValidGeometry = geometryValues.every((coordinateOrSize) => {
       return typeof coordinateOrSize === 'number' && Number.isFinite(coordinateOrSize);
     });
 
-    if (!valid) {
+    if (!hasValidGeometry) {
       return fallback;
     }
 

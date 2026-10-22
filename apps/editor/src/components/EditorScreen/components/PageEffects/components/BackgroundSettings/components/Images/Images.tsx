@@ -63,58 +63,58 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
   };
 
   return (
-      <section className={styles.Section}>
-        <h3>
-          Изображения
-        </h3>
+    <section className={styles.Section}>
+      <h3>
+        Изображения
+      </h3>
 
-        {images.map((imageCur, index) => {
-          return (
-            <div key={index} className={styles.Media}>
-              <label className={styles.Field}>
-                <span>
-                  Путь к изображению
-                </span>
+      {images.map((imageCur, index) => {
+        return (
+          <div key={index} className={styles.Media}>
+            <label className={styles.Field}>
+              <span>
+                Путь к изображению
+              </span>
 
-                <input
-                  value={imageCur.src}
-                  placeholder="assets/forest.webp"
-                  onChange={(e) => handlePathChange(index, e.target.value)}
-                />
-              </label>
+              <input
+                value={imageCur.src}
+                placeholder="assets/forest.webp"
+                onChange={(e) => handlePathChange(index, e.target.value)}
+              />
+            </label>
 
-              <label className={styles.Field}>
-                <span>
-                  Или выбрать файл
-                </span>
+            <label className={styles.Field}>
+              <span>
+                Или выбрать файл
+              </span>
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => void handleFileChange(index, e.target.files)}
-                />
-              </label>
-              <details>
-                <summary>
-                  Стили изображения
-                </summary>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleFileChange(index, e.target.files)}
+              />
+            </label>
+            <details>
+              <summary>
+                Стили изображения
+              </summary>
 
-                <StyleEditor
-                  value={imageCur.style ?? {}}
-                  onChange={(val) => handleStyleChange(index, val)}
-                />
-              </details>
+              <StyleEditor
+                value={imageCur.style ?? {}}
+                onChange={(val) => handleStyleChange(index, val)}
+              />
+            </details>
 
-              <button type="button" onClick={() => handleDelete(index)}>
-                Удалить изображение
-              </button>
-            </div>
-          );
-        })}
+            <button type="button" onClick={() => handleDelete(index)}>
+              Удалить изображение
+            </button>
+          </div>
+        );
+      })}
 
-        <button type="button" onClick={handleAdd}>
-          Добавить изображение
-        </button>
-      </section>
+      <button type="button" onClick={handleAdd}>
+        Добавить изображение
+      </button>
+    </section>
   );
 };
