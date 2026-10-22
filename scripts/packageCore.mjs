@@ -10,7 +10,11 @@ const editorPackagePath = resolve(editorRoot, 'package.json');
 
 const run = (command, args, cwd) => {
   const executable = process.platform === 'win32' ? `${command}.cmd` : command;
-  const result = spawnSync(executable, args, { cwd, stdio: 'inherit' });
+  const result = spawnSync(executable, args, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
 
   if (result.error) {
     throw result.error;
