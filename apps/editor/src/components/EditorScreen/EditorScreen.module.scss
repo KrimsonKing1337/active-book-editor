@@ -55,3 +55,9 @@
     }
   }
 }
+
+.EditorScreen.isNarrativeHidden {
+  .Canvas :global(#narrative) {
+    visibility: hidden;
+  }
+}

@@ -34,9 +34,14 @@ export const BookDocument = Document.extend({
   content: '(P | bookBlock)+',
 
   addAttributes() {
+    const defaultEffects = {
+      audio: [],
+      vibration: [],
+    };
+
     return {
       pageEffects: {
-        default: { audio: [], vibration: [] } satisfies PageEffects,
+        default: defaultEffects satisfies PageEffects,
       },
     };
   },

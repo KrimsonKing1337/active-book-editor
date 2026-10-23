@@ -21,7 +21,7 @@ export type AudioSettingsProps = {
   project: BookProject | null;
   existingIds: string[];
 
-  onLoadingChange: (loading: boolean) => void;
+  onLoadingChange: (loading: boolean, message?: string) => void;
   onUpdate: (previousId: string, effect: AudioEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -46,7 +46,11 @@ export const AudioSettings = ({
   const [importError, setImportError] = useState('');
 
   useEffect(() => {
-    onLoadingChange(isImporting || isPreviewLoading);
+    const loadingMessage = isImporting ? 'Загружаем аудиофайл...' : 'Подготавливаем аудио...';
+
+    const isLoading = isImporting || isPreviewLoading;
+
+    onLoadingChange(isLoading, loadingMessage);
   }, [isImporting, isPreviewLoading, onLoadingChange]);
 
   useEffect(() => {
@@ -223,6 +227,7 @@ export const AudioSettings = ({
 
     await importAudioFile(file);
   };
+
   const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as AudioOptions['type'];
 

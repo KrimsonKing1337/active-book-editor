@@ -13,13 +13,18 @@ type HeaderProps = {
   isProjectBusy: boolean;
   showSavedStatus: boolean;
   showStructure: boolean;
+  showNarrative: boolean;
+  showBackgrounds: boolean;
   buildState: BuildState;
   buttonIsDisabled: boolean;
   structureButtonIsDisabled: boolean;
+
   onNewProject: () => Promise<void>;
   onOpenProject: () => Promise<void>;
   onSaveProject: () => Promise<void>;
   onToggleStructure: () => void;
+  onToggleNarrative: () => void;
+  onToggleBackgrounds: () => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
@@ -34,26 +39,36 @@ export const Header = ({
   isProjectBusy,
   showSavedStatus,
   showStructure,
+  showNarrative,
+  showBackgrounds,
   buildState,
   buttonIsDisabled,
   structureButtonIsDisabled,
+
   onNewProject,
   onOpenProject,
   onSaveProject,
   onToggleStructure,
+  onToggleNarrative,
+  onToggleBackgrounds,
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextComponent,
   onBuildBook,
   onImportCustomComponents,
 }: HeaderProps) => {
-  const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
-  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
-
   const savedStatusClassNames = classNames({
     [styles.SavedStatus]: true,
     [styles.isVisible]: showSavedStatus,
   });
+
+  const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
+  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
+  const dirtyStatusLabel = isDirty ? ' *' : '';
+  const projectBusyStatusLabel = isProjectBusy ? 'Подождите...' : 'Сохранить';
+
+  const narrativeControlButtonLabel = showNarrative ? 'Скрыть нарратив' : 'Показать нарратив';
+  const backgroundControlButtonLabel = showBackgrounds ? 'Скрыть фон' : 'Показать фон';
 
   return (
     <header className={styles.Header}>
@@ -61,7 +76,7 @@ export const Header = ({
         <div className={styles.TitleLine}>
           <strong>
             {projectName}
-            {isDirty ? ' *' : ''}
+            {dirtyStatusLabel}
           </strong>
 
           <span className={savedStatusClassNames} aria-hidden={!showSavedStatus}>
@@ -84,7 +99,7 @@ export const Header = ({
         </button>
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onSaveProject()}>
-          {isProjectBusy ? 'Подождите...' : 'Сохранить'}
+          {projectBusyStatusLabel}
         </button>
 
         <span className={styles.Separator} />
@@ -98,20 +113,30 @@ export const Header = ({
           {structureButtonLabel}
         </button>
 
+        <button type="button" aria-pressed={showNarrative} onClick={onToggleNarrative}>
+          {narrativeControlButtonLabel}
+        </button>
+
+        <button type="button" aria-pressed={showBackgrounds} onClick={onToggleBackgrounds}>
+          {backgroundControlButtonLabel}
+        </button>
+
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>
           Импортировать .tgz
         </button>
 
-        {customComponentDefinitions.map((component) => {
+        {customComponentDefinitions.map((componentCur) => {
+          const { id, description, packageName, name, title } = componentCur;
+
           return (
             <button
-              key={component.id}
+              key={id}
               type="button"
               disabled={buttonIsDisabled}
-              title={component.description}
-              onClick={() => onInsertCustomComponent(component.packageName, component.name)}
+              title={description}
+              onClick={() => onInsertCustomComponent(packageName, name)}
             >
-              Добавить {component.title}
+              Добавить {title}
             </button>
           );
         })}

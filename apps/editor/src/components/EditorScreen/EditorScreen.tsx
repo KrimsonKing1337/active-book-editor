@@ -33,8 +33,7 @@ import {
 } from './components';
 
 import { AudioInstances } from './components/PageEffects/components/AudioInstances';
-
-import styles from './EditorScreen.module.scss';
+import { BackgroundInstances } from './components/PageEffects/components/BackgroundInstances';
 
 import {
   editorConfig,
@@ -45,17 +44,21 @@ import {
   insertTextComponent,
 } from './utils';
 
+import styles from './EditorScreen.module.scss';
+
 const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
 const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
+const SHOW_NARRATIVE_STORAGE_KEY = 'activeBook-editor:showNarrative';
+const SHOW_BACKGROUNDS_STORAGE_KEY = 'activeBook-editor:showBackgrounds';
 
 export const EditorScreen = () => {
+  const { definitions: customComponentDefinitions } = useCustomComponents();
+
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
   const [librariesRevision, setLibrariesRevision] = useState(0);
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
-
-  const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
@@ -64,6 +67,14 @@ export const EditorScreen = () => {
 
   const [showStructure, setShowStructure] = useState(() => {
     return localStorage.getItem(SHOW_STRUCTURE_STORAGE_KEY) === 'true';
+  });
+
+  const [showNarrative, setShowNarrative] = useState(() => {
+    return localStorage.getItem(SHOW_NARRATIVE_STORAGE_KEY) !== 'false';
+  });
+
+  const [showBackgrounds, setShowBackgrounds] = useState(() => {
+    return localStorage.getItem(SHOW_BACKGROUNDS_STORAGE_KEY) !== 'false';
   });
 
   const editor = useEditor({
@@ -77,6 +88,14 @@ export const EditorScreen = () => {
       },
     },
   });
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_NARRATIVE_STORAGE_KEY, String(showNarrative));
+  }, [showNarrative]);
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_BACKGROUNDS_STORAGE_KEY, String(showBackgrounds));
+  }, [showBackgrounds]);
 
   const autosave = useAutosave({
     editor,
@@ -142,7 +161,7 @@ export const EditorScreen = () => {
         }
 
         if (cancelled) {
-          libraries.forEach((library) => library.dispose());
+          libraries.forEach((cur) => cur.dispose());
 
           return;
         }
@@ -155,6 +174,7 @@ export const EditorScreen = () => {
           const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки библиотек';
 
           setProjectMessage(errorMessage);
+
           replaceCustomLibraries([]);
         }
       }
@@ -175,6 +195,7 @@ export const EditorScreen = () => {
   const editorScreenClassNames = classNames({
     [styles.EditorScreen]: true,
     [styles.isStructureVisible]: showStructure,
+    [styles.isNarrativeHidden]: !showNarrative,
   });
 
   const toggleStructure = () => {
@@ -253,6 +274,8 @@ export const EditorScreen = () => {
           isProjectBusy={isProjectBusy}
           showSavedStatus={showSavedStatus}
           showStructure={showStructure}
+          showNarrative={showNarrative}
+          showBackgrounds={showBackgrounds}
           buildState={buildState}
           buttonIsDisabled={buttonIsDisabled}
           structureButtonIsDisabled={structureButtonIsDisabled}
@@ -261,6 +284,8 @@ export const EditorScreen = () => {
           onOpenProject={handleOpenProject}
           onSaveProject={handleSaveProject}
           onToggleStructure={toggleStructure}
+          onToggleNarrative={() => setShowNarrative((visible) => !visible)}
+          onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
           onInsertCustomComponent={handleInsertCustomComponent}
           customComponentDefinitions={customComponentDefinitions}
           onInsertTextComponent={handleInsertTextComponent}
@@ -296,9 +321,10 @@ export const EditorScreen = () => {
             rangeEffects={[]}
           >
             <AudioInstances project={project} />
-            <PageEffects project={project} />
+            <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
+              {showBackgrounds && <BackgroundInstances project={project} />}
               <EditorContent editor={editor} />
             </PageWrapper>
           </App>

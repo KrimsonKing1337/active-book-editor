@@ -15,14 +15,15 @@ const audioOptions = {
   fadeOutWhenUnload: true,
 };
 
-test('migrates ungrouped legacy audio effects', () => {
-  const legacy = [{
-    id: 'legacy',
+test('rejects ungrouped audio effects', () => {
+  const ungrouped = [{
+    id: 'audio-1',
+    type: 'audio',
     slug: 'Дождь',
     options: audioOptions,
   }];
 
-  assert.deepEqual(normalizeAudioEffects(legacy), [{ ...legacy[0], type: 'audio' }]);
+  assert.deepEqual(normalizeAudioEffects(ungrouped), []);
 });
 
 test('keeps grouped audio effects and their discriminator', () => {

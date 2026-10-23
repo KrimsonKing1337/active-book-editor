@@ -1,35 +1,17 @@
-import type { MouseEvent, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
-import type { BookProject } from '@project/@types';
+import { Rnd } from 'react-rnd';
 
-import type { EditorEffectDraft } from '../../@types';
+import type { EffectsModalProps } from './@types';
 
-import { AudioSettings } from '../AudioSettings';
-import { VibrationSettings } from '../VibrationSettings';
-import { FlashlightSettings } from '../FlashlightSettings';
+import { getModalContent } from './content';
+import { usePanelGeometry } from './hooks';
 
-import { EffectTile } from './components';
+import { Header, PanelBody } from './components';
 
 import styles from './EffectsModal.module.scss';
-
-type EffectsModalProps = {
-  effects: EditorEffectDraft[];
-  project: BookProject | null;
-  selectedEffect: EditorEffectDraft | null;
-  onClose: () => void;
-  onBack: () => void;
-  onAddAudio: () => void;
-  onAddVibration: () => void;
-  onAddFlashlight: () => void;
-  onSelectEffect: (id: string) => void;
-  onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
-  onDuplicateEffect: () => void;
-  onDeleteEffect: () => void;
-};
-
 export const EffectsModal = ({
   effects,
   project,
@@ -40,232 +22,115 @@ export const EffectsModal = ({
   onAddAudio,
   onAddVibration,
   onAddFlashlight,
+  onAddBackground,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,
+  onBeforeCollapse,
+  isSavingStyles,
+  styleSaveError,
 }: EffectsModalProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const mouseDownTargetRef = useRef<EventTarget | null>(null);
+  const handleLoadingChange = useCallback((loading: boolean, message?: string) => {
+    const loadingMessage = message ?? 'Загружаем файл...';
 
-  useEffect(() => {
-    const dialogElement = dialogRef.current;
-
-    if (!dialogElement) {
-      return;
-    }
-
-    dialogElement.showModal();
-
-    return () => {
-      dialogElement.close();
-    };
+    setLoadingMessage(loading ? loadingMessage : null);
   }, []);
 
-  const isSettingsOpen = Boolean(selectedEffect);
-  const isEffectsEmpty = effects.length === 0;
-  const existingIds = effects.map((cur) => cur.id);
+  const {
+    isCollapsed,
+    rndOptions,
+    toggleCollapsed,
+    handleDragStop,
+    handleResizeStop,
+  } = usePanelGeometry();
 
-  const buttons = [
-    {
-      id: 'audio',
-      label: 'Добавить Audio',
-      onClick: onAddAudio,
-    },
-    {
-      id: 'vibration',
-      label: 'Добавить Vibration',
-      onClick: onAddVibration,
-    },
-    {
-      id: 'flashlight',
-      label: 'Добавить Flashlight',
-      onClick: onAddFlashlight,
-    },
-  ];
+  const {
+    title,
+    description,
+    notice,
+    content,
+  } = getModalContent({
+    effects,
+    project,
+    selectedEffect,
 
-  let modalTitle = 'Эффекты страницы';
-  let modalDescription = 'Невидимые эффекты, которые относятся к странице';
-  let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги';
+    onAddAudio,
+    onAddVibration,
+    onAddFlashlight,
+    onAddBackground,
+    onSelectEffect,
+    onUpdateEffect,
+    onDuplicateEffect,
+    onDeleteEffect,
+    onLoadingChange: handleLoadingChange,
+  });
 
-  let modalContent: ReactNode = (
-    <>
-      {isEffectsEmpty && (
-        <div className={styles.Empty}>
-          Пока нет эффектов
-        </div>
-      )}
+  const handleToggleCollapsed = () => {
+    void onBeforeCollapse().then((saved) => {
+      if (saved) {
+        toggleCollapsed();
+      }
+    });
+  };
 
-      <div className={styles.Tiles}>
-        {effects.map((effectCur) => {
-          return (
-            <EffectTile
-              key={effectCur.id}
-              effect={effectCur}
-              onSelect={onSelectEffect}
-            />
-          );
-        })}
+  const showBackButton = Boolean(selectedEffect) && !isCollapsed;
+  let activeLoadingMessage: string | null = null;
 
-        {buttons.map((buttonCur) => {
-          const { id, label, onClick } = buttonCur;
-
-          return (
-            <button
-              key={id}
-              className={styles.AddTile}
-              type="button"
-              onClick={onClick}
-            >
-              <span className={styles.AddIcon} aria-hidden="true">
-                +
-              </span>
-
-              {label}
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
-
-  if (selectedEffect?.type === 'audio') {
-    modalTitle = 'Настройки Audio';
-    modalDescription = 'Параметры сохраняются в book.json и применяются в собранной книге';
-    notice = 'Звук с playOnLoad запускается только при чтении; в редакторе нажмите «Прослушать»';
-
-    modalContent = (
-      <AudioSettings
-        key={selectedEffect.id}
-        effect={selectedEffect}
-        project={project}
-        existingIds={existingIds}
-        onLoadingChange={setIsLoading}
-        onUpdate={onUpdateEffect}
-        onDuplicate={onDuplicateEffect}
-        onDelete={onDeleteEffect}
-      />
-    );
-  } else if (selectedEffect?.type === 'vibration') {
-    modalTitle = 'Настройки Vibration';
-    modalDescription = 'Вибрация запускается при открытии страницы на поддерживаемом устройстве';
-    notice = 'Для тестирования вибрации в редакторе нажмите «Проверить»';
-
-    modalContent = (
-      <VibrationSettings
-        key={selectedEffect.id}
-        effect={selectedEffect}
-        existingIds={existingIds}
-        onUpdate={onUpdateEffect}
-        onDuplicate={onDuplicateEffect}
-        onDelete={onDeleteEffect}
-      />
-    );
-  } else if (selectedEffect?.type === 'flashlight') {
-    modalTitle = 'Настройки Flashlight';
-    modalDescription = 'Вспышка доступна на поддерживаемых устройствах; sideShadow имитирует её на экране';
-    notice = 'Для тестирования вспышки в редакторе нажмите «Проверить»';
-
-    modalContent = (
-      <FlashlightSettings
-        key={selectedEffect.id}
-        effect={selectedEffect}
-        existingIds={existingIds}
-        onUpdate={onUpdateEffect}
-        onDuplicate={onDuplicateEffect}
-        onDelete={onDeleteEffect}
-      />
-    );
+  if (isSavingStyles) {
+    activeLoadingMessage = 'Подождите, пока изменения сохраняются...';
+  } else if (!isCollapsed) {
+    activeLoadingMessage = loadingMessage;
   }
 
-  const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
-    event.preventDefault();
-
-    if (isLoading) {
-      return;
-    }
-
-    if (isSettingsOpen) {
-      onBack();
-
-      return;
-    }
-
-    onClose();
-  };
-
-  const handleBackdropMouseDown = (event: MouseEvent<HTMLDialogElement>) => {
-    mouseDownTargetRef.current = event.button === 0 ? event.target : null;
-  };
-
-  const handleBackdropMouseUp = (event: MouseEvent<HTMLDialogElement>) => {
-    const targetAndCurrentTargetAreEqual = event.target === event.currentTarget;
-    const startedOnBackdrop = mouseDownTargetRef.current === event.currentTarget;
-
-    mouseDownTargetRef.current = null;
-
-    if (isLoading || !startedOnBackdrop || !targetAndCurrentTargetAreEqual) {
-      return;
-    }
-
-    onClose();
-  };
-
   return createPortal(
-    <dialog
-      ref={dialogRef}
+    <Rnd
       className={styles.Dialog}
+      role="dialog"
       aria-label="Эффекты страницы"
-      aria-busy={isLoading}
-      onCancel={handleCancel}
-      onMouseDown={handleBackdropMouseDown}
-      onMouseUp={handleBackdropMouseUp}
+      aria-modal={false}
+      bounds="window"
+      dragHandleClassName={styles.Header}
+      {...rndOptions}
+
+      onDragStop={handleDragStop}
+      onResizeStop={handleResizeStop}
     >
-      <div className={styles.Header} inert={isLoading}>
-        {isSettingsOpen && (
-          <button className={styles.Back} type="button" onClick={onBack}>
-            ← Назад
-          </button>
-        )}
+      <Header
+        title={title}
+        description={description}
+        isCollapsed={isCollapsed}
+        showBackButton={showBackButton}
 
-        <div className={styles.Title}>
-          <h2>
-            {modalTitle}
-          </h2>
+        onBack={onBack}
+        onToggleCollapsed={handleToggleCollapsed}
+        onClose={onClose}
+      />
 
-          <p>
-            {modalDescription}
-          </p>
-        </div>
+      {!isCollapsed && (
+        <PanelBody
+          content={content}
+          notice={notice}
+          isLoading={Boolean(activeLoadingMessage)}
+        />
+      )}
 
-        <button
-          className={styles.Close}
-          type="button"
-          onClick={onClose}
-          aria-label="Закрыть"
-        >
-          ×
-        </button>
-      </div>
+      {styleSaveError && (
+        <p className={styles.SaveError} role="alert">
+          {styleSaveError}
+        </p>
+      )}
 
-      <div className={styles.Content} inert={isLoading}>
-        {modalContent}
-      </div>
-
-      <p className={styles.Notice} inert={isLoading}>
-        {notice}
-      </p>
-
-      {isLoading && (
+      {activeLoadingMessage && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
 
-          Подготавливаем аудио...
+          {activeLoadingMessage}
         </div>
       )}
-    </dialog>,
+    </Rnd>,
     document.body,
   );
 };

@@ -1,0 +1,106 @@
+.StyleEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+
+  :global(.react-colorful) {
+    width: 100%;
+    min-height: 160px;
+  }
+}
+
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  input {
+    width: 100%;
+    padding: 7px;
+  }
+}
+
+.ColorFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.RangeFields,
+.LayerControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.RangeFields {
+  input[type='number'] {
+    flex: 0 0 84px;
+    width: 84px;
+  }
+}
+
+.LayerControls {
+  input[type='number'] {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  button {
+    flex: 0 0 36px;
+  }
+}
+
+.Advanced {
+  margin-top: 8px;
+
+  summary {
+    cursor: pointer;
+  }
+}
+
+.RuleContainer {
+  margin-top: 8px;
+}
+
+.Rule {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+
+  input {
+    width: 0;
+    flex: 1;
+    padding: 7px;
+  }
+
+  button {
+    min-width: 30px;
+  }
+}
+
+.Error {
+  display: block;
+  margin-top: 4px;
+  color: #f5a4a4;
+  font-size: 12px;
+}
+
+.BlurSlider {
+  flex: 1;
+  min-width: 0;
+}
+
+.ColorActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  button {
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+}

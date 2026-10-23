@@ -25,6 +25,8 @@ import {
   saveProject,
 } from '@project/projectService';
 
+import { hasPendingProjectChanges, markProjectStylesSaved } from '@project/pendingOperations';
+
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
 import type { BuildState } from './@types';
@@ -68,6 +70,7 @@ export const useAutosave = ({
     }
 
     window.clearTimeout(autosaveTimerRef.current);
+
     autosaveTimerRef.current = null;
   }, []);
 
@@ -98,6 +101,8 @@ export const useAutosave = ({
     setIsDirty(false);
     setShowSavedStatus(true);
     setProjectMessage('Локальный проект');
+
+    markProjectStylesSaved();
   }, []);
 
   const scheduleAutosave = useCallback((currentEditor: Editor) => {
@@ -127,6 +132,7 @@ export const useAutosave = ({
     }
 
     clearAutosaveTimer();
+
     documentRevisionRef.current += 1;
 
     editor.commands.setContent(document, {
@@ -179,6 +185,8 @@ export const useAutosave = ({
     if (documentIsUnchanged) {
       setIsDirty(false);
       setShowSavedStatus(true);
+
+      markProjectStylesSaved();
     } else {
       setIsDirty(true);
       setShowSavedStatus(false);
@@ -290,8 +298,9 @@ export const useProjectRestore = ({
 
       if (result.status === 'opened') {
         setProject(result.openedProject.project);
-        replaceDocument(result.openedProject.document);
         setProjectMessage(`Открыт последний проект: ${result.openedProject.project.name}`);
+
+        replaceDocument(result.openedProject.document);
       } else if (result.status === 'permission-required') {
         setPendingRestore(result.project);
         setProjectMessage(`Нужно разрешение, чтобы снова открыть «${result.project.name}»`);
@@ -370,9 +379,9 @@ export const useProjectActions = ({
 
       setProject(null);
       setPendingRestore(null);
+      setProjectMessage('Новый несохранённый проект');
 
       replaceDocument(createEmptyDocument());
-      setProjectMessage('Новый несохранённый проект');
     } finally {
       setIsProjectBusy(false);
     }
@@ -539,13 +548,15 @@ export const useProjectActions = ({
 };
 
 export const useBeforeUnload = (isDirty: boolean): void => {
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
+  const isDirtyRef = useRef(isDirty);
 
+  isDirtyRef.current = isDirty;
+
+  useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
+      if (isDirtyRef.current || hasPendingProjectChanges()) {
+        event.preventDefault();
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -553,7 +564,7 @@ export const useBeforeUnload = (isDirty: boolean): void => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty]);
+  }, []);
 };
 
 export const useSaveShortcut = (handleSaveProject: () => Promise<void>): void => {

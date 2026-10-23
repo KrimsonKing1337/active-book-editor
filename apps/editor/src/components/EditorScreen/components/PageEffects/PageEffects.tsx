@@ -1,15 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { BookProject } from '@project/@types';
 
-import {
-  createAudioEffect,
-  createFlashlightEffect,
-  createVibrationEffect,
-} from '@components/EditorScreen/components/PageEffects/utils';
-
 import type {
   AudioEffectDraft,
+  BackgroundEffectDraft,
   EditorEffectDraft,
   VibrationEffectDraft,
   FlashlightEffectDraft,
@@ -19,59 +14,154 @@ import { usePageEffects } from './PageEffectsContext';
 
 import { EffectsModal } from './components';
 
+import {
+  createAudioEffect,
+  createBackgroundEffect,
+  createFlashlightEffect,
+  createVibrationEffect,
+} from './utils';
+
 import styles from './PageEffects.module.scss';
 
 export type PageEffectsProps = {
   project: BookProject | null;
+  onSaveProject: () => Promise<BookProject | null>;
 };
 
-export const PageEffects = ({ project }: PageEffectsProps) => {
-  const { effects, writeEffects } = usePageEffects();
+export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
+  const {
+    effects,
+    writeEffects,
+    getCurrentEffects,
+    flushStylePreviews,
+    hasUnsavedStyleChanges,
+    markStylesSaved,
+  } = usePageEffects();
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
+  const [isSavingStyles, setIsSavingStyles] = useState(false);
+  const [styleSaveError, setStyleSaveError] = useState('');
+  const savingStylesRef = useRef(false);
 
-  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId) ?? null;
+  const persistStyles = async (): Promise<boolean> => {
+    if (savingStylesRef.current) {
+      return false;
+    }
+
+    const hasUnsaved = hasUnsavedStyleChanges();
+
+    if (!hasUnsaved) {
+      return true;
+    }
+
+    savingStylesRef.current = true;
+
+    setIsSavingStyles(true);
+    setStyleSaveError('');
+
+    try {
+      if (!flushStylePreviews()) {
+        throw new Error('Не удалось зафиксировать изменения CSS');
+      }
+
+      const savedProject = await onSaveProject();
+
+      if (!savedProject) {
+        throw new Error('Проект не был сохранён');
+      }
+
+      markStylesSaved();
+
+      return true;
+    } catch (error) {
+      setStyleSaveError(error instanceof Error ? error.message : 'Не удалось сохранить изменения');
+
+      return false;
+    } finally {
+      savingStylesRef.current = false;
+
+      setIsSavingStyles(false);
+    }
+  };
+
+  const afterStylesSaved = (action: () => void) => {
+    void persistStyles().then((saved) => {
+      if (saved) {
+        action();
+      }
+    });
+  };
+
+  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId);
 
   const openEffects = () => {
     setIsOpen(true);
   };
 
   const closeEffects = () => {
-    setIsOpen(false);
-    setSelectedEffectId(null);
+    afterStylesSaved(() => {
+      setIsOpen(false);
+      setSelectedEffectId(null);
+    });
   };
 
   const goBackToEffects = () => {
-    setSelectedEffectId(null);
+    afterStylesSaved(() => setSelectedEffectId(null));
+  };
+
+  const selectEffect = (id: string) => {
+    afterStylesSaved(() => setSelectedEffectId(id));
   };
 
   const addAudio = () => {
     const effect = createAudioEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...effects, effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const addVibration = () => {
     const effect = createVibrationEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...effects, effect]);
+    writeEffects([...currentEffects, effect]);
+
+    setSelectedEffectId(effect.id);
+  };
+
+  const addBackground = () => {
+    const effect = createBackgroundEffect();
+    const currentEffects = getCurrentEffects();
+
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const addFlashlight = () => {
     const effect = createFlashlightEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...effects, effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const updateEffect = (previousId: string, updatedEffect: EditorEffectDraft) => {
     const nextId = updatedEffect.id.trim();
+
+    if (nextId !== previousId && !flushStylePreviews()) {
+      return;
+    }
+
     const idIsEmpty = nextId.length === 0;
 
-    const idAlreadyExists = effects.some((effectCur) => {
+    const currentEffects = getCurrentEffects();
+
+    const idAlreadyExists = currentEffects.some((effectCur) => {
       if (effectCur.id === previousId) {
         return false;
       }
@@ -83,13 +173,23 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
       return;
     }
 
-    const normalizedEffect = {
+    const currentEffect = currentEffects.find((cur) => cur.id === previousId);
+
+    let normalizedEffect: EditorEffectDraft = {
       ...updatedEffect,
       id: nextId,
     };
 
-    const nextEffects = effects.map((effect) => {
-      return effect.id === previousId ? normalizedEffect : effect;
+    if (nextId !== previousId && currentEffect) {
+      normalizedEffect = {
+        ...currentEffect,
+        id: nextId,
+        slug: updatedEffect.slug,
+      };
+    }
+
+    const nextEffects = currentEffects.map((effectCur) => {
+      return effectCur.id === previousId ? normalizedEffect : effectCur;
     });
 
     writeEffects(nextEffects);
@@ -100,68 +200,110 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
   };
 
   const duplicateEffect = () => {
-    if (!selectedEffect) {
-      return;
-    }
+    afterStylesSaved(() => {
+      const currentEffects = getCurrentEffects();
+      const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
-    const id = crypto.randomUUID();
-    const slug = `${selectedEffect.slug} (копия)`;
+      if (!selectedEffect) {
+        return;
+      }
 
-    if (selectedEffect.type === 'audio') {
-      const duplicate: AudioEffectDraft = {
-        ...selectedEffect,
-        id,
-        slug,
-        options: {
+      const id = crypto.randomUUID();
+      const slug = `${selectedEffect.slug} (копия)`;
+
+      if (selectedEffect.type === 'audio') {
+        const options = {
           ...selectedEffect.options,
-        },
-      };
+        };
 
-      writeEffects([...effects, duplicate]);
-    } else if (selectedEffect.type === 'vibration') {
-      const duplicate: VibrationEffectDraft = {
-        ...selectedEffect,
-        id,
-        slug,
-        options: {
+        const duplicate: AudioEffectDraft = {
+          ...selectedEffect,
+          id,
+          slug,
+          options,
+        };
+
+        writeEffects([...currentEffects, duplicate]);
+      } else if (selectedEffect.type === 'vibration') {
+        const options = {
           ...selectedEffect.options,
-        },
-      };
+        };
 
-      writeEffects([...effects, duplicate]);
-    } else {
-      const duplicate: FlashlightEffectDraft = {
-        ...selectedEffect,
-        id,
-        slug,
-        options: {
+        const duplicate: VibrationEffectDraft = {
+          ...selectedEffect,
+          id,
+          slug,
+          options,
+        };
+
+        writeEffects([...currentEffects, duplicate]);
+      } else if (selectedEffect.type === 'background') {
+        const options = structuredClone(selectedEffect.options);
+
+        options.images = options.images?.map((imageCur) => {
+          return {
+            ...imageCur,
+            id: crypto.randomUUID(),
+          };
+        });
+
+        options.videos = options.videos?.map((videoCur) => {
+          return {
+            ...videoCur,
+            id: crypto.randomUUID(),
+          };
+        });
+
+        const duplicate: BackgroundEffectDraft = {
+          ...selectedEffect,
+          id,
+          slug,
+          options,
+        };
+
+        writeEffects([...currentEffects, duplicate]);
+      } else {
+        const options = {
           ...selectedEffect.options,
-        },
-      };
+        };
 
-      writeEffects([...effects, duplicate]);
-    }
+        const duplicate: FlashlightEffectDraft = {
+          ...selectedEffect,
+          id,
+          slug,
+          options,
+        };
 
-    setSelectedEffectId(id);
+        writeEffects([...currentEffects, duplicate]);
+      }
+
+      setSelectedEffectId(id);
+    });
   };
 
   const deleteEffect = () => {
-    if (!selectedEffect) {
-      return;
-    }
+    afterStylesSaved(() => {
+      const currentEffects = getCurrentEffects();
+      const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
-    const shouldDelete = window.confirm(`Удалить эффект «${selectedEffect.slug}»?`);
+      if (!selectedEffect) {
+        return;
+      }
 
-    if (!shouldDelete) {
-      return;
-    }
+      const shouldDelete = window.confirm(`Удалить эффект «${selectedEffect.slug}»?`);
 
-    const filteredEffects = effects.filter((effectCur) => {
-      return effectCur.id !== selectedEffect.id;
+      if (!shouldDelete) {
+        return;
+      }
+
+      const filteredEffects = currentEffects.filter((effectCur) => {
+        return effectCur.id !== selectedEffect.id;
+      });
+
+      writeEffects(filteredEffects);
+
+      setSelectedEffectId(null);
     });
-
-    writeEffects(filteredEffects);
-    setSelectedEffectId(null);
   };
 
   return (
@@ -191,16 +333,21 @@ export const PageEffects = ({ project }: PageEffectsProps) => {
         <EffectsModal
           effects={effects}
           project={project}
-          selectedEffect={selectedEffect}
+          selectedEffect={selectedEffect ?? null}
+
           onClose={closeEffects}
           onBack={goBackToEffects}
           onAddAudio={addAudio}
           onAddVibration={addVibration}
           onAddFlashlight={addFlashlight}
-          onSelectEffect={setSelectedEffectId}
+          onAddBackground={addBackground}
+          onSelectEffect={selectEffect}
           onUpdateEffect={updateEffect}
           onDuplicateEffect={duplicateEffect}
           onDeleteEffect={deleteEffect}
+          isSavingStyles={isSavingStyles}
+          styleSaveError={styleSaveError}
+          onBeforeCollapse={persistStyles}
         />
       )}
     </>

@@ -21,6 +21,13 @@ const vibrationOptions = {
   playOnLoad: true,
 };
 
+const backgroundOptions = {
+  style: { zIndex: 4 },
+  images: [{ id: 'forest-image', src: 'assets/forest.webp', style: { zIndex: 1 } }],
+  videos: [],
+  shadow: { show: true, style: { backgroundColor: 'rgba(0,0,0,0.3)' } },
+};
+
 const flashlightOptions = {
   duration: 200,
   delay: 0,
@@ -29,7 +36,7 @@ const flashlightOptions = {
   speed: 150,
 };
 
-test('compiles audio, vibration and flashlight and strips editor-only slug', () => {
+test('compiles audio, vibration, flashlight and background and strips editor-only slug', () => {
   const document = {
     type: 'doc',
     attrs: {
@@ -37,6 +44,7 @@ test('compiles audio, vibration and flashlight and strips editor-only slug', () 
         audio: [{ id: 'a', type: 'audio', slug: 'Звук', options: audioOptions }],
         vibration: [{ id: 'v', type: 'vibration', slug: 'Толчок', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', slug: 'Вспышка', options: flashlightOptions }],
+        background: [{ id: 'b', type: 'background', slug: 'Лес', options: backgroundOptions }],
       },
     },
     content: [{ type: 'P' }],
@@ -51,6 +59,7 @@ test('compiles audio, vibration and flashlight and strips editor-only slug', () 
         audio: [{ id: 'a', type: 'audio', options: audioOptions }],
         vibration: [{ id: 'v', type: 'vibration', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', options: flashlightOptions }],
+        background: [{ id: 'b', type: 'background', options: backgroundOptions }],
       },
     },
     content: [{ type: 'P' }],
@@ -65,7 +74,7 @@ test('an empty document compiles with empty effect groups', () => {
   assert.deepEqual(compileBookDocument({ type: 'doc', content: [] }), {
     type: 'doc',
     attrs: {
-      pageEffects: { audio: [], vibration: [], flashlight: [] },
+      pageEffects: { audio: [], vibration: [], flashlight: [], background: [] },
     },
     content: [],
   });

@@ -1,14 +1,19 @@
-import type { ComponentType } from 'react';
+import { type ComponentType, createElement } from 'react';
 
 import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
+import { Audio, Vibration, Flashlight, Background } from 'activeBook-core/components/ProxyHooks';
 
-import type { BookDocument } from '@types';
+import type { BookDocument, CustomComponentType } from '@types';
 import type { BookRuntime } from '@active-book/types';
 
 import { renderNode } from '@utils/renderNode';
 
-import { getAudioEffects, getVibrationEffects, getFlashlightEffects } from './utils';
+import {
+  getAudioEffects,
+  getVibrationEffects,
+  getFlashlightEffects,
+  getBackgroundEffects,
+} from './utils';
 
 type BookPageProps = {
   document: BookDocument;
@@ -22,6 +27,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
   const audioEffects = getAudioEffects(document);
   const vibrationEffects = getVibrationEffects(document);
   const flashlightEffects = getFlashlightEffects(document);
+  const backgroundEffects = getBackgroundEffects(document);
 
   return (
     <PageWrapper>
@@ -56,6 +62,39 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
               id={effectCur.id}
               page={1}
               {...effectCur.options}
+            />
+          );
+        })}
+
+        {backgroundEffects.map((effectCur) => {
+          const { component, ...options } = effectCur.options;
+
+          let componentId = null;
+
+          if (component) {
+            componentId = `${component.package}/${component.name}`;
+          }
+
+          let CustomComponent;
+
+          if (componentId) {
+            CustomComponent = customComponents[componentId] as CustomComponentType;
+          }
+
+          let componentElement = null;
+
+          if (CustomComponent) {
+            componentElement = createElement(CustomComponent, {
+              book: bookRuntime,
+            });
+          }
+
+          return (
+            <Background
+              key={effectCur.id}
+              id={effectCur.id}
+              {...options}
+              Component={componentElement}
             />
           );
         })}
