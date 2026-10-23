@@ -5,7 +5,6 @@ import type {
   BackgroundEffectDraft,
 } from './@types';
 
-import { getBlurFilter } from './components/StyleEditor/utils';
 
 export const createAudioEffect = (): AudioEffectDraft => {
   const options: AudioEffectDraft['options'] = {
@@ -63,12 +62,13 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
 export const createBackgroundEffect = (): BackgroundEffectDraft => {
   const shadowStyle = {
     zIndex: 2,
-    backdropFilter: getBlurFilter(10),
+
   };
 
   const shadow = {
     show: false,
     style: shadowStyle,
+    styleFilters: [{ id: crypto.randomUUID(), property: 'backdropFilter', function: 'blur', value: '10px' }],
   };
 
   const style = {

@@ -1,17 +1,21 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
 
+import type { FilterOperation } from '@active-book/book-builder/effects';
+
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
 
 import { useStyleEditor } from './hooks';
-import { getBlurFilter } from './utils';
 
-import { AdvancedStyles, BlurSettings, ColorSettings, LayerSettings } from './components';
+import { useBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+
+import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
 
 import styles from './StyleEditor.module.scss';
 
 export type StyleEditorProps = {
   value: CSSProperties;
   layer: BackgroundPreviewLayer;
+  styleFilters?: FilterOperation[];
   mediaId?: string;
   defaultZIndex?: number;
 };
@@ -25,6 +29,7 @@ const handleInputEnter = (e: KeyboardEvent<HTMLDivElement>) => {
 export const StyleEditor = ({
   value,
   layer,
+  styleFilters,
   mediaId,
   defaultZIndex = 0,
 }: StyleEditorProps) => {
@@ -39,16 +44,10 @@ export const StyleEditor = ({
     mediaId,
   });
 
+  const { commitFilters } = useBackgroundStyle();
+
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
-
-  const handleBlurChange = (blur: number, updateLocal = true) => {
-    if (Number.isFinite(blur) && blur >= 0) {
-      const blurFilterValue = getBlurFilter(blur);
-
-      setProperty('backdropFilter', blurFilterValue, updateLocal);
-    }
-  };
 
   const handleColorChange = (val: string) => {
     setProperty('backgroundColor', val);
@@ -56,6 +55,11 @@ export const StyleEditor = ({
 
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
+  };
+
+  const handleApplyFilters = (operations: FilterOperation[]) => {
+    commitStyle();
+    commitFilters(layer, mediaId ?? null, operations);
   };
 
   const backgroundColor = String(currentStyle.backgroundColor ?? '');
@@ -68,20 +72,21 @@ export const StyleEditor = ({
         onCommit={commitStyle}
       />
 
-      <BlurSettings
-        filter={currentStyle.backdropFilter}
-        onChange={handleBlurChange}
-        onCommit={commitStyle}
-      />
-
       <LayerSettings
         zIndex={zIndex}
         onChange={handleLayerChange}
         onCommit={commitStyle}
       />
 
+      <FilterSettings
+        style={currentStyle}
+        operations={styleFilters}
+        onApply={handleApplyFilters}
+      />
+
       <AdvancedStyles
         style={currentStyle}
+        isMedia={layer === 'image' || layer === 'video'}
         onPreview={previewStyle}
         onCommit={commitStyle}
       />

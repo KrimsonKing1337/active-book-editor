@@ -104,3 +104,111 @@
     cursor: pointer;
   }
 }
+
+.SearchSelect {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px;
+  }
+}
+
+.SearchOptions {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--background, #222);
+  border: 1px solid #777;
+  border-radius: 4px;
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 7px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &[data-active='true'] {
+      background: #555;
+    }
+  }
+}
+
+.EmptyOptions {
+  display: block;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.FilterRow,
+.AdvancedRow {
+  margin-top: 8px;
+  border: 1px solid #777;
+  border-radius: 4px;
+}
+
+.FilterSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.FilterBody,
+.AdvancedRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.FilterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.PositionRow,
+.NumericFields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.PositionRow > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.NumericFields {
+  input {
+    box-sizing: border-box;
+    width: 75px;
+    padding: 7px;
+  }
+
+  span {
+    min-width: 18px;
+  }
+}
+
+.NumericControl {
+  min-width: 0;
+}

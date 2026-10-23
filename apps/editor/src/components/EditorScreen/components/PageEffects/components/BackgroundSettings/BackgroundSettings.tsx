@@ -4,6 +4,7 @@ import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
+import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import { useRef, useState } from 'react';
 
@@ -13,7 +14,6 @@ import { Images, Videos, Shadow, Background, CustomComponent } from './component
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
-import { getBlurFilter } from '../StyleEditor/utils';
 
 import styles from './BackgroundSettings.module.scss';
 type BackgroundSettingsProps = {
@@ -29,12 +29,13 @@ type BackgroundSettingsProps = {
 
 const defaultShadowStyle = {
   zIndex: 2,
-  backdropFilter: getBlurFilter(10),
+
 };
 
 const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
   show: false,
   style: defaultShadowStyle,
+  styleFilters: [{ id: crypto.randomUUID(), property: 'backdropFilter', function: 'blur', value: '10px' }],
 };
 
 export const BackgroundSettings = ({
@@ -50,7 +51,7 @@ export const BackgroundSettings = ({
   const [idDraft, setIdDraft] = useState(effect.id);
   const importsInProgressRef = useRef(0);
   const updateStylePreview = useBackgroundStylePreviewUpdater();
-  const { flushStylePreviews } = usePageEffects();
+  const { flushStylePreviews, getCurrentEffects } = usePageEffects();
 
   const options = effect.options;
 
@@ -147,6 +148,52 @@ export const BackgroundSettings = ({
     updateStylePreview(effect.id, layer, mediaId, style);
   };
 
+  const commitFilters = (
+    layer: 'background' | 'shadow' | 'image' | 'video',
+    mediaId: string | null,
+    styleFilters: FilterOperation[],
+  ) => {
+    if (!flushStylePreviews()) {
+      return;
+    }
+
+    const currentEffect = getCurrentEffects().find((cur): cur is BackgroundEffectDraft => {
+      return cur.type === 'background' && cur.id === effect.id;
+    });
+
+    if (!currentEffect) {
+      return;
+    }
+
+    const currentOptions = currentEffect.options;
+    let nextOptions: BackgroundOptions = currentOptions;
+
+    if (layer === 'background') {
+      nextOptions = { ...currentOptions, styleFilters };
+    } else if (layer === 'shadow' && currentOptions.shadow) {
+      nextOptions = {
+        ...currentOptions,
+        shadow: { ...currentOptions.shadow, styleFilters },
+      };
+    } else if (layer === 'image') {
+      nextOptions = {
+        ...currentOptions,
+        images: currentOptions.images?.map((image) => (
+          image.id === mediaId ? { ...image, styleFilters } : image
+        )),
+      };
+    } else if (layer === 'video') {
+      nextOptions = {
+        ...currentOptions,
+        videos: currentOptions.videos?.map((video) => (
+          video.id === mediaId ? { ...video, styleFilters } : video
+        )),
+      };
+    }
+
+    onUpdate(effect.id, { ...currentEffect, options: nextOptions });
+  };
+
   const handleComponentChange = (component: BackgroundOptions['component']) => {
     updateOptions({ component });
   };
@@ -168,7 +215,7 @@ export const BackgroundSettings = ({
   };
 
   return (
-    <BackgroundStyleProvider preview={updateStylePreviewForEffect} commit={flushStylePreviews}>
+    <BackgroundStyleProvider preview={updateStylePreviewForEffect} commit={flushStylePreviews} commitFilters={commitFilters}>
       <div className={styles.Settings}>
         <label className={styles.Field}>
           <span>
@@ -196,7 +243,7 @@ export const BackgroundSettings = ({
           </div>
         </div>
 
-        <Background style={style} />
+        <Background style={style} styleFilters={options.styleFilters} />
         <Images
           images={images}
           canImport={Boolean(project)}

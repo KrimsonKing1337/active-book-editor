@@ -67,7 +67,7 @@ export const Images = ({
       </summary>
 
       {images.map((imageCur, index) => {
-        const { id, src, style } = imageCur;
+        const { id, src, style, styleFilters } = imageCur;
 
         const handlePathChangeForImage = (val: string) => {
           handlePathChange(index, val);
@@ -95,6 +95,7 @@ export const Images = ({
               <StyleEditor
                 defaultZIndex={1}
                 value={style ?? {}}
+                styleFilters={styleFilters}
                 layer="image"
                 mediaId={id}
               />
