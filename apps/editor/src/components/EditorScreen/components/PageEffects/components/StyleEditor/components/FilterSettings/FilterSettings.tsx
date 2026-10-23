@@ -28,34 +28,97 @@ type FilterDraft = {
 };
 
 const CONFIG: Record<FilterFunction, NumericConfig> = {
-  blur: { min: 0, max: 50, step: 1, unit: 'px', initial: '0' },
-  brightness: { min: 0, max: 300, step: 1, unit: '%', initial: '100' },
-  contrast: { min: 0, max: 300, step: 1, unit: '%', initial: '100' },
-  grayscale: { min: 0, max: 100, step: 1, unit: '%', initial: '0' },
-  'hue-rotate': { min: -360, max: 360, step: 1, unit: 'deg', initial: '0' },
-  invert: { min: 0, max: 100, step: 1, unit: '%', initial: '0' },
-  opacity: { min: 0, max: 100, step: 1, unit: '%', initial: '100' },
-  saturate: { min: 0, max: 300, step: 1, unit: '%', initial: '100' },
-  sepia: { min: 0, max: 100, step: 1, unit: '%', initial: '0' },
+  blur: {
+    min: 0,
+    max: 50,
+    step: 1,
+    unit: 'px',
+    initial: '0',
+  },
+  brightness: {
+    min: 0,
+    max: 300,
+    step: 1,
+    unit: '%',
+    initial: '100',
+  },
+  contrast: {
+    min: 0,
+    max: 300,
+    step: 1,
+    unit: '%',
+    initial: '100',
+  },
+  grayscale: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: '%',
+    initial: '0',
+  },
+  'hue-rotate': {
+    min: -360,
+    max: 360,
+    step: 1,
+    unit: 'deg',
+    initial: '0',
+  },
+  invert: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: '%',
+    initial: '0',
+  },
+  opacity: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: '%',
+    initial: '100',
+  },
+  saturate: {
+    min: 0,
+    max: 300,
+    step: 1,
+    unit: '%',
+    initial: '100',
+  },
+  sepia: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: '%',
+    initial: '0',
+  },
 };
 
 const PROPERTY_OPTIONS = [
-  { value: 'filter', label: 'filter' },
-  { value: 'backdropFilter', label: 'backdrop-filter' },
+  {
+    value: 'filter',
+    label: 'filter',
+  },
+  {
+    value: 'backdropFilter',
+    label: 'backdrop-filter',
+  },
 ];
 
-const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((name) => ({ value: name, label: name }));
+const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((cur) => ({
+  value: cur,
+  label: cur,
+}));
 
 const getDrafts = (operations: FilterOperation[] | undefined): FilterDraft[] => {
-  return (operations ?? []).map((operation) => {
-    const config = CONFIG[operation.function];
+  return (operations ?? []).map((operationCur) => {
+    const config = CONFIG[operationCur.function];
 
     return {
-      id: operation.id,
-      property: operation.property,
-      function: operation.function,
-      value: operation.value.endsWith(config.unit)
-        ? operation.value.slice(0, -config.unit.length) : operation.value,
+      id: operationCur.id,
+      property: operationCur.property,
+      function: operationCur.function,
+      value: operationCur.value.endsWith(config.unit)
+        ? operationCur.value.slice(0, -config.unit.length) : operationCur.value,
     };
   });
 };
@@ -69,22 +132,38 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
     setDrafts(getDrafts(operations));
   }, [operations]);
 
-  const update = (id: string, changes: Partial<FilterDraft>) => {
-    setDrafts((current) => current.map((draft) => {
-      return draft.id === id ? { ...draft, ...changes } : draft;
-    }));
+  const updateDraft = (id: string, changes: Partial<FilterDraft>) => {
+    setDrafts((current) => {
+      return current.map((draftCur) => {
+        if (draftCur.id !== id) {
+          return draftCur;
+        }
+
+        return {
+          ...draftCur,
+          ...changes,
+        };
+      });
+    });
     setError('');
   };
 
-  const add = () => {
+  const handleAddFilter = () => {
     const id = crypto.randomUUID();
 
-    setDrafts((current) => [...current, { id, property: '', function: '', value: '' }]);
+    const newDraft: FilterDraft = {
+      id,
+      property: '',
+      function: '',
+      value: '',
+    };
+
+    setDrafts((current) => [...current, newDraft]);
     setExpandedId(id);
     setError('');
   };
 
-  const move = (index: number, offset: number) => {
+  const moveFilter = (index: number, offset: number) => {
     const nextIndex = index + offset;
 
     if (nextIndex < 0 || nextIndex >= drafts.length) {
@@ -99,55 +178,55 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
     setError('');
   };
 
-  const apply = () => {
+  const handleApplyFilters = () => {
     const next: FilterOperation[] = [];
 
-    for (const draft of drafts) {
-      if (!draft.property || !draft.function) {
+    for (const draftCur of drafts) {
+      if (!draftCur.property || !draftCur.function) {
         setError('Выбери свойство и функцию каждого фильтра');
 
         return;
       }
 
-      const config = CONFIG[draft.function];
-      const value = draft.value.trim();
+      const config = CONFIG[draftCur.function];
+      const value = draftCur.value.trim();
 
       if (!isValidNumericValue(value, config)) {
-        setError(`Некорректное значение для ${draft.function}`);
+        setError(`Некорректное значение для ${draftCur.function}`);
 
         return;
       }
 
-      const result = `${draft.function}(${value}${config.unit})`;
-      const property = draft.property === 'backdropFilter' ? 'backdrop-filter' : 'filter';
+      const filterValue = `${draftCur.function}(${value}${config.unit})`;
+      const property = draftCur.property === 'backdropFilter' ? 'backdrop-filter' : 'filter';
 
-      if (!CSS.supports(property, result)) {
-        setError(`Браузер не поддерживает ${result}`);
+      if (!CSS.supports(property, filterValue)) {
+        setError(`Браузер не поддерживает ${filterValue}`);
 
         return;
       }
 
       next.push({
-        id: draft.id,
-        property: draft.property,
-        function: draft.function,
+        id: draftCur.id,
+        property: draftCur.property,
+        function: draftCur.function,
         value: `${value}${config.unit}`,
       });
     }
 
     const combined = resolveStyle({}, next);
 
-    for (const property of PROPERTY_OPTIONS) {
-      const cssValue = combined[property.value as FilterProperty];
+    for (const propertyCur of PROPERTY_OPTIONS) {
+      const cssValue = combined[propertyCur.value as FilterProperty];
 
       if (!cssValue) {
         continue;
       }
 
-      const name = property.value === 'backdropFilter' ? 'backdrop-filter' : 'filter';
+      const name = propertyCur.value === 'backdropFilter' ? 'backdrop-filter' : 'filter';
 
       if (!CSS.supports(name, String(cssValue))) {
-        setError(`Некорректное составное значение ${property.label}`);
+        setError(`Некорректное составное значение ${propertyCur.label}`);
 
         return;
       }
@@ -159,71 +238,117 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
 
   return (
     <details className={styles.Advanced}>
-      <summary>Фильтры</summary>
+      <summary>
+        Фильтры
+      </summary>
 
-      {drafts.map((draft, index) => {
-        const config = draft.function ? CONFIG[draft.function] : null;
-        const expanded = draft.id === expandedId;
+      {drafts.map((draftCur, index) => {
+        const { id, property, function: functionName, value } = draftCur;
+
+        const config = functionName ? CONFIG[functionName] : null;
+        const expanded = id === expandedId;
+        const propertyLabel = property === 'backdropFilter' ? 'backdrop-filter' : 'filter';
+        const displayedProperty = property ? propertyLabel : 'Свойство';
+        const displayedFunction = functionName || 'Функция';
+        const displayedValue = config ? `(${value}${config.unit})` : '';
+        const expandedIndicator = expanded ? '▴' : '▾';
+        const valueLabel = `Значение ${functionName}`;
+
+        const handleToggle = () => {
+          setExpandedId(expanded ? null : id);
+        };
+
+        const handlePropertyChange = (val: string) => {
+          const changes: Partial<FilterDraft> = {
+            property: val as FilterProperty,
+            function: '',
+            value: '',
+          };
+
+          updateDraft(id, changes);
+        };
+
+        const handleFunctionChange = (val: string) => {
+          const nextFunction = val as FilterFunction;
+          const changes: Partial<FilterDraft> = {
+            function: nextFunction,
+            value: CONFIG[nextFunction].initial,
+          };
+
+          updateDraft(id, changes);
+        };
+
+        const handleValueChange = (val: string) => {
+          updateDraft(id, { value: val });
+        };
+
+        const handleMoveUp = () => {
+          moveFilter(index, -1);
+        };
+
+        const handleMoveDown = () => {
+          moveFilter(index, 1);
+        };
+
+        const handleDelete = () => {
+          setDrafts((current) => current.filter((cur) => cur.id !== id));
+          setExpandedId(null);
+        };
 
         return (
-          <div key={draft.id} className={styles.FilterRow}>
+          <div key={id} className={styles.FilterRow}>
             <button
               type="button"
               className={styles.FilterSummary}
               aria-expanded={expanded}
-              onClick={() => setExpandedId(expanded ? null : draft.id)}
+              onClick={handleToggle}
             >
               <span>
-                {draft.property ? (draft.property === 'backdropFilter' ? 'backdrop-filter' : 'filter') : 'Свойство'}
-                {' → '}
-                {draft.function || 'Функция'}
-                {config ? `(${draft.value}${config.unit})` : ''}
+                {displayedProperty} → {displayedFunction}{displayedValue}
               </span>
-              <span>{expanded ? '▴' : '▾'}</span>
+
+              <span>
+                {expandedIndicator}
+              </span>
             </button>
 
             {expanded && (
               <div className={styles.FilterBody}>
                 <SearchSelect
-                  value={draft.property}
+                  value={property}
                   options={PROPERTY_OPTIONS}
                   placeholder="CSS-свойство"
-                  onChange={(property) => update(draft.id, {
-                    property: property as FilterProperty,
-                    function: '',
-                    value: '',
-                  })}
+                  onChange={handlePropertyChange}
                 />
 
-                {draft.property && (
+                {property && (
                   <SearchSelect
-                    value={draft.function}
+                    value={functionName}
                     options={FUNCTION_OPTIONS}
                     placeholder="Функция"
-                    onChange={(name) => {
-                      const functionName = name as FilterFunction;
-
-                      update(draft.id, { function: functionName, value: CONFIG[functionName].initial });
-                    }}
+                    onChange={handleFunctionChange}
                   />
                 )}
 
                 {config && (
                   <NumericControl
-                    label={`Значение ${draft.function}`}
+                    label={valueLabel}
                     config={config}
-                    value={draft.value}
-                    onChange={(value) => update(draft.id, { value })}
+                    value={value}
+                    onChange={handleValueChange}
                   />
                 )}
 
                 <div className={styles.FilterActions}>
-                  <button type="button" disabled={index === 0} onClick={() => move(index, -1)}>↑</button>
-                  <button type="button" disabled={index === drafts.length - 1} onClick={() => move(index, 1)}>↓</button>
-                  <button type="button" onClick={() => {
-                    setDrafts((current) => current.filter((item) => item.id !== draft.id));
-                    setExpandedId(null);
-                  }}>
+                  <button type="button" disabled={index === 0} onClick={handleMoveUp}>
+                    ↑
+                  </button>
+
+                  <button type="button" disabled={index === drafts.length - 1} onClick={handleMoveDown}>
+                    ↓
+                  </button>
+
+                  <button type="button" onClick={handleDelete}>
                     Удалить
                   </button>
                 </div>
@@ -234,11 +359,19 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
       })}
 
       <div className={styles.FilterActions}>
-        <button type="button" onClick={add}>+ Добавить фильтр</button>
-        <button type="button" onClick={apply}>Применить фильтры</button>
+        <button type="button" onClick={handleAddFilter}>
+          + Добавить фильтр
+        </button>
+        <button type="button" onClick={handleApplyFilters}>
+          Применить фильтры
+        </button>
       </div>
 
-      {error && <span className={styles.Error} role="alert">{error}</span>}
+      {error && (
+        <span className={styles.Error} role="alert">
+          {error}
+        </span>
+      )}
     </details>
   );
 };
