@@ -31,7 +31,7 @@ export const StyleRule = ({
     setValueDraft(String(value));
   }, [name, value]);
 
-  const applyRule = () => {
+  const handleApplyRule = () => {
     const nextName = normalizePropertyName(nameDraft);
     const nextValue = valueDraft.trim();
 
@@ -82,7 +82,7 @@ export const StyleRule = ({
           value={nameDraft}
 
           onChange={handleNameChange}
-          onBlur={applyRule}
+          onBlur={handleApplyRule}
           onKeyDown={handleKeyDown}
         />
 
@@ -91,7 +91,7 @@ export const StyleRule = ({
           value={valueDraft}
 
           onChange={handleValueInputChange}
-          onBlur={applyRule}
+          onBlur={handleApplyRule}
           onKeyDown={handleKeyDown}
         />
 
