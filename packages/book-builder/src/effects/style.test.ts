@@ -18,15 +18,16 @@ test('keeps repeated filter functions in their original order', () => {
   assert.equal(style.opacity, 0.5);
 });
 
-test('empty operations clear legacy CSS filters', () => {
+test('empty operations remove unstructured filter declarations', () => {
   const style = resolveStyle({ filter: 'blur(10px)', backdropFilter: 'sepia(80%)' }, []);
 
   assert.equal(style.filter, undefined);
   assert.equal(style.backdropFilter, undefined);
 });
 
-test('missing operations preserve legacy styles', () => {
-  const style = resolveStyle({ backdropFilter: 'blur(10px)' }, undefined);
+test('missing operations do not restore unstructured filter declarations', () => {
+  const style = resolveStyle({ opacity: 0.5, backdropFilter: 'blur(10px)' }, undefined);
 
-  assert.equal(style.backdropFilter, 'blur(10px)');
+  assert.equal(style.backdropFilter, undefined);
+  assert.equal(style.opacity, 0.5);
 });

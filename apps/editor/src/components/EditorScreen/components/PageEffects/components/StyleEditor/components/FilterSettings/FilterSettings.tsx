@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import type {
   FilterFunction,
   FilterOperation,
@@ -17,7 +16,6 @@ import { SearchSelect } from '../SearchSelect';
 import styles from '../../StyleEditor.module.scss';
 
 type FilterSettingsProps = {
-  style: CSSProperties;
   operations?: FilterOperation[];
   onApply: (operations: FilterOperation[]) => void;
 };
@@ -48,50 +46,28 @@ const PROPERTY_OPTIONS = [
 
 const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((name) => ({ value: name, label: name }));
 
-const getDrafts = (operations: FilterOperation[] | undefined, style: CSSProperties): FilterDraft[] => {
-  if (operations) {
-    return operations.map((operation) => {
-      const config = CONFIG[operation.function];
+const getDrafts = (operations: FilterOperation[] | undefined): FilterDraft[] => {
+  return (operations ?? []).map((operation) => {
+    const config = CONFIG[operation.function];
 
-      return {
-        id: operation.id,
-        property: operation.property,
-        function: operation.function,
-        value: operation.value.endsWith(config.unit)
-          ? operation.value.slice(0, -config.unit.length) : operation.value,
-      };
-    });
-  }
-
-  // Existing projects stored the blur directly in CSSProperties.
-  const properties: FilterProperty[] = ['filter', 'backdropFilter'];
-
-  return properties.flatMap((property) => {
-    const legacyValue = String(style[property] ?? '').trim();
-    const blur = /^blur\((\d+(?:\.\d+)?)px\)$/.exec(legacyValue);
-
-    if (!blur) {
-      return [];
-    }
-
-    return [{ id: `legacy-${property}`, property, function: 'blur' as const, value: blur[1] }];
+    return {
+      id: operation.id,
+      property: operation.property,
+      function: operation.function,
+      value: operation.value.endsWith(config.unit)
+        ? operation.value.slice(0, -config.unit.length) : operation.value,
+    };
   });
 };
 
-export const FilterSettings = ({ style, operations, onApply }: FilterSettingsProps) => {
-  const [drafts, setDrafts] = useState<FilterDraft[]>(() => getDrafts(operations, style));
+export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => {
+  const [drafts, setDrafts] = useState<FilterDraft[]>(() => getDrafts(operations));
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
-  const hasUnsupportedLegacyValue = !operations && (['filter', 'backdropFilter'] as const).some((property) => {
-    const value = String(style[property] ?? '').trim();
-
-    return value.length > 0 && !/^blur\(\d+(?:\.\d+)?px\)$/.test(value);
-  });
-
   useEffect(() => {
-    setDrafts(getDrafts(operations, style));
-  }, [operations, style.filter, style.backdropFilter]);
+    setDrafts(getDrafts(operations));
+  }, [operations]);
 
   const update = (id: string, changes: Partial<FilterDraft>) => {
     setDrafts((current) => current.map((draft) => {
@@ -184,12 +160,6 @@ export const FilterSettings = ({ style, operations, onApply }: FilterSettingsPro
   return (
     <details className={styles.Advanced}>
       <summary>Фильтры</summary>
-
-      {hasUnsupportedLegacyValue && (
-        <span className={styles.Error}>
-          Есть ранее сохранённый фильтр со сложным значением. При применении он будет заменён новым списком.
-        </span>
-      )}
 
       {drafts.map((draft, index) => {
         const config = draft.function ? CONFIG[draft.function] : null;

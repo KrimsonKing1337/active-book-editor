@@ -79,7 +79,6 @@ export const StyleEditor = ({
       />
 
       <FilterSettings
-        style={currentStyle}
         operations={styleFilters}
         onApply={handleApplyFilters}
       />
