@@ -1,3 +1,5 @@
+import type { FilterOperation } from '@active-book/book-builder/effects';
+
 import type {
   AudioEffectDraft,
   VibrationEffectDraft,
@@ -5,6 +7,16 @@ import type {
   BackgroundEffectDraft,
 } from './@types';
 
+export const createDefaultShadowFilters = (): FilterOperation[] => {
+  const blurFilter: FilterOperation = {
+    id: crypto.randomUUID(),
+    property: 'backdropFilter',
+    function: 'blur',
+    value: '10px',
+  };
+
+  return [blurFilter];
+};
 
 export const createAudioEffect = (): AudioEffectDraft => {
   const options: AudioEffectDraft['options'] = {
@@ -62,13 +74,12 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
 export const createBackgroundEffect = (): BackgroundEffectDraft => {
   const shadowStyle = {
     zIndex: 2,
-
   };
 
   const shadow = {
     show: false,
     style: shadowStyle,
-    styleFilters: [{ id: crypto.randomUUID(), property: 'backdropFilter', function: 'blur', value: '10px' }],
+    styleFilters: createDefaultShadowFilters(),
   };
 
   const style = {

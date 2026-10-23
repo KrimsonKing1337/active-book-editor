@@ -13,7 +13,7 @@ import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffe
 import { Images, Videos, Shadow, Background, CustomComponent } from './components';
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
-
+import { createDefaultShadowFilters } from '../../utils';
 
 import styles from './BackgroundSettings.module.scss';
 type BackgroundSettingsProps = {
@@ -29,13 +29,12 @@ type BackgroundSettingsProps = {
 
 const defaultShadowStyle = {
   zIndex: 2,
-
 };
 
 const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
   show: false,
   style: defaultShadowStyle,
-  styleFilters: [{ id: crypto.randomUUID(), property: 'backdropFilter', function: 'blur', value: '10px' }],
+  styleFilters: createDefaultShadowFilters(),
 };
 
 export const BackgroundSettings = ({
@@ -173,25 +172,47 @@ export const BackgroundSettings = ({
     } else if (layer === 'shadow' && currentOptions.shadow) {
       nextOptions = {
         ...currentOptions,
-        shadow: { ...currentOptions.shadow, styleFilters },
+        shadow: {
+          ...currentOptions.shadow,
+          styleFilters,
+        },
       };
     } else if (layer === 'image') {
       nextOptions = {
         ...currentOptions,
-        images: currentOptions.images?.map((image) => (
-          image.id === mediaId ? { ...image, styleFilters } : image
-        )),
+        images: currentOptions.images?.map((imageCur) => {
+          if (imageCur.id !== mediaId) {
+            return imageCur;
+          }
+
+          return {
+            ...imageCur,
+            styleFilters,
+          };
+        }),
       };
     } else if (layer === 'video') {
       nextOptions = {
         ...currentOptions,
-        videos: currentOptions.videos?.map((video) => (
-          video.id === mediaId ? { ...video, styleFilters } : video
-        )),
+        videos: currentOptions.videos?.map((videoCur) => {
+          if (videoCur.id !== mediaId) {
+            return videoCur;
+          }
+
+          return {
+            ...videoCur,
+            styleFilters,
+          };
+        }),
       };
     }
 
-    onUpdate(effect.id, { ...currentEffect, options: nextOptions });
+    const updatedEffect = {
+      ...currentEffect,
+      options: nextOptions,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleComponentChange = (component: BackgroundOptions['component']) => {
@@ -215,7 +236,11 @@ export const BackgroundSettings = ({
   };
 
   return (
-    <BackgroundStyleProvider preview={updateStylePreviewForEffect} commit={flushStylePreviews} commitFilters={commitFilters}>
+    <BackgroundStyleProvider
+      preview={updateStylePreviewForEffect}
+      commit={flushStylePreviews}
+      commitFilters={commitFilters}
+    >
       <div className={styles.Settings}>
         <label className={styles.Field}>
           <span>
