@@ -31,15 +31,16 @@ export const resolveStyle = (
   delete result.backdropFilter;
 
   const properties: FilterProperty[] = ['filter', 'backdropFilter'];
+  const filterOperations = operations ?? [];
 
-  for (const property of properties) {
-    const value = (operations ?? [])
-      .filter((operation) => operation.property === property)
-      .map((operation) => `${operation.function}(${operation.value})`)
+  for (const propertyCur of properties) {
+    const filterValue = filterOperations
+      .filter((cur) => cur.property === propertyCur)
+      .map((cur) => `${cur.function}(${cur.value})`)
       .join(' ');
 
-    if (value) {
-      result[property] = value;
+    if (filterValue) {
+      result[propertyCur] = filterValue;
     }
   }
 

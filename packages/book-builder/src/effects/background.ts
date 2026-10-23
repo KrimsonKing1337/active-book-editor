@@ -6,11 +6,10 @@ import type {
   BackgroundEffectShadowOptions,
 } from 'activeBook-core/hooks/effects/background/@types';
 
-import { isRecord } from './utils';
-
 import type { FilterOperation } from './style';
 
 import { resolveStyle } from './style';
+import { isRecord } from './utils';
 
 export type BackgroundComponentReference = {
   package: string;
@@ -57,21 +56,49 @@ export const resolveBackgroundOptions = (options: BackgroundOptions) => {
     ...rest
   } = options;
 
+  const resolvedStyle = resolveStyle(style, styleFilters);
+
+  const resolvedImages = images?.map((imageCur) => {
+    const {
+      style: mediaStyle,
+      styleFilters: mediaFilters,
+      ...mediaOptions
+    } = imageCur;
+
+    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
+
+    return {
+      ...mediaOptions,
+      style: resolvedMediaStyle,
+    };
+  });
+
+  const resolvedVideos = videos?.map((videoCur) => {
+    const {
+      style: mediaStyle,
+      styleFilters: mediaFilters,
+      ...mediaOptions
+    } = videoCur;
+
+    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
+
+    return {
+      ...mediaOptions,
+      style: resolvedMediaStyle,
+    };
+  });
+
+  const resolvedShadow = shadow && {
+    show: shadow.show,
+    style: resolveStyle(shadow.style, shadow.styleFilters),
+  };
+
   return {
     ...rest,
-    style: resolveStyle(style, styleFilters),
-    images: images?.map(({ style: mediaStyle, styleFilters: mediaFilters, ...media }) => ({
-      ...media,
-      style: resolveStyle(mediaStyle, mediaFilters),
-    })),
-    videos: videos?.map(({ style: mediaStyle, styleFilters: mediaFilters, ...media }) => ({
-      ...media,
-      style: resolveStyle(mediaStyle, mediaFilters),
-    })),
-    shadow: shadow && {
-      show: shadow.show,
-      style: resolveStyle(shadow.style, shadow.styleFilters),
-    },
+    style: resolvedStyle,
+    images: resolvedImages,
+    videos: resolvedVideos,
+    shadow: resolvedShadow,
   };
 };
 
