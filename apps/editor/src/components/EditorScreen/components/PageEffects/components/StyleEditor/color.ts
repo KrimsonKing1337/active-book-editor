@@ -1,32 +1,33 @@
-import { type Modify } from '@react-input/mask';
-
 export const hexMaskOptions = {
   mask: '#hhhhhhhh',
   replacement: { h: /[a-f\d]/i },
 };
 
-export const rgbaReplacement = { d: /\d/, a: /[01]/ };
+export const rgbaReplacement = { d: /\d/ };
 
-export const getRgbaMask = (value: string): string => {
-  const [channelsPart = '', alphaPart = ''] = value.split('/');
-  const channels = channelsPart.trim().split(/\s+/);
+export type RgbaWidths = [number, number, number, number];
 
-  const lengths = [0, 1, 2].map((index) => {
-    const digits = channels[index]?.replace(/\D/g, '').length ?? 0;
+export const getRgbaWidths = (value: string): RgbaWidths => {
+  const [channels = '', alpha = ''] = value.split('/');
+  const parts = channels.trim().split(/\s+/);
+  const percentages = alpha.trim().replace('%', '');
 
-    return digits ? 'd'.repeat(Math.min(digits, 3)) : 'ddd';
-  });
-
-  const decimals = alphaPart.split('.')[1]?.replace(/\D/g, '').length ?? 0;
-  const alphaMask = decimals ? 'd'.repeat(Math.min(decimals, 2)) : 'dd';
-
-  return lengths.join(' ') + ' / a.' + alphaMask;
+  return [
+    parts[0]?.length || 3,
+    parts[1]?.length || 3,
+    parts[2]?.length || 3,
+    percentages.length || 3,
+  ] as RgbaWidths;
 };
 
-export const modifyRgbaMask: Modify = ({ value, data, selectionStart, selectionEnd }) => {
-  const nextValue = value.slice(0, selectionStart) + (data ?? '') + value.slice(selectionEnd);
+export const getRgbaMask = (widths: RgbaWidths): string => {
+  const [red, green, blue, alpha] = widths;
 
-  return { mask: getRgbaMask(nextValue) };
+  return [
+    'd'.repeat(red),
+    'd'.repeat(green),
+    'd'.repeat(blue),
+  ].join(' ') + ' / ' + 'd'.repeat(alpha) + '%';
 };
 
 export const getHexColor = (value: string): string => {
@@ -63,27 +64,33 @@ export const getRgbaColor = (hex: string): string => {
 
   const alpha = Math.round(parseInt(hex.slice(7, 9), 16) / 255 * 100) / 100;
 
-  return channels.join(' ') + ' / ' + alpha;
+  return channels.join(' ') + ' / ' + Math.round(alpha * 100) + '%';
 };
 
 export const parseRgbaColor = (value: string): string | null => {
-  const [channelsPart, alphaPart] = value.split('/');
+  const sections = value.split('/');
 
-  if (!channelsPart || !alphaPart) {
+  if (sections.length !== 2 || !sections[1].trim().endsWith('%')) {
     return null;
   }
 
-  const channels = channelsPart.trim().split(/\s+/).map(Number);
-  const alpha = Number(alphaPart.trim());
+  const channelTexts = sections[0].trim().split(/\s+/);
+  const channelNumbers = channelTexts.map(Number);
+  const alphaText = sections[1].trim().slice(0, -1);
+  const percentage = Number(alphaText);
 
-  const channelsAreValid = channels.length === 3 && channels.every((channel) => {
-    return Number.isInteger(channel) && channel >= 0 && channel <= 255;
+  const channelsAreValid = channelTexts.length === 3 && channelTexts.every((text, index) => {
+    const number = channelNumbers[index];
+
+    return text.length > 0 && Number.isInteger(number) && number >= 0 && number <= 255;
   });
 
-  if (!channelsAreValid || !Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+  const alphaIsValid = alphaText.length > 0 && Number.isInteger(percentage)
+    && percentage >= 0 && percentage <= 100;
+
+  if (!channelsAreValid || !alphaIsValid) {
     return null;
   }
 
-  return 'rgb(' + channels.join(' ') + ' / ' + alpha + ')';
+  return 'rgb(' + channelNumbers.join(' ') + ' / ' + percentage / 100 + ')';
 };
-

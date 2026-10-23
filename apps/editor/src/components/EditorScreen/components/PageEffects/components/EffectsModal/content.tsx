@@ -29,7 +29,7 @@ type ContentParams = Pick<
   | 'onDuplicateEffect'
   | 'onDeleteEffect'
 > & {
-  onLoadingChange: (loading: boolean) => void;
+  onLoadingChange: (loading: boolean, message?: string) => void;
 };
 
 type ModalContent = {
@@ -189,6 +189,7 @@ export const getModalContent = ({
         effect={selectedEffect}
         effects={backgrounds}
         project={project}
+        onLoadingChange={onLoadingChange}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}

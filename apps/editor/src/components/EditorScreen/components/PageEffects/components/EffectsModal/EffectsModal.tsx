@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
@@ -32,7 +32,11 @@ export const EffectsModal = ({
   isSavingStyles,
   styleSaveError,
 }: EffectsModalProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+
+  const handleLoadingChange = useCallback((loading: boolean, message?: string) => {
+    setLoadingMessage(loading ? message ?? 'Загружаем файл...' : null);
+  }, []);
 
   const {
     isCollapsed,
@@ -59,7 +63,7 @@ export const EffectsModal = ({
     onUpdateEffect,
     onDuplicateEffect,
     onDeleteEffect,
-    onLoadingChange: setIsLoading,
+    onLoadingChange: handleLoadingChange,
   });
 
   const handleToggleCollapsed = () => {
@@ -71,7 +75,9 @@ export const EffectsModal = ({
   };
 
   const showBackButton = Boolean(selectedEffect) && !isCollapsed;
-  const isAudioLoading = isLoading && !isCollapsed;
+  const activeLoadingMessage = isSavingStyles
+    ? 'Подождите, пока изменения сохраняются...'
+    : !isCollapsed ? loadingMessage : null;
 
   return createPortal(
     <Rnd
@@ -99,7 +105,7 @@ export const EffectsModal = ({
         <PanelBody
           content={content}
           notice={notice}
-          isLoading={isLoading}
+          isLoading={Boolean(activeLoadingMessage)}
         />
       )}
 
@@ -109,19 +115,11 @@ export const EffectsModal = ({
         </p>
       )}
 
-      {isSavingStyles && (
+      {activeLoadingMessage && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
 
-          Подождите, пока изменения сохраняются...
-        </div>
-      )}
-
-      {isAudioLoading && !isSavingStyles && (
-        <div className={styles.LoadingOverlay} role="status" aria-live="polite">
-          <span className={styles.LoadingSpinner} aria-hidden="true" />
-
-          Подготавливаем аудио...
+          {activeLoadingMessage}
         </div>
       )}
     </Rnd>,

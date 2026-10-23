@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
@@ -15,6 +15,7 @@ type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
+  onLoadingChange: (loading: boolean, message?: string) => void;
 
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;
@@ -30,12 +31,14 @@ export const BackgroundSettings = ({
   effect,
   effects,
   project,
+  onLoadingChange,
 
   onUpdate,
   onDuplicate,
   onDelete,
 }: BackgroundSettingsProps) => {
   const [idDraft, setIdDraft] = useState(effect.id);
+  const importsInProgressRef = useRef(0);
   const updateStylePreview = useBackgroundStylePreviewUpdater();
   const { flushStylePreviews } = usePageEffects();
 
@@ -75,12 +78,27 @@ export const BackgroundSettings = ({
     });
   };
 
-  const importAsset = async (file: File, fileHandle?: ProjectFileHandle): Promise<string> => {
+  const importAsset = async (
+    file: File,
+    fileHandle: ProjectFileHandle | undefined,
+    kind: 'image' | 'video',
+  ): Promise<string> => {
     if (!project) {
       throw new Error('Сначала создайте или откройте проект книги');
     }
 
-    return project.storage.importAssetFile(file, fileHandle);
+    importsInProgressRef.current += 1;
+    onLoadingChange(true, kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...');
+
+    try {
+      return await project.storage.importAssetFile(file, fileHandle);
+    } finally {
+      importsInProgressRef.current -= 1;
+
+      if (importsInProgressRef.current === 0) {
+        onLoadingChange(false);
+      }
+    }
   };
 
   const handleNameChange = (name: string) => {
@@ -164,7 +182,7 @@ export const BackgroundSettings = ({
         images={images}
         canImport={Boolean(project)}
         onChange={handleImagesChange}
-        onImportAsset={importAsset}
+        onImportAsset={(file, handle) => importAsset(file, handle, 'image')}
         onStylePreview={previewImageStyle}
         onStyleCommit={flushStylePreviews}
       />
@@ -172,7 +190,7 @@ export const BackgroundSettings = ({
         videos={videos}
         canImport={Boolean(project)}
         onChange={handleVideosChange}
-        onImportAsset={importAsset}
+        onImportAsset={(file, handle) => importAsset(file, handle, 'video')}
         onStylePreview={previewVideoStyle}
         onStyleCommit={flushStylePreviews}
       />
