@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 import { useEffect, useRef } from 'react';
 
 import { InputMask } from '@react-input/mask';
@@ -19,6 +21,10 @@ type NumericControlProps = {
   config: NumericConfig;
   label: string;
   onChange: (value: string) => void;
+};
+
+const numericReplacement = {
+  _: /[0-9.\-]/,
 };
 
 const NUMBER_PATTERN = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
@@ -52,10 +58,12 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
   const parsedValue = Number(value);
   const current = Number.isFinite(parsedValue) ? parsedValue : config.min;
   const limited = Math.min(config.max, Math.max(config.min, current));
-  const sliderValue = Math.round((limited - config.min) / (config.max - config.min) * 100);
+  const range = config.max - config.min;
+  const fraction = (limited - config.min) / range;
+  const sliderValue = Math.round(fraction * 100);
 
-  const changeSlider = (position: number) => {
-    const nextValue = config.min + (config.max - config.min) * position / 100;
+  const handleSliderChange = (val: number) => {
+    const nextValue = config.min + range * val / 100;
     const stepped = Math.round(nextValue / config.step) * config.step;
 
     if (sliderFrameRef.current !== null) {
@@ -68,30 +76,32 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
     });
   };
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    if (/^-?\d*(?:\.\d*)?$/.test(val)) {
+      onChange(val);
+    }
+  };
+
   return (
     <div className={styles.NumericControl}>
       <div className={styles.NumericFields}>
         <Slider
           className={styles.BlurSlider}
           value={sliderValue}
-          onChange={changeSlider}
+          onChange={handleSliderChange}
         />
 
         <InputMask
           aria-label={label}
           mask="____________"
-          replacement={{ _: /[0-9.\-]/ }}
+          replacement={numericReplacement}
           value={value}
           inputMode="decimal"
           spellCheck={false}
           placeholder={config.initial}
-          onChange={(event) => {
-            const text = event.target.value;
-
-            if (/^-?\d*(?:\.\d*)?$/.test(text)) {
-              onChange(text);
-            }
-          }}
+          onChange={handleInputChange}
         />
 
         <span>{config.unit}</span>
