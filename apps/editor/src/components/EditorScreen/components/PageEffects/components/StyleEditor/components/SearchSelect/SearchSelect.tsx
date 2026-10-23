@@ -1,4 +1,9 @@
-import type { KeyboardEvent } from 'react';
+import type {
+  ChangeEvent,
+  FocusEvent,
+  KeyboardEvent,
+  MouseEvent,
+} from 'react';
 
 import { useId, useState } from 'react';
 
@@ -22,54 +27,75 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const selected = options.find((option) => option.value === value);
-  const filtered = options.filter((option) => {
-    const text = `${option.label} ${option.value}`.toLowerCase();
+  const selectedOption = options.find((cur) => cur.value === value);
+  const filteredOptions = options.filter((optionCur) => {
+    const searchText = `${optionCur.label} ${optionCur.value}`.toLowerCase();
+    const searchQuery = query.toLowerCase().trim();
 
-    return text.includes(query.toLowerCase().trim());
+    return searchText.includes(searchQuery);
   });
 
-  const choose = (nextValue: string) => {
-    onChange(nextValue);
+  const selectOption = (val: string) => {
+    onChange(val);
     setIsOpen(false);
     setQuery('');
     setActiveIndex(0);
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Escape') {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
       setIsOpen(false);
       setQuery('');
 
       return;
     }
 
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      event.preventDefault();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
       setIsOpen(true);
 
-      const direction = event.key === 'ArrowDown' ? 1 : -1;
+      const direction = e.key === 'ArrowDown' ? 1 : -1;
 
       setActiveIndex((index) => {
-        return (index + direction + filtered.length) % Math.max(filtered.length, 1);
+        return (index + direction + filteredOptions.length) % Math.max(filteredOptions.length, 1);
       });
     }
 
-    if (event.key === 'Enter' && isOpen && filtered[activeIndex]) {
-      event.preventDefault();
-      choose(filtered[activeIndex].value);
+    const selectedOption = filteredOptions[activeIndex];
+
+    if (
+      e.key === 'Enter'
+      && isOpen
+      && selectedOption
+    ) {
+      e.preventDefault();
+      selectOption(selectedOption.value);
     }
+  };
+
+  const handleBlur = (e: FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsOpen(false);
+      setQuery('');
+    }
+  };
+
+  const handleFocus = () => {
+    setQuery('');
+    setActiveIndex(0);
+    setIsOpen(true);
+  };
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    setActiveIndex(0);
+    setIsOpen(true);
   };
 
   return (
     <div
       className={styles.SearchSelect}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setIsOpen(false);
-          setQuery('');
-        }
-      }}
+      onBlur={handleBlur}
     >
       <input
         type="search"
@@ -79,37 +105,45 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
         aria-expanded={isOpen}
         aria-label={placeholder}
         placeholder={placeholder}
-        value={isOpen ? query : selected?.label ?? ''}
+        value={isOpen ? query : selectedOption?.label ?? ''}
         autoComplete="off"
-        onFocus={() => {
-          setQuery('');
-          setActiveIndex(0);
-          setIsOpen(true);
-        }}
-        onChange={(event) => {
-          setQuery(event.target.value);
-          setActiveIndex(0);
-          setIsOpen(true);
-        }}
+
+        onFocus={handleFocus}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
 
       {isOpen && (
         <div id={listId} role="listbox" className={styles.SearchOptions}>
-          {filtered.length === 0 && <span className={styles.EmptyOptions}>Ничего не найдено</span>}
+          {filteredOptions.length === 0 && (
+            <span className={styles.EmptyOptions}>
+              Ничего не найдено
+            </span>
+          )}
 
-          {filtered.map((option, index) => {
+          {filteredOptions.map((optionCur, index) => {
+            const { value: optionValue, label } = optionCur;
+
+            const handleOptionMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
+              e.preventDefault();
+            };
+
+            const handleOptionClick = () => {
+              selectOption(optionValue);
+            };
+
             return (
               <button
-                key={option.value}
+                key={optionValue}
                 type="button"
                 role="option"
-                aria-selected={value === option.value}
+                aria-selected={value === optionValue}
                 data-active={index === activeIndex}
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => choose(option.value)}
+
+                onMouseDown={handleOptionMouseDown}
+                onClick={handleOptionClick}
               >
-                {option.label}
+                {label}
               </button>
             );
           })}
