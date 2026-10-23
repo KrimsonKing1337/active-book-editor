@@ -37,35 +37,53 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
 
   const result: BackgroundEffect[] = [];
 
-  for (const effect of value.background) {
-    if (!isRecord(effect) || effect.type !== 'background' || !isRecord(effect.options)) {
+  for (const effectCur of value.background) {
+    if (
+      !isRecord(effectCur)
+      || effectCur.type !== 'background'
+      || !isRecord(effectCur.options)
+    ) {
       continue;
     }
 
-    if (typeof effect.id !== 'string' || !effect.id.trim()) {
+    if (typeof effectCur.id !== 'string' || !effectCur.id.trim()) {
       continue;
     }
 
-    const images = Array.isArray(effect.options.images) ? effect.options.images : [];
-    const videos = Array.isArray(effect.options.videos) ? effect.options.videos : [];
+    const images = Array.isArray(effectCur.options.images) ? effectCur.options.images : [];
+    const videos = Array.isArray(effectCur.options.videos) ? effectCur.options.videos : [];
 
-    const imagesAreValid = images.every((cur) => {
-      return isRecord(cur) && typeof cur.id === 'string' && !!cur.id.trim() && typeof cur.src === 'string';
+    const imagesAreValid = images.every((imageCur) => {
+      if (!isRecord(imageCur)) {
+        return false;
+      }
+
+      const idIsValid = typeof imageCur.id === 'string' && !!imageCur.id.trim();
+      const srcIsValid = typeof imageCur.src === 'string';
+
+      return idIsValid && srcIsValid;
     });
 
     const videosAreValid = videos.every((videoCur) => {
-      return isRecord(videoCur) && typeof videoCur.id === 'string' && typeof videoCur.src === 'string';
+      if (!isRecord(videoCur)) {
+        return false;
+      }
+
+      const idIsValid = typeof videoCur.id === 'string';
+      const srcIsValid = typeof videoCur.src === 'string';
+
+      return idIsValid && srcIsValid;
     });
 
     if (!imagesAreValid || !videosAreValid) {
       continue;
     }
 
-    const slug = typeof effect.slug === 'string' ? effect.slug : 'Новый фон';
-    const options = effect.options as BackgroundOptions;
+    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фон';
+    const options = effectCur.options as BackgroundOptions;
 
     result.push({
-      id: effect.id,
+      id: effectCur.id,
       type: 'background',
       slug,
       options,
