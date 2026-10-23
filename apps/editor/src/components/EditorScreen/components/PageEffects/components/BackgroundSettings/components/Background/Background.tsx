@@ -7,15 +7,16 @@ import styles from '../../BackgroundSettings.module.scss';
 type BackgroundProps = {
   style: CSSProperties;
   onChange: (style: CSSProperties) => void;
-  onBlurPreview: (blur: number | null) => void;
+  onStylePreview: (style: CSSProperties) => void;
+  onStyleCommit: () => boolean;
 };
 
-export const Background = ({ style, onChange, onBlurPreview }: BackgroundProps) => {
+export const Background = ({ style, onChange, onStylePreview, onStyleCommit }: BackgroundProps) => {
   return (
     <details className={styles.Section}>
       <summary>Фон</summary>
 
-      <StyleEditor value={style} onChange={onChange} onBlurPreview={onBlurPreview} />
+      <StyleEditor value={style} onChange={onChange} onStylePreview={onStylePreview} onStyleCommit={onStyleCommit} />
     </details>
   );
 };

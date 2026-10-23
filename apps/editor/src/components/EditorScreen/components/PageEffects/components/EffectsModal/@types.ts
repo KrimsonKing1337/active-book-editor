@@ -17,4 +17,7 @@ export type EffectsModalProps = {
   onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;
   onDeleteEffect: () => void;
+  onBeforeCollapse: () => Promise<boolean>;
+  isSavingStyles: boolean;
+  styleSaveError: string;
 };

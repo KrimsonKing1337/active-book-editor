@@ -5,7 +5,7 @@ import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
-import { useBackgroundBlurPreviewUpdater } from '../../PageEffectsContext';
+import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
 
 import { Images, Videos, Shadow, Background, CustomComponent } from './components';
 
@@ -36,7 +36,8 @@ export const BackgroundSettings = ({
   onDelete,
 }: BackgroundSettingsProps) => {
   const [idDraft, setIdDraft] = useState(effect.id);
-  const updateBlurPreview = useBackgroundBlurPreviewUpdater();
+  const updateStylePreview = useBackgroundStylePreviewUpdater();
+  const { flushStylePreviews } = usePageEffects();
 
   const options = effect.options;
 
@@ -105,20 +106,20 @@ export const BackgroundSettings = ({
     updateOptions({ shadow: nextShadow });
   };
 
-  const previewBackgroundBlur = (blur: number | null) => {
-    updateBlurPreview(effect.id, 'background', null, blur);
+  const previewBackgroundStyle = (nextStyle: CSSProperties) => {
+    updateStylePreview(effect.id, 'background', null, nextStyle);
   };
 
-  const previewShadowBlur = (blur: number | null) => {
-    updateBlurPreview(effect.id, 'shadow', null, blur);
+  const previewShadowStyle = (nextStyle: CSSProperties) => {
+    updateStylePreview(effect.id, 'shadow', null, nextStyle);
   };
 
-  const previewImageBlur = (imageId: string, blur: number | null) => {
-    updateBlurPreview(effect.id, 'image', imageId, blur);
+  const previewImageStyle = (imageId: string, nextStyle: CSSProperties) => {
+    updateStylePreview(effect.id, 'image', imageId, nextStyle);
   };
 
-  const previewVideoBlur = (videoId: string, blur: number | null) => {
-    updateBlurPreview(effect.id, 'video', videoId, blur);
+  const previewVideoStyle = (videoId: string, nextStyle: CSSProperties) => {
+    updateStylePreview(effect.id, 'video', videoId, nextStyle);
   };
 
   const handleComponentChange = (component: BackgroundOptions['component']) => {
@@ -153,22 +154,34 @@ export const BackgroundSettings = ({
         </div>
       </div>
 
-      <Background style={style} onChange={handleBackgroundChange} onBlurPreview={previewBackgroundBlur} />
+      <Background
+        style={style}
+        onChange={handleBackgroundChange}
+        onStylePreview={previewBackgroundStyle}
+        onStyleCommit={flushStylePreviews}
+      />
       <Images
         images={images}
         canImport={Boolean(project)}
         onChange={handleImagesChange}
         onImportAsset={importAsset}
-        onBlurPreview={previewImageBlur}
+        onStylePreview={previewImageStyle}
+        onStyleCommit={flushStylePreviews}
       />
       <Videos
         videos={videos}
         canImport={Boolean(project)}
         onChange={handleVideosChange}
         onImportAsset={importAsset}
-        onBlurPreview={previewVideoBlur}
+        onStylePreview={previewVideoStyle}
+        onStyleCommit={flushStylePreviews}
       />
-      <Shadow shadow={shadow} onChange={handleShadowChange} onBlurPreview={previewShadowBlur} />
+      <Shadow
+        shadow={shadow}
+        onChange={handleShadowChange}
+        onStylePreview={previewShadowStyle}
+        onStyleCommit={flushStylePreviews}
+      />
       <CustomComponent component={options.component} onChange={handleComponentChange} />
 
       <div className={styles.Actions}>

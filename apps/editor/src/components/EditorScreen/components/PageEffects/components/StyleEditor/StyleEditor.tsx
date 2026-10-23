@@ -10,7 +10,8 @@ type StyleEditorProps = {
   value: CSSProperties;
   onChange: (style: CSSProperties) => void;
   defaultZIndex?: number;
-  onBlurPreview?: (blur: number | null) => void;
+  onStylePreview?: (style: CSSProperties) => void;
+  onStyleCommit?: () => boolean;
 };
 
 type UpdatedValue = Record<string, string | number | undefined>;
@@ -19,6 +20,7 @@ type StyleRuleProps = {
   name: string;
   value: string | number;
   onUpdate: (name: string, nextName: string, nextValue: string) => string | null;
+  onPreview: (name: string, nextValue: string) => void;
   onDelete: (name: string) => void;
 };
 
@@ -107,7 +109,7 @@ const getIsValidRgba = (value: string): boolean => {
     && alpha >= 0 && alpha <= 1;
 };
 
-const StyleRule = ({ name, value, onUpdate, onDelete }: StyleRuleProps) => {
+const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleRuleProps) => {
   const [nameDraft, setNameDraft] = useState(name);
   const [valueDraft, setValueDraft] = useState(String(value));
   const [error, setError] = useState('');
@@ -132,6 +134,14 @@ const StyleRule = ({ name, value, onUpdate, onDelete }: StyleRuleProps) => {
     setError(updateError ?? '');
   };
 
+  const handleValueChange = (nextValue: string) => {
+    setValueDraft(nextValue);
+
+    if (isValidCssRule(name, nextValue.trim())) {
+      onPreview(name, nextValue.trim());
+    }
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.currentTarget.blur();
@@ -152,7 +162,7 @@ const StyleRule = ({ name, value, onUpdate, onDelete }: StyleRuleProps) => {
         <input
           aria-label="Значение свойства"
           value={valueDraft}
-          onChange={(event) => setValueDraft(event.target.value)}
+          onChange={(event) => handleValueChange(event.target.value)}
           onBlur={applyRule}
           onKeyDown={handleKeyDown}
         />
@@ -167,30 +177,60 @@ const StyleRule = ({ name, value, onUpdate, onDelete }: StyleRuleProps) => {
   );
 };
 
-export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview }: StyleEditorProps) => {
+export const StyleEditor = ({
+  value,
+  onChange,
+  defaultZIndex = 0,
+  onStylePreview,
+  onStyleCommit,
+}: StyleEditorProps) => {
   const [newProperty, setNewProperty] = useState('');
   const [newValue, setNewValue] = useState('');
   const [propertyError, setPropertyError] = useState('');
   const [dragBlur, setDragBlur] = useState<number | null>(null);
+  const [draftStyle, setDraftStyle] = useState<CSSProperties | null>(null);
 
   const sliderFrameRef = useRef<number | null>(null);
-  const onBlurPreviewRef = useRef(onBlurPreview);
-
-  useEffect(() => {
-    onBlurPreviewRef.current = onBlurPreview;
-  }, [onBlurPreview]);
+  const draftStyleRef = useRef<CSSProperties | null>(null);
 
   useEffect(() => {
     return () => {
       if (sliderFrameRef.current !== null) {
         cancelAnimationFrame(sliderFrameRef.current);
       }
-
-      onBlurPreviewRef.current?.(null);
     };
   }, []);
 
-  const backgroundColor = String(value.backgroundColor ?? '');
+  const previewStyle = (updatedStyle: CSSProperties, updateLocal = true) => {
+    draftStyleRef.current = updatedStyle;
+
+    if (updateLocal) {
+      setDraftStyle(updatedStyle);
+    }
+
+    if (onStylePreview) {
+      onStylePreview(updatedStyle);
+    } else {
+      onChange(updatedStyle);
+    }
+  };
+
+  const commitStyle = () => {
+    if (!draftStyleRef.current) {
+      return;
+    }
+
+    if (onStyleCommit && !onStyleCommit()) {
+      return;
+    }
+
+    draftStyleRef.current = null;
+    setDraftStyle(null);
+  };
+
+  const currentStyle = draftStyle ?? value;
+
+  const backgroundColor = String((draftStyle ?? value).backgroundColor ?? '');
   const pickerColor = getHexColor(backgroundColor);
 
   const [hexDraft, setHexDraft] = useState(pickerColor);
@@ -207,10 +247,10 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
     }
   }, [pickerColor, activeColorInput]);
 
-  const rules = Object.entries(value);
+  const rules = Object.entries(currentStyle);
 
   const setProperty = (name: string, nextValue: string | number | undefined) => {
-    const updated: UpdatedValue = { ...value };
+    const updated: UpdatedValue = { ...(draftStyleRef.current ?? value) };
 
     if (nextValue === undefined || nextValue === '') {
       delete updated[name];
@@ -218,20 +258,29 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
       updated[name] = nextValue;
     }
 
-    onChange(updated as CSSProperties);
+    previewStyle(updated as CSSProperties);
+  };
+
+  const previewRuleValue = (name: string, nextValue: string) => {
+    const updated: UpdatedValue = { ...(draftStyleRef.current ?? value) };
+
+    updated[name] = nextValue;
+
+    previewStyle(updated as CSSProperties);
   };
 
   const updateRule = (name: string, nextName: string, nextValue: string): string | null => {
-    if (name !== nextName && Object.hasOwn(value, nextName)) {
+    if (name !== nextName && Object.hasOwn(currentStyle, nextName)) {
       return 'Такое CSS-свойство уже существует';
     }
 
-    const updated: UpdatedValue = { ...value };
+    const updated: UpdatedValue = { ...(draftStyleRef.current ?? value) };
 
     delete updated[name];
     updated[nextName] = nextValue;
 
-    onChange(updated as CSSProperties);
+    previewStyle(updated as CSSProperties);
+    commitStyle();
 
     return null;
   };
@@ -239,7 +288,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
   const addProperty = () => {
     const name = normalizePropertyName(newProperty);
 
-    if (Object.hasOwn(value, name)) {
+    if (Object.hasOwn(currentStyle, name)) {
       setPropertyError('Такое CSS-свойство уже существует');
 
       return;
@@ -252,6 +301,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
     }
 
     setProperty(name, newValue.trim());
+    commitStyle();
     setNewProperty('');
     setNewValue('');
     setPropertyError('');
@@ -293,6 +343,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
 
   const handleColorBlur = () => {
     setActiveColorInput(null);
+    commitStyle();
   };
 
   const handleBlurChange = (blur: number) => {
@@ -304,13 +355,19 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
   };
 
   const handleSliderBlurChange = (blur: number) => {
+    const nextStyle: CSSProperties = {
+      ...(draftStyleRef.current ?? value),
+      backdropFilter: blur ? `blur(${blur}px)` : undefined,
+    };
+
+    previewStyle(nextStyle, false);
+
     if (sliderFrameRef.current !== null) {
       cancelAnimationFrame(sliderFrameRef.current);
     }
 
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(blur);
-      onBlurPreviewRef.current?.(blur);
       sliderFrameRef.current = null;
     });
   };
@@ -320,12 +377,17 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
       cancelAnimationFrame(sliderFrameRef.current);
     }
 
-    // react-range may notify listeners during its own React update.
-    // Commit background changes in the next animation frame, outside its flushSync.
+    // Keep document updates outside react-range's flushSync.
+    const nextStyle: CSSProperties = {
+      ...(draftStyleRef.current ?? value),
+      backdropFilter: blur ? `blur(${blur}px)` : undefined,
+    };
+
+    previewStyle(nextStyle, false);
+
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(null);
-      handleBlurChange(blur);
-      onBlurPreviewRef.current?.(null);
+      commitStyle();
       sliderFrameRef.current = null;
     });
   };
@@ -338,13 +400,13 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
     handleBlurChange(Number(normalized));
   };
 
-  const backdropFilter = String(value.backdropFilter ?? '');
+  const backdropFilter = String(currentStyle.backdropFilter ?? '');
   const blurMatch = backdropFilter.match(/blur\((\d+(?:\.\d+)?)px\)/);
   const blurValue = Number(blurMatch?.[1] ?? 0);
   const sliderBlur = Math.min(100, Math.max(0, blurValue));
   const displayedBlur = dragBlur ?? blurValue;
 
-  const rawZIndex = Number(value.zIndex ?? defaultZIndex);
+  const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
 
   const handleZIndexChange = (nextZIndex: number) => {
@@ -394,10 +456,15 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
         </label>
       </div>
 
-      <HexAlphaColorPicker
-        color={pickerColor}
-        onChange={(color) => setProperty('backgroundColor', color)}
-      />
+      <div
+        onPointerUp={() => requestAnimationFrame(commitStyle)}
+        onKeyUp={() => requestAnimationFrame(commitStyle)}
+      >
+        <HexAlphaColorPicker
+          color={pickerColor}
+          onChange={(color) => setProperty('backgroundColor', color)}
+        />
+      </div>
 
       <label className={styles.Field}>
         <span>Размытие (px)</span>
@@ -417,6 +484,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
             aria-label="Размытие в пикселях"
             value={displayedBlur}
             onChange={handleBlurInputChange}
+            onBlur={commitStyle}
           />
         </div>
       </label>
@@ -425,7 +493,10 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
         <span>z-index</span>
 
         <div className={styles.LayerControls}>
-          <button type="button" onClick={() => handleZIndexChange(zIndex - 1)} aria-label="На слой назад">
+          <button type="button" onClick={() => {
+            handleZIndexChange(zIndex - 1);
+            commitStyle();
+          }} aria-label="На слой назад">
             −
           </button>
 
@@ -434,9 +505,13 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
             step={1}
             value={zIndex}
             onChange={handleZIndexInputChange}
+            onBlur={commitStyle}
           />
 
-          <button type="button" onClick={() => handleZIndexChange(zIndex + 1)} aria-label="На слой вперёд">
+          <button type="button" onClick={() => {
+            handleZIndexChange(zIndex + 1);
+            commitStyle();
+          }} aria-label="На слой вперёд">
             +
           </button>
         </div>
@@ -452,7 +527,11 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview 
               name={property}
               value={ruleValue as string | number}
               onUpdate={updateRule}
-              onDelete={(name) => setProperty(name, undefined)}
+              onPreview={previewRuleValue}
+              onDelete={(name) => {
+                setProperty(name, undefined);
+                commitStyle();
+              }}
             />
           );
         })}

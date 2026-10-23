@@ -17,10 +17,18 @@ export type BackgroundImagesProps = {
   onChange: (images: BackgroundImages) => void;
   canImport: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
-  onBlurPreview: (mediaId: string, blur: number | null) => void;
+  onStylePreview: (mediaId: string, style: CSSProperties) => void;
+  onStyleCommit: () => boolean;
 };
 
-export const Images = ({ images, canImport, onChange, onImportAsset, onBlurPreview }: BackgroundImagesProps) => {
+export const Images = ({
+  images,
+  canImport,
+  onChange,
+  onImportAsset,
+  onStylePreview,
+  onStyleCommit,
+}: BackgroundImagesProps) => {
   const updateImage = (index: number, changes: Partial<BackgroundImages[number]>) => {
     const updated = images.map((imageCur, currentIndex) => {
       if (currentIndex !== index) {
@@ -87,7 +95,8 @@ export const Images = ({ images, canImport, onChange, onImportAsset, onBlurPrevi
                 defaultZIndex={1}
                 value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
-                onBlurPreview={(blur) => onBlurPreview(id, blur)}
+                onStylePreview={(style) => onStylePreview(id, style)}
+                onStyleCommit={onStyleCommit}
               />
             </details>
 

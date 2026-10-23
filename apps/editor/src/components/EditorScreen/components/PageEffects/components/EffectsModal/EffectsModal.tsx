@@ -28,6 +28,9 @@ export const EffectsModal = ({
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,
+  onBeforeCollapse,
+  isSavingStyles,
+  styleSaveError,
 }: EffectsModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,6 +62,14 @@ export const EffectsModal = ({
     onLoadingChange: setIsLoading,
   });
 
+  const handleToggleCollapsed = () => {
+    void onBeforeCollapse().then((saved) => {
+      if (saved) {
+        toggleCollapsed();
+      }
+    });
+  };
+
   const showBackButton = Boolean(selectedEffect) && !isCollapsed;
   const isAudioLoading = isLoading && !isCollapsed;
 
@@ -80,7 +91,7 @@ export const EffectsModal = ({
         isCollapsed={isCollapsed}
         showBackButton={showBackButton}
         onBack={onBack}
-        onToggleCollapsed={toggleCollapsed}
+        onToggleCollapsed={handleToggleCollapsed}
         onClose={onClose}
       />
 
@@ -92,7 +103,21 @@ export const EffectsModal = ({
         />
       )}
 
-      {isAudioLoading && (
+      {styleSaveError && (
+        <p className={styles.SaveError} role="alert">
+          {styleSaveError}
+        </p>
+      )}
+
+      {isSavingStyles && (
+        <div className={styles.LoadingOverlay} role="status" aria-live="polite">
+          <span className={styles.LoadingSpinner} aria-hidden="true" />
+
+          Подождите, пока изменения сохраняются...
+        </div>
+      )}
+
+      {isAudioLoading && !isSavingStyles && (
         <div className={styles.LoadingOverlay} role="status" aria-live="polite">
           <span className={styles.LoadingSpinner} aria-hidden="true" />
 

@@ -1,8 +1,9 @@
-import { type PropsWithChildren,
+import { type CSSProperties, type PropsWithChildren,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   createContext,
 } from 'react';
@@ -29,19 +30,23 @@ export type AudioPreviewStatus = {
 type PageEffectsContextValue = {
   effects: EditorEffectDraft[];
   writeEffects: (effects: EditorEffectDraft[]) => void;
+  getCurrentEffects: () => EditorEffectDraft[];
   audioPreviewStatuses: Record<string, AudioPreviewStatus>;
   setAudioPreviewStatus: (id: string, status: AudioPreviewStatus | null) => void;
+  flushStylePreviews: () => boolean;
+  hasUnsavedStyleChanges: () => boolean;
+  markStylesSaved: () => void;
 };
 
 export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
 
-export type BackgroundBlurPreviews = Record<string, number>;
+export type BackgroundStylePreviews = Record<string, CSSProperties>;
 
-type BackgroundBlurPreviewUpdater = (
+type BackgroundStylePreviewUpdater = (
   effectId: string,
   layer: BackgroundPreviewLayer,
   mediaId: string | null,
-  blur: number | null
+  style: CSSProperties
 ) => void;
 
 export const getBackgroundPreviewKey = (
@@ -57,8 +62,8 @@ type PageEffectsProviderProps = PropsWithChildren<{
 }>;
 
 const PageEffectsContext = createContext<PageEffectsContextValue | null>(null);
-const BackgroundBlurPreviewsContext = createContext<BackgroundBlurPreviews>({});
-const BackgroundBlurPreviewUpdaterContext = createContext<BackgroundBlurPreviewUpdater | null>(null);
+const BackgroundStylePreviewsContext = createContext<BackgroundStylePreviews>({});
+const BackgroundStylePreviewUpdaterContext = createContext<BackgroundStylePreviewUpdater | null>(null);
 
 const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const grouped = editor?.state.doc.attrs.pageEffects as GroupedPageEffects | undefined;
@@ -83,33 +88,52 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
 export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
-  const [backgroundBlurPreviews, setBackgroundBlurPreviews] = useState<BackgroundBlurPreviews>({});
+  const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
 
-  const updateBackgroundBlurPreview = useCallback<BackgroundBlurPreviewUpdater>((effectId, layer, mediaId, blur) => {
+  const previewStylesRef = useRef<BackgroundStylePreviews>({});
+  const previewFrameRef = useRef<number | null>(null);
+  const unsavedStylesRef = useRef(false);
+
+  const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>((effectId, layer, mediaId, style) => {
     const key = getBackgroundPreviewKey(effectId, layer, mediaId);
 
-    setBackgroundBlurPreviews((current) => {
-      if (blur === null) {
-        if (!Object.hasOwn(current, key)) {
-          return current;
-        }
+    previewStylesRef.current = {
+      ...previewStylesRef.current,
+      [key]: style,
+    };
 
-        const updated = { ...current };
+    unsavedStylesRef.current = true;
 
-        delete updated[key];
+    if (previewFrameRef.current !== null) {
+      cancelAnimationFrame(previewFrameRef.current);
+    }
 
-        return updated;
-      }
-
-      if (current[key] === blur) {
-        return current;
-      }
-
-      return {
-        ...current,
-        [key]: blur,
-      };
+    previewFrameRef.current = requestAnimationFrame(() => {
+      setBackgroundStylePreviews(previewStylesRef.current);
+      previewFrameRef.current = null;
     });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewFrameRef.current !== null) {
+        cancelAnimationFrame(previewFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (unsavedStylesRef.current) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const setAudioPreviewStatus = useCallback((id: string, status: AudioPreviewStatus | null) => {
@@ -202,20 +226,120 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     editor.view.dispatch(transaction);
   }, [editor]);
 
+  const getCurrentEffects = useCallback((): EditorEffectDraft[] => {
+    return getPageEffects(editor);
+  }, [editor]);
+
+  const flushStylePreviews = useCallback((): boolean => {
+    const pending = previewStylesRef.current;
+
+    if (Object.keys(pending).length === 0) {
+      return true;
+    }
+
+    if (!editor || editor.isDestroyed) {
+      return false;
+    }
+
+    const nextEffects = getPageEffects(editor).map((effect) => {
+      if (effect.type !== 'background') {
+        return effect;
+      }
+
+      const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
+        return pending[getBackgroundPreviewKey(effect.id, layer, mediaId)];
+      };
+
+      const backgroundStyle = previewStyle('background');
+      const shadowStyle = previewStyle('shadow');
+
+      const hasImageChanges = effect.options.images?.some((image) => {
+        return previewStyle('image', image.id) !== undefined;
+      });
+
+      const hasVideoChanges = effect.options.videos?.some((video) => {
+        return previewStyle('video', video.id) !== undefined;
+      });
+
+      if (!backgroundStyle && !shadowStyle && !hasImageChanges && !hasVideoChanges) {
+        return effect;
+      }
+
+      const options = {
+        ...effect.options,
+        style: backgroundStyle ?? effect.options.style,
+        shadow: shadowStyle && effect.options.shadow
+          ? { ...effect.options.shadow, style: shadowStyle }
+          : effect.options.shadow,
+        images: effect.options.images?.map((image) => {
+          const style = previewStyle('image', image.id);
+
+          return style ? { ...image, style } : image;
+        }),
+        videos: effect.options.videos?.map((video) => {
+          const style = previewStyle('video', video.id);
+
+          return style ? { ...video, style } : video;
+        }),
+      };
+
+      return { ...effect, options };
+    });
+
+    try {
+      writeEffects(nextEffects);
+    } catch (error) {
+      console.error('[background] Failed to commit style changes', error);
+
+      return false;
+    }
+
+    previewStylesRef.current = {};
+    setBackgroundStylePreviews({});
+
+    if (previewFrameRef.current !== null) {
+      cancelAnimationFrame(previewFrameRef.current);
+      previewFrameRef.current = null;
+    }
+
+    return true;
+  }, [editor, writeEffects]);
+
+  const hasUnsavedStyleChanges = useCallback(() => {
+    return unsavedStylesRef.current;
+  }, []);
+
+  const markStylesSaved = useCallback(() => {
+    unsavedStylesRef.current = false;
+  }, []);
+
   const value = useMemo(() => ({
     effects,
     writeEffects,
+    getCurrentEffects,
     audioPreviewStatuses,
     setAudioPreviewStatus,
-  }), [effects, writeEffects, audioPreviewStatuses, setAudioPreviewStatus]);
+    flushStylePreviews,
+    hasUnsavedStyleChanges,
+    markStylesSaved,
+  }), [
+    effects,
+    writeEffects,
+    getCurrentEffects,
+    audioPreviewStatuses,
+    setAudioPreviewStatus,
+    flushStylePreviews,
+    hasUnsavedStyleChanges,
+    markStylesSaved,
+  ]);
 
   return (
     <PageEffectsContext.Provider value={value}>
-      <BackgroundBlurPreviewUpdaterContext.Provider value={updateBackgroundBlurPreview}>
-        <BackgroundBlurPreviewsContext.Provider value={backgroundBlurPreviews}>
+      <BackgroundStylePreviewUpdaterContext.Provider value={updateBackgroundStylePreview}>
+        <BackgroundStylePreviewsContext.Provider value={backgroundStylePreviews}>
           {children}
-        </BackgroundBlurPreviewsContext.Provider>
-      </BackgroundBlurPreviewUpdaterContext.Provider>
+        </BackgroundStylePreviewsContext.Provider>
+      </BackgroundStylePreviewUpdaterContext.Provider>
     </PageEffectsContext.Provider>
   );
 };
@@ -230,15 +354,15 @@ export const usePageEffects = (): PageEffectsContextValue => {
   return context;
 };
 
-export const useBackgroundBlurPreviews = (): BackgroundBlurPreviews => {
-  return useContext(BackgroundBlurPreviewsContext);
+export const useBackgroundStylePreviews = (): BackgroundStylePreviews => {
+  return useContext(BackgroundStylePreviewsContext);
 };
 
-export const useBackgroundBlurPreviewUpdater = (): BackgroundBlurPreviewUpdater => {
-  const updater = useContext(BackgroundBlurPreviewUpdaterContext);
+export const useBackgroundStylePreviewUpdater = (): BackgroundStylePreviewUpdater => {
+  const updater = useContext(BackgroundStylePreviewUpdaterContext);
 
   if (!updater) {
-    throw new Error('useBackgroundBlurPreviewUpdater must be used within PageEffectsProvider');
+    throw new Error('useBackgroundStylePreviewUpdater must be used within PageEffectsProvider');
   }
 
   return updater;

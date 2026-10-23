@@ -320,7 +320,7 @@ export const EditorScreen = () => {
             rangeEffects={[]}
           >
             <AudioInstances project={project} />
-            <PageEffects project={project} />
+            <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
               {showBackgrounds && <BackgroundInstances project={project} />}
