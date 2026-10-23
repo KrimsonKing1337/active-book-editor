@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 
 import type { BookProject } from '@project/@types';
+import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
@@ -70,22 +71,12 @@ export const BackgroundSettings = ({
     });
   };
 
-  const importAsset = async (file: File): Promise<string | null> => {
+  const importAsset = async (file: File, fileHandle?: ProjectFileHandle): Promise<string> => {
     if (!project) {
-      window.alert('Сначала сохраните проект, чтобы добавить файл в assets/');
-
-      return null;
+      throw new Error('Сначала создайте или откройте проект книги');
     }
 
-    try {
-      return await project.storage.importAssetFile(file);
-    } catch (error) {
-      console.error('[background] Failed to import media asset', error);
-
-      window.alert(error instanceof Error ? error.message : 'Не удалось импортировать файл');
-
-      return null;
-    }
+    return project.storage.importAssetFile(file, fileHandle);
   };
 
   const handleNameChange = (name: string) => {
@@ -144,8 +135,8 @@ export const BackgroundSettings = ({
       </div>
 
       <Background style={style} onChange={handleBackgroundChange} />
-      <Images images={images} onChange={handleImagesChange} onImportAsset={importAsset} />
-      <Videos videos={videos} onChange={handleVideosChange} onImportAsset={importAsset} />
+      <Images images={images} canImport={Boolean(project)} onChange={handleImagesChange} onImportAsset={importAsset} />
+      <Videos videos={videos} canImport={Boolean(project)} onChange={handleVideosChange} onImportAsset={importAsset} />
       <Shadow shadow={shadow} onChange={handleShadowChange} />
       <CustomComponent component={options.component} onChange={handleComponentChange} />
 

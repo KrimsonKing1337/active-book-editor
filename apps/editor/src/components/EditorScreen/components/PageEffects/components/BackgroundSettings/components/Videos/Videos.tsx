@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react';
 
+import type { ProjectFileHandle } from '@project/fileSystemAccess';
+
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
+
+import { MediaSource } from '../MediaSource';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -11,10 +15,11 @@ type BackgroundVideos = NonNullable<BackgroundOptions['videos']>;
 export type BackgroundVideosProps = {
   videos: BackgroundVideos;
   onChange: (videos: BackgroundVideos) => void;
-  onImportAsset: (file: File) => Promise<string | null>;
+  canImport: boolean;
+  onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
-export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProps) => {
+export const Videos = ({ videos, canImport, onChange, onImportAsset }: BackgroundVideosProps) => {
   const updateVideo = (index: number, changes: Partial<BackgroundVideos[number]>) => {
     const updated = videos.map((videoCur, currentIndex) => {
       if (currentIndex !== index) {
@@ -32,20 +37,6 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
 
   const handlePathChange = (index: number, path: string) => {
     updateVideo(index, { src: path });
-  };
-
-  const handleFileChange = async (index: number, files: FileList | null) => {
-    const file = files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    const path = await onImportAsset(file);
-
-    if (path) {
-      updateVideo(index, { src: path });
-    }
   };
 
   const handleStyleChange = (index: number, style: CSSProperties) => {
@@ -88,29 +79,13 @@ export const Videos = ({ videos, onChange, onImportAsset }: BackgroundVideosProp
 
         return (
           <div key={id} className={styles.Media}>
-            <label className={styles.Field}>
-              <span>
-                Путь к видео
-              </span>
-
-              <input
-                value={src}
-                placeholder="assets/fog.webm"
-                onChange={(e) => handlePathChange(index, e.target.value)}
-              />
-            </label>
-
-            <label className={styles.Field}>
-              <span>
-                Или выбрать видеофайл
-              </span>
-
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => void handleFileChange(index, e.target.files)}
-              />
-            </label>
+            <MediaSource
+              kind="video"
+              src={src}
+              canImport={canImport}
+              onChange={(path) => handlePathChange(index, path)}
+              onImportAsset={onImportAsset}
+            />
 
             <div className={styles.Checkboxes}>
               <label>

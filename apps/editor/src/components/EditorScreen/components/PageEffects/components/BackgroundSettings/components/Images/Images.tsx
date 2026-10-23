@@ -1,8 +1,12 @@
 import type { CSSProperties } from 'react';
 
+import type { ProjectFileHandle } from '@project/fileSystemAccess';
+
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
+
+import { MediaSource } from '../MediaSource';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -11,10 +15,11 @@ type BackgroundImages = NonNullable<BackgroundOptions['images']>;
 export type BackgroundImagesProps = {
   images: BackgroundImages;
   onChange: (images: BackgroundImages) => void;
-  onImportAsset: (file: File) => Promise<string | null>;
+  canImport: boolean;
+  onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
-export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProps) => {
+export const Images = ({ images, canImport, onChange, onImportAsset }: BackgroundImagesProps) => {
   const updateImage = (index: number, changes: Partial<BackgroundImages[number]>) => {
     const updated = images.map((imageCur, currentIndex) => {
       if (currentIndex !== index) {
@@ -32,20 +37,6 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
 
   const handlePathChange = (index: number, path: string) => {
     updateImage(index, { src: path });
-  };
-
-  const handleFileChange = async (index: number, files: FileList | null) => {
-    const file = files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    const path = await onImportAsset(file);
-
-    if (path) {
-      updateImage(index, { src: path });
-    }
   };
 
   const handleStyleChange = (index: number, style: CSSProperties) => {
@@ -78,29 +69,13 @@ export const Images = ({ images, onChange, onImportAsset }: BackgroundImagesProp
 
         return (
           <div key={id} className={styles.Media}>
-            <label className={styles.Field}>
-              <span>
-                Путь к изображению
-              </span>
-
-              <input
-                value={src}
-                placeholder="assets/forest.webp"
-                onChange={(e) => handlePathChange(index, e.target.value)}
-              />
-            </label>
-
-            <label className={styles.Field}>
-              <span>
-                Или выбрать файл
-              </span>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => void handleFileChange(index, e.target.files)}
-              />
-            </label>
+            <MediaSource
+              kind="image"
+              src={src}
+              canImport={canImport}
+              onChange={(path) => handlePathChange(index, path)}
+              onImportAsset={onImportAsset}
+            />
 
             <details>
               <summary>

@@ -1,4 +1,4 @@
-import { type ChangeEvent, type CSSProperties, type KeyboardEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { HexAlphaColorPicker } from 'react-colorful';
 
@@ -170,6 +170,17 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
   const [newProperty, setNewProperty] = useState('');
   const [newValue, setNewValue] = useState('');
   const [propertyError, setPropertyError] = useState('');
+  const [dragBlur, setDragBlur] = useState<number | null>(null);
+
+  const sliderFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (sliderFrameRef.current !== null) {
+        cancelAnimationFrame(sliderFrameRef.current);
+      }
+    };
+  }, []);
 
   const backgroundColor = String(value.backgroundColor ?? '');
   const pickerColor = getHexColor(backgroundColor);
@@ -284,6 +295,31 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
     }
   };
 
+  const handleSliderBlurChange = (blur: number) => {
+    if (sliderFrameRef.current !== null) {
+      cancelAnimationFrame(sliderFrameRef.current);
+    }
+
+    sliderFrameRef.current = requestAnimationFrame(() => {
+      setDragBlur(blur);
+      sliderFrameRef.current = null;
+    });
+  };
+
+  const handleSliderBlurCommit = (blur: number) => {
+    if (sliderFrameRef.current !== null) {
+      cancelAnimationFrame(sliderFrameRef.current);
+    }
+
+    // react-range may notify listeners during its own React update.
+    // Commit background changes in the next animation frame, outside its flushSync.
+    sliderFrameRef.current = requestAnimationFrame(() => {
+      setDragBlur(null);
+      handleBlurChange(blur);
+      sliderFrameRef.current = null;
+    });
+  };
+
   const handleBlurInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const normalized = removeLeadingZeros(event.target.value);
 
@@ -296,6 +332,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
   const blurMatch = backdropFilter.match(/blur\((\d+(?:\.\d+)?)px\)/);
   const blurValue = Number(blurMatch?.[1] ?? 0);
   const sliderBlur = Math.min(100, Math.max(0, blurValue));
+  const displayedBlur = dragBlur ?? blurValue;
 
   const rawZIndex = Number(value.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
@@ -359,7 +396,8 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
           <Slider
             className={styles.BlurSlider}
             value={sliderBlur}
-            onAfterChange={handleBlurChange}
+            onChange={handleSliderBlurChange}
+            onAfterChange={handleSliderBlurCommit}
           />
 
           <input
@@ -367,7 +405,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
             min={0}
             step={1}
             aria-label="Размытие в пикселях"
-            value={blurValue}
+            value={displayedBlur}
             onChange={handleBlurInputChange}
           />
         </div>
