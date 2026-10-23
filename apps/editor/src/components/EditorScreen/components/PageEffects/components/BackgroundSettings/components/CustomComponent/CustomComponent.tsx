@@ -5,6 +5,7 @@ import type { BackgroundOptions } from '@components/EditorScreen/components/Page
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import styles from '../../BackgroundSettings.module.scss';
+
 type ComponentReference = BackgroundOptions['component'];
 
 type CustomComponentProps = {
