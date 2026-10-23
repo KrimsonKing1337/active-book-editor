@@ -11,7 +11,7 @@ import type { BookComponentProps } from '@active-book/types';
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
-import { resolveBackgroundOptions, resolveStyle } from '@active-book/book-builder/effects';
+import { resolveStyle } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 
@@ -155,7 +155,7 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
     images = [],
     videos = [],
     ...options
-  } = resolveBackgroundOptions(effect.options);
+  } = effect.options;
 
   let componentId = null;
 
