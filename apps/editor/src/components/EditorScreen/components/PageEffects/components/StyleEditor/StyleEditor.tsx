@@ -10,6 +10,7 @@ type StyleEditorProps = {
   value: CSSProperties;
   onChange: (style: CSSProperties) => void;
   defaultZIndex?: number;
+  onBlurPreview?: (blur: number | null) => void;
 };
 
 type UpdatedValue = Record<string, string | number | undefined>;
@@ -166,19 +167,26 @@ const StyleRule = ({ name, value, onUpdate, onDelete }: StyleRuleProps) => {
   );
 };
 
-export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorProps) => {
+export const StyleEditor = ({ value, onChange, defaultZIndex = 0, onBlurPreview }: StyleEditorProps) => {
   const [newProperty, setNewProperty] = useState('');
   const [newValue, setNewValue] = useState('');
   const [propertyError, setPropertyError] = useState('');
   const [dragBlur, setDragBlur] = useState<number | null>(null);
 
   const sliderFrameRef = useRef<number | null>(null);
+  const onBlurPreviewRef = useRef(onBlurPreview);
+
+  useEffect(() => {
+    onBlurPreviewRef.current = onBlurPreview;
+  }, [onBlurPreview]);
 
   useEffect(() => {
     return () => {
       if (sliderFrameRef.current !== null) {
         cancelAnimationFrame(sliderFrameRef.current);
       }
+
+      onBlurPreviewRef.current?.(null);
     };
   }, []);
 
@@ -302,6 +310,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
 
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(blur);
+      onBlurPreviewRef.current?.(blur);
       sliderFrameRef.current = null;
     });
   };
@@ -316,6 +325,7 @@ export const StyleEditor = ({ value, onChange, defaultZIndex = 0 }: StyleEditorP
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(null);
       handleBlurChange(blur);
+      onBlurPreviewRef.current?.(null);
       sliderFrameRef.current = null;
     });
   };

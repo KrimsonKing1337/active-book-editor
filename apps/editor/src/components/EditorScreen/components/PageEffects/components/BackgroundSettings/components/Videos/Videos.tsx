@@ -17,9 +17,10 @@ export type BackgroundVideosProps = {
   onChange: (videos: BackgroundVideos) => void;
   canImport: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
+  onBlurPreview: (mediaId: string, blur: number | null) => void;
 };
 
-export const Videos = ({ videos, canImport, onChange, onImportAsset }: BackgroundVideosProps) => {
+export const Videos = ({ videos, canImport, onChange, onImportAsset, onBlurPreview }: BackgroundVideosProps) => {
   const updateVideo = (index: number, changes: Partial<BackgroundVideos[number]>) => {
     const updated = videos.map((videoCur, currentIndex) => {
       if (currentIndex !== index) {
@@ -125,6 +126,7 @@ export const Videos = ({ videos, canImport, onChange, onImportAsset }: Backgroun
                 defaultZIndex={1}
                 value={style ?? {}}
                 onChange={(val) => handleStyleChange(index, val)}
+                onBlurPreview={(blur) => onBlurPreview(id, blur)}
               />
             </details>
 

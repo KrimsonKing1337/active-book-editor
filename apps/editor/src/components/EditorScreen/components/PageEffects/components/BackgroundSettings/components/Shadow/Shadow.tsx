@@ -11,9 +11,10 @@ type BackgroundShadow = NonNullable<BackgroundOptions['shadow']>;
 export type ShadowProps = {
   shadow: BackgroundShadow;
   onChange: (shadow: BackgroundShadow) => void;
+  onBlurPreview: (blur: number | null) => void;
 };
 
-export const Shadow = ({ shadow, onChange }: ShadowProps) => {
+export const Shadow = ({ shadow, onChange, onBlurPreview }: ShadowProps) => {
   const { show, style } = shadow;
 
   const handleShowChange = (show: boolean) => {
@@ -53,6 +54,7 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
         defaultZIndex={2}
         value={style ?? {}}
         onChange={(val) => handleStyleChange(val)}
+        onBlurPreview={onBlurPreview}
       />
     </details>
   );

@@ -1,4 +1,4 @@
-import { type ComponentType, useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
@@ -12,7 +12,13 @@ import type { BookProject } from '@project/@types';
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundEffectDraft } from '../../@types';
-import { usePageEffects } from '../../PageEffectsContext';
+import {
+  getBackgroundPreviewKey,
+  useBackgroundBlurPreviews,
+  usePageEffects,
+} from '../../PageEffectsContext';
+
+import type { BackgroundBlurPreviews } from '../../PageEffectsContext';
 
 type BackgroundInstancesProps = {
   project: BookProject | null;
@@ -122,13 +128,25 @@ const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | 
   return resolved.media;
 };
 
+const withPreviewBlur = (style: CSSProperties | undefined, blur: number | undefined): CSSProperties | undefined => {
+  if (blur === undefined) {
+    return style;
+  }
+
+  return {
+    ...style,
+    backdropFilter: blur ? `blur(${blur}px)` : undefined,
+  };
+};
+
 type BackgroundInstanceProps = {
   effect: BackgroundEffectDraft;
   project: BookProject | null;
   components: Record<string, ComponentType>;
+  blurPreviews: BackgroundBlurPreviews;
 };
 
-const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceProps) => {
+const BackgroundInstance = ({ effect, project, components, blurPreviews }: BackgroundInstanceProps) => {
   const media = useResolvedMedia(effect, project);
 
   const {
@@ -158,10 +176,17 @@ const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceP
     return null;
   }
 
+  const previewBlur = (layer: 'background' | 'shadow' | 'image' | 'video', mediaId: string | null = null) => {
+    const key = getBackgroundPreviewKey(effect.id, layer, mediaId);
+
+    return blurPreviews[key];
+  };
+
   const backgroundImages = images.map((imageCur, index) => {
     return {
       ...imageCur,
       src: media.images[index],
+      style: withPreviewBlur(imageCur.style, previewBlur('image', imageCur.id)),
     };
   });
 
@@ -169,12 +194,20 @@ const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceP
     return {
       ...videoCur,
       src: media.videos[index],
+      style: withPreviewBlur(videoCur.style, previewBlur('video', videoCur.id)),
     };
   });
+
+  const shadow = options.shadow && {
+    ...options.shadow,
+    style: withPreviewBlur(options.shadow.style, previewBlur('shadow')),
+  };
 
   const background: CoreBackgroundEffect = {
     id: effect.id,
     ...options,
+    style: withPreviewBlur(options.style, previewBlur('background')),
+    shadow,
     images: backgroundImages,
     videos: backgroundVideos,
     Component: componentElement,
@@ -185,6 +218,7 @@ const BackgroundInstance = ({ effect, project, components }: BackgroundInstanceP
 
 export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {
   const { effects } = usePageEffects();
+  const blurPreviews = useBackgroundBlurPreviews();
   const { components } = useCustomComponents();
 
   const backgrounds = effects.filter((effectCur): effectCur is BackgroundEffectDraft => {
@@ -200,6 +234,7 @@ export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {
             effect={effect}
             project={project}
             components={components}
+            blurPreviews={blurPreviews}
           />
         );
       })}

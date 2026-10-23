@@ -5,6 +5,8 @@ import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
+import { useBackgroundBlurPreviewUpdater } from '../../PageEffectsContext';
+
 import { Images, Videos, Shadow, Background, CustomComponent } from './components';
 
 import styles from './BackgroundSettings.module.scss';
@@ -34,6 +36,7 @@ export const BackgroundSettings = ({
   onDelete,
 }: BackgroundSettingsProps) => {
   const [idDraft, setIdDraft] = useState(effect.id);
+  const updateBlurPreview = useBackgroundBlurPreviewUpdater();
 
   const options = effect.options;
 
@@ -102,6 +105,22 @@ export const BackgroundSettings = ({
     updateOptions({ shadow: nextShadow });
   };
 
+  const previewBackgroundBlur = (blur: number | null) => {
+    updateBlurPreview(effect.id, 'background', null, blur);
+  };
+
+  const previewShadowBlur = (blur: number | null) => {
+    updateBlurPreview(effect.id, 'shadow', null, blur);
+  };
+
+  const previewImageBlur = (imageId: string, blur: number | null) => {
+    updateBlurPreview(effect.id, 'image', imageId, blur);
+  };
+
+  const previewVideoBlur = (videoId: string, blur: number | null) => {
+    updateBlurPreview(effect.id, 'video', videoId, blur);
+  };
+
   const handleComponentChange = (component: BackgroundOptions['component']) => {
     updateOptions({ component });
   };
@@ -134,10 +153,22 @@ export const BackgroundSettings = ({
         </div>
       </div>
 
-      <Background style={style} onChange={handleBackgroundChange} />
-      <Images images={images} canImport={Boolean(project)} onChange={handleImagesChange} onImportAsset={importAsset} />
-      <Videos videos={videos} canImport={Boolean(project)} onChange={handleVideosChange} onImportAsset={importAsset} />
-      <Shadow shadow={shadow} onChange={handleShadowChange} />
+      <Background style={style} onChange={handleBackgroundChange} onBlurPreview={previewBackgroundBlur} />
+      <Images
+        images={images}
+        canImport={Boolean(project)}
+        onChange={handleImagesChange}
+        onImportAsset={importAsset}
+        onBlurPreview={previewImageBlur}
+      />
+      <Videos
+        videos={videos}
+        canImport={Boolean(project)}
+        onChange={handleVideosChange}
+        onImportAsset={importAsset}
+        onBlurPreview={previewVideoBlur}
+      />
+      <Shadow shadow={shadow} onChange={handleShadowChange} onBlurPreview={previewShadowBlur} />
       <CustomComponent component={options.component} onChange={handleComponentChange} />
 
       <div className={styles.Actions}>

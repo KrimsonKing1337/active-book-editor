@@ -33,11 +33,32 @@ type PageEffectsContextValue = {
   setAudioPreviewStatus: (id: string, status: AudioPreviewStatus | null) => void;
 };
 
+export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
+
+export type BackgroundBlurPreviews = Record<string, number>;
+
+type BackgroundBlurPreviewUpdater = (
+  effectId: string,
+  layer: BackgroundPreviewLayer,
+  mediaId: string | null,
+  blur: number | null
+) => void;
+
+export const getBackgroundPreviewKey = (
+  effectId: string,
+  layer: BackgroundPreviewLayer,
+  mediaId: string | null = null,
+): string => {
+  return JSON.stringify([effectId, layer, mediaId]);
+};
+
 type PageEffectsProviderProps = PropsWithChildren<{
   editor: Editor | null;
 }>;
 
 const PageEffectsContext = createContext<PageEffectsContextValue | null>(null);
+const BackgroundBlurPreviewsContext = createContext<BackgroundBlurPreviews>({});
+const BackgroundBlurPreviewUpdaterContext = createContext<BackgroundBlurPreviewUpdater | null>(null);
 
 const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const grouped = editor?.state.doc.attrs.pageEffects as GroupedPageEffects | undefined;
@@ -62,6 +83,34 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
 export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
+  const [backgroundBlurPreviews, setBackgroundBlurPreviews] = useState<BackgroundBlurPreviews>({});
+
+  const updateBackgroundBlurPreview = useCallback<BackgroundBlurPreviewUpdater>((effectId, layer, mediaId, blur) => {
+    const key = getBackgroundPreviewKey(effectId, layer, mediaId);
+
+    setBackgroundBlurPreviews((current) => {
+      if (blur === null) {
+        if (!Object.hasOwn(current, key)) {
+          return current;
+        }
+
+        const updated = { ...current };
+
+        delete updated[key];
+
+        return updated;
+      }
+
+      if (current[key] === blur) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [key]: blur,
+      };
+    });
+  }, []);
 
   const setAudioPreviewStatus = useCallback((id: string, status: AudioPreviewStatus | null) => {
     setAudioPreviewStatuses((current) => {
@@ -162,7 +211,11 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
   return (
     <PageEffectsContext.Provider value={value}>
-      {children}
+      <BackgroundBlurPreviewUpdaterContext.Provider value={updateBackgroundBlurPreview}>
+        <BackgroundBlurPreviewsContext.Provider value={backgroundBlurPreviews}>
+          {children}
+        </BackgroundBlurPreviewsContext.Provider>
+      </BackgroundBlurPreviewUpdaterContext.Provider>
     </PageEffectsContext.Provider>
   );
 };
@@ -175,4 +228,18 @@ export const usePageEffects = (): PageEffectsContextValue => {
   }
 
   return context;
+};
+
+export const useBackgroundBlurPreviews = (): BackgroundBlurPreviews => {
+  return useContext(BackgroundBlurPreviewsContext);
+};
+
+export const useBackgroundBlurPreviewUpdater = (): BackgroundBlurPreviewUpdater => {
+  const updater = useContext(BackgroundBlurPreviewUpdaterContext);
+
+  if (!updater) {
+    throw new Error('useBackgroundBlurPreviewUpdater must be used within PageEffectsProvider');
+  }
+
+  return updater;
 };
