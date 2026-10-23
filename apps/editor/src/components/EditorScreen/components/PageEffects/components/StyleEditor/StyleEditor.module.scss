@@ -21,10 +21,63 @@
   }
 }
 
-.ColorFields {
+.ColorPropertyHeading {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ManualColorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+
+  legend {
+    padding: 0 5px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+.RgbaFields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+
+  .Field {
+    min-width: 0;
+
+    input {
+      min-width: 0;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    small {
+      color: #b5b5b5;
+      font-size: 11px;
+      text-align: center;
+    }
+  }
+}
+
+.ColorPickerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  strong {
+    font-size: 13px;
+  }
+
+  small {
+    color: #b5b5b5;
+    font-size: 12px;
+  }
 }
 
 .RangeFields,
@@ -95,13 +148,16 @@
 
 .ColorActions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 
   button {
     padding: 7px 12px;
     cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 }
 

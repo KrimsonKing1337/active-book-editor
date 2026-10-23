@@ -7,42 +7,7 @@ export const hexMaskOptions = {
   replacement: hexReplacement,
 };
 
-export const rgbaReplacement = {
-  d: /\d/,
-};
-
-export type RgbaWidths = [number, number, number, number];
-
-export const getRgbaWidths = (value: string): RgbaWidths => {
-  const [channels = '', alpha = ''] = value.split('/');
-  const parts = channels.trim().split(/\s+/);
-  const percentages = alpha.trim().replace('%', '');
-
-  const redWidth = parts[0]?.length || 3;
-  const greenWidth = parts[1]?.length || 3;
-  const blueWidth = parts[2]?.length || 3;
-  const alphaWidth = percentages.length || 3;
-
-  return [
-    redWidth,
-    greenWidth,
-    blueWidth,
-    alphaWidth,
-  ] as RgbaWidths;
-};
-
-export const getRgbaMask = (widths: RgbaWidths): string => {
-  const [red, green, blue, alpha] = widths;
-
-  const redMask = 'd'.repeat(red);
-  const greenMask = 'd'.repeat(green);
-  const blueMask = 'd'.repeat(blue);
-  const alphaMask = 'd'.repeat(alpha);
-
-  const rgbMask = [redMask, greenMask, blueMask].join(' ');
-
-  return `${rgbMask} / ${alphaMask}%`;
-};
+export type RgbaChannels = [string, string, string, string];
 
 export const getHexColor = (value: string): string => {
   if (value.startsWith('#')) {
@@ -73,52 +38,45 @@ export const getHexColor = (value: string): string => {
   return `#${channelsString}${alphaHex}`;
 };
 
-export const getRgbaColor = (hex: string): string => {
-  const channels = [1, 3, 5].map((index) => {
-    return parseInt(hex.slice(index, index + 2), 16);
-  });
+export const getRgbaChannels = (hex: string): RgbaChannels => {
+  const color = getHexColor(hex);
 
-  const alpha = Math.round(parseInt(hex.slice(7, 9), 16) / 255 * 100) / 100;
+  const red = parseInt(color.slice(1, 3), 16);
+  const green = parseInt(color.slice(3, 5), 16);
+  const blue = parseInt(color.slice(5, 7), 16);
+  const alpha = parseInt(color.slice(7, 9), 16);
 
-  const channelsString = channels.join(' ');
-  const alphaPercent = Math.round(alpha * 100);
+  const alphaPercent = Math.round(alpha / 255 * 100);
 
-  return `${channelsString} / ${alphaPercent}%`;
+  return [String(red), String(green), String(blue), String(alphaPercent)];
 };
 
-export const parseRgbaColor = (value: string): string | null => {
-  const sections = value.split('/');
+export const getRgbaError = (channels: RgbaChannels): string | null => {
+  const names = ['R', 'G', 'B', 'A'];
 
-  if (sections.length !== 2 || !sections[1].trim().endsWith('%')) {
+  for (let index = 0; index < channels.length; index += 1) {
+    const text = channels[index];
+    const maximum = index === 3 ? 100 : 255;
+
+    if (text && (!/^\d{1,3}$/.test(text) || Number(text) > maximum)) {
+      return `Канал ${names[index]}: допустимое значение от 0 до ${maximum}`;
+    }
+  }
+
+  return null;
+};
+
+export const getHexFromRgba = (channels: RgbaChannels): string | null => {
+  if (getRgbaError(channels)) {
     return null;
   }
 
-  const channelTexts = sections[0].trim().split(/\s+/);
-  const channelNumbers = channelTexts.map(Number);
-  const alphaText = sections[1].trim().slice(0, -1);
-  const percentage = Number(alphaText);
+  const numbers = channels.map((value) => Number(value || 0));
+  const rgb = numbers.slice(0, 3);
+  const alpha = numbers[3];
 
-  const channelCountIsValid = channelTexts.length === 3;
+  const rgbHex = rgb.map((value) => value.toString(16).padStart(2, '0')).join('');
+  const alphaHex = Math.round(alpha / 100 * 255).toString(16).padStart(2, '0');
 
-  const channelValuesAreValid = channelTexts.every((text, index) => {
-    const number = channelNumbers[index];
-
-    return text.length > 0 && Number.isInteger(number) && number >= 0 && number <= 255;
-  });
-
-  const channelsAreValid = channelCountIsValid && channelValuesAreValid;
-
-  const alphaIsValid = alphaText.length > 0
-    && Number.isInteger(percentage)
-    && percentage >= 0
-    && percentage <= 100;
-
-  if (!channelsAreValid || !alphaIsValid) {
-    return null;
-  }
-
-  const rgbValue = channelNumbers.join(' ');
-  const alphaValue = percentage / 100;
-
-  return `rgb(${rgbValue} / ${alphaValue})`;
+  return `#${rgbHex}${alphaHex}`;
 };
