@@ -22,6 +22,7 @@ import {
 } from './utils';
 
 import styles from './PageEffects.module.scss';
+
 export type PageEffectsProps = {
   project: BookProject | null;
   onSaveProject: () => Promise<BookProject | null>;
@@ -199,9 +200,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const duplicateEffect = () => {
-    const currentEffects = getCurrentEffects();
-
     afterStylesSaved(() => {
+      const currentEffects = getCurrentEffects();
       const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
       if (!selectedEffect) {
@@ -282,9 +282,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const deleteEffect = () => {
-    const currentEffects = getCurrentEffects();
-
     afterStylesSaved(() => {
+      const currentEffects = getCurrentEffects();
       const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
       if (!selectedEffect) {
