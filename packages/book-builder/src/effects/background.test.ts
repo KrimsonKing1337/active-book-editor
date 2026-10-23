@@ -54,16 +54,34 @@ test('resolves per-layer filter arrays while preserving media options', () => {
     value: '12px',
   };
 
+  const imageFilter = {
+    ...operation,
+    property: 'filter' as const,
+  };
+
+  const image = {
+    id: 'image',
+    src: 'assets/tree.webp',
+    styleFilters: [imageFilter],
+  };
+
+  const video = {
+    id: 'video',
+    src: 'assets/fog.webm',
+    autoPlay: false,
+  };
+
+  const shadow = {
+    show: true,
+    styleFilters: [operation],
+  };
+
   const options = resolveBackgroundOptions({
     style: { opacity: 0.8 },
     styleFilters: [operation],
-    images: [{
-      id: 'image',
-      src: 'assets/tree.webp',
-      styleFilters: [{ ...operation, property: 'filter' }],
-    }],
-    videos: [{ id: 'video', src: 'assets/fog.webm', autoPlay: false }],
-    shadow: { show: true, styleFilters: [operation] },
+    images: [image],
+    videos: [video],
+    shadow,
   });
 
   assert.equal(options.style.backdropFilter, 'blur(12px)');
