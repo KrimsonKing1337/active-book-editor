@@ -68,7 +68,7 @@ export const getHexColor = (value: string): string => {
   const alpha = Math.max(0, Math.min(1, Number(matches[3] ?? 1)));
   const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, '0');
 
-  const channelsString = `${channels.join('')}`;
+  const channelsString = channels.join('');
 
   return `#${channelsString}${alphaHex}`;
 };
@@ -80,10 +80,10 @@ export const getRgbaColor = (hex: string): string => {
 
   const alpha = Math.round(parseInt(hex.slice(7, 9), 16) / 255 * 100) / 100;
 
-  const channelsString = `${channels.join(' ')}`;
-  const alphaString = `${Math.round(alpha * 100)}`;
+  const channelsString = channels.join(' ');
+  const alphaPercent = Math.round(alpha * 100);
 
-  return `${channelsString} / ${alphaString}%`;
+  return `${channelsString} / ${alphaPercent}%`;
 };
 
 export const parseRgbaColor = (value: string): string | null => {
@@ -98,15 +98,15 @@ export const parseRgbaColor = (value: string): string | null => {
   const alphaText = sections[1].trim().slice(0, -1);
   const percentage = Number(alphaText);
 
-  const channelTextsCountAreValid = channelTexts.length === 3;
+  const channelCountIsValid = channelTexts.length === 3;
 
-  const channelTextAreValid = channelTexts.every((text, index) => {
+  const channelValuesAreValid = channelTexts.every((text, index) => {
     const number = channelNumbers[index];
 
     return text.length > 0 && Number.isInteger(number) && number >= 0 && number <= 255;
   });
 
-  const channelsAreValid = channelTextsCountAreValid && channelTextAreValid;
+  const channelsAreValid = channelCountIsValid && channelValuesAreValid;
 
   const alphaIsValid = alphaText.length > 0
     && Number.isInteger(percentage)
@@ -117,7 +117,7 @@ export const parseRgbaColor = (value: string): string | null => {
     return null;
   }
 
-  const rgbValue = `${channelNumbers.join(' ')}`;
+  const rgbValue = channelNumbers.join(' ');
   const alphaValue = percentage / 100;
 
   return `rgb(${rgbValue} / ${alphaValue})`;
