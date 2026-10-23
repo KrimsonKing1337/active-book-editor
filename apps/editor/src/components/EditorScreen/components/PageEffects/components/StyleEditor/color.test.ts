@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getHexColor, getHexFromRgba, getRgbaChannels, getRgbaError, normalizeRgbaChannel } from './color';
+import {
+  getHexColor,
+  getHexFromRgba,
+  getRgbaChannels,
+  getRgbaError,
+  normalizeRgbaChannel,
+} from './color';
 
 test('converts HEX with alpha to four RGBA channels', () => {
   assert.deepEqual(getRgbaChannels('#cc3e72cc'), ['204', '62', '114', '80']);

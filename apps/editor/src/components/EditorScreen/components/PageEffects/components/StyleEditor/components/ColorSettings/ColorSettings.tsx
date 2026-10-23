@@ -266,7 +266,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
             placeholder="#RRGGBBAA"
             value={hexDraft}
             spellCheck={false}
-            
+
             onChange={handleHexChange}
             onBlur={handleHexBlur}
             onKeyDown={handleHexKeyDown}
@@ -328,13 +328,19 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
         </div>
 
         <div className={styles.ColorActions}>
-          <button type="button" onClick={handleApplyColor} disabled={!hasManualChanges || Boolean(validationError)}>
+          <button
+            type="button"
+            disabled={!hasManualChanges || Boolean(validationError)}
+            onClick={handleApplyColor}
+          >
             Применить
           </button>
         </div>
 
         {showValidation && validationError && (
-          <span className={styles.Error} role="alert">{validationError}</span>
+          <span className={styles.Error} role="alert">
+            {validationError}
+          </span>
         )}
       </fieldset>
 
@@ -347,7 +353,10 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
           Изменения через палитру применяются сразу.
         </small>
 
-        <div onPointerUp={handlePickerPointerUp} onKeyUp={handlePickerKeyUp}>
+        <div
+          onPointerUp={handlePickerPointerUp}
+          onKeyUp={handlePickerKeyUp}
+        >
           <HexAlphaColorPicker color={pickerColor} onChange={onColorChange} />
         </div>
       </div>

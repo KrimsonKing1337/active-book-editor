@@ -69,8 +69,8 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
         })}
 
         {backgroundEffects.map((effectCur) => {
-          const { component } = effectCur.options;
-          const { component: _component, ...options } = resolveBackgroundOptions(effectCur.options);
+          const { component, ...effectOptions } = effectCur.options;
+          const options = resolveBackgroundOptions(effectOptions);
 
           let componentId = null;
 

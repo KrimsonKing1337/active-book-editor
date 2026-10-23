@@ -79,11 +79,11 @@ export const getHexFromRgba = (channels: RgbaChannels): string | null => {
     return null;
   }
 
-  const numbers = channels.map((value) => Number(value || 0));
+  const numbers = channels.map((cur) => Number(cur || 0));
   const rgb = numbers.slice(0, 3);
   const alpha = numbers[3];
 
-  const rgbHex = rgb.map((value) => value.toString(16).padStart(2, '0')).join('');
+  const rgbHex = rgb.map((cur) => cur.toString(16).padStart(2, '0')).join('');
   const alphaHex = Math.round(alpha / 100 * 255).toString(16).padStart(2, '0');
 
   return `#${rgbHex}${alphaHex}`;
