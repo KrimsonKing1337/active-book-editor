@@ -28,6 +28,7 @@ import {
   useBackgroundStylePreviews,
   usePageEffects,
 } from '../../PageEffectsContext';
+
 type BackgroundInstancesProps = {
   project: BookProject | null;
 };
