@@ -1,4 +1,4 @@
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react';
 import type { RgbaChannels } from '../../color';
 
 import { useEffect, useRef, useState } from 'react';
@@ -27,8 +27,8 @@ type EditedFormat = 'hex' | 'rgba' | null;
 
 const CHANNEL_LABELS = ['R', 'G', 'B', 'A'];
 
-const getCompleteHex = (value: string): string | null => {
-  const digits = unformat(value, hexMaskOptions);
+const getCompleteHex = (val: string): string | null => {
+  const digits = unformat(val, hexMaskOptions);
 
   if (digits.length !== 6 && digits.length !== 8) {
     return null;
@@ -59,10 +59,10 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     setShowValidation(false);
   }, [pickerColor]);
 
-  const updateChannel = (index: number, value: string) => {
+  const updateChannel = (index: number, val: string) => {
     const updated: RgbaChannels = [...rgbaDraftRef.current];
 
-    updated[index] = value;
+    updated[index] = val;
     rgbaDraftRef.current = updated;
 
     setRgbaDraft(updated);
@@ -96,8 +96,8 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     input.setSelectionRange(offset, offset);
   };
 
-  const handleHexChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextHex = event.target.value;
+  const handleHexChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextHex = e.target.value;
     const parsedHex = getCompleteHex(nextHex);
 
     setHexDraft(nextHex);
@@ -112,11 +112,11 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     }
   };
 
-  const handleChannelChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+  const handleChannelChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
 
-    if (/^\d{0,3}$/.test(value)) {
-      updateChannel(index, value);
+    if (/^\d{0,3}$/.test(val)) {
+      updateChannel(index, val);
     }
   };
 
@@ -131,40 +131,42 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     setShowValidation(true);
   };
 
-  const handleChannelKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
+  const handleChannelKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     const start = input.selectionStart ?? 0;
     const end = input.selectionEnd ?? 0;
     const value = rgbaDraftRef.current[index];
+    const caretIsAtStart = start === 0 && end === 0;
+    const caretIsAtEnd = start === value.length && start === end;
 
-    if (event.key === 'Enter') {
-      event.preventDefault();
+    if (e.key === 'Enter') {
+      e.preventDefault();
       setShowValidation(true);
       input.blur();
 
       return;
     }
 
-    if (event.key === 'ArrowRight' && start === value.length && start === end && index < 3) {
-      event.preventDefault();
+    if (e.key === 'ArrowRight' && caretIsAtEnd && index < 3) {
+      e.preventDefault();
       focusChannel(index + 1, 'start');
 
       return;
     }
 
-    if (event.key === 'ArrowLeft' && start === 0 && end === 0 && index > 0) {
-      event.preventDefault();
+    if (e.key === 'ArrowLeft' && caretIsAtStart && index > 0) {
+      e.preventDefault();
       focusChannel(index - 1);
 
       return;
     }
 
-    if (event.key === 'Backspace') {
+    if (e.key === 'Backspace') {
       const selectedAll = start === 0 && end === value.length;
       const removingLastDigit = value.length === 1 && start === 1 && end === 1;
 
       if (selectedAll || removingLastDigit || value === '') {
-        event.preventDefault();
+        e.preventDefault();
         updateChannel(index, '');
 
         if (index > 0) {
@@ -174,19 +176,21 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
         return;
       }
 
-      if (start === 0 && end === 0 && index > 0) {
-        event.preventDefault();
+      if (caretIsAtStart && index > 0) {
+        e.preventDefault();
         focusChannel(index - 1);
 
         return;
       }
     }
 
-    const isDigit = /^\d$/.test(event.key);
+    const isDigit = /^\d$/.test(e.key);
 
-    if (!event.ctrlKey && !event.altKey && !event.metaKey
-      && isDigit && value.length === 3 && start === end && start === 3) {
-      event.preventDefault();
+    const hasModifier = e.ctrlKey || e.altKey || e.metaKey;
+    const atThreeDigits = value.length === 3 && caretIsAtEnd;
+
+    if (isDigit && !hasModifier && atThreeDigits) {
+      e.preventDefault();
 
       if (index < 3) {
         focusChannel(index + 1, 'select');
@@ -198,14 +202,15 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   const rgbaColor = getHexFromRgba(rgbaDraft);
 
   const nextColor = editedFormat === 'hex' ? hexColor : rgbaColor;
-  const hasManualChanges = editedFormat !== null && nextColor !== null
-    && nextColor.toLowerCase() !== pickerColor.toLowerCase();
+  const hasCompleteColor = nextColor !== null;
+  const hasEditedColor = editedFormat !== null;
+  const hasDifferentColor = nextColor?.toLowerCase() !== pickerColor.toLowerCase();
+  const hasManualChanges = hasCompleteColor && hasEditedColor && hasDifferentColor;
 
-  const validationError = editedFormat === 'hex'
-    ? (!hexColor ? 'Укажи 6 или 8 HEX-символов' : null)
-    : getRgbaError(rgbaDraft);
+  const hexValidationError = hexColor ? null : 'Укажи 6 или 8 HEX-символов';
+  const validationError = editedFormat === 'hex' ? hexValidationError : getRgbaError(rgbaDraft);
 
-  const applyColor = () => {
+  const handleApplyColor = () => {
     if (!nextColor || !hasManualChanges || validationError) {
       setShowValidation(true);
 
@@ -214,6 +219,20 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
     onColorChange(nextColor);
     onCommit();
+  };
+
+  const handleHexBlur = () => {
+    setShowValidation(true);
+  };
+
+  const handleHexKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') {
+      return;
+    }
+
+    e.preventDefault();
+    setShowValidation(true);
+    e.currentTarget.blur();
   };
 
   const handlePickerPointerUp = () => {
@@ -226,13 +245,19 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
   return (
     <>
-      <div className={styles.ColorPropertyHeading}>Цвет фона (background-color)</div>
+      <div className={styles.ColorPropertyHeading}>
+        Цвет фона (background-color)
+      </div>
 
       <fieldset className={styles.ManualColorSection}>
-        <legend>Ручной ввод</legend>
+        <legend>
+          Ручной ввод
+        </legend>
 
         <label className={styles.Field}>
-          <span>HEX</span>
+          <span>
+            HEX
+          </span>
 
           <InputMask
             aria-label="HEX"
@@ -241,48 +266,69 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
             placeholder="#RRGGBBAA"
             value={hexDraft}
             spellCheck={false}
+            
             onChange={handleHexChange}
-            onBlur={() => setShowValidation(true)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                setShowValidation(true);
-                event.currentTarget.blur();
-              }
-            }}
+            onBlur={handleHexBlur}
+            onKeyDown={handleHexKeyDown}
           />
         </label>
 
         <div className={styles.RgbaFields} role="group" aria-label="RGBA">
-          {CHANNEL_LABELS.map((label, index) => {
+          {CHANNEL_LABELS.map((labelCur, index) => {
+            const inputAriaLabel = index === 3 ? 'Альфа (0–100%)' : `Канал ${labelCur} (0–255)`;
+            const rangeLabel = index === 3 ? '0–100%' : '0–255';
+
+            const handleInputRef = (val: HTMLInputElement | null) => {
+              channelRefs.current[index] = val;
+            };
+
+            const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+              e.currentTarget.select();
+            };
+
+            const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+              handleChannelChange(index, e);
+            };
+
+            const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+              handleChannelKeyDown(index, e);
+            };
+
+            const handleBlur = () => {
+              handleChannelBlur(index);
+            };
+
             return (
-              <label key={label} className={styles.Field}>
-                <span>{label}</span>
+              <label key={labelCur} className={styles.Field}>
+                <span>
+                  {labelCur}
+                </span>
 
                 <input
-                  ref={(element) => {
-                    channelRefs.current[index] = element;
-                  }}
+                  ref={handleInputRef}
                   type="text"
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={3}
-                  aria-label={label === 'A' ? 'Альфа (0–100%)' : `Канал ${label} (0–255)`}
+                  aria-label={inputAriaLabel}
                   value={rgbaDraft[index]}
-                  onFocus={(event) => event.currentTarget.select()}
-                  onChange={(event) => handleChannelChange(index, event)}
-                  onKeyDown={(event) => handleChannelKeyDown(index, event)}
-                  onBlur={() => handleChannelBlur(index)}
+
+                  onFocus={handleFocus}
+                  onChange={handleChange}
+                  onKeyDown={handleKeyDown}
+                  onBlur={handleBlur}
                 />
 
-                <small>{index === 3 ? '0–100%' : '0–255'}</small>
+                <small>
+                  {rangeLabel}
+                </small>
               </label>
             );
           })}
         </div>
 
         <div className={styles.ColorActions}>
-          <button type="button" onClick={applyColor} disabled={!hasManualChanges || Boolean(validationError)}>
+          <button type="button" onClick={handleApplyColor} disabled={!hasManualChanges || Boolean(validationError)}>
             Применить
           </button>
         </div>
@@ -293,8 +339,13 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
       </fieldset>
 
       <div className={styles.ColorPickerSection}>
-        <strong>Выбор цвета</strong>
-        <small>Изменения через палитру применяются сразу.</small>
+        <strong>
+          Выбор цвета
+        </strong>
+
+        <small>
+          Изменения через палитру применяются сразу.
+        </small>
 
         <div onPointerUp={handlePickerPointerUp} onKeyUp={handlePickerKeyUp}>
           <HexAlphaColorPicker color={pickerColor} onChange={onColorChange} />
