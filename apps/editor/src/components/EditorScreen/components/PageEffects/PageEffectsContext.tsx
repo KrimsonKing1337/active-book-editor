@@ -273,15 +273,14 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       }
 
       const previousShadow = effectCur.options.shadow;
+      let nextShadow = previousShadow;
 
-      const copiedPreviousShadow = {
-        ...previousShadow,
-        style: shadowStyle,
-      };
-
-      const hasStyleAndShadow = shadowStyle && previousShadow;
-
-      const nextShadow = hasStyleAndShadow ? copiedPreviousShadow : previousShadow;
+      if (shadowStyle && previousShadow) {
+        nextShadow = {
+          ...previousShadow,
+          style: shadowStyle,
+        };
+      }
 
       const images = effectCur.options.images?.map((imageCur) => {
         const style = previewStyle('image', imageCur.id);
