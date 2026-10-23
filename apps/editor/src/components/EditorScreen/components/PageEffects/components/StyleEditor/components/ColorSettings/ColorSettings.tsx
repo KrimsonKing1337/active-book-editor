@@ -12,6 +12,7 @@ import {
   getRgbaChannels,
   getRgbaError,
   hexMaskOptions,
+  normalizeRgbaChannel,
 } from '../../color';
 
 import styles from '../../StyleEditor.module.scss';
@@ -120,8 +121,11 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   };
 
   const handleChannelBlur = (index: number) => {
-    if (rgbaDraftRef.current[index] === '') {
-      updateChannel(index, '0');
+    const value = rgbaDraftRef.current[index];
+    const normalized = normalizeRgbaChannel(value, index);
+
+    if (value !== normalized) {
+      updateChannel(index, normalized);
     }
 
     setShowValidation(true);

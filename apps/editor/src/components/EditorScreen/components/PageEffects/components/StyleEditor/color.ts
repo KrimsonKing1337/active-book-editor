@@ -51,6 +51,14 @@ export const getRgbaChannels = (hex: string): RgbaChannels => {
   return [String(red), String(green), String(blue), String(alphaPercent)];
 };
 
+export const normalizeRgbaChannel = (value: string, index: number): string => {
+  const maximum = index === 3 ? 100 : 255;
+  const number = Number(value || 0);
+  const clamped = Math.min(number, maximum);
+
+  return String(clamped);
+};
+
 export const getRgbaError = (channels: RgbaChannels): string | null => {
   const names = ['R', 'G', 'B', 'A'];
 

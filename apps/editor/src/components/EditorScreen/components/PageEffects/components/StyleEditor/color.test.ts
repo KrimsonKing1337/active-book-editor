@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getHexColor, getHexFromRgba, getRgbaChannels, getRgbaError } from './color';
+import { getHexColor, getHexFromRgba, getRgbaChannels, getRgbaError, normalizeRgbaChannel } from './color';
 
 test('converts HEX with alpha to four RGBA channels', () => {
   assert.deepEqual(getRgbaChannels('#cc3e72cc'), ['204', '62', '114', '80']);
@@ -28,4 +28,14 @@ test('validates RGB and alpha independently', () => {
 
 test('keeps normalized HEX format for the picker', () => {
   assert.equal(getHexColor('#cc3e72'), '#cc3e72ff');
+});
+
+test('clamps overflowing RGB and alpha values after editing', () => {
+  assert.equal(normalizeRgbaChannel('600', 0), '255');
+  assert.equal(normalizeRgbaChannel('600', 1), '255');
+  assert.equal(normalizeRgbaChannel('600', 2), '255');
+  assert.equal(normalizeRgbaChannel('600', 3), '100');
+  assert.equal(normalizeRgbaChannel('44', 3), '44');
+  assert.equal(normalizeRgbaChannel('', 0), '0');
+  assert.equal(normalizeRgbaChannel('', 3), '0');
 });
