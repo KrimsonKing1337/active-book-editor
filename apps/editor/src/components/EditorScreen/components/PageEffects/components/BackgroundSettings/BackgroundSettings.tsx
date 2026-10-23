@@ -9,6 +9,10 @@ import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffe
 
 import { Images, Videos, Shadow, Background, CustomComponent } from './components';
 
+import { BackgroundStyleProvider } from './BackgroundStyleContext';
+
+import { getBlurFilter } from '../StyleEditor/utils';
+
 import styles from './BackgroundSettings.module.scss';
 
 type BackgroundSettingsProps = {
@@ -24,7 +28,7 @@ type BackgroundSettingsProps = {
 
 const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
   show: false,
-  style: { zIndex: 2, backdropFilter: 'blur(10px)' },
+  style: { zIndex: 2, backdropFilter: getBlurFilter(10) },
 };
 
 export const BackgroundSettings = ({
@@ -108,10 +112,6 @@ export const BackgroundSettings = ({
     });
   };
 
-  const handleBackgroundChange = (updatedStyle: CSSProperties) => {
-    updateOptions({ style: updatedStyle });
-  };
-
   const handleImagesChange = (nextImages: NonNullable<BackgroundOptions['images']>) => {
     updateOptions({ images: nextImages });
   };
@@ -124,20 +124,12 @@ export const BackgroundSettings = ({
     updateOptions({ shadow: nextShadow });
   };
 
-  const previewBackgroundStyle = (nextStyle: CSSProperties) => {
-    updateStylePreview(effect.id, 'background', null, nextStyle);
-  };
-
-  const previewShadowStyle = (nextStyle: CSSProperties) => {
-    updateStylePreview(effect.id, 'shadow', null, nextStyle);
-  };
-
-  const previewImageStyle = (imageId: string, nextStyle: CSSProperties) => {
-    updateStylePreview(effect.id, 'image', imageId, nextStyle);
-  };
-
-  const previewVideoStyle = (videoId: string, nextStyle: CSSProperties) => {
-    updateStylePreview(effect.id, 'video', videoId, nextStyle);
+  const updateStylePreviewForEffect = (
+    layer: 'background' | 'shadow' | 'image' | 'video',
+    mediaId: string | null,
+    style: CSSProperties,
+  ) => {
+    updateStylePreview(effect.id, layer, mediaId, style);
   };
 
   const handleComponentChange = (component: BackgroundOptions['component']) => {
@@ -145,72 +137,60 @@ export const BackgroundSettings = ({
   };
 
   return (
-    <div className={styles.Settings}>
-      <label className={styles.Field}>
-        <span>
-          Название эффекта
-        </span>
+    <BackgroundStyleProvider preview={updateStylePreviewForEffect} commit={flushStylePreviews}>
+      <div className={styles.Settings}>
+        <label className={styles.Field}>
+          <span>
+            Название эффекта
+          </span>
 
-        <input
-          type="text"
-          value={effect.slug}
-          onChange={(event) => handleNameChange(event.target.value)}
+          <input
+            type="text"
+            value={effect.slug}
+            onChange={(event) => handleNameChange(event.target.value)}
+          />
+        </label>
+
+        <div className={styles.Field}>
+          <span>
+            ID эффекта
+          </span>
+
+          <div className={styles.Row}>
+            <input value={idDraft} onChange={(event) => setIdDraft(event.target.value)} />
+
+            <button type="button" onClick={updateId}>
+              Применить
+            </button>
+          </div>
+        </div>
+
+        <Background style={style} />
+        <Images
+          images={images}
+          canImport={Boolean(project)}
+          onChange={handleImagesChange}
+          onImportAsset={(file, handle) => importAsset(file, handle, 'image')}
         />
-      </label>
+        <Videos
+          videos={videos}
+          canImport={Boolean(project)}
+          onChange={handleVideosChange}
+          onImportAsset={(file, handle) => importAsset(file, handle, 'video')}
+        />
+        <Shadow shadow={shadow} onChange={handleShadowChange} />
+        <CustomComponent component={options.component} onChange={handleComponentChange} />
 
-      <div className={styles.Field}>
-        <span>
-          ID эффекта
-        </span>
+        <div className={styles.Actions}>
+          <button type="button" onClick={onDuplicate}>
+            Дублировать
+          </button>
 
-        <div className={styles.Row}>
-          <input value={idDraft} onChange={(event) => setIdDraft(event.target.value)} />
-
-          <button type="button" onClick={updateId}>
-            Применить
+          <button type="button" onClick={onDelete}>
+            Удалить эффект
           </button>
         </div>
       </div>
-
-      <Background
-        style={style}
-        onChange={handleBackgroundChange}
-        onStylePreview={previewBackgroundStyle}
-        onStyleCommit={flushStylePreviews}
-      />
-      <Images
-        images={images}
-        canImport={Boolean(project)}
-        onChange={handleImagesChange}
-        onImportAsset={(file, handle) => importAsset(file, handle, 'image')}
-        onStylePreview={previewImageStyle}
-        onStyleCommit={flushStylePreviews}
-      />
-      <Videos
-        videos={videos}
-        canImport={Boolean(project)}
-        onChange={handleVideosChange}
-        onImportAsset={(file, handle) => importAsset(file, handle, 'video')}
-        onStylePreview={previewVideoStyle}
-        onStyleCommit={flushStylePreviews}
-      />
-      <Shadow
-        shadow={shadow}
-        onChange={handleShadowChange}
-        onStylePreview={previewShadowStyle}
-        onStyleCommit={flushStylePreviews}
-      />
-      <CustomComponent component={options.component} onChange={handleComponentChange} />
-
-      <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
-          Дублировать
-        </button>
-
-        <button type="button" onClick={onDelete}>
-          Удалить эффект
-        </button>
-      </div>
-    </div>
+    </BackgroundStyleProvider>
   );
 };

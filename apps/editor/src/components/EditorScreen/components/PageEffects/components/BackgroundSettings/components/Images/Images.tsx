@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react';
-
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
@@ -17,8 +15,6 @@ export type BackgroundImagesProps = {
   onChange: (images: BackgroundImages) => void;
   canImport: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
-  onStylePreview: (mediaId: string, style: CSSProperties) => void;
-  onStyleCommit: () => boolean;
 };
 
 export const Images = ({
@@ -26,8 +22,6 @@ export const Images = ({
   canImport,
   onChange,
   onImportAsset,
-  onStylePreview,
-  onStyleCommit,
 }: BackgroundImagesProps) => {
   const updateImage = (index: number, changes: Partial<BackgroundImages[number]>) => {
     const updated = images.map((imageCur, currentIndex) => {
@@ -46,10 +40,6 @@ export const Images = ({
 
   const handlePathChange = (index: number, path: string) => {
     updateImage(index, { src: path });
-  };
-
-  const handleStyleChange = (index: number, style: CSSProperties) => {
-    updateImage(index, { style });
   };
 
   const handleDelete = (index: number) => {
@@ -94,9 +84,8 @@ export const Images = ({
               <StyleEditor
                 defaultZIndex={1}
                 value={style ?? {}}
-                onChange={(val) => handleStyleChange(index, val)}
-                onStylePreview={(style) => onStylePreview(id, style)}
-                onStyleCommit={onStyleCommit}
+                layer="image"
+                mediaId={id}
               />
             </details>
 

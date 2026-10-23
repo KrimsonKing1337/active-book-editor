@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react';
-
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
@@ -17,8 +15,6 @@ export type BackgroundVideosProps = {
   onChange: (videos: BackgroundVideos) => void;
   canImport: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
-  onStylePreview: (mediaId: string, style: CSSProperties) => void;
-  onStyleCommit: () => boolean;
 };
 
 export const Videos = ({
@@ -26,8 +22,6 @@ export const Videos = ({
   canImport,
   onChange,
   onImportAsset,
-  onStylePreview,
-  onStyleCommit,
 }: BackgroundVideosProps) => {
   const updateVideo = (index: number, changes: Partial<BackgroundVideos[number]>) => {
     const updated = videos.map((videoCur, currentIndex) => {
@@ -46,10 +40,6 @@ export const Videos = ({
 
   const handlePathChange = (index: number, path: string) => {
     updateVideo(index, { src: path });
-  };
-
-  const handleStyleChange = (index: number, style: CSSProperties) => {
-    updateVideo(index, { style });
   };
 
   const handleDelete = (index: number) => {
@@ -133,9 +123,8 @@ export const Videos = ({
               <StyleEditor
                 defaultZIndex={1}
                 value={style ?? {}}
-                onChange={(val) => handleStyleChange(index, val)}
-                onStylePreview={(style) => onStylePreview(id, style)}
-                onStyleCommit={onStyleCommit}
+                layer="video"
+                mediaId={id}
               />
             </details>
 

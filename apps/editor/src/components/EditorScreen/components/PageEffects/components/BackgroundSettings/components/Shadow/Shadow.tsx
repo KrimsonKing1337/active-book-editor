@@ -1,8 +1,7 @@
-import type { CSSProperties } from 'react';
-
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
+import { getBlurFilter } from '../../../StyleEditor/utils';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -11,28 +10,19 @@ type BackgroundShadow = NonNullable<BackgroundOptions['shadow']>;
 export type ShadowProps = {
   shadow: BackgroundShadow;
   onChange: (shadow: BackgroundShadow) => void;
-  onStylePreview: (style: CSSProperties) => void;
-  onStyleCommit: () => boolean;
 };
 
-export const Shadow = ({ shadow, onChange, onStylePreview, onStyleCommit }: ShadowProps) => {
+export const Shadow = ({ shadow, onChange }: ShadowProps) => {
   const { show, style } = shadow;
 
   const handleShowChange = (show: boolean) => {
     const hasNoStyles = !style || Object.keys(style).length === 0;
-    const nextStyle = hasNoStyles ? { zIndex: 2, backdropFilter: 'blur(10px)' } : style;
+    const nextStyle = hasNoStyles ? { zIndex: 2, backdropFilter: getBlurFilter(10) } : style;
 
     onChange({
       ...shadow,
       show,
       style: nextStyle,
-    });
-  };
-
-  const handleStyleChange = (style: CSSProperties) => {
-    onChange({
-      ...shadow,
-      style,
     });
   };
 
@@ -54,8 +44,7 @@ export const Shadow = ({ shadow, onChange, onStylePreview, onStyleCommit }: Shad
       <StyleEditor
         defaultZIndex={2}
         value={style ?? {}}
-        onChange={(val) => handleStyleChange(val)}
-        onStylePreview={onStylePreview} onStyleCommit={onStyleCommit}
+        layer="shadow"
       />
     </details>
   );
