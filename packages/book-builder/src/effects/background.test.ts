@@ -4,11 +4,22 @@ import test from 'node:test';
 import { normalizeBackgroundEffects } from './background';
 
 test('preserves background image IDs', () => {
-  const background = [{
+  const image = {
+    id: 'tree',
+    src: 'assets/tree.webp',
+  };
+
+  const options = {
+    images: [image],
+  };
+
+  const backgroundEffect = {
     id: 'forest',
     type: 'background',
-    options: { images: [{ id: 'tree', src: 'assets/tree.webp' }] },
-  }];
+    options,
+  };
+
+  const background = [backgroundEffect];
 
   const normalized = normalizeBackgroundEffects({ background });
 
@@ -16,11 +27,21 @@ test('preserves background image IDs', () => {
 });
 
 test('rejects background images without IDs', () => {
-  const background = [{
+  const image = {
+    src: 'assets/tree.webp',
+  };
+
+  const options = {
+    images: [image],
+  };
+
+  const backgroundEffect = {
     id: 'forest',
     type: 'background',
-    options: { images: [{ src: 'assets/tree.webp' }] },
-  }];
+    options,
+  };
+
+  const background = [backgroundEffect];
 
   assert.deepEqual(normalizeBackgroundEffects({ background }), []);
 });
