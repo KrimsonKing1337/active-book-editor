@@ -196,7 +196,6 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     setColorError('');
   };
 
-
   const handleHexInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     handleHexChange(e.target.value);
   };
@@ -293,6 +292,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
         >
           Применить цвет
         </button>
+
         {colorError && (
           <span className={styles.Error} role="alert">
             {colorError}
