@@ -1,7 +1,8 @@
-import { createContext, useContext, type CSSProperties, type PropsWithChildren } from 'react';
+import type { CSSProperties, PropsWithChildren } from 'react';
 
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
 
+import { createContext, useContext } from 'react';
 type BackgroundStyleContextValue = {
   preview: (layer: BackgroundPreviewLayer, mediaId: string | null, style: CSSProperties) => void;
   commit: () => boolean;
@@ -12,8 +13,13 @@ type BackgroundStyleProviderProps = PropsWithChildren<BackgroundStyleContextValu
 const BackgroundStyleContext = createContext<BackgroundStyleContextValue | null>(null);
 
 export const BackgroundStyleProvider = ({ children, preview, commit }: BackgroundStyleProviderProps) => {
+  const value = {
+    preview,
+    commit,
+  };
+
   return (
-    <BackgroundStyleContext.Provider value={{ preview, commit }}>
+    <BackgroundStyleContext.Provider value={value}>
       {children}
     </BackgroundStyleContext.Provider>
   );

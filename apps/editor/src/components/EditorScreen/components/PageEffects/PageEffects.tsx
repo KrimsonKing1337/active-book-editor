@@ -1,13 +1,4 @@
-import { useRef, useState } from 'react';
-
 import type { BookProject } from '@project/@types';
-
-import {
-  createAudioEffect,
-  createBackgroundEffect,
-  createFlashlightEffect,
-  createVibrationEffect,
-} from '@components/EditorScreen/components/PageEffects/utils';
 
 import type {
   AudioEffectDraft,
@@ -17,12 +8,20 @@ import type {
   FlashlightEffectDraft,
 } from './@types';
 
+import { useRef, useState } from 'react';
+
+import {
+  createAudioEffect,
+  createBackgroundEffect,
+  createFlashlightEffect,
+  createVibrationEffect,
+} from '@components/EditorScreen/components/PageEffects/utils';
+
 import { usePageEffects } from './PageEffectsContext';
 
 import { EffectsModal } from './components';
 
 import styles from './PageEffects.module.scss';
-
 export type PageEffectsProps = {
   project: BookProject | null;
   onSaveProject: () => Promise<BookProject | null>;
@@ -144,6 +143,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     if (nextId !== previousId && !flushStylePreviews()) {
       return;
     }
+
     const idIsEmpty = nextId.length === 0;
 
     const idAlreadyExists = getCurrentEffects().some((effectCur) => {
@@ -158,14 +158,23 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((effect) => effect.id === previousId);
+    const currentEffect = getCurrentEffects().find((cur) => cur.id === previousId);
 
-    const normalizedEffect: EditorEffectDraft = nextId !== previousId && currentEffect
-      ? { ...currentEffect, id: nextId, slug: updatedEffect.slug }
-      : { ...updatedEffect, id: nextId };
+    let normalizedEffect: EditorEffectDraft = {
+      ...updatedEffect,
+      id: nextId,
+    };
 
-    const nextEffects = getCurrentEffects().map((effect) => {
-      return effect.id === previousId ? normalizedEffect : effect;
+    if (nextId !== previousId && currentEffect) {
+      normalizedEffect = {
+        ...currentEffect,
+        id: nextId,
+        slug: updatedEffect.slug,
+      };
+    }
+
+    const nextEffects = getCurrentEffects().map((effectCur) => {
+      return effectCur.id === previousId ? normalizedEffect : effectCur;
     });
 
     writeEffects(nextEffects);
@@ -187,36 +196,46 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       const slug = `${selectedEffect.slug} (копия)`;
 
       if (selectedEffect.type === 'audio') {
+        const options = {
+          ...selectedEffect.options,
+        };
+
         const duplicate: AudioEffectDraft = {
           ...selectedEffect,
           id,
           slug,
-          options: {
-            ...selectedEffect.options,
-          },
+          options,
         };
 
         writeEffects([...getCurrentEffects(), duplicate]);
       } else if (selectedEffect.type === 'vibration') {
+        const options = {
+          ...selectedEffect.options,
+        };
+
         const duplicate: VibrationEffectDraft = {
           ...selectedEffect,
           id,
           slug,
-          options: {
-            ...selectedEffect.options,
-          },
+          options,
         };
 
         writeEffects([...getCurrentEffects(), duplicate]);
       } else if (selectedEffect.type === 'background') {
         const options = structuredClone(selectedEffect.options);
 
-        options.images = options.images?.map((image) => {
-          return { ...image, id: crypto.randomUUID() };
+        options.images = options.images?.map((imageCur) => {
+          return {
+            ...imageCur,
+            id: crypto.randomUUID(),
+          };
         });
 
-        options.videos = options.videos?.map((video) => {
-          return { ...video, id: crypto.randomUUID() };
+        options.videos = options.videos?.map((videoCur) => {
+          return {
+            ...videoCur,
+            id: crypto.randomUUID(),
+          };
         });
 
         const duplicate: BackgroundEffectDraft = {
@@ -228,13 +247,15 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
         writeEffects([...getCurrentEffects(), duplicate]);
       } else {
+        const options = {
+          ...selectedEffect.options,
+        };
+
         const duplicate: FlashlightEffectDraft = {
           ...selectedEffect,
           id,
           slug,
-          options: {
-            ...selectedEffect.options,
-          },
+          options,
         };
 
         writeEffects([...getCurrentEffects(), duplicate]);

@@ -1,10 +1,12 @@
-import { type ChangeEvent, useEffect, useId, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
+
+import { useEffect, useId, useRef, useState } from 'react';
+
 import { isAbortError } from '@project/errors';
 
 import styles from '../../BackgroundSettings.module.scss';
-
 type MediaKind = 'image' | 'video';
 
 type MediaSourceProps = {
@@ -15,21 +17,25 @@ type MediaSourceProps = {
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
+const imageMediaType = {
+  label: 'Путь к изображению',
+  placeholder: 'assets/forest.webp',
+  description: 'Изображения',
+  accept: 'image/*',
+  extensions: ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.avif', '.svg', '.bmp'],
+};
+
+const videoMediaType = {
+  label: 'Путь к видео',
+  placeholder: 'assets/fog.webm',
+  description: 'Видеофайлы',
+  accept: 'video/*',
+  extensions: ['.mp4', '.webm', '.ogv', '.mov', '.m4v'],
+};
+
 const mediaTypes = {
-  image: {
-    label: 'Путь к изображению',
-    placeholder: 'assets/forest.webp',
-    description: 'Изображения',
-    accept: 'image/*',
-    extensions: ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.avif', '.svg', '.bmp'],
-  },
-  video: {
-    label: 'Путь к видео',
-    placeholder: 'assets/fog.webm',
-    description: 'Видеофайлы',
-    accept: 'video/*',
-    extensions: ['.mp4', '.webm', '.ogv', '.mov', '.m4v'],
-  },
+  image: imageMediaType,
+  video: videoMediaType,
 };
 
 export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: MediaSourceProps) => {
@@ -44,7 +50,13 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState('');
 
-  const { label, placeholder, description, accept, extensions } = mediaTypes[kind];
+  const {
+    label,
+    placeholder,
+    description,
+    accept,
+    extensions,
+  } = mediaTypes[kind];
 
   const importFile = async (file: File, fileHandle?: ProjectFileHandle) => {
     setIsImporting(true);
@@ -70,16 +82,22 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
       return;
     }
 
+    const acceptedExtensions = {
+      [accept]: extensions,
+    };
+
+    const mediaType = {
+      description,
+      accept: acceptedExtensions,
+    };
+
+    const pickerOptions = {
+      id: `active-book-${kind}`,
+      types: [mediaType],
+    };
+
     try {
-      const [fileHandle] = await pickerWindow.showOpenFilePicker({
-        id: 'active-book-' + kind,
-        types: [{
-          description,
-          accept: {
-            [accept]: extensions,
-          },
-        }],
-      });
+      const [fileHandle] = await pickerWindow.showOpenFilePicker(pickerOptions);
 
       if (!fileHandle) {
         return;
@@ -97,15 +115,26 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
     }
   };
 
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
 
-    event.target.value = '';
+    e.target.value = '';
 
     if (file) {
       await importFile(file);
     }
   };
+
+  const handleSourceChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    void handleFileChange(e);
+  };
+
+  const chooseFileButtonLabel = isImporting ? 'Импорт...' : 'Выбрать файл';
+  const chooseFileButtonDisabled = !canImport || isImporting;
 
   return (
     <div className={styles.Field}>
@@ -120,11 +149,11 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
           value={src}
           placeholder={placeholder}
           spellCheck={false}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={handleSourceChange}
         />
 
-        <button type="button" disabled={!canImport || isImporting} onClick={handleChooseFile}>
-          {isImporting ? 'Импорт...' : 'Выбрать файл'}
+        <button type="button" disabled={chooseFileButtonDisabled} onClick={handleChooseFile}>
+          {chooseFileButtonLabel}
         </button>
 
         <input
@@ -132,7 +161,7 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
           type="file"
           accept={accept}
           hidden
-          onChange={(event) => void handleFileChange(event)}
+          onChange={handleFileInputChange}
         />
       </div>
 

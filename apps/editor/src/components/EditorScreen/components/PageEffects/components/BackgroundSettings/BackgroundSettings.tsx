@@ -1,9 +1,11 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import type { ChangeEvent, CSSProperties } from 'react';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
+
+import { useRef, useState } from 'react';
 
 import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
 
@@ -14,7 +16,6 @@ import { BackgroundStyleProvider } from './BackgroundStyleContext';
 import { getBlurFilter } from '../StyleEditor/utils';
 
 import styles from './BackgroundSettings.module.scss';
-
 type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
@@ -26,9 +27,14 @@ type BackgroundSettingsProps = {
   onDelete: () => void;
 };
 
+const defaultShadowStyle = {
+  zIndex: 2,
+  backdropFilter: getBlurFilter(10),
+};
+
 const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
   show: false,
-  style: { zIndex: 2, backdropFilter: getBlurFilter(10) },
+  style: defaultShadowStyle,
 };
 
 export const BackgroundSettings = ({
@@ -59,10 +65,12 @@ export const BackgroundSettings = ({
       ...updates,
     };
 
-    onUpdate(effect.id, {
+    const updatedEffect = {
       ...effect,
       options: updatedOptions,
-    });
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateId = () => {
@@ -76,10 +84,12 @@ export const BackgroundSettings = ({
       return;
     }
 
-    onUpdate(effect.id, {
+    const updatedEffect = {
       ...effect,
       id: normalized,
-    });
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const importAsset = async (
@@ -92,7 +102,10 @@ export const BackgroundSettings = ({
     }
 
     importsInProgressRef.current += 1;
-    onLoadingChange(true, kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...');
+
+    const loadingMessage = kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...';
+
+    onLoadingChange(true, loadingMessage);
 
     try {
       return await project.storage.importAssetFile(file, fileHandle);
@@ -106,10 +119,12 @@ export const BackgroundSettings = ({
   };
 
   const handleNameChange = (name: string) => {
-    onUpdate(effect.id, {
+    const updatedEffect = {
       ...effect,
       slug: name,
-    });
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleImagesChange = (nextImages: NonNullable<BackgroundOptions['images']>) => {
@@ -136,6 +151,22 @@ export const BackgroundSettings = ({
     updateOptions({ component });
   };
 
+  const handleIdDraftChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setIdDraft(e.target.value);
+  };
+
+  const handleNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    handleNameChange(e.target.value);
+  };
+
+  const handleImportImage = (file: File, handle?: ProjectFileHandle) => {
+    return importAsset(file, handle, 'image');
+  };
+
+  const handleImportVideo = (file: File, handle?: ProjectFileHandle) => {
+    return importAsset(file, handle, 'video');
+  };
+
   return (
     <BackgroundStyleProvider preview={updateStylePreviewForEffect} commit={flushStylePreviews}>
       <div className={styles.Settings}>
@@ -147,7 +178,7 @@ export const BackgroundSettings = ({
           <input
             type="text"
             value={effect.slug}
-            onChange={(event) => handleNameChange(event.target.value)}
+            onChange={handleNameInputChange}
           />
         </label>
 
@@ -157,7 +188,7 @@ export const BackgroundSettings = ({
           </span>
 
           <div className={styles.Row}>
-            <input value={idDraft} onChange={(event) => setIdDraft(event.target.value)} />
+            <input value={idDraft} onChange={handleIdDraftChange} />
 
             <button type="button" onClick={updateId}>
               Применить
@@ -170,13 +201,13 @@ export const BackgroundSettings = ({
           images={images}
           canImport={Boolean(project)}
           onChange={handleImagesChange}
-          onImportAsset={(file, handle) => importAsset(file, handle, 'image')}
+          onImportAsset={handleImportImage}
         />
         <Videos
           videos={videos}
           canImport={Boolean(project)}
           onChange={handleVideosChange}
-          onImportAsset={(file, handle) => importAsset(file, handle, 'video')}
+          onImportAsset={handleImportVideo}
         />
         <Shadow shadow={shadow} onChange={handleShadowChange} />
         <CustomComponent component={options.component} onChange={handleComponentChange} />

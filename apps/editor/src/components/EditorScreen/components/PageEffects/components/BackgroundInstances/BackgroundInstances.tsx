@@ -1,25 +1,33 @@
-import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
+import type { ComponentType, CSSProperties } from 'react';
 
-import { Background } from 'activeBook-core/components/ProxyHooks';
+import type {
+  BackgroundEffect as CoreBackgroundEffect,
+} from 'activeBook-core/hooks/effects/background/@types';
 
-import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
 import type { BookComponentProps } from '@active-book/types';
-
-import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
 
 import type { BookProject } from '@project/@types';
 
+import type { BackgroundEffectDraft } from '../../@types';
+
+import type {
+  BackgroundPreviewLayer,
+  BackgroundStylePreviews,
+} from '../../PageEffectsContext';
+
+import { useEffect, useMemo, useState } from 'react';
+
+import { Background } from 'activeBook-core/components/ProxyHooks';
+
+import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { BackgroundEffectDraft } from '../../@types';
 import {
   getBackgroundPreviewKey,
   useBackgroundStylePreviews,
   usePageEffects,
 } from '../../PageEffectsContext';
-
-import type { BackgroundStylePreviews } from '../../PageEffectsContext';
-
 type BackgroundInstancesProps = {
   project: BookProject | null;
 };
@@ -54,8 +62,8 @@ export type UseResolvedMediaResolvedState = {
 };
 
 const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | null): ResolvedMedia | null => {
-  const imagePaths = effect.options.images?.map((image) => image.src) ?? [];
-  const videoPaths = effect.options.videos?.map((video) => video.src) ?? [];
+  const imagePaths = effect.options.images?.map((cur) => cur.src) ?? [];
+  const videoPaths = effect.options.videos?.map((cur) => cur.src) ?? [];
 
   const pathsKey = JSON.stringify([imagePaths, videoPaths]);
 
@@ -169,7 +177,7 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
     return null;
   }
 
-  const previewStyle = (layer: 'background' | 'shadow' | 'image' | 'video', mediaId: string | null = null) => {
+  const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
     const key = getBackgroundPreviewKey(effect.id, layer, mediaId);
 
     return stylePreviews[key];
@@ -220,11 +228,11 @@ export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {
 
   return (
     <>
-      {backgrounds.map((effect) => {
+      {backgrounds.map((effectCur) => {
         return (
           <BackgroundInstance
-            key={effect.id}
-            effect={effect}
+            key={effectCur.id}
+            effect={effectCur}
             project={project}
             components={components}
             stylePreviews={stylePreviews}

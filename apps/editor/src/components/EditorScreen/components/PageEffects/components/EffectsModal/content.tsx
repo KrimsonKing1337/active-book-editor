@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import type { BackgroundEffectDraft } from '../../@types';
 
+import type { EffectsModalProps } from './@types';
+
 import {
   AudioSettings,
   VibrationSettings,
@@ -9,12 +11,9 @@ import {
   BackgroundSettings,
 } from '../';
 
-import type { EffectsModalProps } from './@types';
-
 import { EffectTile } from './components';
 
 import styles from './EffectsModal.module.scss';
-
 type ContentParams = Pick<
   EffectsModalProps,
   | 'effects'

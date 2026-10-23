@@ -1,9 +1,15 @@
-export const hexMaskOptions = {
-  mask: '#hhhhhhhh',
-  replacement: { h: /[a-f\d]/i },
+const hexReplacement = {
+  h: /[a-f\d]/i,
 };
 
-export const rgbaReplacement = { d: /\d/ };
+export const hexMaskOptions = {
+  mask: '#hhhhhhhh',
+  replacement: hexReplacement,
+};
+
+export const rgbaReplacement = {
+  d: /\d/,
+};
 
 export type RgbaWidths = [number, number, number, number];
 
@@ -54,7 +60,7 @@ export const getHexColor = (value: string): string => {
   const alpha = Math.max(0, Math.min(1, Number(matches[3] ?? 1)));
   const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, '0');
 
-  return '#' + channels.join('') + alphaHex;
+  return `#${channels.join('')}${alphaHex}`;
 };
 
 export const getRgbaColor = (hex: string): string => {
@@ -64,7 +70,7 @@ export const getRgbaColor = (hex: string): string => {
 
   const alpha = Math.round(parseInt(hex.slice(7, 9), 16) / 255 * 100) / 100;
 
-  return channels.join(' ') + ' / ' + Math.round(alpha * 100) + '%';
+  return `${channels.join(' ')} / ${Math.round(alpha * 100)}%`;
 };
 
 export const parseRgbaColor = (value: string): string | null => {
@@ -92,5 +98,5 @@ export const parseRgbaColor = (value: string): string | null => {
     return null;
   }
 
-  return 'rgb(' + channelNumbers.join(' ') + ' / ' + percentage / 100 + ')';
+  return `rgb(${channelNumbers.join(' ')} / ${percentage / 100})`;
 };

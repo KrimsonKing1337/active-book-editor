@@ -1,4 +1,6 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+
+import { useEffect, useState } from 'react';
 
 import { isValidCssRule, normalizePropertyName } from '../../utils';
 
@@ -45,10 +47,22 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      event.currentTarget.blur();
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
     }
+  };
+
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setNameDraft(e.target.value);
+  };
+
+  const handleValueInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    handleValueChange(e.target.value);
+  };
+
+  const handleDelete = () => {
+    onDelete(name);
   };
 
   return (
@@ -57,7 +71,7 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
         <input
           aria-label="Имя свойства"
           value={nameDraft}
-          onChange={(event) => setNameDraft(event.target.value)}
+          onChange={handleNameChange}
           onBlur={applyRule}
           onKeyDown={handleKeyDown}
         />
@@ -65,17 +79,21 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
         <input
           aria-label="Значение свойства"
           value={valueDraft}
-          onChange={(event) => handleValueChange(event.target.value)}
+          onChange={handleValueInputChange}
           onBlur={applyRule}
           onKeyDown={handleKeyDown}
         />
 
-        <button type="button" aria-label="Удалить свойство" onClick={() => onDelete(name)}>
+        <button type="button" aria-label="Удалить свойство" onClick={handleDelete}>
           ×
         </button>
       </div>
 
-      {error && <span className={styles.Error} role="alert">{error}</span>}
+      {error && (
+        <span className={styles.Error} role="alert">
+          {error}
+        </span>
+      )}
     </div>
   );
 };

@@ -1,9 +1,10 @@
-import { useCustomComponents } from '@project/customComponentRegistry';
+import type { ChangeEvent } from 'react';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
-import styles from '../../BackgroundSettings.module.scss';
+import { useCustomComponents } from '@project/customComponentRegistry';
 
+import styles from '../../BackgroundSettings.module.scss';
 type ComponentReference = BackgroundOptions['component'];
 
 type CustomComponentProps = {
@@ -14,11 +15,7 @@ type CustomComponentProps = {
 export const CustomComponent = ({ component, onChange }: CustomComponentProps) => {
   const { definitions } = useCustomComponents();
 
-  let componentId = '';
-
-  if (component) {
-    componentId = component.package + '/' + component.name;
-  }
+  const componentId = component ? `${component.package}/${component.name}` : '';
 
   const updateComponent = (id: string) => {
     if (!id) {
@@ -27,7 +24,7 @@ export const CustomComponent = ({ component, onChange }: CustomComponentProps) =
       return;
     }
 
-    const definition = definitions.find((item) => item.id === id);
+    const definition = definitions.find((cur) => cur.id === id);
 
     if (definition) {
       onChange({
@@ -37,16 +34,26 @@ export const CustomComponent = ({ component, onChange }: CustomComponentProps) =
     }
   };
 
+  const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    updateComponent(e.target.value);
+  };
+
   return (
     <details className={styles.Section}>
-      <summary>Кастомный компонент</summary>
+      <summary>
+        Кастомный компонент
+      </summary>
 
-      <select value={componentId} onChange={(event) => updateComponent(event.target.value)}>
-        <option value="">Не использовать</option>
+      <select value={componentId} onChange={handleComponentChange}>
+        <option value="">
+          Не использовать
+        </option>
 
-        {definitions.map((definition) => {
+        {definitions.map((definitionCur) => {
           return (
-            <option key={definition.id} value={definition.id}>{definition.title}</option>
+            <option key={definitionCur.id} value={definitionCur.id}>
+              {definitionCur.title}
+            </option>
           );
         })}
       </select>

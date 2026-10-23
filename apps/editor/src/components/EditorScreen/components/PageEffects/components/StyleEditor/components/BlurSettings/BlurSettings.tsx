@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
 
@@ -52,10 +54,10 @@ export const BlurSettings = ({ filter, onChange, onCommit }: BlurSettingsProps) 
     });
   };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const normalized = removeLeadingZeros(event.target.value);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const normalized = removeLeadingZeros(e.target.value);
 
-    event.target.value = normalized;
+    e.target.value = normalized;
     const value = Number(normalized);
 
     if (Number.isFinite(value) && value >= 0) {
@@ -69,7 +71,9 @@ export const BlurSettings = ({ filter, onChange, onCommit }: BlurSettingsProps) 
 
   return (
     <label className={styles.Field}>
-      <span>Размытие (px)</span>
+      <span>
+        Размытие (px)
+      </span>
 
       <div className={styles.RangeFields}>
         <Slider

@@ -1,10 +1,10 @@
+import type { EffectsModalProps } from './@types';
+
 import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
 import { Rnd } from 'react-rnd';
-
-import type { EffectsModalProps } from './@types';
 
 import { getModalContent } from './content';
 import { usePanelGeometry } from './hooks';
@@ -12,7 +12,6 @@ import { usePanelGeometry } from './hooks';
 import { Header, PanelBody } from './components';
 
 import styles from './EffectsModal.module.scss';
-
 export const EffectsModal = ({
   effects,
   project,
@@ -75,9 +74,13 @@ export const EffectsModal = ({
   };
 
   const showBackButton = Boolean(selectedEffect) && !isCollapsed;
-  const activeLoadingMessage = isSavingStyles
-    ? 'Подождите, пока изменения сохраняются...'
-    : !isCollapsed ? loadingMessage : null;
+  let activeLoadingMessage: string | null = null;
+
+  if (isSavingStyles) {
+    activeLoadingMessage = 'Подождите, пока изменения сохраняются...';
+  } else if (!isCollapsed) {
+    activeLoadingMessage = loadingMessage;
+  }
 
   return createPortal(
     <Rnd

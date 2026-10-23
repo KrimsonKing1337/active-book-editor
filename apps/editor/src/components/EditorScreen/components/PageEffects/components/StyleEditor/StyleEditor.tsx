@@ -1,4 +1,4 @@
-import { type CSSProperties, type KeyboardEvent } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
 
@@ -16,41 +16,65 @@ export type StyleEditorProps = {
   defaultZIndex?: number;
 };
 
-const handleInputEnter = (event: KeyboardEvent<HTMLDivElement>) => {
-  if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
-    event.target.blur();
+const handleInputEnter = (e: KeyboardEvent<HTMLDivElement>) => {
+  if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+    e.target.blur();
   }
 };
 
-export const StyleEditor = ({ value, layer, mediaId, defaultZIndex = 0 }: StyleEditorProps) => {
-  const { currentStyle, setProperty, previewStyle, commitStyle } = useStyleEditor({ value, layer, mediaId });
+export const StyleEditor = ({
+  value,
+  layer,
+  mediaId,
+  defaultZIndex = 0,
+}: StyleEditorProps) => {
+  const {
+    currentStyle,
+    setProperty,
+    previewStyle,
+    commitStyle,
+  } = useStyleEditor({
+    value,
+    layer,
+    mediaId,
+  });
 
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
 
-  const changeBlur = (blur: number, updateLocal = true) => {
+  const handleBlurChange = (blur: number, updateLocal = true) => {
     if (Number.isFinite(blur) && blur >= 0) {
       setProperty('backdropFilter', getBlurFilter(blur), updateLocal);
     }
   };
 
+  const handleColorChange = (val: string) => {
+    setProperty('backgroundColor', val);
+  };
+
+  const handleLayerChange = (val: number) => {
+    setProperty('zIndex', val);
+  };
+
+  const backgroundColor = String(currentStyle.backgroundColor ?? '');
+
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
       <ColorSettings
-        color={String(currentStyle.backgroundColor ?? '')}
-        onColorChange={(color) => setProperty('backgroundColor', color)}
+        color={backgroundColor}
+        onColorChange={handleColorChange}
         onCommit={commitStyle}
       />
 
       <BlurSettings
         filter={currentStyle.backdropFilter}
-        onChange={changeBlur}
+        onChange={handleBlurChange}
         onCommit={commitStyle}
       />
 
       <LayerSettings
         zIndex={zIndex}
-        onChange={(index) => setProperty('zIndex', index)}
+        onChange={handleLayerChange}
         onCommit={commitStyle}
       />
 

@@ -11,7 +11,9 @@ type BackgroundProps = {
 export const Background = ({ style }: BackgroundProps) => {
   return (
     <details className={styles.Section}>
-      <summary>Фон</summary>
+      <summary>
+        Фон
+      </summary>
 
       <StyleEditor layer="background" value={style} />
     </details>

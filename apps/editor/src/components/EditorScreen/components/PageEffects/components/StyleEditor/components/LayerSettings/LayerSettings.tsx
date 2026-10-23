@@ -1,4 +1,4 @@
-import { type ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
 import { removeLeadingZeros } from '../../utils';
 
@@ -17,24 +17,34 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
     }
   };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const normalized = removeLeadingZeros(event.target.value);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const normalized = removeLeadingZeros(e.target.value);
 
-    event.target.value = normalized;
+    e.target.value = normalized;
     updateIndex(Number(normalized));
   };
 
-  const changeByStep = (step: number) => {
+  const handleStepChange = (step: number) => {
     updateIndex(zIndex + step);
     onCommit();
   };
 
+  const handleStepBack = () => {
+    handleStepChange(-1);
+  };
+
+  const handleStepForward = () => {
+    handleStepChange(1);
+  };
+
   return (
     <label className={styles.Field}>
-      <span>z-index</span>
+      <span>
+        z-index
+      </span>
 
       <div className={styles.LayerControls}>
-        <button type="button" onClick={() => changeByStep(-1)} aria-label="На слой назад">
+        <button type="button" onClick={handleStepBack} aria-label="На слой назад">
           −
         </button>
 
@@ -46,7 +56,7 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
           onBlur={onCommit}
         />
 
-        <button type="button" onClick={() => changeByStep(1)} aria-label="На слой вперёд">
+        <button type="button" onClick={handleStepForward} aria-label="На слой вперёд">
           +
         </button>
       </div>

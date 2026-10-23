@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
@@ -61,10 +63,12 @@ export const Videos = ({
   };
 
   const handleAdd = () => {
-    onChange([...videos, {
+    const video = {
       id: crypto.randomUUID(),
       src: '',
-    }]);
+    };
+
+    onChange([...videos, video]);
   };
 
   return (
@@ -74,7 +78,34 @@ export const Videos = ({
       </summary>
 
       {videos.map((videoCur, index) => {
-        const { autoPlay, id, loop, muted, src, style } = videoCur;
+        const {
+          autoPlay,
+          id,
+          loop,
+          muted,
+          src,
+          style,
+        } = videoCur;
+
+        const handlePathChangeForVideo = (val: string) => {
+          handlePathChange(index, val);
+        };
+
+        const handleLoopChangeForVideo = (e: ChangeEvent<HTMLInputElement>) => {
+          handleLoopChange(index, e.target.checked);
+        };
+
+        const handleAutoPlayChangeForVideo = (e: ChangeEvent<HTMLInputElement>) => {
+          handleAutoPlayChange(index, e.target.checked);
+        };
+
+        const handleMutedChangeForVideo = (e: ChangeEvent<HTMLInputElement>) => {
+          handleMutedChange(index, e.target.checked);
+        };
+
+        const handleDeleteVideo = () => {
+          handleDelete(index);
+        };
 
         return (
           <div key={id} className={styles.Media}>
@@ -82,7 +113,7 @@ export const Videos = ({
               kind="video"
               src={src}
               canImport={canImport}
-              onChange={(path) => handlePathChange(index, path)}
+              onChange={handlePathChangeForVideo}
               onImportAsset={onImportAsset}
             />
 
@@ -91,7 +122,7 @@ export const Videos = ({
                 <input
                   type="checkbox"
                   checked={loop ?? true}
-                  onChange={(e) => handleLoopChange(index, e.target.checked)}
+                  onChange={handleLoopChangeForVideo}
                 />
                 Зациклить
               </label>
@@ -100,7 +131,7 @@ export const Videos = ({
                 <input
                   type="checkbox"
                   checked={autoPlay ?? true}
-                  onChange={(e) => handleAutoPlayChange(index, e.target.checked)}
+                  onChange={handleAutoPlayChangeForVideo}
                 />
                 Автозапуск
               </label>
@@ -109,7 +140,7 @@ export const Videos = ({
                 <input
                   type="checkbox"
                   checked={muted ?? true}
-                  onChange={(e) => handleMutedChange(index, e.target.checked)}
+                  onChange={handleMutedChangeForVideo}
                 />
                 Без звука
               </label>
@@ -128,7 +159,7 @@ export const Videos = ({
               />
             </details>
 
-            <button type="button" onClick={() => handleDelete(index)}>
+            <button type="button" onClick={handleDeleteVideo}>
               Удалить видео
             </button>
           </div>

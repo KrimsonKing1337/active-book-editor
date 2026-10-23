@@ -1,8 +1,8 @@
+import type { PanelGeometry, Position } from './utils';
+
 import { useState } from 'react';
 
 import { getSavedGeometry, getRndOptions, PANEL_GEOMETRY_KEY } from './utils';
-
-import type { PanelGeometry, Position } from './utils';
 
 export const usePanelGeometry = () => {
   const [geometry, setGeometry] = useState(getSavedGeometry);
@@ -38,7 +38,7 @@ export const usePanelGeometry = () => {
   };
 
   const toggleCollapsed = () => {
-    setIsCollapsed((current) => !current);
+    setIsCollapsed((cur) => !cur);
   };
 
   const rndOptions = getRndOptions(geometry, isCollapsed);

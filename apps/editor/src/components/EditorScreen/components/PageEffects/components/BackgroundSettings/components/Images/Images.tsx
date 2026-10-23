@@ -51,10 +51,12 @@ export const Images = ({
   };
 
   const handleAdd = () => {
-    onChange([...images, {
+    const image = {
       id: crypto.randomUUID(),
       src: '',
-    }]);
+    };
+
+    onChange([...images, image]);
   };
 
   return (
@@ -66,13 +68,21 @@ export const Images = ({
       {images.map((imageCur, index) => {
         const { id, src, style } = imageCur;
 
+        const handlePathChangeForImage = (val: string) => {
+          handlePathChange(index, val);
+        };
+
+        const handleDeleteImage = () => {
+          handleDelete(index);
+        };
+
         return (
           <div key={id} className={styles.Media}>
             <MediaSource
               kind="image"
               src={src}
               canImport={canImport}
-              onChange={(path) => handlePathChange(index, path)}
+              onChange={handlePathChangeForImage}
               onImportAsset={onImportAsset}
             />
 
@@ -89,7 +99,7 @@ export const Images = ({
               />
             </details>
 
-            <button type="button" onClick={() => handleDelete(index)}>
+            <button type="button" onClick={handleDeleteImage}>
               Удалить изображение
             </button>
           </div>

@@ -1,4 +1,6 @@
-import { useState, type CSSProperties } from 'react';
+import type { ChangeEvent, CSSProperties } from 'react';
+
+import { useState } from 'react';
 
 import { isValidCssRule, normalizePropertyName } from '../../utils';
 
@@ -20,7 +22,12 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
   const [propertyError, setPropertyError] = useState('');
 
   const previewRuleValue = (name: string, value: string) => {
-    onPreview({ ...style, [name]: value });
+    const updatedStyle = {
+      ...style,
+      [name]: value,
+    };
+
+    onPreview(updatedStyle);
   };
 
   const updateRule = (name: string, nextName: string, nextValue: string): string | null => {
@@ -28,7 +35,9 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
       return 'Такое CSS-свойство уже существует';
     }
 
-    const updated: Record<string, StyleValue> = { ...style };
+    const updated: Record<string, StyleValue> = {
+      ...style,
+    };
 
     delete updated[name];
     updated[nextName] = nextValue;
@@ -40,7 +49,9 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
   };
 
   const deleteRule = (name: string) => {
-    const updated: Record<string, StyleValue> = { ...style };
+    const updated: Record<string, StyleValue> = {
+      ...style,
+    };
 
     delete updated[name];
 
@@ -64,18 +75,35 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
       return;
     }
 
-    onPreview({ ...style, [name]: value });
+    const updatedStyle = {
+      ...style,
+      [name]: value,
+    };
+
+    onPreview(updatedStyle);
     onCommit();
     setNewProperty('');
     setNewValue('');
     setPropertyError('');
   };
 
+  const handleNewPropertyChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setNewProperty(e.target.value);
+  };
+
+  const handleNewValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setNewValue(e.target.value);
+  };
+
+  const rules = Object.entries(style);
+
   return (
     <details className={styles.Advanced}>
-      <summary>Дополнительные CSS-свойства</summary>
+      <summary>
+        Дополнительные CSS-свойства
+      </summary>
 
-      {Object.entries(style).map(([property, ruleValue]) => {
+      {rules.map(([property, ruleValue]) => {
         return (
           <StyleRule
             key={property}
@@ -93,20 +121,26 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
           aria-label="Новое CSS-свойство"
           value={newProperty}
           placeholder="opacity"
-          onChange={(event) => setNewProperty(event.target.value)}
+          onChange={handleNewPropertyChange}
         />
 
         <input
           aria-label="Значение нового свойства"
           value={newValue}
           placeholder="0.8"
-          onChange={(event) => setNewValue(event.target.value)}
+          onChange={handleNewValueChange}
         />
 
-        <button type="button" onClick={addProperty}>+</button>
+        <button type="button" onClick={addProperty}>
+          +
+        </button>
       </div>
 
-      {propertyError && <span className={styles.Error} role="alert">{propertyError}</span>}
+      {propertyError && (
+        <span className={styles.Error} role="alert">
+          {propertyError}
+        </span>
+      )}
     </details>
   );
 };

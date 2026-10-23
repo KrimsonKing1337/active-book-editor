@@ -4,7 +4,7 @@ export type PanelGeometry = {
   x: number;
   y: number;
   width: number;
-  height: number,
+  height: number;
 };
 
 export type Position = {
@@ -59,8 +59,8 @@ export const getSavedGeometry = (): PanelGeometry => {
       value.height,
     ];
 
-    const hasValidGeometry = geometryValues.every((coordinateOrSize) => {
-      return typeof coordinateOrSize === 'number' && Number.isFinite(coordinateOrSize);
+    const hasValidGeometry = geometryValues.every((valueCur) => {
+      return typeof valueCur === 'number' && Number.isFinite(valueCur);
     });
 
     if (!hasValidGeometry) {
