@@ -10,6 +10,8 @@ import type {
   ProjectFileHandle,
 } from './fileSystemAccess';
 
+import { trackProjectWrite } from './pendingOperations';
+
 import {
   ExistingProjectError,
   InvalidProjectError,
@@ -116,6 +118,10 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async initialize(document: JSONContent): Promise<void> {
+    return trackProjectWrite(() => this.initializeInternal(document));
+  }
+
+  private async initializeInternal(document: JSONContent): Promise<void> {
     const hasBook = await this.getHasBook();
 
     if (hasBook) {
@@ -160,6 +166,10 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async writeBook(document: JSONContent): Promise<void> {
+    return trackProjectWrite(() => this.writeBookInternal(document));
+  }
+
+  private async writeBookInternal(document: JSONContent): Promise<void> {
     await this.ensureAssetsDirectory();
 
     const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, {
@@ -203,6 +213,10 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async writePackageJson(content: string): Promise<void> {
+    return trackProjectWrite(() => this.writePackageJsonInternal(content));
+  }
+
+  private async writePackageJsonInternal(content: string): Promise<void> {
     const handle = await this.directoryHandle.getFileHandle(PACKAGE_FILE_NAME, {
       create: true,
     });
@@ -219,6 +233,10 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async importDependencyFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
+    return trackProjectWrite(() => this.importDependencyFileInternal(file, sourceHandle));
+  }
+
+  private async importDependencyFileInternal(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
     const directory = await this.directoryHandle.getDirectoryHandle(DEPENDENCIES_DIRECTORY_NAME, {
       create: true,
     });
@@ -318,6 +336,10 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
+    return trackProjectWrite(() => this.importAssetFileInternal(file, sourceHandle));
+  }
+
+  private async importAssetFileInternal(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
     const assetsDirectory = await this.directoryHandle.getDirectoryHandle(ASSETS_DIRECTORY_NAME, {
       create: true,
     });

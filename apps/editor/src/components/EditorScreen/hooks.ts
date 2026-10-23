@@ -27,6 +27,8 @@ import {
 
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
+import { hasPendingProjectChanges, markProjectStylesSaved } from '@project/pendingOperations';
+
 import type { BuildState } from './@types';
 
 import { AUTO_SAVE_DELAY, createEmptyDocument, getProjectErrorMessage } from './utils';
@@ -98,6 +100,7 @@ export const useAutosave = ({
     setIsDirty(false);
     setShowSavedStatus(true);
     setProjectMessage('Локальный проект');
+    markProjectStylesSaved();
   }, []);
 
   const scheduleAutosave = useCallback((currentEditor: Editor) => {
@@ -179,6 +182,7 @@ export const useAutosave = ({
     if (documentIsUnchanged) {
       setIsDirty(false);
       setShowSavedStatus(true);
+      markProjectStylesSaved();
     } else {
       setIsDirty(true);
       setShowSavedStatus(false);
@@ -539,13 +543,15 @@ export const useProjectActions = ({
 };
 
 export const useBeforeUnload = (isDirty: boolean): void => {
-  useEffect(() => {
-    if (!isDirty) {
-      return;
-    }
+  const isDirtyRef = useRef(isDirty);
 
+  isDirtyRef.current = isDirty;
+
+  useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
+      if (isDirtyRef.current || hasPendingProjectChanges()) {
+        event.preventDefault();
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -553,7 +559,7 @@ export const useBeforeUnload = (isDirty: boolean): void => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [isDirty]);
+  }, []);
 };
 
 export const useSaveShortcut = (handleSaveProject: () => Promise<void>): void => {

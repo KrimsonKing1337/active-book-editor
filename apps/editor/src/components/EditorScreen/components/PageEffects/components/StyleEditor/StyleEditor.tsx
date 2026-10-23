@@ -2,7 +2,19 @@ import { type ChangeEvent, type CSSProperties, type KeyboardEvent, useEffect, us
 
 import { HexAlphaColorPicker } from 'react-colorful';
 
+import { InputMask, unformat } from '@react-input/mask';
+
 import { Slider } from 'activeBook-core/components';
+
+import {
+  getHexColor,
+  getRgbaColor,
+  getRgbaMask,
+  hexMaskOptions,
+  modifyRgbaMask,
+  parseRgbaColor,
+  rgbaReplacement,
+} from './color';
 
 import styles from './StyleEditor.module.scss';
 
@@ -59,54 +71,6 @@ const handleInputEnter = (event: KeyboardEvent<HTMLDivElement>) => {
   if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
     event.target.blur();
   }
-};
-
-const getHexColor = (value: string): string => {
-  if (/^#[\da-f]{6}([\da-f]{2})?$/i.test(value)) {
-    return value.length === 7 ? value + 'ff' : value;
-  }
-
-  const match = value.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\/\s]+(\d+(?:\.\d*)?|\.\d+))?\s*\)$/i);
-
-  if (!match) {
-    return '#000000ff';
-  }
-
-  const rgbChannels = match.slice(1, 4);
-
-  const channels = rgbChannels.map((channel) => {
-    const clampedChannel = Math.max(0, Math.min(255, Number(channel)));
-
-    return clampedChannel.toString(16).padStart(2, '0');
-  });
-
-  const alpha = Math.round(Math.max(0, Math.min(1, Number(match[4] ?? 1))) * 255);
-  const alphaHex = alpha.toString(16).padStart(2, '0');
-
-  return '#' + channels.join('') + alphaHex;
-};
-
-const getRgbaColor = (hex: string): string => {
-  const red = parseInt(hex.slice(1, 3), 16);
-  const green = parseInt(hex.slice(3, 5), 16);
-  const blue = parseInt(hex.slice(5, 7), 16);
-  const alpha = Math.round((parseInt(hex.slice(7, 9), 16) / 255) * 100) / 100;
-
-  return red + ' ' + green + ' ' + blue + ' / ' + alpha;
-};
-
-const getIsValidRgba = (value: string): boolean => {
-  const match = value.match(/^(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*\/\s*(\d+(?:\.\d+)?|\.\d+)$/);
-
-  if (!match) {
-    return false;
-  }
-
-  const channels = match.slice(1, 4).map(Number);
-  const alpha = Number(match[4]);
-
-  return channels.every((channel) => channel >= 0 && channel <= 255)
-    && alpha >= 0 && alpha <= 1;
 };
 
 const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleRuleProps) => {
@@ -308,36 +272,22 @@ export const StyleEditor = ({
   };
 
   const handleHexChange = (input: string) => {
-    const hexDigits = input.replaceAll('#', '').replace(/[^\da-f]/gi, '').slice(0, 8);
-    const nextHex = '#' + hexDigits;
+    setHexDraft(input);
 
-    setHexDraft(nextHex);
+    const digits = unformat(input, hexMaskOptions);
 
-    if (/^#[\da-f]{6}([\da-f]{2})?$/i.test(nextHex)) {
-      setProperty('backgroundColor', nextHex);
+    if (digits.length === 6 || digits.length === 8) {
+      setProperty('backgroundColor', '#' + digits);
     }
   };
 
   const handleRgbaChange = (input: string) => {
-    const cleaned = input.replace(/[(),]/g, ' ').replace(/[^\d./\s]/g, '')
-      .replace(/\/+/g, ' / ').replace(/\s+/g, ' ').trimStart();
+    setRgbaDraft(input);
 
-    const parts = cleaned.split(/[\s/]+/).filter(Boolean).slice(0, 4).map(removeLeadingZeros);
+    const color = parseRgbaColor(input);
 
-    let nextRgba = parts.slice(0, 3).join(' ');
-
-    if (parts.length === 4) {
-      nextRgba += ' / ' + parts[3];
-    } else if (parts.length === 3 && (cleaned.endsWith(' ') || cleaned.includes('/'))) {
-      nextRgba += ' / ';
-    } else if (cleaned.endsWith(' ')) {
-      nextRgba += ' ';
-    }
-
-    setRgbaDraft(nextRgba);
-
-    if (getIsValidRgba(nextRgba)) {
-      setProperty('backgroundColor', 'rgb(' + nextRgba.trim() + ')');
+    if (color) {
+      setProperty('backgroundColor', color);
     }
   };
 
@@ -429,22 +379,31 @@ export const StyleEditor = ({
         <label className={styles.Field}>
           <span>HEX</span>
 
-          <input
+          <InputMask
             aria-label="HEX"
+            {...hexMaskOptions}
+            showMask
+            placeholder="#RRGGBBAA"
             value={hexDraft}
-            maxLength={9}
             spellCheck={false}
             onChange={(event) => handleHexChange(event.target.value)}
             onFocus={() => setActiveColorInput('hex')}
             onBlur={handleColorBlur}
           />
+
+          <small>#RRGGBBAA</small>
         </label>
 
         <label className={styles.Field}>
           <span>RGBA</span>
 
-          <input
+          <InputMask
             aria-label="RGBA"
+            mask={getRgbaMask(rgbaDraft)}
+            modify={modifyRgbaMask}
+            replacement={rgbaReplacement}
+            showMask
+            separate
             value={rgbaDraft}
             inputMode="decimal"
             spellCheck={false}
@@ -453,6 +412,8 @@ export const StyleEditor = ({
             onFocus={() => setActiveColorInput('rgba')}
             onBlur={handleColorBlur}
           />
+
+          <small>204 62 114 / 0.8</small>
         </label>
       </div>
 

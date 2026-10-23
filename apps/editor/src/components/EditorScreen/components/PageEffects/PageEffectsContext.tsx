@@ -14,6 +14,8 @@ import type { PageEffects as GroupedPageEffects } from '@active-book/book-builde
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
+import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
+
 import type {
   AudioEffectDraft,
   BackgroundEffectDraft,
@@ -103,6 +105,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     };
 
     unsavedStylesRef.current = true;
+    setHasPendingStyles(true);
 
     if (previewFrameRef.current !== null) {
       cancelAnimationFrame(previewFrameRef.current);
@@ -123,16 +126,8 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (unsavedStylesRef.current) {
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      setHasPendingStyles(false);
     };
   }, []);
 
@@ -296,6 +291,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
     previewStylesRef.current = {};
     setBackgroundStylePreviews({});
+    markStylePreviewsCommitted();
 
     if (previewFrameRef.current !== null) {
       cancelAnimationFrame(previewFrameRef.current);
@@ -311,6 +307,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
   const markStylesSaved = useCallback(() => {
     unsavedStylesRef.current = false;
+    setHasPendingStyles(false);
   }, []);
 
   const value = useMemo(() => ({
