@@ -35,8 +35,6 @@ import {
 import { AudioInstances } from './components/PageEffects/components/AudioInstances';
 import { BackgroundInstances } from './components/PageEffects/components/BackgroundInstances';
 
-import styles from './EditorScreen.module.scss';
-
 import {
   editorConfig,
   editorExtensions,
@@ -46,19 +44,21 @@ import {
   insertTextComponent,
 } from './utils';
 
+import styles from './EditorScreen.module.scss';
+
 const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
 const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
 const SHOW_NARRATIVE_STORAGE_KEY = 'activeBook-editor:showNarrative';
 const SHOW_BACKGROUNDS_STORAGE_KEY = 'activeBook-editor:showBackgrounds';
 
 export const EditorScreen = () => {
+  const { definitions: customComponentDefinitions } = useCustomComponents();
+
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
   const [librariesRevision, setLibrariesRevision] = useState(0);
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
-
-  const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
@@ -161,7 +161,7 @@ export const EditorScreen = () => {
         }
 
         if (cancelled) {
-          libraries.forEach((library) => library.dispose());
+          libraries.forEach((cur) => cur.dispose());
 
           return;
         }
@@ -174,6 +174,7 @@ export const EditorScreen = () => {
           const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки библиотек';
 
           setProjectMessage(errorMessage);
+
           replaceCustomLibraries([]);
         }
       }

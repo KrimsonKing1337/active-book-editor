@@ -9,12 +9,19 @@ import styles from '../../StyleEditor.module.scss';
 export type StyleRuleProps = {
   name: string;
   value: string | number;
+
   onUpdate: (name: string, nextName: string, nextValue: string) => string | null;
   onPreview: (name: string, nextValue: string) => void;
   onDelete: (name: string) => void;
 };
 
-export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleRuleProps) => {
+export const StyleRule = ({
+  name,
+  value,
+  onUpdate,
+  onPreview,
+  onDelete,
+}: StyleRuleProps) => {
   const [nameDraft, setNameDraft] = useState(name);
   const [valueDraft, setValueDraft] = useState(String(value));
   const [error, setError] = useState('');
@@ -28,7 +35,9 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
     const nextName = normalizePropertyName(nameDraft);
     const nextValue = valueDraft.trim();
 
-    if (!nextValue || !isValidCssRule(nextName, nextValue)) {
+    const cssRuleIsValid = isValidCssRule(nextName, nextValue);
+
+    if (!nextValue || !cssRuleIsValid) {
       setError('Некорректное CSS-свойство или значение');
 
       return;
@@ -71,6 +80,7 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
         <input
           aria-label="Имя свойства"
           value={nameDraft}
+
           onChange={handleNameChange}
           onBlur={applyRule}
           onKeyDown={handleKeyDown}
@@ -79,6 +89,7 @@ export const StyleRule = ({ name, value, onUpdate, onPreview, onDelete }: StyleR
         <input
           aria-label="Значение свойства"
           value={valueDraft}
+
           onChange={handleValueInputChange}
           onBlur={applyRule}
           onKeyDown={handleKeyDown}

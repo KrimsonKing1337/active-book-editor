@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+
 import type { BookProject } from '@project/@types';
 
 import type {
@@ -8,18 +10,16 @@ import type {
   FlashlightEffectDraft,
 } from './@types';
 
-import { useRef, useState } from 'react';
+import { usePageEffects } from './PageEffectsContext';
+
+import { EffectsModal } from './components';
 
 import {
   createAudioEffect,
   createBackgroundEffect,
   createFlashlightEffect,
   createVibrationEffect,
-} from '@components/EditorScreen/components/PageEffects/utils';
-
-import { usePageEffects } from './PageEffectsContext';
-
-import { EffectsModal } from './components';
+} from './utils';
 
 import styles from './PageEffects.module.scss';
 export type PageEffectsProps = {
@@ -48,11 +48,14 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       return false;
     }
 
-    if (!hasUnsavedStyleChanges()) {
+    const hasUnsaved = hasUnsavedStyleChanges();
+
+    if (!hasUnsaved) {
       return true;
     }
 
     savingStylesRef.current = true;
+
     setIsSavingStyles(true);
     setStyleSaveError('');
 
@@ -76,6 +79,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       return false;
     } finally {
       savingStylesRef.current = false;
+
       setIsSavingStyles(false);
     }
   };
@@ -88,7 +92,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     });
   };
 
-  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId) ?? null;
+  const selectedEffect = effects.find((cur) => cur.id === selectedEffectId);
 
   const openEffects = () => {
     setIsOpen(true);
@@ -111,29 +115,37 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
   const addAudio = () => {
     const effect = createAudioEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...getCurrentEffects(), effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const addVibration = () => {
     const effect = createVibrationEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...getCurrentEffects(), effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const addBackground = () => {
     const effect = createBackgroundEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...getCurrentEffects(), effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
   const addFlashlight = () => {
     const effect = createFlashlightEffect();
+    const currentEffects = getCurrentEffects();
 
-    writeEffects([...getCurrentEffects(), effect]);
+    writeEffects([...currentEffects, effect]);
+
     setSelectedEffectId(effect.id);
   };
 
@@ -146,7 +158,9 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
     const idIsEmpty = nextId.length === 0;
 
-    const idAlreadyExists = getCurrentEffects().some((effectCur) => {
+    const currentEffects = getCurrentEffects();
+
+    const idAlreadyExists = currentEffects.some((effectCur) => {
       if (effectCur.id === previousId) {
         return false;
       }
@@ -158,7 +172,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((cur) => cur.id === previousId);
+    const currentEffect = currentEffects.find((cur) => cur.id === previousId);
 
     let normalizedEffect: EditorEffectDraft = {
       ...updatedEffect,
@@ -173,7 +187,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       };
     }
 
-    const nextEffects = getCurrentEffects().map((effectCur) => {
+    const nextEffects = currentEffects.map((effectCur) => {
       return effectCur.id === previousId ? normalizedEffect : effectCur;
     });
 
@@ -185,8 +199,10 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const duplicateEffect = () => {
+    const currentEffects = getCurrentEffects();
+
     afterStylesSaved(() => {
-      const selectedEffect = getCurrentEffects().find((cur) => cur.id === selectedEffectId);
+      const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
       if (!selectedEffect) {
         return;
@@ -207,7 +223,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           options,
         };
 
-        writeEffects([...getCurrentEffects(), duplicate]);
+        writeEffects([...currentEffects, duplicate]);
       } else if (selectedEffect.type === 'vibration') {
         const options = {
           ...selectedEffect.options,
@@ -220,7 +236,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           options,
         };
 
-        writeEffects([...getCurrentEffects(), duplicate]);
+        writeEffects([...currentEffects, duplicate]);
       } else if (selectedEffect.type === 'background') {
         const options = structuredClone(selectedEffect.options);
 
@@ -245,7 +261,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           options,
         };
 
-        writeEffects([...getCurrentEffects(), duplicate]);
+        writeEffects([...currentEffects, duplicate]);
       } else {
         const options = {
           ...selectedEffect.options,
@@ -258,7 +274,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           options,
         };
 
-        writeEffects([...getCurrentEffects(), duplicate]);
+        writeEffects([...currentEffects, duplicate]);
       }
 
       setSelectedEffectId(id);
@@ -266,8 +282,10 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const deleteEffect = () => {
+    const currentEffects = getCurrentEffects();
+
     afterStylesSaved(() => {
-      const selectedEffect = getCurrentEffects().find((cur) => cur.id === selectedEffectId);
+      const selectedEffect = currentEffects.find((cur) => cur.id === selectedEffectId);
 
       if (!selectedEffect) {
         return;
@@ -279,11 +297,12 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         return;
       }
 
-      const filteredEffects = getCurrentEffects().filter((effectCur) => {
+      const filteredEffects = currentEffects.filter((effectCur) => {
         return effectCur.id !== selectedEffect.id;
       });
 
       writeEffects(filteredEffects);
+
       setSelectedEffectId(null);
     });
   };
@@ -315,7 +334,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         <EffectsModal
           effects={effects}
           project={project}
-          selectedEffect={selectedEffect}
+          selectedEffect={selectedEffect ?? null}
+
           onClose={closeEffects}
           onBack={goBackToEffects}
           onAddAudio={addAudio}

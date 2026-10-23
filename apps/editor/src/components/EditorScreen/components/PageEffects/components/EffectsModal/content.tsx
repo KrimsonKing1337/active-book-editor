@@ -14,11 +14,13 @@ import {
 import { EffectTile } from './components';
 
 import styles from './EffectsModal.module.scss';
+
 type ContentParams = Pick<
   EffectsModalProps,
   | 'effects'
   | 'project'
   | 'selectedEffect'
+
   | 'onAddAudio'
   | 'onAddVibration'
   | 'onAddFlashlight'
@@ -42,6 +44,7 @@ export const getModalContent = ({
   effects,
   project,
   selectedEffect,
+
   onAddAudio,
   onAddVibration,
   onAddFlashlight,

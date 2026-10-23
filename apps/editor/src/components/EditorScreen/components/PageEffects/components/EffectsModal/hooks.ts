@@ -1,6 +1,6 @@
-import type { PanelGeometry, Position } from './utils';
-
 import { useState } from 'react';
+
+import type { PanelGeometry, Position } from './utils';
 
 import { getSavedGeometry, getRndOptions, PANEL_GEOMETRY_KEY } from './utils';
 

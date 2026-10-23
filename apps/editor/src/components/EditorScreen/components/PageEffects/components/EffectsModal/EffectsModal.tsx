@@ -1,10 +1,10 @@
-import type { EffectsModalProps } from './@types';
-
 import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
 import { Rnd } from 'react-rnd';
+
+import type { EffectsModalProps } from './@types';
 
 import { getModalContent } from './content';
 import { usePanelGeometry } from './hooks';
@@ -34,7 +34,9 @@ export const EffectsModal = ({
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   const handleLoadingChange = useCallback((loading: boolean, message?: string) => {
-    setLoadingMessage(loading ? message ?? 'Загружаем файл...' : null);
+    const loadingMessage = message ?? 'Загружаем файл...';
+
+    setLoadingMessage(loading ? loadingMessage : null);
   }, []);
 
   const {
@@ -54,6 +56,7 @@ export const EffectsModal = ({
     effects,
     project,
     selectedEffect,
+
     onAddAudio,
     onAddVibration,
     onAddFlashlight,
@@ -91,6 +94,7 @@ export const EffectsModal = ({
       bounds="window"
       dragHandleClassName={styles.Header}
       {...rndOptions}
+
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
     >
@@ -99,6 +103,7 @@ export const EffectsModal = ({
         description={description}
         isCollapsed={isCollapsed}
         showBackButton={showBackButton}
+
         onBack={onBack}
         onToggleCollapsed={handleToggleCollapsed}
         onClose={onClose}

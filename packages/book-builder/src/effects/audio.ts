@@ -44,11 +44,14 @@ export const normalizeAudioEffects = (value: unknown): AudioEffect[] => {
       continue;
     }
 
+    const slug = typeof effect.slug === 'string' ? effect.slug : 'Новый звук';
+    const options = effect.options as AudioOptions;
+
     audio.push({
       id: effect.id,
       type: 'audio',
-      slug: typeof effect.slug === 'string' ? effect.slug : 'Новый звук',
-      options: effect.options as AudioOptions,
+      slug,
+      options,
     });
   }
 

@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react';
 
-import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
-
 import { useRef, useState } from 'react';
 
+import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
+
 import { useBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+
 export type StylePropertyValue = string | number | undefined;
 
 export type UseStyleEditorProps = {
@@ -29,8 +30,10 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
   };
 
   const setProperty = (name: string, nextValue: StylePropertyValue, updateLocal = true) => {
+    const updatedValue = draftStyleRef.current ?? value;
+
     const updated: Record<string, StylePropertyValue> = {
-      ...(draftStyleRef.current ?? value),
+      ...updatedValue,
     };
 
     if (nextValue === undefined || nextValue === '') {
@@ -48,6 +51,7 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
     }
 
     draftStyleRef.current = null;
+
     setDraftStyle(null);
   };
 

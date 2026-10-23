@@ -18,22 +18,30 @@ export const getRgbaWidths = (value: string): RgbaWidths => {
   const parts = channels.trim().split(/\s+/);
   const percentages = alpha.trim().replace('%', '');
 
+  const redWidth = parts[0]?.length || 3;
+  const greenWidth = parts[1]?.length || 3;
+  const blueWidth = parts[2]?.length || 3;
+  const alphaWidth = percentages.length || 3;
+
   return [
-    parts[0]?.length || 3,
-    parts[1]?.length || 3,
-    parts[2]?.length || 3,
-    percentages.length || 3,
+    redWidth,
+    greenWidth,
+    blueWidth,
+    alphaWidth,
   ] as RgbaWidths;
 };
 
 export const getRgbaMask = (widths: RgbaWidths): string => {
   const [red, green, blue, alpha] = widths;
 
-  return [
-    'd'.repeat(red),
-    'd'.repeat(green),
-    'd'.repeat(blue),
-  ].join(' ') + ' / ' + 'd'.repeat(alpha) + '%';
+  const redMask = 'd'.repeat(red);
+  const greenMask = 'd'.repeat(green);
+  const blueMask = 'd'.repeat(blue);
+  const alphaMask = 'd'.repeat(alpha);
+
+  const rgbMask = [redMask, greenMask, blueMask].join(' ');
+
+  return `${rgbMask} / ${alphaMask}%`;
 };
 
 export const getHexColor = (value: string): string => {
@@ -60,7 +68,9 @@ export const getHexColor = (value: string): string => {
   const alpha = Math.max(0, Math.min(1, Number(matches[3] ?? 1)));
   const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, '0');
 
-  return `#${channels.join('')}${alphaHex}`;
+  const channelsString = `${channels.join('')}`;
+
+  return `#${channelsString}${alphaHex}`;
 };
 
 export const getRgbaColor = (hex: string): string => {
@@ -70,7 +80,10 @@ export const getRgbaColor = (hex: string): string => {
 
   const alpha = Math.round(parseInt(hex.slice(7, 9), 16) / 255 * 100) / 100;
 
-  return `${channels.join(' ')} / ${Math.round(alpha * 100)}%`;
+  const channelsString = `${channels.join(' ')}`;
+  const alphaString = `${Math.round(alpha * 100)}`;
+
+  return `${channelsString} / ${alphaString}%`;
 };
 
 export const parseRgbaColor = (value: string): string | null => {
@@ -85,18 +98,27 @@ export const parseRgbaColor = (value: string): string | null => {
   const alphaText = sections[1].trim().slice(0, -1);
   const percentage = Number(alphaText);
 
-  const channelsAreValid = channelTexts.length === 3 && channelTexts.every((text, index) => {
+  const channelTextsCountAreValid = channelTexts.length === 3;
+
+  const channelTextAreValid = channelTexts.every((text, index) => {
     const number = channelNumbers[index];
 
     return text.length > 0 && Number.isInteger(number) && number >= 0 && number <= 255;
   });
 
-  const alphaIsValid = alphaText.length > 0 && Number.isInteger(percentage)
-    && percentage >= 0 && percentage <= 100;
+  const channelsAreValid = channelTextsCountAreValid && channelTextAreValid;
+
+  const alphaIsValid = alphaText.length > 0
+    && Number.isInteger(percentage)
+    && percentage >= 0
+    && percentage <= 100;
 
   if (!channelsAreValid || !alphaIsValid) {
     return null;
   }
 
-  return `rgb(${channelNumbers.join(' ')} / ${percentage / 100})`;
+  const rgbValue = `${channelNumbers.join(' ')}`;
+  const alphaValue = percentage / 100;
+
+  return `rgb(${rgbValue} / ${alphaValue})`;
 };

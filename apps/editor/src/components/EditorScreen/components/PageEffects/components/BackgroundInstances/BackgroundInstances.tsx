@@ -1,29 +1,27 @@
 import type { ComponentType, CSSProperties } from 'react';
 
+import { useEffect, useMemo, useState } from 'react';
+
 import type {
   BackgroundEffect as CoreBackgroundEffect,
 } from 'activeBook-core/hooks/effects/background/@types';
 
 import type { BookComponentProps } from '@active-book/types';
 
-import type { BookProject } from '@project/@types';
-
-import type { BackgroundEffectDraft } from '../../@types';
-
-import type {
-  BackgroundPreviewLayer,
-  BackgroundStylePreviews,
-} from '../../PageEffectsContext';
-
-import { useEffect, useMemo, useState } from 'react';
-
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
 
+import type { BookProject } from '@project/@types';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
+import type { BackgroundEffectDraft } from '../../@types';
+
 import {
+  type BackgroundPreviewLayer,
+  type BackgroundStylePreviews,
+
   getBackgroundPreviewKey,
   useBackgroundStylePreviews,
   usePageEffects,
@@ -48,7 +46,7 @@ const resolveSource = async (src: string, project: BookProject | null): Promise<
   }
 
   if (!project) {
-    throw new Error('Сохрани проект, чтобы использовать файлы из assets/');
+    throw new Error('Сохраните проект, чтобы использовать файлы из assets/');
   }
 
   const file = await project.storage.getAssetFile(trimmed);
@@ -171,7 +169,11 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
   }
 
   const componentElement = useMemo(() => {
-    return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
+    if (!CustomComponent) {
+      return null;
+    }
+
+    return <CustomComponent book={bookRuntime} />;
   }, [CustomComponent]);
 
   if (!media) {
@@ -185,30 +187,38 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
   };
 
   const backgroundImages = images.map((imageCur, index) => {
+    const style = withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id));
+
     return {
       ...imageCur,
       src: media.images[index],
-      style: withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id)),
+      style,
     };
   });
 
   const backgroundVideos = videos.map((videoCur, index) => {
+    const style = withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id));
+
     return {
       ...videoCur,
       src: media.videos[index],
-      style: withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id)),
+      style,
     };
   });
 
+  const shadowStyle = withPreviewStyle(options?.shadow?.style, previewStyle('shadow'));
+
   const shadow = options.shadow && {
     ...options.shadow,
-    style: withPreviewStyle(options.shadow.style, previewStyle('shadow')),
+    style: shadowStyle,
   };
+
+  const backgroundStyle = withPreviewStyle(options.style, previewStyle('background'));
 
   const background: CoreBackgroundEffect = {
     id: effect.id,
     ...options,
-    style: withPreviewStyle(options.style, previewStyle('background')),
+    style: backgroundStyle,
     shadow,
     images: backgroundImages,
     videos: backgroundVideos,
@@ -220,8 +230,8 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
 
 export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {
   const { effects } = usePageEffects();
-  const stylePreviews = useBackgroundStylePreviews();
   const { components } = useCustomComponents();
+  const stylePreviews = useBackgroundStylePreviews();
 
   const backgrounds = effects.filter((effectCur): effectCur is BackgroundEffectDraft => {
     return effectCur.type === 'background';

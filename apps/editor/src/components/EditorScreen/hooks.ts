@@ -25,9 +25,9 @@ import {
   saveProject,
 } from '@project/projectService';
 
-import { useAsyncEffect } from '@hooks/useAsyncEffect';
-
 import { hasPendingProjectChanges, markProjectStylesSaved } from '@project/pendingOperations';
+
+import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
 import type { BuildState } from './@types';
 
@@ -70,6 +70,7 @@ export const useAutosave = ({
     }
 
     window.clearTimeout(autosaveTimerRef.current);
+
     autosaveTimerRef.current = null;
   }, []);
 
@@ -100,6 +101,7 @@ export const useAutosave = ({
     setIsDirty(false);
     setShowSavedStatus(true);
     setProjectMessage('Локальный проект');
+
     markProjectStylesSaved();
   }, []);
 
@@ -130,6 +132,7 @@ export const useAutosave = ({
     }
 
     clearAutosaveTimer();
+
     documentRevisionRef.current += 1;
 
     editor.commands.setContent(document, {
@@ -182,6 +185,7 @@ export const useAutosave = ({
     if (documentIsUnchanged) {
       setIsDirty(false);
       setShowSavedStatus(true);
+
       markProjectStylesSaved();
     } else {
       setIsDirty(true);
@@ -294,8 +298,9 @@ export const useProjectRestore = ({
 
       if (result.status === 'opened') {
         setProject(result.openedProject.project);
-        replaceDocument(result.openedProject.document);
         setProjectMessage(`Открыт последний проект: ${result.openedProject.project.name}`);
+
+        replaceDocument(result.openedProject.document);
       } else if (result.status === 'permission-required') {
         setPendingRestore(result.project);
         setProjectMessage(`Нужно разрешение, чтобы снова открыть «${result.project.name}»`);
@@ -374,9 +379,9 @@ export const useProjectActions = ({
 
       setProject(null);
       setPendingRestore(null);
+      setProjectMessage('Новый несохранённый проект');
 
       replaceDocument(createEmptyDocument());
-      setProjectMessage('Новый несохранённый проект');
     } finally {
       setIsProjectBusy(false);
     }

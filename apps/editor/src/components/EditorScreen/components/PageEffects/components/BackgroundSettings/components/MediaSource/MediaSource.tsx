@@ -1,10 +1,13 @@
-import type { ChangeEvent } from 'react';
+import { type ChangeEvent, useEffect, useId, useRef, useState } from 'react';
 
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
 
-import { useEffect, useId, useRef, useState } from 'react';
-
 import { isAbortError } from '@project/errors';
+
+import {
+  IMAGE_MEDIA_EXTENSIONS,
+  VIDEO_MEDIA_EXTENSIONS,
+} from './utils';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -23,7 +26,7 @@ const imageMediaType = {
   placeholder: 'assets/forest.webp',
   description: 'Изображения',
   accept: 'image/*',
-  extensions: ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.avif', '.svg', '.bmp'],
+  extensions: IMAGE_MEDIA_EXTENSIONS,
 };
 
 const videoMediaType = {
@@ -31,7 +34,7 @@ const videoMediaType = {
   placeholder: 'assets/fog.webm',
   description: 'Видеофайлы',
   accept: 'video/*',
-  extensions: ['.mp4', '.webm', '.ogv', '.mov', '.m4v'],
+  extensions: VIDEO_MEDIA_EXTENSIONS,
 };
 
 const mediaTypes = {

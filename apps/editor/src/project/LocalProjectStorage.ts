@@ -162,7 +162,7 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new InvalidProjectError('book.json не содержит документ Active Book.');
     }
 
-    return document;
+    return document as JSONContent;
   }
 
   async writeBook(document: JSONContent): Promise<void> {
@@ -228,6 +228,7 @@ export class LocalProjectStorage implements ProjectStorage {
       await writable.close();
     } catch (error) {
       await writable.abort?.();
+
       throw error;
     }
   }
@@ -281,6 +282,7 @@ export class LocalProjectStorage implements ProjectStorage {
       await writable.close();
     } catch (error) {
       await writable.abort?.();
+
       throw error;
     }
 

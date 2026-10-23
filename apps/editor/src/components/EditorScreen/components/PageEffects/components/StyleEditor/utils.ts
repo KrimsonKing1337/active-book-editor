@@ -22,7 +22,9 @@ export const normalizePropertyName = (name: string): string => {
     return trimmed;
   }
 
-  return trimmed.replace(/-([a-z])/g, (_full, letter: string) => letter.toUpperCase());
+  const replaceFunc = (_full: string, letter: string) => letter.toUpperCase();
+
+  return trimmed.replace(/-([a-z])/g, replaceFunc);
 };
 
 export const isValidCssRule = (property: string, value: string): boolean => {
@@ -33,7 +35,9 @@ export const isValidCssRule = (property: string, value: string): boolean => {
     return false;
   }
 
-  const cssProperty = property.replace(/[A-Z]/g, (letter) => '-' + letter.toLowerCase());
+  const replaceFunc = (letter: string) => '-' + letter.toLowerCase();
+
+  const cssProperty = property.replace(/[A-Z]/g, replaceFunc);
 
   try {
     return CSS.supports(cssProperty, value);

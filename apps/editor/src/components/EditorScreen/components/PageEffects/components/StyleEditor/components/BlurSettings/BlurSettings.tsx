@@ -35,6 +35,7 @@ export const BlurSettings = ({ filter, onChange, onCommit }: BlurSettingsProps) 
 
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(blur);
+
       sliderFrameRef.current = null;
     });
   };
@@ -49,7 +50,9 @@ export const BlurSettings = ({ filter, onChange, onCommit }: BlurSettingsProps) 
     // Keep document updates outside react-range's flushSync.
     sliderFrameRef.current = requestAnimationFrame(() => {
       setDragBlur(null);
+
       onCommit();
+
       sliderFrameRef.current = null;
     });
   };

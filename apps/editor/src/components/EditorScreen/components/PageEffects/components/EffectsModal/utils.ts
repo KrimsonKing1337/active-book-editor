@@ -121,8 +121,10 @@ export const getRndOptions = (geometry: PanelGeometry, isCollapsed: boolean) => 
     zIndex: 1000,
   };
 
+  const cancelSelectors = panelDragCancelSelectors.join(',');
+
   return {
-    cancel: panelDragCancelSelectors.join(','),
+    cancel: cancelSelectors,
     size: panelSize,
     position: panelPosition,
     minWidth: panelMinWidth,

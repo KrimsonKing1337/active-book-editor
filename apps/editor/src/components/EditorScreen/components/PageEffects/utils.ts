@@ -6,6 +6,7 @@ import type {
 } from './@types';
 
 import { getBlurFilter } from './components/StyleEditor/utils';
+
 export const createAudioEffect = (): AudioEffectDraft => {
   const options: AudioEffectDraft['options'] = {
     src: '',

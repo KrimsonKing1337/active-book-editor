@@ -48,7 +48,9 @@ export const AudioSettings = ({
   useEffect(() => {
     const loadingMessage = isImporting ? 'Загружаем аудиофайл...' : 'Подготавливаем аудио...';
 
-    onLoadingChange(isImporting || isPreviewLoading, loadingMessage);
+    const isLoading = isImporting || isPreviewLoading;
+
+    onLoadingChange(isLoading, loadingMessage);
   }, [isImporting, isPreviewLoading, onLoadingChange]);
 
   useEffect(() => {
@@ -225,6 +227,7 @@ export const AudioSettings = ({
 
     await importAudioFile(file);
   };
+
   const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const type = event.target.value as AudioOptions['type'];
 

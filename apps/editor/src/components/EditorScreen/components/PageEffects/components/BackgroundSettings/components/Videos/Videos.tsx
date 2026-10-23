@@ -14,6 +14,7 @@ type BackgroundVideos = NonNullable<BackgroundOptions['videos']>;
 
 export type BackgroundVideosProps = {
   videos: BackgroundVideos;
+
   onChange: (videos: BackgroundVideos) => void;
   canImport: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
@@ -21,6 +22,7 @@ export type BackgroundVideosProps = {
 
 export const Videos = ({
   videos,
+
   canImport,
   onChange,
   onImportAsset,

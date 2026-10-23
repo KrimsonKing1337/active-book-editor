@@ -40,6 +40,7 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
     };
 
     delete updated[name];
+
     updated[nextName] = nextValue;
 
     onPreview(updated as CSSProperties);
@@ -82,6 +83,7 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
 
     onPreview(updatedStyle);
     onCommit();
+
     setNewProperty('');
     setNewValue('');
     setPropertyError('');
@@ -109,6 +111,7 @@ export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesPro
             key={property}
             name={property}
             value={ruleValue as string | number}
+
             onUpdate={updateRule}
             onPreview={previewRuleValue}
             onDelete={deleteRule}

@@ -1,8 +1,8 @@
 import type { ChangeEvent } from 'react';
 
-import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
-
 import { useCustomComponents } from '@project/customComponentRegistry';
+
+import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -16,7 +16,11 @@ type CustomComponentProps = {
 export const CustomComponent = ({ component, onChange }: CustomComponentProps) => {
   const { definitions } = useCustomComponents();
 
-  const componentId = component ? `${component.package}/${component.name}` : '';
+  let componentId = '';
+
+  if (component) {
+    componentId = `${component.package}/${component.name}`;
+  }
 
   const updateComponent = (id: string) => {
     if (!id) {

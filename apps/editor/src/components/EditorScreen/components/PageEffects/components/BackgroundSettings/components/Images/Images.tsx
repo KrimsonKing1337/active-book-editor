@@ -19,6 +19,7 @@ export type BackgroundImagesProps = {
 
 export const Images = ({
   images,
+
   canImport,
   onChange,
   onImportAsset,

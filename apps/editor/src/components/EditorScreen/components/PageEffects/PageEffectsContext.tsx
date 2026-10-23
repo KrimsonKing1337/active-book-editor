@@ -1,17 +1,5 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
 
-import type { Editor } from '@tiptap/core';
-
-import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
-
-import type {
-  AudioEffectDraft,
-  BackgroundEffectDraft,
-  EditorEffectDraft,
-  FlashlightEffectDraft,
-  VibrationEffectDraft,
-} from './@types';
-
 import {
   createContext,
   useCallback,
@@ -22,9 +10,22 @@ import {
   useState,
 } from 'react';
 
+import type { Editor } from '@tiptap/core';
+
+import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
+
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
+
+import type {
+  AudioEffectDraft,
+  BackgroundEffectDraft,
+  EditorEffectDraft,
+  FlashlightEffectDraft,
+  VibrationEffectDraft,
+} from './@types';
+
 export type AudioPreviewStatus = {
   state: 'empty' | 'loading' | 'ready' | 'error';
   error?: string;
@@ -97,26 +98,29 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   const previewFrameRef = useRef<number | null>(null);
   const unsavedStylesRef = useRef(false);
 
-  const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>((effectId, layer, mediaId, style) => {
-    const key = getBackgroundPreviewKey(effectId, layer, mediaId);
+  const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>(
+    (effectId, layer, mediaId, style) => {
+      const key = getBackgroundPreviewKey(effectId, layer, mediaId);
 
-    previewStylesRef.current = {
-      ...previewStylesRef.current,
-      [key]: style,
-    };
+      previewStylesRef.current = {
+        ...previewStylesRef.current,
+        [key]: style,
+      };
 
-    unsavedStylesRef.current = true;
-    setHasPendingStyles(true);
+      unsavedStylesRef.current = true;
 
-    if (previewFrameRef.current !== null) {
-      cancelAnimationFrame(previewFrameRef.current);
-    }
+      setHasPendingStyles(true);
 
-    previewFrameRef.current = requestAnimationFrame(() => {
-      setBackgroundStylePreviews(previewStylesRef.current);
-      previewFrameRef.current = null;
-    });
-  }, []);
+      if (previewFrameRef.current !== null) {
+        cancelAnimationFrame(previewFrameRef.current);
+      }
+
+      previewFrameRef.current = requestAnimationFrame(() => {
+        setBackgroundStylePreviews(previewStylesRef.current);
+
+        previewFrameRef.current = null;
+      });
+    }, []);
 
   useEffect(() => {
     return () => {
@@ -169,9 +173,11 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       setEffects((current) => {
         const hasSameEffectCount = current.length === nextEffects.length;
 
-        const allEffectReferencesMatch = hasSameEffectCount && current.every((currentEffect, index) => {
+        const everyEffectMatch = current.every((currentEffect, index) => {
           return currentEffect === nextEffects[index];
         });
+
+        const allEffectReferencesMatch = hasSameEffectCount && everyEffectMatch;
 
         return allEffectReferencesMatch ? current : nextEffects;
       });
@@ -243,7 +249,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       }
 
       const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
-        return pending[getBackgroundPreviewKey(effectCur.id, layer, mediaId)];
+        const previewKey = getBackgroundPreviewKey(effectCur.id, layer, mediaId);
+
+        return pending[previewKey];
       };
 
       const backgroundStyle = previewStyle('background');
@@ -257,14 +265,23 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
         return previewStyle('video', videoCur.id) !== undefined;
       });
 
-      if (!backgroundStyle && !shadowStyle && !hasImageChanges && !hasVideoChanges) {
+      if (!backgroundStyle
+        && !shadowStyle
+        && !hasImageChanges
+        && !hasVideoChanges) {
         return effectCur;
       }
 
       const previousShadow = effectCur.options.shadow;
-      const nextShadow = shadowStyle && previousShadow
-        ? { ...previousShadow, style: shadowStyle }
-        : previousShadow;
+
+      const copiedPreviousShadow = {
+        ...previousShadow,
+        style: shadowStyle,
+      };
+
+      const hasStyleAndShadow = shadowStyle && previousShadow;
+
+      const nextShadow = hasStyleAndShadow ? copiedPreviousShadow : previousShadow;
 
       const images = effectCur.options.images?.map((imageCur) => {
         const style = previewStyle('image', imageCur.id);
@@ -292,9 +309,11 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
         };
       });
 
+      const optionStyle = backgroundStyle ?? effectCur.options.style;
+
       const options = {
         ...effectCur.options,
-        style: backgroundStyle ?? effectCur.options.style,
+        style: optionStyle,
         shadow: nextShadow,
         images,
         videos,
@@ -315,11 +334,13 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     }
 
     previewStylesRef.current = {};
+
     setBackgroundStylePreviews({});
     markStylePreviewsCommitted();
 
     if (previewFrameRef.current !== null) {
       cancelAnimationFrame(previewFrameRef.current);
+
       previewFrameRef.current = null;
     }
 
@@ -332,6 +353,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
   const markStylesSaved = useCallback(() => {
     unsavedStylesRef.current = false;
+
     setHasPendingStyles(false);
   }, []);
 

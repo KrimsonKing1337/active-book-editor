@@ -21,11 +21,13 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
     const normalized = removeLeadingZeros(e.target.value);
 
     e.target.value = normalized;
+
     updateIndex(Number(normalized));
   };
 
   const handleStepChange = (step: number) => {
     updateIndex(zIndex + step);
+
     onCommit();
   };
 

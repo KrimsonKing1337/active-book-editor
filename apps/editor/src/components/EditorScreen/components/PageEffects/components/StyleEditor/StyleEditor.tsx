@@ -44,7 +44,9 @@ export const StyleEditor = ({
 
   const handleBlurChange = (blur: number, updateLocal = true) => {
     if (Number.isFinite(blur) && blur >= 0) {
-      setProperty('backdropFilter', getBlurFilter(blur), updateLocal);
+      const blurFilterValue = getBlurFilter(blur);
+
+      setProperty('backdropFilter', blurFilterValue, updateLocal);
     }
   };
 

@@ -91,6 +91,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
     setColorError('');
     setActiveColorInput(null);
+
     onColorChange(color);
     onCommit();
   };
@@ -105,6 +106,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
       e.preventDefault();
 
       const widths: typeof rgbaWidths = [3, 3, 3, 3];
+
       const options = {
         mask: getRgbaMask(widths),
         replacement: rgbaReplacement,
@@ -127,13 +129,21 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     }
 
     const [red, green, blue] = rgbaWidths;
+
+    const redStart = red + 1;
+    const greenStart = red + green + 2;
+    const blueStart = red + green + blue + 5;
+
     const starts = [
       0,
-      red + 1,
-      red + green + 2,
-      red + green + blue + 5,
+      redStart,
+      greenStart,
+      blueStart,
     ];
-    const currentIndex = starts.reduce((index, start, itemIndex) => position >= start ? itemIndex : index, -1);
+
+    const currentIndex = starts.reduce((index, start, itemIndex) => {
+      return position >= start ? itemIndex : index;
+    }, -1);
 
     if (currentIndex < 0 || currentIndex > 2) {
       return;
@@ -141,8 +151,10 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
     e.preventDefault();
 
-    const currentValue = rgbaDraft.slice(starts[currentIndex], starts[currentIndex] + rgbaWidths[currentIndex]);
-    const digits = [...currentValue].filter((character) => character >= '0' && character <= '9');
+    const last = starts[currentIndex] + rgbaWidths[currentIndex];
+
+    const currentValue = rgbaDraft.slice(starts[currentIndex], last);
+    const digits = [...currentValue].filter((cur) => cur >= '0' && cur <= '9');
 
     if (!digits.length) {
       return;
@@ -154,6 +166,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
       rgbaWidths[2],
       rgbaWidths[3],
     ];
+
     nextWidths[currentIndex] = digits.length;
 
     const previousMask = {
@@ -165,17 +178,23 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
       mask: getRgbaMask(nextWidths),
       replacement: rgbaReplacement,
     };
+
     const rawDigits = unformat(rgbaDraft, previousMask);
 
     setRgbaWidths(nextWidths);
     setRgbaDraft(format(rawDigits, nextMask));
 
     const nextIndex = e.key === '/' ? 3 : currentIndex + 1;
+
+    const nextStartsRed = nextWidths[0] + 1;
+    const nextStartsGreen = nextWidths[0] + nextWidths[1] + 2;
+    const nextStartsBlue = nextWidths[0] + nextWidths[1] + nextWidths[2] + 5;
+
     const nextStarts = [
       0,
-      nextWidths[0] + 1,
-      nextWidths[0] + nextWidths[1] + 2,
-      nextWidths[0] + nextWidths[1] + nextWidths[2] + 5,
+      nextStartsRed,
+      nextStartsGreen,
+      nextStartsBlue,
     ];
 
     requestAnimationFrame(() => {
@@ -191,6 +210,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     }
 
     e.preventDefault();
+
     setRgbaDraft(pastedValue);
     setRgbaWidths(getRgbaWidths(pastedValue));
     setColorError('');
@@ -253,6 +273,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
             placeholder="#RRGGBBAA"
             value={hexDraft}
             spellCheck={false}
+
             onChange={handleHexInputChange}
             onFocus={handleHexFocus}
             onBlur={handleHexBlur}
@@ -275,6 +296,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
             inputMode="numeric"
             spellCheck={false}
             placeholder="204 62 114 / 80%"
+
             onChange={handleRgbaInputChange}
             onKeyDown={handleRgbaKeyDown}
             onPaste={handleRgbaPaste}
