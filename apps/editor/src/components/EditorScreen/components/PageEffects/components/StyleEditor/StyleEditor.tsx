@@ -409,7 +409,7 @@ export const StyleEditor = ({
 
   const handleBlurChange = (blur: number) => {
     if (Number.isFinite(blur) && blur >= 0) {
-      const newFilter = blur ? 'blur(' + blur + 'px)' : undefined;
+      const newFilter = blur ? `blur(${blur}px)` : undefined;
 
       setProperty('backdropFilter', newFilter);
     }
@@ -502,8 +502,6 @@ export const StyleEditor = ({
             }}
             onBlur={() => applyColor('hex')}
           />
-
-          <small>#RRGGBBAA</small>
         </label>
 
         <label className={styles.Field}>
@@ -529,8 +527,6 @@ export const StyleEditor = ({
             }}
             onBlur={() => applyColor('rgba')}
           />
-
-          <small>204 62 114 / 80%</small>
         </label>
       </div>
 
@@ -582,10 +578,14 @@ export const StyleEditor = ({
         <span>z-index</span>
 
         <div className={styles.LayerControls}>
-          <button type="button" onClick={() => {
-            handleZIndexChange(zIndex - 1);
-            commitStyle();
-          }} aria-label="На слой назад">
+          <button
+            type="button"
+            onClick={() => {
+              handleZIndexChange(zIndex - 1);
+              commitStyle();
+            }}
+            aria-label="На слой назад"
+          >
             −
           </button>
 
@@ -597,10 +597,14 @@ export const StyleEditor = ({
             onBlur={commitStyle}
           />
 
-          <button type="button" onClick={() => {
-            handleZIndexChange(zIndex + 1);
-            commitStyle();
-          }} aria-label="На слой вперёд">
+          <button
+            type="button"
+            onClick={() => {
+              handleZIndexChange(zIndex + 1);
+              commitStyle();
+            }}
+            aria-label="На слой вперёд"
+          >
             +
           </button>
         </div>
