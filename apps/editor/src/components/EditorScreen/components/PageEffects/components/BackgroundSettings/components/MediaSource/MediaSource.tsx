@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { isAbortError } from '@project/errors';
 
 import styles from '../../BackgroundSettings.module.scss';
+
 type MediaKind = 'image' | 'video';
 
 type MediaSourceProps = {
