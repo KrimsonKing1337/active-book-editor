@@ -4,6 +4,8 @@ import type { SideOptions } from '@active-book/book-builder/effects';
 
 import type { SideEffectDraft } from '../../@types';
 
+import { getSidePreviewKey, usePageEffects } from '../../PageEffectsContext';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { AnimationSettings } from './components/AnimationSettings';
@@ -25,6 +27,8 @@ type LayoutSettingsProps = {
   item: ItemLayout;
   onChange: (changes: Partial<ItemLayout>) => void;
   defaultColor?: string;
+  hidden: boolean;
+  onHiddenChange: (hidden: boolean) => void;
 };
 
 const positions: Array<{ value: NonNullable<ItemLayout['position']>; label: string }> = [
@@ -51,7 +55,13 @@ const textPresets = [
   { value: 'none' as const, label: 'Без анимации' },
 ];
 
-const LayoutSettings = ({ item, onChange, defaultColor = '#ff0000' }: LayoutSettingsProps) => {
+const LayoutSettings = ({
+  item,
+  onChange,
+  defaultColor = '#ff0000',
+  hidden,
+  onHiddenChange,
+}: LayoutSettingsProps) => {
   const handlePositionChange = (e: ChangeEvent<HTMLSelectElement>) => {
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
@@ -82,7 +92,7 @@ const LayoutSettings = ({ item, onChange, defaultColor = '#ff0000' }: LayoutSett
   };
 
   const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ hidden: e.target.checked });
+    onHiddenChange(e.target.checked);
   };
 
   const color = typeof item.style?.color === 'string' && /^#[0-9a-f]{6}$/i.test(item.style.color)
@@ -134,7 +144,7 @@ const LayoutSettings = ({ item, onChange, defaultColor = '#ff0000' }: LayoutSett
         </label>
 
         <label>
-          <input type="checkbox" checked={item.hidden ?? false} onChange={handleHiddenChange} />
+          <input type="checkbox" checked={hidden} onChange={handleHiddenChange} />
           Скрыть элемент
         </label>
       </div>
@@ -144,6 +154,13 @@ const LayoutSettings = ({ item, onChange, defaultColor = '#ff0000' }: LayoutSett
 
 export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
   const { definitions } = useCustomComponents();
+  const { sideItemPreviews, updateSideItemPreview } = usePageEffects();
+
+  const previewFor = (itemId: string) => {
+    const key = getSidePreviewKey(effect.id, itemId);
+
+    return sideItemPreviews[key] ?? {};
+  };
 
   const { shadows = [], texts = [], component } = effect.options;
 
@@ -244,11 +261,15 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <LayoutSettings
                 item={shadowCur}
+                hidden={previewFor(shadowCur.id).hidden ?? shadowCur.hidden ?? false}
+                onHiddenChange={(hidden) => updateSideItemPreview(effect.id, shadowCur.id, { hidden })}
                 onChange={(changes) => updateShadow(shadowCur.id, changes)}
               />
 
               <AnimationSettings
                 animation={shadowCur.animation}
+                playState={previewFor(shadowCur.id).playState}
+                onPlaybackChange={(playState) => updateSideItemPreview(effect.id, shadowCur.id, { playState })}
                 presets={shadowPresets}
                 defaultDuration={1000}
                 onChange={(animation) => updateShadow(shadowCur.id, { animation })}
@@ -294,11 +315,15 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <LayoutSettings
                 item={textCur}
                 defaultColor="#a3a3a3"
+                hidden={previewFor(textCur.id).hidden ?? textCur.hidden ?? false}
+                onHiddenChange={(hidden) => updateSideItemPreview(effect.id, textCur.id, { hidden })}
                 onChange={(changes) => updateText(textCur.id, changes)}
               />
 
               <AnimationSettings
                 animation={textCur.animation}
+                playState={previewFor(textCur.id).playState}
+                onPlaybackChange={(playState) => updateSideItemPreview(effect.id, textCur.id, { playState })}
                 presets={textPresets}
                 defaultDuration={60000}
                 onChange={(animation) => updateText(textCur.id, { animation })}

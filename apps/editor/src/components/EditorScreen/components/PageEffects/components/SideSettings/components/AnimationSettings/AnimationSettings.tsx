@@ -10,10 +10,12 @@ type AnimationSettingsProps = {
   animation?: SideAnimation;
   presets: Array<{ value: AnimationPreset; label: string }>;
   defaultDuration: number;
+  playState?: SideAnimation['playState'];
+  onPlaybackChange: (state: NonNullable<SideAnimation['playState']>) => void;
   onChange: (animation: SideAnimation) => void;
 };
 
-export const AnimationSettings = ({ animation = {}, presets, defaultDuration, onChange }: AnimationSettingsProps) => {
+export const AnimationSettings = ({ animation = {}, presets, defaultDuration, playState, onChange, onPlaybackChange }: AnimationSettingsProps) => {
   const updateAnimation = (changes: Partial<SideAnimation>) => {
     onChange({
       ...animation,
@@ -114,13 +116,13 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, on
       </label>
 
       <div>
-        <button type="button" onClick={() => updateAnimation({ playState: 'running' })}>
+        <button type="button" aria-pressed={playState === 'running'} onClick={() => onPlaybackChange('running')}>
           Старт
         </button>
-        <button type="button" onClick={() => updateAnimation({ playState: 'paused' })}>
+        <button type="button" aria-pressed={playState === 'paused'} onClick={() => onPlaybackChange('paused')}>
           Пауза
         </button>
-        <button type="button" onClick={() => updateAnimation({ playState: 'stopped' })}>
+        <button type="button" aria-pressed={playState === 'stopped'} onClick={() => onPlaybackChange('stopped')}>
           Стоп
         </button>
       </div>
