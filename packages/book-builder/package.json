@@ -21,7 +21,11 @@
   },
   "exports": {
     "./*": "./src/*.ts",
-    "./effects": "./src/effects/index.ts"
+    "./effects": "./src/effects/index.ts",
+    "./build": "./src/build/build.ts",
+    "./bookPreparation": "./src/bookPreparation/index.ts",
+    "./server": "./src/server/index.ts",
+    "./components/custom": "./src/components/custom/index.ts"
   },
   "devDependencies": {
     "@types/node": "^26.5.1",

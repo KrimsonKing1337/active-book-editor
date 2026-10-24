@@ -11,7 +11,7 @@ import 'activeBook-core/styles/styles.scss';
 
 import type { BookDocument } from '@types';
 
-import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
 import { BookPage, StartReading } from '@components';
 

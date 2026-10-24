@@ -7,7 +7,7 @@
 `import type`; реальные объекты доступны при рендеринге через проп `book`.
 
 Реализация `createBookRuntime(mode)` находится в
-`packages/book-builder/src/customComponents/runtime.ts`. Сейчас она выдаёт:
+`packages/book-builder/src/components/custom/runtime.ts`. Сейчас она выдаёт:
 
 - `book.mode`: `editor` или `reader`.
 - `book.components.P`, `H1`, `H2`: реальные компоненты ядра.

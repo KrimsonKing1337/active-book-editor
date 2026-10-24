@@ -4,7 +4,7 @@ import path from 'node:path';
 import { build } from 'vite';
 
 import { createViteConfig } from './vite.config';
-import { compileBookDocument } from './compileBookDocument';
+import { compileBookDocument } from '../bookPreparation/compileBookDocument';
 
 type BuildBookParams = {
   projectRoot: string;

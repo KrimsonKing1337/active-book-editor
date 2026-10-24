@@ -11,7 +11,7 @@ import {
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import type { BookComponentProps } from '@active-book/types';
 
 import styles from './ComponentNode.module.scss';

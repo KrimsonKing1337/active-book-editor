@@ -30,7 +30,7 @@ MyBook/
 2. Выбираем архив. Редактор читает манифест; при необходимости копирует TGZ в `dependencies/`.
 3. `LocalProjectStorage` записывает ссылку `file:./dependencies/...tgz` в `package.json` книги.
 4. Браузер распаковывает TGZ через `DecompressionStream('gzip')`.
-5. `packages/book-builder/src/customComponents/browser.ts` выдаёт содержимому JS Blob URL, а CSS подключает через `<link>`.
+5. `packages/book-builder/src/components/custom/browser.ts` выдаёт содержимому JS Blob URL, а CSS подключает через `<link>`.
 6. `import(/* @vite-ignore */ url)` загружает ESM **нативно, без npm install и без Vite-плагина**.
 7. Реестр редактора обновляется через `useSyncExternalStore`; Tiptap NodeView получает новый компонент.
 
