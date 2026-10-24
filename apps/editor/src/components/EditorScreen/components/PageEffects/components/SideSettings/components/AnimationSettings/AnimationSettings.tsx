@@ -9,10 +9,11 @@ type AnimationPreset = NonNullable<SideAnimation['preset']>;
 type AnimationSettingsProps = {
   animation?: SideAnimation;
   presets: Array<{ value: AnimationPreset; label: string }>;
+  defaultDuration: number;
   onChange: (animation: SideAnimation) => void;
 };
 
-export const AnimationSettings = ({ animation = {}, presets, onChange }: AnimationSettingsProps) => {
+export const AnimationSettings = ({ animation = {}, presets, defaultDuration, onChange }: AnimationSettingsProps) => {
   const updateAnimation = (changes: Partial<SideAnimation>) => {
     onChange({
       ...animation,
@@ -75,7 +76,7 @@ export const AnimationSettings = ({ animation = {}, presets, onChange }: Animati
           type="number"
           min="0"
           step="100"
-          value={animation.duration ?? 1000}
+          value={animation.duration ?? defaultDuration}
           onChange={handleDurationChange}
         />
       </label>
