@@ -24,6 +24,7 @@ import type {
   EditorEffectDraft,
   FlashlightEffectDraft,
   VibrationEffectDraft,
+  SideEffectDraft,
 } from './@types';
 
 export type AudioPreviewStatus = {
@@ -80,12 +81,14 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
   const groupedBackground = grouped.background ?? [];
+  const groupedSide = grouped.side ?? [];
 
   return [
     ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
     ...groupedBackground,
+    ...groupedSide,
   ];
 };
 
@@ -215,12 +218,17 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return effectCur.type === 'background';
     });
 
+    const sideEffects = nextEffects.filter((effectCur): effectCur is SideEffectDraft => {
+      return effectCur.type === 'side';
+    });
+
     const groupedEffects: GroupedPageEffects = {
       ...currentPageEffects,
       audio: audioEffects,
       vibration: vibrationEffects,
       flashlight: flashlightEffects,
       background: backgroundEffects,
+      side: sideEffects,
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);

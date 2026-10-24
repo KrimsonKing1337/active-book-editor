@@ -1,7 +1,7 @@
 import { type ComponentType, createElement } from 'react';
 
 import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration, Flashlight, Background } from 'activeBook-core/components/ProxyHooks';
+import { Audio, Vibration, Flashlight, Background, Side } from 'activeBook-core/components/ProxyHooks';
 
 import type { BookDocument, CustomComponentType } from '@types';
 import type { BookRuntime } from '@active-book/types';
@@ -15,6 +15,7 @@ import {
   getVibrationEffects,
   getFlashlightEffects,
   getBackgroundEffects,
+  getSideEffects,
 } from './utils';
 
 type BookPageProps = {
@@ -30,6 +31,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
   const vibrationEffects = getVibrationEffects(document);
   const flashlightEffects = getFlashlightEffects(document);
   const backgroundEffects = getBackgroundEffects(document);
+  const sideEffects = getSideEffects(document);
 
   return (
     <PageWrapper>
@@ -64,6 +66,25 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
               id={effectCur.id}
               page={1}
               {...effectCur.options}
+            />
+          );
+        })}
+
+        {sideEffects.map((effectCur) => {
+          const { component, ...options } = effectCur.options;
+          const componentId = component ? `${component.package}/${component.name}` : null;
+          const CustomComponent = componentId ? customComponents[componentId] as CustomComponentType : undefined;
+
+          const componentElement = CustomComponent
+            ? createElement(CustomComponent, { book: bookRuntime })
+            : null;
+
+          return (
+            <Side
+              key={effectCur.id}
+              id={effectCur.id}
+              {...options}
+              Component={componentElement}
             />
           );
         })}

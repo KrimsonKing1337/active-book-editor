@@ -25,6 +25,13 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
     const videoCount = effect.options.videos?.length ?? 0;
 
     effectDetails = `${imageCount} изображений · ${videoCount} видео`;
+  } else if (effect.type === 'side') {
+    effectType = 'Side';
+
+    const shadowsCount = effect.options.shadows?.length ?? 0;
+    const textsCount = effect.options.texts?.length ?? 0;
+
+    effectDetails = `${shadowsCount} теней · ${textsCount} текстов`;
   } else {
     effectType = 'Flashlight';
 

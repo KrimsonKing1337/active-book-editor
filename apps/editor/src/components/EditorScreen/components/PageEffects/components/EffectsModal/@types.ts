@@ -13,6 +13,7 @@ export type EffectsModalProps = {
   onAddVibration: () => void;
   onAddFlashlight: () => void;
   onAddBackground: () => void;
+  onAddSide: () => void;
   onSelectEffect: (id: string) => void;
   onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;

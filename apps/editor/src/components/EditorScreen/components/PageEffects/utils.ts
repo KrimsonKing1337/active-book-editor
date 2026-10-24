@@ -5,6 +5,7 @@ import type {
   VibrationEffectDraft,
   FlashlightEffectDraft,
   BackgroundEffectDraft,
+  SideEffectDraft,
 } from './@types';
 
 export const createDefaultShadowFilters = (): FilterOperation[] => {
@@ -98,5 +99,17 @@ export const createBackgroundEffect = (): BackgroundEffectDraft => {
     type: 'background',
     slug: 'Новый фон',
     options,
+  };
+};
+
+export const createSideEffect = (): SideEffectDraft => {
+  return {
+    id: crypto.randomUUID(),
+    type: 'side',
+    slug: 'Новый боковой эффект',
+    options: {
+      shadows: [],
+      texts: [],
+    },
   };
 };
