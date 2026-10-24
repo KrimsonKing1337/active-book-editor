@@ -1,4 +1,6 @@
-import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
+import type { ChangeEvent, CSSProperties } from 'react';
+
+import { useRef, useState } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 

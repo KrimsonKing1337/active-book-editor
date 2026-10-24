@@ -60,9 +60,9 @@ export const StyleEditor = ({
   const handleApplyFilters = (operations: FilterOperation[]) => {
     commitStyle();
 
-    const mediaIdSafe = mediaId ?? null;
+    const normalizedMediaId = mediaId ?? null;
 
-    commitFilters(layer, mediaIdSafe, operations);
+    commitFilters(layer, normalizedMediaId, operations);
   };
 
   const backgroundColor = String(currentStyle.backgroundColor ?? '');

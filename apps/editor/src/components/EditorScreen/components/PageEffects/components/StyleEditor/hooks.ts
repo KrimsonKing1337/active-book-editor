@@ -28,9 +28,9 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
       setDraftStyle(style);
     }
 
-    const mediaIdSafe = mediaId ?? null;
+    const normalizedMediaId = mediaId ?? null;
 
-    preview(layer, mediaIdSafe, style);
+    preview(layer, normalizedMediaId, style);
   };
 
   const setProperty = (name: string, nextValue: StylePropertyValue, updateLocal = true) => {
@@ -50,9 +50,13 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
   };
 
   const commitStyle = () => {
-    const isCommit = commit();
+    if (!draftStyleRef.current) {
+      return;
+    }
 
-    if (!draftStyleRef.current || !isCommit) {
+    const didCommit = commit();
+
+    if (!didCommit) {
       return;
     }
 

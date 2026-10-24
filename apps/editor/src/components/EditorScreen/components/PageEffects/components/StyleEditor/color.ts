@@ -75,9 +75,9 @@ export const getRgbaError = (channels: RgbaChannels): string | null => {
 };
 
 export const getHexFromRgba = (channels: RgbaChannels): string | null => {
-  const rgbaHasError = getRgbaError(channels);
+  const rgbaError = getRgbaError(channels);
 
-  if (rgbaHasError) {
+  if (rgbaError) {
     return null;
   }
 
