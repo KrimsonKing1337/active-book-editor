@@ -32,6 +32,17 @@ export type AudioPreviewStatus = {
   error?: string;
 };
 
+export type SideItemPreview = {
+  playState?: 'running' | 'paused' | 'stopped';
+  hidden?: boolean;
+};
+
+export type SideItemPreviews = Record<string, SideItemPreview>;
+
+export const getSidePreviewKey = (effectId: string, itemId: string): string => {
+  return JSON.stringify([effectId, itemId]);
+};
+
 type PageEffectsContextValue = {
   effects: EditorEffectDraft[];
   writeEffects: (effects: EditorEffectDraft[]) => void;
@@ -41,6 +52,8 @@ type PageEffectsContextValue = {
   flushStylePreviews: () => boolean;
   hasUnsavedStyleChanges: () => boolean;
   markStylesSaved: () => void;
+  sideItemPreviews: SideItemPreviews;
+  updateSideItemPreview: (effectId: string, itemId: string, changes: Partial<SideItemPreview>) => void;
 };
 
 export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
@@ -96,6 +109,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
   const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
+  const [sideItemPreviews, setSideItemPreviews] = useState<SideItemPreviews>({});
 
   const previewStylesRef = useRef<BackgroundStylePreviews>({});
   const previewFrameRef = useRef<number | null>(null);
@@ -358,6 +372,24 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     return unsavedStylesRef.current;
   }, []);
 
+  const updateSideItemPreview = useCallback((
+    effectId: string,
+    itemId: string,
+    changes: Partial<SideItemPreview>,
+  ) => {
+    const key = getSidePreviewKey(effectId, itemId);
+
+    setSideItemPreviews((current) => {
+      return {
+        ...current,
+        [key]: {
+          ...current[key],
+          ...changes,
+        },
+      };
+    });
+  }, []);
+
   const markStylesSaved = useCallback(() => {
     unsavedStylesRef.current = false;
 
@@ -373,6 +405,8 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
+    sideItemPreviews,
+    updateSideItemPreview,
   }), [
     effects,
     writeEffects,
@@ -382,6 +416,8 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
+    sideItemPreviews,
+    updateSideItemPreview,
   ]);
 
   return (
