@@ -188,45 +188,41 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
   };
 
   const backgroundImages = images.map((imageCur, index) => {
-    const style = resolveStyle(
-      withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id)),
-      imageCur.styleFilters,
-    );
+    const previewedStyle = withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id));
+
+    const style = resolveStyle(previewedStyle, imageCur.styleFilters);
+    const src = media.images[index];
 
     return {
       ...imageCur,
-      src: media.images[index],
+      src,
       style,
     };
   });
 
   const backgroundVideos = videos.map((videoCur, index) => {
-    const style = resolveStyle(
-      withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id)),
-      videoCur.styleFilters,
-    );
+    const previewedStyle = withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id));
+
+    const style = resolveStyle(previewedStyle, videoCur.styleFilters);
+    const src = media.videos[index];
 
     return {
       ...videoCur,
-      src: media.videos[index],
+      src,
       style,
     };
   });
 
-  const shadowStyle = resolveStyle(
-    withPreviewStyle(effect.options.shadow?.style, previewStyle('shadow')),
-    effect.options.shadow?.styleFilters,
-  );
+  const previewedShadowStyle = withPreviewStyle(effect.options.shadow?.style, previewStyle('shadow'));
+  const shadowStyle = resolveStyle(previewedShadowStyle, effect.options.shadow?.styleFilters);
 
   const shadow = options.shadow && {
     ...options.shadow,
     style: shadowStyle,
   };
 
-  const backgroundStyle = resolveStyle(
-    withPreviewStyle(effect.options.style, previewStyle('background')),
-    effect.options.styleFilters,
-  );
+  const previewedBackgroundStyle = withPreviewStyle(effect.options.style, previewStyle('background'));
+  const backgroundStyle = resolveStyle(previewedBackgroundStyle, effect.options.styleFilters);
 
   const background: CoreBackgroundEffect = {
     id: effect.id,
