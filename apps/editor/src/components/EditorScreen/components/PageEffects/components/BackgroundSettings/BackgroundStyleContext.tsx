@@ -1,10 +1,8 @@
-import type { CSSProperties, PropsWithChildren } from 'react';
+import { type CSSProperties, type PropsWithChildren, createContext, useContext } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
-
-import { createContext, useContext } from 'react';
 
 type BackgroundStyleContextValue = {
   preview: (layer: BackgroundPreviewLayer, mediaId: string | null, style: CSSProperties) => void;

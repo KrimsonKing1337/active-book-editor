@@ -22,12 +22,13 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
   const handleShowChange = (show: boolean) => {
     const hasNoStyles = !style || Object.keys(style).length === 0;
     const nextStyle = hasNoStyles ? defaultShadowStyle : style;
+    const styleFilters = shadow.styleFilters ?? createDefaultShadowFilters();
 
     onChange({
       ...shadow,
       show,
       style: nextStyle,
-      styleFilters: shadow.styleFilters ?? createDefaultShadowFilters(),
+      styleFilters,
     });
   };
 

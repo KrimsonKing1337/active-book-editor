@@ -1,16 +1,16 @@
+import { useEffect, useState } from 'react';
+
 import type {
   FilterFunction,
   FilterOperation,
   FilterProperty,
 } from '@active-book/book-builder/effects';
-import type { NumericConfig } from '../NumericControl';
-
-import { useEffect, useState } from 'react';
 
 import { FILTER_FUNCTIONS, resolveStyle } from '@active-book/book-builder/effects';
 
-import { NumericControl, isValidNumericValue } from '../NumericControl';
+import type { NumericConfig } from '../NumericControl';
 
+import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
 import styles from '../../StyleEditor.module.scss';
@@ -104,21 +104,35 @@ const PROPERTY_OPTIONS = [
   },
 ];
 
-const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((cur) => ({
-  value: cur,
-  label: cur,
-}));
+const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((filterCur) => {
+  return {
+    value: filterCur,
+    label: filterCur,
+  };
+});
 
 const getDrafts = (operations: FilterOperation[] | undefined): FilterDraft[] => {
-  return (operations ?? []).map((operationCur) => {
+  const operationsSafe = operations ?? [];
+
+  return operationsSafe.map((operationCur) => {
     const config = CONFIG[operationCur.function];
+
+    const rawValue = operationCur.value;
+    const unit = config.unit;
+
+    const hasUnitSuffix = unit.length > 0 && rawValue.endsWith(unit);
+
+    let value = rawValue;
+
+    if (hasUnitSuffix) {
+      value = rawValue.slice(0, -unit.length);
+    }
 
     return {
       id: operationCur.id,
       property: operationCur.property,
       function: operationCur.function,
-      value: operationCur.value.endsWith(config.unit)
-        ? operationCur.value.slice(0, -config.unit.length) : operationCur.value,
+      value,
     };
   });
 };
@@ -145,6 +159,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
         };
       });
     });
+
     setError('');
   };
 
@@ -233,6 +248,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
     }
 
     onApply(next);
+
     setError('');
   };
 
@@ -247,6 +263,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
 
         const config = functionName ? CONFIG[functionName] : null;
         const expanded = id === expandedId;
+
         const propertyLabel = property === 'backdropFilter' ? 'backdrop-filter' : 'filter';
         const displayedProperty = property ? propertyLabel : 'Свойство';
         const displayedFunction = functionName || 'Функция';
@@ -270,6 +287,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
 
         const handleFunctionChange = (val: string) => {
           const nextFunction = val as FilterFunction;
+
           const changes: Partial<FilterDraft> = {
             function: nextFunction,
             value: CONFIG[nextFunction].initial,
@@ -291,7 +309,10 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
         };
 
         const handleDelete = () => {
-          setDrafts((current) => current.filter((cur) => cur.id !== id));
+          setDrafts((current) => {
+            return current.filter((cur) => cur.id !== id);
+          });
+
           setExpandedId(null);
         };
 
@@ -362,6 +383,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
         <button type="button" onClick={handleAddFilter}>
           + Добавить фильтр
         </button>
+
         <button type="button" onClick={handleApplyFilters}>
           Применить фильтры
         </button>

@@ -27,6 +27,7 @@ export const resolveStyle = (
   operations: FilterOperation[] | undefined,
 ): CSSProperties => {
   const result = { ...style };
+
   delete result.filter;
   delete result.backdropFilter;
 

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import { StyleEditor } from '../../../StyleEditor';

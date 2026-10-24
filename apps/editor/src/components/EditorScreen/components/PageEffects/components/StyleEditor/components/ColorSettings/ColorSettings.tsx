@@ -1,10 +1,10 @@
 import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react';
-import type { RgbaChannels } from '../../color';
-
 import { useEffect, useRef, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 import { HexAlphaColorPicker } from 'react-colorful';
+
+import type { RgbaChannels } from '../../color';
 
 import {
   getHexColor,
@@ -63,6 +63,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     const updated: RgbaChannels = [...rgbaDraftRef.current];
 
     updated[index] = val;
+
     rgbaDraftRef.current = updated;
 
     setRgbaDraft(updated);
@@ -108,6 +109,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
       const nextRgba = getRgbaChannels(parsedHex);
 
       rgbaDraftRef.current = nextRgba;
+
       setRgbaDraft(nextRgba);
     }
   };
@@ -133,15 +135,19 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
   const handleChannelKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
+
     const start = input.selectionStart ?? 0;
     const end = input.selectionEnd ?? 0;
     const value = rgbaDraftRef.current[index];
+
     const caretIsAtStart = start === 0 && end === 0;
     const caretIsAtEnd = start === value.length && start === end;
 
     if (e.key === 'Enter') {
       e.preventDefault();
+
       setShowValidation(true);
+
       input.blur();
 
       return;
@@ -149,6 +155,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
     if (e.key === 'ArrowRight' && caretIsAtEnd && index < 3) {
       e.preventDefault();
+
       focusChannel(index + 1, 'start');
 
       return;
@@ -156,6 +163,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
     if (e.key === 'ArrowLeft' && caretIsAtStart && index > 0) {
       e.preventDefault();
+
       focusChannel(index - 1);
 
       return;
@@ -167,6 +175,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
       if (selectedAll || removingLastDigit || value === '') {
         e.preventDefault();
+
         updateChannel(index, '');
 
         if (index > 0) {
@@ -178,6 +187,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
 
       if (caretIsAtStart && index > 0) {
         e.preventDefault();
+
         focusChannel(index - 1);
 
         return;
@@ -202,12 +212,15 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   const rgbaColor = getHexFromRgba(rgbaDraft);
 
   const nextColor = editedFormat === 'hex' ? hexColor : rgbaColor;
+
   const hasCompleteColor = nextColor !== null;
   const hasEditedColor = editedFormat !== null;
+
   const hasDifferentColor = nextColor?.toLowerCase() !== pickerColor.toLowerCase();
+
   const hasManualChanges = hasCompleteColor && hasEditedColor && hasDifferentColor;
 
-  const hexValidationError = hexColor ? null : 'Укажи 6 или 8 HEX-символов';
+  const hexValidationError = hexColor ? null : 'Укажите 6 или 8 HEX-символов';
   const validationError = editedFormat === 'hex' ? hexValidationError : getRgbaError(rgbaDraft);
 
   const handleApplyColor = () => {
@@ -231,7 +244,9 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     }
 
     e.preventDefault();
+
     setShowValidation(true);
+
     e.currentTarget.blur();
   };
 
@@ -242,6 +257,9 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   const handlePickerKeyUp = () => {
     requestAnimationFrame(onCommit);
   };
+
+  const applyButtonIsDisabled = !hasManualChanges || Boolean(validationError);
+  const showValidationError = showValidation && validationError;
 
   return (
     <>
@@ -330,14 +348,14 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
         <div className={styles.ColorActions}>
           <button
             type="button"
-            disabled={!hasManualChanges || Boolean(validationError)}
+            disabled={applyButtonIsDisabled}
             onClick={handleApplyColor}
           >
             Применить
           </button>
         </div>
 
-        {showValidation && validationError && (
+        {showValidationError && (
           <span className={styles.Error} role="alert">
             {validationError}
           </span>

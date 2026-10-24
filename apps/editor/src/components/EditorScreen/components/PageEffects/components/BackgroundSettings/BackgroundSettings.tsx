@@ -1,21 +1,22 @@
-import type { ChangeEvent, CSSProperties } from 'react';
+import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
+
+import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
-import type { FilterOperation } from '@active-book/book-builder/effects';
-
-import { useRef, useState } from 'react';
 
 import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
 
 import { Images, Videos, Shadow, Background, CustomComponent } from './components';
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
+
 import { createDefaultShadowFilters } from '../../utils';
 
 import styles from './BackgroundSettings.module.scss';
+
 type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
@@ -26,6 +27,8 @@ type BackgroundSettingsProps = {
   onDuplicate: () => void;
   onDelete: () => void;
 };
+
+export type BackgroundEffectLayer = 'background' | 'shadow' | 'image' | 'video';
 
 const defaultShadowStyle = {
   zIndex: 2,
@@ -47,10 +50,12 @@ export const BackgroundSettings = ({
   onDuplicate,
   onDelete,
 }: BackgroundSettingsProps) => {
-  const [idDraft, setIdDraft] = useState(effect.id);
-  const importsInProgressRef = useRef(0);
   const updateStylePreview = useBackgroundStylePreviewUpdater();
   const { flushStylePreviews, getCurrentEffects } = usePageEffects();
+
+  const [idDraft, setIdDraft] = useState(effect.id);
+
+  const importsInProgressRef = useRef(0);
 
   const options = effect.options;
 
@@ -140,7 +145,7 @@ export const BackgroundSettings = ({
   };
 
   const updateStylePreviewForEffect = (
-    layer: 'background' | 'shadow' | 'image' | 'video',
+    layer: BackgroundEffectLayer,
     mediaId: string | null,
     style: CSSProperties,
   ) => {
@@ -148,7 +153,7 @@ export const BackgroundSettings = ({
   };
 
   const commitFilters = (
-    layer: 'background' | 'shadow' | 'image' | 'video',
+    layer: BackgroundEffectLayer,
     mediaId: string | null,
     styleFilters: FilterOperation[],
   ) => {
@@ -165,45 +170,55 @@ export const BackgroundSettings = ({
     }
 
     const currentOptions = currentEffect.options;
+
     let nextOptions: BackgroundOptions = currentOptions;
 
     if (layer === 'background') {
-      nextOptions = { ...currentOptions, styleFilters };
-    } else if (layer === 'shadow' && currentOptions.shadow) {
       nextOptions = {
         ...currentOptions,
-        shadow: {
-          ...currentOptions.shadow,
-          styleFilters,
-        },
+        styleFilters,
+      };
+    } else if (layer === 'shadow' && currentOptions.shadow) {
+      const shadow = {
+        ...currentOptions.shadow,
+        styleFilters,
+      };
+
+      nextOptions = {
+        ...currentOptions,
+        shadow,
       };
     } else if (layer === 'image') {
+      const images = currentOptions.images?.map((imageCur) => {
+        if (imageCur.id !== mediaId) {
+          return imageCur;
+        }
+
+        return {
+          ...imageCur,
+          styleFilters,
+        };
+      });
+
       nextOptions = {
         ...currentOptions,
-        images: currentOptions.images?.map((imageCur) => {
-          if (imageCur.id !== mediaId) {
-            return imageCur;
-          }
-
-          return {
-            ...imageCur,
-            styleFilters,
-          };
-        }),
+        images,
       };
     } else if (layer === 'video') {
+      const videos = currentOptions.videos?.map((videoCur) => {
+        if (videoCur.id !== mediaId) {
+          return videoCur;
+        }
+
+        return {
+          ...videoCur,
+          styleFilters,
+        };
+      });
+
       nextOptions = {
         ...currentOptions,
-        videos: currentOptions.videos?.map((videoCur) => {
-          if (videoCur.id !== mediaId) {
-            return videoCur;
-          }
-
-          return {
-            ...videoCur,
-            styleFilters,
-          };
-        }),
+        videos,
       };
     }
 
@@ -269,18 +284,21 @@ export const BackgroundSettings = ({
         </div>
 
         <Background style={style} styleFilters={options.styleFilters} />
+
         <Images
           images={images}
           canImport={Boolean(project)}
           onChange={handleImagesChange}
           onImportAsset={handleImportImage}
         />
+
         <Videos
           videos={videos}
           canImport={Boolean(project)}
           onChange={handleVideosChange}
           onImportAsset={handleImportVideo}
         />
+
         <Shadow shadow={shadow} onChange={handleShadowChange} />
         <CustomComponent component={options.component} onChange={handleComponentChange} />
 

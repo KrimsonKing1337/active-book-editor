@@ -28,6 +28,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
   const [activeIndex, setActiveIndex] = useState(0);
 
   const selectedOption = options.find((cur) => cur.value === value);
+
   const filteredOptions = options.filter((optionCur) => {
     const searchText = `${optionCur.label} ${optionCur.value}`.toLowerCase();
     const searchQuery = query.toLowerCase().trim();
@@ -37,6 +38,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
 
   const selectOption = (val: string) => {
     onChange(val);
+
     setIsOpen(false);
     setQuery('');
     setActiveIndex(0);
@@ -52,12 +54,17 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
 
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
+
       setIsOpen(true);
 
       const direction = e.key === 'ArrowDown' ? 1 : -1;
 
       setActiveIndex((index) => {
-        return (index + direction + filteredOptions.length) % Math.max(filteredOptions.length, 1);
+        const optionsCount = filteredOptions.length;
+        const safeOptionsCount = Math.max(optionsCount, 1);
+        const nextIndex = index + direction + optionsCount;
+
+        return nextIndex % safeOptionsCount;
       });
     }
 
@@ -69,6 +76,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
       && selectedOption
     ) {
       e.preventDefault();
+
       selectOption(selectedOption.value);
     }
   };
@@ -93,10 +101,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
   };
 
   return (
-    <div
-      className={styles.SearchSelect}
-      onBlur={handleBlur}
-    >
+    <div className={styles.SearchSelect} onBlur={handleBlur}>
       <input
         type="search"
         role="combobox"
@@ -132,13 +137,16 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
               selectOption(optionValue);
             };
 
+            const isSelected = value === optionValue;
+            const isActive = index === activeIndex;
+
             return (
               <button
                 key={optionValue}
                 type="button"
                 role="option"
-                aria-selected={value === optionValue}
-                data-active={index === activeIndex}
+                aria-selected={isSelected}
+                data-active={isActive}
 
                 onMouseDown={handleOptionMouseDown}
                 onClick={handleOptionClick}

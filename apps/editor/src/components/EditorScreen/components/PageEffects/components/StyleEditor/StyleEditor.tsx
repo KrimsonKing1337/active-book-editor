@@ -59,10 +59,14 @@ export const StyleEditor = ({
 
   const handleApplyFilters = (operations: FilterOperation[]) => {
     commitStyle();
-    commitFilters(layer, mediaId ?? null, operations);
+
+    const mediaIdSafe = mediaId ?? null;
+
+    commitFilters(layer, mediaIdSafe, operations);
   };
 
   const backgroundColor = String(currentStyle.backgroundColor ?? '');
+  const isMedia = layer === 'image' || layer === 'video';
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
@@ -85,7 +89,7 @@ export const StyleEditor = ({
 
       <AdvancedStyles
         style={currentStyle}
-        isMedia={layer === 'image' || layer === 'video'}
+        isMedia={isMedia}
         onPreview={previewStyle}
         onCommit={commitStyle}
       />

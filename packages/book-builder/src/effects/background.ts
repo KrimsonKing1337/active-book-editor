@@ -88,10 +88,16 @@ export const resolveBackgroundOptions = (options: BackgroundOptions) => {
     };
   });
 
-  const resolvedShadow = shadow && {
-    show: shadow.show,
-    style: resolveStyle(shadow.style, shadow.styleFilters),
-  };
+  let resolvedShadow;
+
+  if (shadow) {
+    const style = resolveStyle(shadow.style, shadow.styleFilters);
+
+    resolvedShadow = {
+      show: shadow.show,
+      style,
+    };
+  }
 
   return {
     ...rest,

@@ -16,7 +16,9 @@ export type UseStyleEditorProps = {
 
 export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) => {
   const { preview, commit } = useBackgroundStyle();
+
   const [draftStyle, setDraftStyle] = useState<CSSProperties | null>(null);
+
   const draftStyleRef = useRef<CSSProperties | null>(null);
 
   const previewStyle = (style: CSSProperties, updateLocal = true) => {
@@ -26,7 +28,9 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
       setDraftStyle(style);
     }
 
-    preview(layer, mediaId ?? null, style);
+    const mediaIdSafe = mediaId ?? null;
+
+    preview(layer, mediaIdSafe, style);
   };
 
   const setProperty = (name: string, nextValue: StylePropertyValue, updateLocal = true) => {
@@ -46,7 +50,9 @@ export const useStyleEditor = ({ value, layer, mediaId }: UseStyleEditorProps) =
   };
 
   const commitStyle = () => {
-    if (!draftStyleRef.current || !commit()) {
+    const isCommit = commit();
+
+    if (!draftStyleRef.current || !isCommit) {
       return;
     }
 

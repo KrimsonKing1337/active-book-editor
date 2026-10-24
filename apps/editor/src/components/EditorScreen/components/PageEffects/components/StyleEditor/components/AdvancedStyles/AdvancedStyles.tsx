@@ -1,10 +1,8 @@
-import type { CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
+
 import type { NumericConfig } from '../NumericControl';
 
-import { useEffect, useState } from 'react';
-
 import { NumericControl, isValidNumericValue } from '../NumericControl';
-
 import { SearchSelect } from '../SearchSelect';
 
 import styles from '../../StyleEditor.module.scss';
@@ -100,8 +98,15 @@ const getDrafts = (style: CSSProperties): Draft[] => {
       const property = optionCur.value as AdvancedProperty;
       const text = String(style[property]);
       const config = NUMERIC[property];
-      const value = config?.unit && text.endsWith(config.unit)
-        ? text.slice(0, -config.unit.length) : text;
+
+      const unit = config?.unit ?? '';
+      const hasUnitSuffix = unit.length > 0 && text.endsWith(unit);
+
+      let value = text;
+
+      if (hasUnitSuffix) {
+        value = text.slice(0, -unit.length);
+      }
 
       return {
         id: property,
@@ -165,6 +170,7 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
     for (const draftCur of drafts) {
       const { property, value: draftValue } = draftCur;
       const hasProperty = Boolean(property);
+
       const hasValue = Boolean(draftValue.trim());
       const isDuplicate = seen.has(property);
 
@@ -178,7 +184,9 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
 
       const config = NUMERIC[property as AdvancedProperty];
 
-      if (config && !isValidNumericValue(draftValue, config)) {
+      const hasInvalidNumericValue = config !== undefined && !isValidNumericValue(draftValue, config);
+
+      if (hasInvalidNumericValue) {
         setError(`Некорректное значение ${property}`);
 
         return;
@@ -193,11 +201,16 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
         return;
       }
 
-      next[property as AdvancedProperty] = value;
+      const updatedProperty = {
+        [property]: value,
+      };
+
+      Object.assign(next, updatedProperty);
     }
 
     onPreview(next);
     onCommit();
+
     setError('');
   };
 
@@ -209,6 +222,7 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
 
       {drafts.map((draftCur) => {
         const { id, property, value } = draftCur;
+
         const config = property ? NUMERIC[property] : undefined;
 
         const positions = value.split(' ');
@@ -217,8 +231,12 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
 
         const handlePropertyChange = (val: string) => {
           const nextProperty = val as AdvancedProperty;
-          const defaultValue = NUMERIC[nextProperty]?.initial
-            ?? (nextProperty === 'objectFit' ? 'cover' : 'center center');
+
+          let defaultValue = NUMERIC[nextProperty]?.initial;
+
+          if (!defaultValue) {
+            defaultValue = nextProperty === 'objectFit' ? 'cover' : 'center center';
+          }
 
           const changes: Partial<Draft> = {
             property: nextProperty,
@@ -233,15 +251,21 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
         };
 
         const handleHorizontalChange = (val: string) => {
-          updateDraft(id, { value: `${val} ${verticalPosition}` });
+          const value = `${val} ${verticalPosition}`;
+
+          updateDraft(id, { value });
         };
 
         const handleVerticalChange = (val: string) => {
-          updateDraft(id, { value: `${horizontalPosition} ${val}` });
+          const value = `${horizontalPosition} ${val}`;
+
+          updateDraft(id, { value });
         };
 
         const handleDelete = () => {
-          setDrafts((current) => current.filter((cur) => cur.id !== id));
+          setDrafts((current) => {
+            return current.filter((cur) => cur.id !== id);
+          });
         };
 
         return (
@@ -300,6 +324,7 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
         <button type="button" onClick={handleAddProperty}>
           + Добавить свойство
         </button>
+
         <button type="button" onClick={handleApplyProperties}>
           Применить свойства
         </button>

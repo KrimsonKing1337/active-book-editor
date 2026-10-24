@@ -1,6 +1,4 @@
-import type { ChangeEvent } from 'react';
-
-import { useEffect, useRef } from 'react';
+import { type ChangeEvent, useEffect, useRef } from 'react';
 
 import { InputMask } from '@react-input/mask';
 
@@ -24,13 +22,15 @@ type NumericControlProps = {
 };
 
 const numericReplacement = {
-  _: /[0-9.\-]/,
+  _: /[0-9.-]/,
 };
 
 const NUMBER_PATTERN = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
 
 export const isValidNumericValue = (value: string, config: NumericConfig): boolean => {
-  if (!NUMBER_PATTERN.test(value.trim())) {
+  const trimmedValue = value.trim();
+
+  if (!NUMBER_PATTERN.test(trimmedValue)) {
     return false;
   }
 
@@ -57,6 +57,7 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
 
   const parsedValue = Number(value);
   const current = Number.isFinite(parsedValue) ? parsedValue : config.min;
+
   const limited = Math.min(config.max, Math.max(config.min, current));
   const range = config.max - config.min;
   const fraction = (limited - config.min) / range;
@@ -71,7 +72,11 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
     }
 
     sliderFrameRef.current = requestAnimationFrame(() => {
-      onChange(String(Number(stepped.toFixed(4))));
+      const roundedValue = Math.round(stepped * 10000) / 10000;
+      const value = String(roundedValue);
+
+      onChange(value);
+
       sliderFrameRef.current = null;
     });
   };
@@ -104,7 +109,9 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
           onChange={handleInputChange}
         />
 
-        <span>{config.unit}</span>
+        <span>
+          {config.unit}
+        </span>
       </div>
     </div>
   );
