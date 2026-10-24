@@ -1,147 +1,340 @@
-import type { ChangeEvent, CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { isValidCssRule, normalizePropertyName } from '../../utils';
+import type { NumericConfig } from '../NumericControl';
 
-import { StyleRule } from '../StyleRule';
+import { NumericControl, isValidNumericValue } from '../NumericControl';
+import { SearchSelect } from '../SearchSelect';
 
 import styles from '../../StyleEditor.module.scss';
 
+type AdvancedProperty = 'opacity' | 'borderRadius' | 'objectFit' | 'objectPosition';
+
 type AdvancedStylesProps = {
   style: CSSProperties;
+  isMedia: boolean;
   onPreview: (style: CSSProperties) => void;
   onCommit: () => void;
 };
 
-type StyleValue = string | number | undefined;
+type Draft = {
+  id: string;
+  property: AdvancedProperty | '';
+  value: string;
+};
 
-export const AdvancedStyles = ({ style, onPreview, onCommit }: AdvancedStylesProps) => {
-  const [newProperty, setNewProperty] = useState('');
-  const [newValue, setNewValue] = useState('');
-  const [propertyError, setPropertyError] = useState('');
+const NUMERIC: Partial<Record<AdvancedProperty, NumericConfig>> = {
+  opacity: {
+    min: 0,
+    max: 1,
+    step: 0.01,
+    unit: '',
+    initial: '1',
+  },
+  borderRadius: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: 'px',
+    initial: '0',
+  },
+};
 
-  const previewRuleValue = (name: string, value: string) => {
-    const updatedStyle = {
-      ...style,
-      [name]: value,
-    };
+const PROPERTY_OPTIONS = [
+  {
+    value: 'opacity',
+    label: 'opacity',
+  },
+  {
+    value: 'borderRadius',
+    label: 'border-radius',
+  },
+  {
+    value: 'objectFit',
+    label: 'object-fit',
+  },
+  {
+    value: 'objectPosition',
+    label: 'object-position',
+  },
+];
 
-    onPreview(updatedStyle);
+const FIT_OPTIONS = [
+  {
+    value: 'fill',
+    label: 'fill',
+  },
+  {
+    value: 'contain',
+    label: 'contain',
+  },
+  {
+    value: 'cover',
+    label: 'cover',
+  },
+  {
+    value: 'none',
+    label: 'none',
+  },
+  {
+    value: 'scale-down',
+    label: 'scale-down',
+  },
+];
+
+const X_OPTIONS = ['left', 'center', 'right'].map((cur) => ({
+  value: cur,
+  label: cur,
+}));
+
+const Y_OPTIONS = ['top', 'center', 'bottom'].map((cur) => ({
+  value: cur,
+  label: cur,
+}));
+
+const getDrafts = (style: CSSProperties): Draft[] => {
+  return PROPERTY_OPTIONS
+    .filter((cur) => style[cur.value as AdvancedProperty] !== undefined)
+    .map((optionCur) => {
+      const property = optionCur.value as AdvancedProperty;
+      const text = String(style[property]);
+      const config = NUMERIC[property];
+
+      const unit = config?.unit ?? '';
+      const hasUnitSuffix = unit.length > 0 && text.endsWith(unit);
+
+      let value = text;
+
+      if (hasUnitSuffix) {
+        value = text.slice(0, -unit.length);
+      }
+
+      return {
+        id: property,
+        property,
+        value,
+      };
+    });
+};
+
+export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: AdvancedStylesProps) => {
+  const [drafts, setDrafts] = useState<Draft[]>(() => getDrafts(style));
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setDrafts(getDrafts(style));
+  }, [style.opacity, style.borderRadius, style.objectFit, style.objectPosition]);
+
+  const options = PROPERTY_OPTIONS.filter((optionCur) => {
+    const mediaOnly = optionCur.value === 'objectFit' || optionCur.value === 'objectPosition';
+
+    return isMedia || !mediaOnly;
+  });
+
+  const updateDraft = (id: string, changes: Partial<Draft>) => {
+    setDrafts((current) => {
+      return current.map((draftCur) => {
+        if (draftCur.id !== id) {
+          return draftCur;
+        }
+
+        return {
+          ...draftCur,
+          ...changes,
+        };
+      });
+    });
+
+    setError('');
   };
 
-  const updateRule = (name: string, nextName: string, nextValue: string): string | null => {
-    if (name !== nextName && Object.hasOwn(style, nextName)) {
-      return 'Такое CSS-свойство уже существует';
+  const handleAddProperty = () => {
+    const newDraft: Draft = {
+      id: crypto.randomUUID(),
+      property: '',
+      value: '',
+    };
+
+    setDrafts((current) => [...current, newDraft]);
+    setError('');
+  };
+
+  const handleApplyProperties = () => {
+    const next: CSSProperties = { ...style };
+
+    for (const optionCur of PROPERTY_OPTIONS) {
+      delete next[optionCur.value as AdvancedProperty];
     }
 
-    const updated: Record<string, StyleValue> = {
-      ...style,
-    };
+    const seen = new Set<string>();
 
-    delete updated[name];
+    for (const draftCur of drafts) {
+      const { property, value: draftValue } = draftCur;
+      const hasProperty = Boolean(property);
 
-    updated[nextName] = nextValue;
+      const hasValue = Boolean(draftValue.trim());
+      const isDuplicate = seen.has(property);
 
-    onPreview(updated as CSSProperties);
-    onCommit();
+      if (!hasProperty || !hasValue || isDuplicate) {
+        setError('Выбери уникальное свойство и его значение');
 
-    return null;
-  };
+        return;
+      }
 
-  const deleteRule = (name: string) => {
-    const updated: Record<string, StyleValue> = {
-      ...style,
-    };
+      seen.add(property);
 
-    delete updated[name];
+      const config = NUMERIC[property as AdvancedProperty];
 
-    onPreview(updated as CSSProperties);
-    onCommit();
-  };
+      const hasInvalidNumericValue = config !== undefined && !isValidNumericValue(draftValue, config);
 
-  const addProperty = () => {
-    const name = normalizePropertyName(newProperty);
-    const value = newValue.trim();
+      if (hasInvalidNumericValue) {
+        setError(`Некорректное значение ${property}`);
 
-    if (Object.hasOwn(style, name)) {
-      setPropertyError('Такое CSS-свойство уже существует');
+        return;
+      }
 
-      return;
+      const value = config ? `${draftValue.trim()}${config.unit}` : draftValue.trim();
+      const cssName = property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
+      if (!CSS.supports(cssName, value)) {
+        setError(`Браузер не поддерживает ${cssName}: ${value}`);
+
+        return;
+      }
+
+      const updatedProperty = {
+        [property]: value,
+      };
+
+      Object.assign(next, updatedProperty);
     }
 
-    if (!isValidCssRule(name, value)) {
-      setPropertyError('Некорректное CSS-свойство или значение');
-
-      return;
-    }
-
-    const updatedStyle = {
-      ...style,
-      [name]: value,
-    };
-
-    onPreview(updatedStyle);
+    onPreview(next);
     onCommit();
 
-    setNewProperty('');
-    setNewValue('');
-    setPropertyError('');
+    setError('');
   };
-
-  const handleNewPropertyChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewProperty(e.target.value);
-  };
-
-  const handleNewValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setNewValue(e.target.value);
-  };
-
-  const rules = Object.entries(style);
 
   return (
     <details className={styles.Advanced}>
       <summary>
-        Дополнительные CSS-свойства
+        Дополнительные эффекты
       </summary>
 
-      {rules.map(([property, ruleValue]) => {
-        return (
-          <StyleRule
-            key={property}
-            name={property}
-            value={ruleValue as string | number}
+      {drafts.map((draftCur) => {
+        const { id, property, value } = draftCur;
 
-            onUpdate={updateRule}
-            onPreview={previewRuleValue}
-            onDelete={deleteRule}
-          />
+        const config = property ? NUMERIC[property] : undefined;
+
+        const positions = value.split(' ');
+        const horizontalPosition = positions[0] ?? 'center';
+        const verticalPosition = positions[1] ?? 'center';
+
+        const handlePropertyChange = (val: string) => {
+          const nextProperty = val as AdvancedProperty;
+
+          let defaultValue = NUMERIC[nextProperty]?.initial;
+
+          if (!defaultValue) {
+            defaultValue = nextProperty === 'objectFit' ? 'cover' : 'center center';
+          }
+
+          const changes: Partial<Draft> = {
+            property: nextProperty,
+            value: defaultValue,
+          };
+
+          updateDraft(id, changes);
+        };
+
+        const handleValueChange = (val: string) => {
+          updateDraft(id, { value: val });
+        };
+
+        const handleHorizontalChange = (val: string) => {
+          const value = `${val} ${verticalPosition}`;
+
+          updateDraft(id, { value });
+        };
+
+        const handleVerticalChange = (val: string) => {
+          const value = `${horizontalPosition} ${val}`;
+
+          updateDraft(id, { value });
+        };
+
+        const handleDelete = () => {
+          setDrafts((current) => {
+            return current.filter((cur) => cur.id !== id);
+          });
+        };
+
+        return (
+          <div className={styles.AdvancedRow} key={id}>
+            <SearchSelect
+              value={property}
+              options={options}
+              placeholder="CSS-свойство"
+              onChange={handlePropertyChange}
+            />
+
+            {config && (
+              <NumericControl
+                value={value}
+                config={config}
+                label={property}
+                onChange={handleValueChange}
+              />
+            )}
+
+            {property === 'objectFit' && (
+              <SearchSelect
+                value={value}
+                options={FIT_OPTIONS}
+                placeholder="Режим заполнения"
+                onChange={handleValueChange}
+              />
+            )}
+
+            {property === 'objectPosition' && (
+              <div className={styles.PositionRow}>
+                <SearchSelect
+                  value={horizontalPosition}
+                  options={X_OPTIONS}
+                  placeholder="По горизонтали"
+                  onChange={handleHorizontalChange}
+                />
+
+                <SearchSelect
+                  value={verticalPosition}
+                  options={Y_OPTIONS}
+                  placeholder="По вертикали"
+                  onChange={handleVerticalChange}
+                />
+              </div>
+            )}
+
+            <button type="button" onClick={handleDelete}>
+              Удалить
+            </button>
+          </div>
         );
       })}
 
-      <div className={styles.Rule}>
-        <input
-          aria-label="Новое CSS-свойство"
-          value={newProperty}
-          placeholder="opacity"
-          onChange={handleNewPropertyChange}
-        />
+      <div className={styles.FilterActions}>
+        <button type="button" onClick={handleAddProperty}>
+          + Добавить свойство
+        </button>
 
-        <input
-          aria-label="Значение нового свойства"
-          value={newValue}
-          placeholder="0.8"
-          onChange={handleNewValueChange}
-        />
-
-        <button type="button" onClick={addProperty}>
-          +
+        <button type="button" onClick={handleApplyProperties}>
+          Применить свойства
         </button>
       </div>
 
-      {propertyError && (
+      {error && (
         <span className={styles.Error} role="alert">
-          {propertyError}
+          {error}
         </span>
       )}
     </details>

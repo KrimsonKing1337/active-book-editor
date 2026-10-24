@@ -8,9 +8,9 @@ import type {
   VibrationEffect,
   FlashlightEffect,
   BackgroundEffect,
-} from './effects';
+} from '../effects';
 
-import { normalizePageEffects, isRecord } from './effects/utils';
+import { normalizePageEffects, isRecord } from '../effects/utils';
 
 type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect;
 type MappedEffect<T extends EffectForGetMappedEffects> = Pick<T, 'id' | 'type' | 'options'>;

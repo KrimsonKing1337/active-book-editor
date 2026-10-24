@@ -8,6 +8,8 @@ import type { BookRuntime } from '@active-book/types';
 
 import { renderNode } from '@utils/renderNode';
 
+import { resolveBackgroundOptions } from '@active-book/book-builder/effects';
+
 import {
   getAudioEffects,
   getVibrationEffects,
@@ -67,7 +69,12 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
         })}
 
         {backgroundEffects.map((effectCur) => {
-          const { component, ...options } = effectCur.options;
+          const {
+            component,
+            ...effectOptions
+          } = effectCur.options;
+
+          const options = resolveBackgroundOptions(effectOptions);
 
           let componentId = null;
 

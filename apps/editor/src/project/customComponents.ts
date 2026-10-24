@@ -2,7 +2,7 @@ import {
   type BrowserLibrary,
   inspectBrowserArchive,
   loadBrowserLibrary,
-} from '@active-book/book-builder/customComponents/browser';
+} from '@active-book/book-builder/components/custom/browser';
 
 import type { ProjectStorage } from './@types';
 import type { FilePickerWindow, ProjectFileHandle } from './fileSystemAccess';

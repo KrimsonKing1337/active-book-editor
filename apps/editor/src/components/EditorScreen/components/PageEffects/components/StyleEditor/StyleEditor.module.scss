@@ -21,10 +21,63 @@
   }
 }
 
-.ColorFields {
+.ColorPropertyHeading {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ManualColorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 8px;
+
+  legend {
+    padding: 0 5px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+.RgbaFields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+
+  .Field {
+    min-width: 0;
+
+    input {
+      min-width: 0;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    small {
+      color: #b5b5b5;
+      font-size: 11px;
+      text-align: center;
+    }
+  }
+}
+
+.ColorPickerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  strong {
+    font-size: 13px;
+  }
+
+  small {
+    color: #b5b5b5;
+    font-size: 12px;
+  }
 }
 
 .RangeFields,
@@ -95,12 +148,123 @@
 
 .ColorActions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 
   button {
     padding: 7px 12px;
     cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
+}
+
+.SearchSelect {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px;
+  }
+}
+
+.SearchOptions {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--background, #222);
+  border: 1px solid #777;
+  border-radius: 4px;
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 7px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &[data-active='true'] {
+      background: #555;
+    }
+  }
+}
+
+.EmptyOptions {
+  display: block;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.FilterRow,
+.AdvancedRow {
+  margin-top: 8px;
+  border: 1px solid #777;
+  border-radius: 4px;
+}
+
+.FilterSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.FilterBody,
+.AdvancedRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.FilterActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.PositionRow,
+.NumericFields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.PositionRow > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.NumericFields {
+  input {
+    box-sizing: border-box;
+    width: 75px;
+    padding: 7px;
+  }
+
+  span {
+    min-width: 18px;
+  }
+}
+
+.NumericControl {
+  min-width: 0;
 }

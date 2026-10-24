@@ -1,7 +1,7 @@
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
-import { getBlurFilter } from '../../../StyleEditor/utils';
+import { createDefaultShadowFilters } from '../../../../utils';
 
 import styles from '../../BackgroundSettings.module.scss';
 
@@ -14,7 +14,6 @@ export type ShadowProps = {
 
 const defaultShadowStyle = {
   zIndex: 2,
-  backdropFilter: getBlurFilter(10),
 };
 
 export const Shadow = ({ shadow, onChange }: ShadowProps) => {
@@ -23,11 +22,13 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
   const handleShowChange = (show: boolean) => {
     const hasNoStyles = !style || Object.keys(style).length === 0;
     const nextStyle = hasNoStyles ? defaultShadowStyle : style;
+    const styleFilters = shadow.styleFilters ?? createDefaultShadowFilters();
 
     onChange({
       ...shadow,
       show,
       style: nextStyle,
+      styleFilters,
     });
   };
 
@@ -49,6 +50,7 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
       <StyleEditor
         defaultZIndex={2}
         value={style ?? {}}
+        styleFilters={shadow.styleFilters}
         layer="shadow"
       />
     </details>

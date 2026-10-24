@@ -87,6 +87,7 @@ export const Videos = ({
           muted,
           src,
           style,
+          styleFilters,
         } = videoCur;
 
         const handlePathChangeForVideo = (val: string) => {
@@ -156,6 +157,7 @@ export const Videos = ({
               <StyleEditor
                 defaultZIndex={1}
                 value={style ?? {}}
+                styleFilters={styleFilters}
                 layer="video"
                 mediaId={id}
               />

@@ -1,27 +1,18 @@
-import type {
-  ChangeEvent,
-  ClipboardEvent,
-  KeyboardEvent,
-  MouseEvent,
-} from 'react';
+import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-
-import { InputMask, format, unformat } from '@react-input/mask';
+import { InputMask, unformat } from '@react-input/mask';
 import { HexAlphaColorPicker } from 'react-colorful';
+
+import type { RgbaChannels } from '../../color';
 
 import {
   getHexColor,
-  getRgbaColor,
-  getRgbaMask,
-  getRgbaWidths,
+  getHexFromRgba,
+  getRgbaChannels,
+  getRgbaError,
   hexMaskOptions,
-  parseRgbaColor,
-  rgbaReplacement,
+  normalizeRgbaChannel,
 } from '../../color';
 
 import styles from '../../StyleEditor.module.scss';
@@ -32,222 +23,231 @@ type ColorSettingsProps = {
   onCommit: () => void;
 };
 
+type EditedFormat = 'hex' | 'rgba' | null;
+
+const CHANNEL_LABELS = ['R', 'G', 'B', 'A'];
+
+const getCompleteHex = (val: string): string | null => {
+  const digits = unformat(val, hexMaskOptions);
+
+  if (digits.length !== 6 && digits.length !== 8) {
+    return null;
+  }
+
+  return getHexColor('#' + digits);
+};
+
 export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsProps) => {
   const pickerColor = getHexColor(color);
 
   const [hexDraft, setHexDraft] = useState(pickerColor);
-  const [rgbaDraft, setRgbaDraft] = useState(getRgbaColor(pickerColor));
-  const [rgbaWidths, setRgbaWidths] = useState(() => getRgbaWidths(getRgbaColor(pickerColor)));
-  const [activeColorInput, setActiveColorInput] = useState<'hex' | 'rgba' | null>(null);
-  const [lastEditedColorInput, setLastEditedColorInput] = useState<'hex' | 'rgba'>('hex');
-  const [colorError, setColorError] = useState('');
+  const [rgbaDraft, setRgbaDraft] = useState<RgbaChannels>(() => getRgbaChannels(pickerColor));
+  const [editedFormat, setEditedFormat] = useState<EditedFormat>(null);
+  const [showValidation, setShowValidation] = useState(false);
 
-  const rgbaInputRef = useRef<HTMLInputElement>(null);
+  const rgbaDraftRef = useRef(rgbaDraft);
+  const channelRefs = useRef<Array<HTMLInputElement | null>>([null, null, null, null]);
 
   useEffect(() => {
-    if (activeColorInput !== 'hex' && !(colorError && lastEditedColorInput === 'hex')) {
-      setHexDraft(pickerColor);
+    const nextRgba = getRgbaChannels(pickerColor);
+
+    rgbaDraftRef.current = nextRgba;
+
+    setHexDraft(pickerColor);
+    setRgbaDraft(nextRgba);
+    setEditedFormat(null);
+    setShowValidation(false);
+  }, [pickerColor]);
+
+  const updateChannel = (index: number, val: string) => {
+    const updated: RgbaChannels = [...rgbaDraftRef.current];
+
+    updated[index] = val;
+
+    rgbaDraftRef.current = updated;
+
+    setRgbaDraft(updated);
+    setEditedFormat('rgba');
+    setShowValidation(false);
+
+    const hex = getHexFromRgba(updated);
+
+    if (hex) {
+      setHexDraft(hex);
     }
-
-    if (activeColorInput !== 'rgba' && !(colorError && lastEditedColorInput === 'rgba')) {
-      const rgba = getRgbaColor(pickerColor);
-
-      setRgbaDraft(rgba);
-      setRgbaWidths(getRgbaWidths(rgba));
-    }
-  }, [pickerColor, activeColorInput, colorError, lastEditedColorInput]);
-
-  const handleHexChange = (input: string) => {
-    setHexDraft(input);
-    setLastEditedColorInput('hex');
-    setColorError('');
   };
 
-  const handleRgbaChange = (input: string) => {
-    setRgbaDraft(input);
-    setLastEditedColorInput('rgba');
-    setColorError('');
-  };
+  const focusChannel = (index: number, position: 'start' | 'end' | 'select' = 'end') => {
+    const input = channelRefs.current[index];
 
-  const handleApplyColor = (kind: 'hex' | 'rgba'): void => {
-    let color: string | null = null;
-
-    if (kind === 'hex') {
-      const digits = unformat(hexDraft, hexMaskOptions);
-
-      if (digits.length === 6 || digits.length === 8) {
-        color = `#${digits}`;
-      }
-    } else {
-      color = parseRgbaColor(rgbaDraft);
+    if (!input) {
+      return;
     }
 
-    if (!color) {
-      setColorError(kind === 'hex' ? 'Укажи 6 или 8 HEX-символов' : 'Проверь RGB (0–255) и альфу (0–100%)');
-      setActiveColorInput(null);
+    input.focus();
+
+    if (position === 'select') {
+      input.select();
 
       return;
     }
 
-    setColorError('');
-    setActiveColorInput(null);
+    const offset = position === 'start' ? 0 : input.value.length;
 
-    onColorChange(color);
+    input.setSelectionRange(offset, offset);
+  };
+
+  const handleHexChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const nextHex = e.target.value;
+    const parsedHex = getCompleteHex(nextHex);
+
+    setHexDraft(nextHex);
+    setEditedFormat('hex');
+    setShowValidation(false);
+
+    if (parsedHex) {
+      const nextRgba = getRgbaChannels(parsedHex);
+
+      rgbaDraftRef.current = nextRgba;
+
+      setRgbaDraft(nextRgba);
+    }
+  };
+
+  const handleChannelChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    if (/^\d{0,3}$/.test(val)) {
+      updateChannel(index, val);
+    }
+  };
+
+  const handleChannelBlur = (index: number) => {
+    const value = rgbaDraftRef.current[index];
+    const normalized = normalizeRgbaChannel(value, index);
+
+    if (value !== normalized) {
+      updateChannel(index, normalized);
+    }
+
+    setShowValidation(true);
+  };
+
+  const handleChannelKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? 0;
+    const value = rgbaDraftRef.current[index];
+
+    const caretIsAtStart = start === 0 && end === 0;
+    const caretIsAtEnd = start === value.length && start === end;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+
+      setShowValidation(true);
+
+      input.blur();
+
+      return;
+    }
+
+    if (e.key === 'ArrowRight' && caretIsAtEnd && index < 3) {
+      e.preventDefault();
+
+      focusChannel(index + 1, 'start');
+
+      return;
+    }
+
+    if (e.key === 'ArrowLeft' && caretIsAtStart && index > 0) {
+      e.preventDefault();
+
+      focusChannel(index - 1);
+
+      return;
+    }
+
+    if (e.key === 'Backspace') {
+      const selectedAll = start === 0 && end === value.length;
+      const removingLastDigit = value.length === 1 && start === 1 && end === 1;
+
+      if (selectedAll || removingLastDigit || value === '') {
+        e.preventDefault();
+
+        updateChannel(index, '');
+
+        if (index > 0) {
+          focusChannel(index - 1);
+        }
+
+        return;
+      }
+
+      if (caretIsAtStart && index > 0) {
+        e.preventDefault();
+
+        focusChannel(index - 1);
+
+        return;
+      }
+    }
+
+    const isDigit = /^\d$/.test(e.key);
+
+    const hasModifier = e.ctrlKey || e.altKey || e.metaKey;
+    const atThreeDigits = value.length === 3 && caretIsAtEnd;
+
+    if (isDigit && !hasModifier && atThreeDigits) {
+      e.preventDefault();
+
+      if (index < 3) {
+        focusChannel(index + 1, 'select');
+      }
+    }
+  };
+
+  const hexColor = getCompleteHex(hexDraft);
+  const rgbaColor = getHexFromRgba(rgbaDraft);
+
+  const nextColor = editedFormat === 'hex' ? hexColor : rgbaColor;
+
+  const hasCompleteColor = nextColor !== null;
+  const hasEditedColor = editedFormat !== null;
+
+  const hasDifferentColor = nextColor?.toLowerCase() !== pickerColor.toLowerCase();
+
+  const hasManualChanges = hasCompleteColor && hasEditedColor && hasDifferentColor;
+
+  const hexValidationError = hexColor ? null : 'Укажите 6 или 8 HEX-символов';
+  const validationError = editedFormat === 'hex' ? hexValidationError : getRgbaError(rgbaDraft);
+
+  const handleApplyColor = () => {
+    if (!nextColor || !hasManualChanges || validationError) {
+      setShowValidation(true);
+
+      return;
+    }
+
+    onColorChange(nextColor);
     onCommit();
   };
 
-  const handleRgbaKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const input = e.currentTarget;
-    const position = input.selectionStart ?? 0;
-    const selectedAll = position === 0 && input.selectionEnd === input.value.length;
-    const pressedDigit = e.key.length === 1 && e.key >= '0' && e.key <= '9';
-
-    if (selectedAll && pressedDigit) {
-      e.preventDefault();
-
-      const widths: typeof rgbaWidths = [3, 3, 3, 3];
-
-      const options = {
-        mask: getRgbaMask(widths),
-        replacement: rgbaReplacement,
-      };
-
-      setRgbaWidths(widths);
-      setRgbaDraft(format(e.key, options));
-      setLastEditedColorInput('rgba');
-      setColorError('');
-
-      requestAnimationFrame(() => {
-        rgbaInputRef.current?.setSelectionRange(1, 1);
-      });
-
-      return;
-    }
-
-    if (e.key !== ' ' && e.key !== '/') {
-      return;
-    }
-
-    const [red, green, blue] = rgbaWidths;
-
-    const redStart = red + 1;
-    const greenStart = red + green + 2;
-    const blueStart = red + green + blue + 5;
-
-    const starts = [
-      0,
-      redStart,
-      greenStart,
-      blueStart,
-    ];
-
-    const currentIndex = starts.reduce((index, start, itemIndex) => {
-      return position >= start ? itemIndex : index;
-    }, -1);
-
-    if (currentIndex < 0 || currentIndex > 2) {
-      return;
-    }
-
-    e.preventDefault();
-
-    const last = starts[currentIndex] + rgbaWidths[currentIndex];
-
-    const currentValue = rgbaDraft.slice(starts[currentIndex], last);
-    const digits = [...currentValue].filter((cur) => cur >= '0' && cur <= '9');
-
-    if (!digits.length) {
-      return;
-    }
-
-    const nextWidths: typeof rgbaWidths = [
-      rgbaWidths[0],
-      rgbaWidths[1],
-      rgbaWidths[2],
-      rgbaWidths[3],
-    ];
-
-    nextWidths[currentIndex] = digits.length;
-
-    const previousMask = {
-      mask: getRgbaMask(rgbaWidths),
-      replacement: rgbaReplacement,
-    };
-
-    const nextMask = {
-      mask: getRgbaMask(nextWidths),
-      replacement: rgbaReplacement,
-    };
-
-    const rawDigits = unformat(rgbaDraft, previousMask);
-
-    setRgbaWidths(nextWidths);
-    setRgbaDraft(format(rawDigits, nextMask));
-
-    const nextIndex = e.key === '/' ? 3 : currentIndex + 1;
-
-    const nextStartsRed = nextWidths[0] + 1;
-    const nextStartsGreen = nextWidths[0] + nextWidths[1] + 2;
-    const nextStartsBlue = nextWidths[0] + nextWidths[1] + nextWidths[2] + 5;
-
-    const nextStarts = [
-      0,
-      nextStartsRed,
-      nextStartsGreen,
-      nextStartsBlue,
-    ];
-
-    requestAnimationFrame(() => {
-      rgbaInputRef.current?.setSelectionRange(nextStarts[nextIndex], nextStarts[nextIndex]);
-    });
-  };
-
-  const handleRgbaPaste = (e: ClipboardEvent<HTMLInputElement>) => {
-    const pastedValue = e.clipboardData.getData('text').trim();
-
-    if (!parseRgbaColor(pastedValue)) {
-      return;
-    }
-
-    e.preventDefault();
-
-    setRgbaDraft(pastedValue);
-    setRgbaWidths(getRgbaWidths(pastedValue));
-    setColorError('');
-  };
-
-  const handleHexInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleHexChange(e.target.value);
-  };
-
-  const handleRgbaInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleRgbaChange(e.target.value);
-  };
-
-  const handleHexFocus = () => {
-    setActiveColorInput('hex');
-    setLastEditedColorInput('hex');
-  };
-
-  const handleRgbaFocus = () => {
-    setActiveColorInput('rgba');
-    setLastEditedColorInput('rgba');
-  };
-
   const handleHexBlur = () => {
-    handleApplyColor('hex');
+    setShowValidation(true);
   };
 
-  const handleRgbaBlur = () => {
-    handleApplyColor('rgba');
-  };
+  const handleHexKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') {
+      return;
+    }
 
-  const handleApplyButtonClick = () => {
-    handleApplyColor(lastEditedColorInput);
-  };
-
-  const handleApplyButtonMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+
+    setShowValidation(true);
+
+    e.currentTarget.blur();
   };
 
   const handlePickerPointerUp = () => {
@@ -258,9 +258,20 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
     requestAnimationFrame(onCommit);
   };
 
+  const applyButtonIsDisabled = !hasManualChanges || Boolean(validationError);
+  const showValidationError = showValidation && validationError;
+
   return (
     <>
-      <div className={styles.ColorFields}>
+      <div className={styles.ColorPropertyHeading}>
+        Цвет фона (background-color)
+      </div>
+
+      <fieldset className={styles.ManualColorSection}>
+        <legend>
+          Ручной ввод
+        </legend>
+
         <label className={styles.Field}>
           <span>
             HEX
@@ -274,62 +285,98 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
             value={hexDraft}
             spellCheck={false}
 
-            onChange={handleHexInputChange}
-            onFocus={handleHexFocus}
+            onChange={handleHexChange}
             onBlur={handleHexBlur}
+            onKeyDown={handleHexKeyDown}
           />
         </label>
 
-        <label className={styles.Field}>
-          <span>
-            RGBA
-          </span>
+        <div className={styles.RgbaFields} role="group" aria-label="RGBA">
+          {CHANNEL_LABELS.map((labelCur, index) => {
+            const inputAriaLabel = index === 3 ? 'Альфа (0–100%)' : `Канал ${labelCur} (0–255)`;
+            const rangeLabel = index === 3 ? '0–100%' : '0–255';
 
-          <InputMask
-            ref={rgbaInputRef}
-            aria-label="RGBA"
-            mask={getRgbaMask(rgbaWidths)}
-            replacement={rgbaReplacement}
-            showMask
-            separate
-            value={rgbaDraft}
-            inputMode="numeric"
-            spellCheck={false}
-            placeholder="204 62 114 / 80%"
+            const handleInputRef = (val: HTMLInputElement | null) => {
+              channelRefs.current[index] = val;
+            };
 
-            onChange={handleRgbaInputChange}
-            onKeyDown={handleRgbaKeyDown}
-            onPaste={handleRgbaPaste}
-            onFocus={handleRgbaFocus}
-            onBlur={handleRgbaBlur}
-          />
-        </label>
-      </div>
+            const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+              e.currentTarget.select();
+            };
 
-      <div className={styles.ColorActions}>
-        <button
-          type="button"
-          onMouseDown={handleApplyButtonMouseDown}
-          onClick={handleApplyButtonClick}
-        >
-          Применить цвет
-        </button>
+            const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+              handleChannelChange(index, e);
+            };
 
-        {colorError && (
+            const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+              handleChannelKeyDown(index, e);
+            };
+
+            const handleBlur = () => {
+              handleChannelBlur(index);
+            };
+
+            return (
+              <label key={labelCur} className={styles.Field}>
+                <span>
+                  {labelCur}
+                </span>
+
+                <input
+                  ref={handleInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={3}
+                  aria-label={inputAriaLabel}
+                  value={rgbaDraft[index]}
+
+                  onFocus={handleFocus}
+                  onChange={handleChange}
+                  onKeyDown={handleKeyDown}
+                  onBlur={handleBlur}
+                />
+
+                <small>
+                  {rangeLabel}
+                </small>
+              </label>
+            );
+          })}
+        </div>
+
+        <div className={styles.ColorActions}>
+          <button
+            type="button"
+            disabled={applyButtonIsDisabled}
+            onClick={handleApplyColor}
+          >
+            Применить
+          </button>
+        </div>
+
+        {showValidationError && (
           <span className={styles.Error} role="alert">
-            {colorError}
+            {validationError}
           </span>
         )}
-      </div>
+      </fieldset>
 
-      <div
-        onPointerUp={handlePickerPointerUp}
-        onKeyUp={handlePickerKeyUp}
-      >
-        <HexAlphaColorPicker
-          color={pickerColor}
-          onChange={onColorChange}
-        />
+      <div className={styles.ColorPickerSection}>
+        <strong>
+          Выбор цвета
+        </strong>
+
+        <small>
+          Изменения через палитру применяются сразу.
+        </small>
+
+        <div
+          onPointerUp={handlePickerPointerUp}
+          onKeyUp={handlePickerKeyUp}
+        >
+          <HexAlphaColorPicker color={pickerColor} onChange={onColorChange} />
+        </div>
       </div>
     </>
   );

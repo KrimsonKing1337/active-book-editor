@@ -1,6 +1,6 @@
 import { type ComponentType, useSyncExternalStore } from 'react';
 
-import type { BrowserLibrary, BrowserComponentDefinition } from '@active-book/book-builder/customComponents/browser';
+import type { BrowserLibrary, BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
 
 export type CustomComponentRegistry = {
   components: Record<string, ComponentType>;

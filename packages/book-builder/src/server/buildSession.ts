@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { randomUUID } from 'node:crypto';
 
-import { buildBook } from './build';
+import { buildBook } from '../build/build';
 
 const BUILD_ROOT_NAME = '.active-book-build';
 

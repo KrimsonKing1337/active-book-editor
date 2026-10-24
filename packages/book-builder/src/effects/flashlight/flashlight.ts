@@ -1,6 +1,6 @@
 import type { FlashlightProps } from 'activeBook-core/components/ProxyHooks';
 
-import { isRecord } from './utils';
+import { isRecord } from '../utils';
 
 export type FlashlightOptions = Required<Pick<
   FlashlightProps,

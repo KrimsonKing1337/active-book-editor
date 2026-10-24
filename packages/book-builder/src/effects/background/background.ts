@@ -6,18 +6,34 @@ import type {
   BackgroundEffectShadowOptions,
 } from 'activeBook-core/hooks/effects/background/@types';
 
-import { isRecord } from './utils';
+import type { FilterOperation } from '../style';
+
+import { resolveStyle } from '../style';
+import { isRecord } from '../utils';
 
 export type BackgroundComponentReference = {
   package: string;
   name: string;
 };
 
+export type StyledBackgroundMedia = BackgroundEffectMediaOptions & {
+  styleFilters?: FilterOperation[];
+};
+
+export type StyledBackgroundVideo = BackgroundEffectVideoOptions & {
+  styleFilters?: FilterOperation[];
+};
+
+export type StyledBackgroundShadow = BackgroundEffectShadowOptions & {
+  styleFilters?: FilterOperation[];
+};
+
 export type BackgroundOptions = {
   style?: CSSProperties;
-  images?: BackgroundEffectMediaOptions[];
-  videos?: BackgroundEffectVideoOptions[];
-  shadow?: BackgroundEffectShadowOptions;
+  styleFilters?: FilterOperation[];
+  images?: StyledBackgroundMedia[];
+  videos?: StyledBackgroundVideo[];
+  shadow?: StyledBackgroundShadow;
   component?: BackgroundComponentReference;
 };
 
@@ -29,6 +45,68 @@ export type BackgroundEffect = {
 };
 
 export type BuiltBackgroundEffect = Omit<BackgroundEffect, 'slug'>;
+
+export const resolveBackgroundOptions = (options: BackgroundOptions) => {
+  const {
+    style,
+    styleFilters,
+    images,
+    videos,
+    shadow,
+    ...rest
+  } = options;
+
+  const resolvedStyle = resolveStyle(style, styleFilters);
+
+  const resolvedImages = images?.map((imageCur) => {
+    const {
+      style: mediaStyle,
+      styleFilters: mediaFilters,
+      ...mediaOptions
+    } = imageCur;
+
+    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
+
+    return {
+      ...mediaOptions,
+      style: resolvedMediaStyle,
+    };
+  });
+
+  const resolvedVideos = videos?.map((videoCur) => {
+    const {
+      style: mediaStyle,
+      styleFilters: mediaFilters,
+      ...mediaOptions
+    } = videoCur;
+
+    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
+
+    return {
+      ...mediaOptions,
+      style: resolvedMediaStyle,
+    };
+  });
+
+  let resolvedShadow;
+
+  if (shadow) {
+    const style = resolveStyle(shadow.style, shadow.styleFilters);
+
+    resolvedShadow = {
+      show: shadow.show,
+      style,
+    };
+  }
+
+  return {
+    ...rest,
+    style: resolvedStyle,
+    images: resolvedImages,
+    videos: resolvedVideos,
+    shadow: resolvedShadow,
+  };
+};
 
 export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] => {
   if (!isRecord(value) || !Array.isArray(value.background)) {

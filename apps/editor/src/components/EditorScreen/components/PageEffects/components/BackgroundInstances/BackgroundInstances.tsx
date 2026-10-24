@@ -11,6 +11,7 @@ import type { BookComponentProps } from '@active-book/types';
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import { resolveStyle } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 
@@ -187,33 +188,41 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
   };
 
   const backgroundImages = images.map((imageCur, index) => {
-    const style = withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id));
+    const previewedStyle = withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id));
+
+    const style = resolveStyle(previewedStyle, imageCur.styleFilters);
+    const src = media.images[index];
 
     return {
       ...imageCur,
-      src: media.images[index],
+      src,
       style,
     };
   });
 
   const backgroundVideos = videos.map((videoCur, index) => {
-    const style = withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id));
+    const previewedStyle = withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id));
+
+    const style = resolveStyle(previewedStyle, videoCur.styleFilters);
+    const src = media.videos[index];
 
     return {
       ...videoCur,
-      src: media.videos[index],
+      src,
       style,
     };
   });
 
-  const shadowStyle = withPreviewStyle(options?.shadow?.style, previewStyle('shadow'));
+  const previewedShadowStyle = withPreviewStyle(effect.options.shadow?.style, previewStyle('shadow'));
+  const shadowStyle = resolveStyle(previewedShadowStyle, effect.options.shadow?.styleFilters);
 
   const shadow = options.shadow && {
     ...options.shadow,
     style: shadowStyle,
   };
 
-  const backgroundStyle = withPreviewStyle(options.style, previewStyle('background'));
+  const previewedBackgroundStyle = withPreviewStyle(effect.options.style, previewStyle('background'));
+  const backgroundStyle = resolveStyle(previewedBackgroundStyle, effect.options.styleFilters);
 
   const background: CoreBackgroundEffect = {
     id: effect.id,
