@@ -1,4 +1,6 @@
-import { type CSSProperties, useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
+
+import { useEffect, useState } from 'react';
 
 import type { NumericConfig } from '../NumericControl';
 

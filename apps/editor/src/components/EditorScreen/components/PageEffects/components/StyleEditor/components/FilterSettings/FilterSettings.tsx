@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-
 import type {
   FilterFunction,
   FilterOperation,
   FilterProperty,
 } from '@active-book/book-builder/effects';
 
-import { FILTER_FUNCTIONS, resolveStyle } from '@active-book/book-builder/effects';
-
 import type { NumericConfig } from '../NumericControl';
+
+import { useEffect, useState } from 'react';
+
+import { FILTER_FUNCTIONS, resolveStyle } from '@active-book/book-builder/effects';
 
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';

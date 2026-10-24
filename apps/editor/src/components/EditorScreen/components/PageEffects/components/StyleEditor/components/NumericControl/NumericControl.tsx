@@ -1,4 +1,6 @@
-import { type ChangeEvent, useEffect, useRef } from 'react';
+import type { ChangeEvent } from 'react';
+
+import { useEffect, useRef } from 'react';
 
 import { InputMask } from '@react-input/mask';
 
