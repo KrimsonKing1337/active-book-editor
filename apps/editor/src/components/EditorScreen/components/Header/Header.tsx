@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 
-import type { BrowserComponentDefinition } from '@active-book/book-builder/customComponents/browser';
+import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
 
 import type { BuildState, TextComponentName } from '../../@types';
 
@@ -15,6 +15,7 @@ type HeaderProps = {
   showStructure: boolean;
   showNarrative: boolean;
   showBackgrounds: boolean;
+  showSideEffects: boolean;
   buildState: BuildState;
   buttonIsDisabled: boolean;
   structureButtonIsDisabled: boolean;
@@ -25,6 +26,7 @@ type HeaderProps = {
   onToggleStructure: () => void;
   onToggleNarrative: () => void;
   onToggleBackgrounds: () => void;
+  onToggleSideEffects: () => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
@@ -41,6 +43,7 @@ export const Header = ({
   showStructure,
   showNarrative,
   showBackgrounds,
+  showSideEffects,
   buildState,
   buttonIsDisabled,
   structureButtonIsDisabled,
@@ -51,6 +54,7 @@ export const Header = ({
   onToggleStructure,
   onToggleNarrative,
   onToggleBackgrounds,
+  onToggleSideEffects,
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextComponent,
@@ -69,6 +73,7 @@ export const Header = ({
 
   const narrativeControlButtonLabel = showNarrative ? 'Скрыть нарратив' : 'Показать нарратив';
   const backgroundControlButtonLabel = showBackgrounds ? 'Скрыть фон' : 'Показать фон';
+  const sideEffectsButtonLabel = showSideEffects ? 'Скрыть боковые эффекты' : 'Показать боковые эффекты';
 
   return (
     <header className={styles.Header}>
@@ -119,6 +124,10 @@ export const Header = ({
 
         <button type="button" aria-pressed={showBackgrounds} onClick={onToggleBackgrounds}>
           {backgroundControlButtonLabel}
+        </button>
+
+        <button type="button" aria-pressed={showSideEffects} onClick={onToggleSideEffects}>
+          {sideEffectsButtonLabel}
         </button>
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>

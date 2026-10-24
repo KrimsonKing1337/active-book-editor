@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { SideOptions } from '@active-book/book-builder/effects';
 
@@ -198,7 +198,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     onUpdate(effect.id, { ...effect, slug: e.target.value });
   };
 
-  const handleIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleIdChange = (e: FocusEvent<HTMLInputElement>) => {
     onUpdate(effect.id, { ...effect, id: e.target.value });
   };
 

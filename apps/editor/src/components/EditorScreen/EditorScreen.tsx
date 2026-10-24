@@ -34,6 +34,7 @@ import {
 
 import { AudioInstances } from './components/PageEffects/components/AudioInstances';
 import { BackgroundInstances } from './components/PageEffects/components/BackgroundInstances';
+import { SideInstances } from './components/PageEffects/components/SideInstances';
 
 import {
   editorConfig,
@@ -50,6 +51,7 @@ const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
 const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
 const SHOW_NARRATIVE_STORAGE_KEY = 'activeBook-editor:showNarrative';
 const SHOW_BACKGROUNDS_STORAGE_KEY = 'activeBook-editor:showBackgrounds';
+const SHOW_SIDE_EFFECTS_STORAGE_KEY = 'activeBook-editor:showSideEffects';
 
 export const EditorScreen = () => {
   const { definitions: customComponentDefinitions } = useCustomComponents();
@@ -77,6 +79,10 @@ export const EditorScreen = () => {
     return localStorage.getItem(SHOW_BACKGROUNDS_STORAGE_KEY) !== 'false';
   });
 
+  const [showSideEffects, setShowSideEffects] = useState(() => {
+    return localStorage.getItem(SHOW_SIDE_EFFECTS_STORAGE_KEY) !== 'false';
+  });
+
   const editor = useEditor({
     content: createEmptyDocument(),
     editable: false,
@@ -96,6 +102,10 @@ export const EditorScreen = () => {
   useEffect(() => {
     localStorage.setItem(SHOW_BACKGROUNDS_STORAGE_KEY, String(showBackgrounds));
   }, [showBackgrounds]);
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_SIDE_EFFECTS_STORAGE_KEY, String(showSideEffects));
+  }, [showSideEffects]);
 
   const autosave = useAutosave({
     editor,
@@ -276,6 +286,7 @@ export const EditorScreen = () => {
           showStructure={showStructure}
           showNarrative={showNarrative}
           showBackgrounds={showBackgrounds}
+          showSideEffects={showSideEffects}
           buildState={buildState}
           buttonIsDisabled={buttonIsDisabled}
           structureButtonIsDisabled={structureButtonIsDisabled}
@@ -286,6 +297,7 @@ export const EditorScreen = () => {
           onToggleStructure={toggleStructure}
           onToggleNarrative={() => setShowNarrative((visible) => !visible)}
           onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
+          onToggleSideEffects={() => setShowSideEffects((visible) => !visible)}
           onInsertCustomComponent={handleInsertCustomComponent}
           customComponentDefinitions={customComponentDefinitions}
           onInsertTextComponent={handleInsertTextComponent}
@@ -325,6 +337,7 @@ export const EditorScreen = () => {
 
             <PageWrapper>
               {showBackgrounds && <BackgroundInstances project={project} />}
+              {showSideEffects && <SideInstances />}
               <EditorContent editor={editor} />
             </PageWrapper>
           </App>
