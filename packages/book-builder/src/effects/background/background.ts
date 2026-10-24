@@ -6,10 +6,10 @@ import type {
   BackgroundEffectShadowOptions,
 } from 'activeBook-core/hooks/effects/background/@types';
 
-import type { FilterOperation } from './style';
+import type { FilterOperation } from '../style';
 
-import { resolveStyle } from './style';
-import { isRecord } from './utils';
+import { resolveStyle } from '../style';
+import { isRecord } from '../utils';
 
 export type BackgroundComponentReference = {
   package: string;

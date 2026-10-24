@@ -1,6 +1,6 @@
 import type { VibrationProps } from 'activeBook-core/components/ProxyHooks';
 
-import { isRecord } from './utils';
+import { isRecord } from '../utils';
 
 export type VibrationOptions = Required<Pick<VibrationProps, 'duration' | 'delay' | 'playOnLoad'>>;
 
