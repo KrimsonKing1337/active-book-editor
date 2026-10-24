@@ -24,6 +24,7 @@ type SideSettingsProps = {
 type LayoutSettingsProps = {
   item: ItemLayout;
   onChange: (changes: Partial<ItemLayout>) => void;
+  defaultColor?: string;
 };
 
 const positions: Array<{ value: NonNullable<ItemLayout['position']>; label: string }> = [
@@ -50,7 +51,7 @@ const textPresets = [
   { value: 'none' as const, label: 'Без анимации' },
 ];
 
-const LayoutSettings = ({ item, onChange }: LayoutSettingsProps) => {
+const LayoutSettings = ({ item, onChange, defaultColor = '#ff0000' }: LayoutSettingsProps) => {
   const handlePositionChange = (e: ChangeEvent<HTMLSelectElement>) => {
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
@@ -86,13 +87,13 @@ const LayoutSettings = ({ item, onChange }: LayoutSettingsProps) => {
 
   const color = typeof item.style?.color === 'string' && /^#[0-9a-f]{6}$/i.test(item.style.color)
     ? item.style.color
-    : '#ff0000';
+    : defaultColor;
 
   return (
     <>
       <div className={styles.Layout}>
         <label className={styles.Field}>
-          Расположение
+          Точка привязки
           <select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
             {positions.map((positionCur) => {
               return (
@@ -292,6 +293,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <LayoutSettings
                 item={textCur}
+                defaultColor="#a3a3a3"
                 onChange={(changes) => updateText(textCur.id, changes)}
               />
 
