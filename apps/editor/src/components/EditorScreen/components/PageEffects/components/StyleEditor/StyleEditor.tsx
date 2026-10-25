@@ -4,9 +4,11 @@ import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
 
+import type { StyleEditorController } from './hooks';
+
 import { useStyleEditor } from './hooks';
 
-import { useBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
 
 import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
 
@@ -18,6 +20,9 @@ export type StyleEditorProps = {
   styleFilters?: FilterOperation[];
   mediaId?: string;
   defaultZIndex?: number;
+  colorProperty?: 'color' | 'backgroundColor';
+  controller?: StyleEditorController;
+  isMediaOverride?: boolean;
 };
 
 const handleInputEnter = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -32,6 +37,9 @@ export const StyleEditor = ({
   styleFilters,
   mediaId,
   defaultZIndex = 0,
+  colorProperty = 'backgroundColor',
+  controller,
+  isMediaOverride,
 }: StyleEditorProps) => {
   const {
     currentStyle,
@@ -42,15 +50,16 @@ export const StyleEditor = ({
     value,
     layer,
     mediaId,
+    controller,
   });
 
-  const { commitFilters } = useBackgroundStyle();
+  const backgroundStyle = useOptionalBackgroundStyle();
 
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
 
   const handleColorChange = (val: string) => {
-    setProperty('backgroundColor', val);
+    setProperty(colorProperty, val);
   };
 
   const handleLayerChange = (val: number) => {
@@ -62,16 +71,20 @@ export const StyleEditor = ({
 
     const normalizedMediaId = mediaId ?? null;
 
-    commitFilters(layer, normalizedMediaId, operations);
+    if (controller) {
+      controller.commitFilters(operations);
+    } else {
+      backgroundStyle?.commitFilters(layer, normalizedMediaId, operations);
+    }
   };
 
-  const backgroundColor = String(currentStyle.backgroundColor ?? '');
-  const isMedia = layer === 'image' || layer === 'video';
+  const color = String(currentStyle[colorProperty] ?? '');
+  const isMedia = isMediaOverride ?? (layer === 'image' || layer === 'video');
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
       <ColorSettings
-        color={backgroundColor}
+        color={color}
         onColorChange={handleColorChange}
         onCommit={commitStyle}
       />
