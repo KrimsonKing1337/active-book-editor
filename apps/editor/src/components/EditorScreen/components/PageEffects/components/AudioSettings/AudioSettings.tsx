@@ -321,12 +321,13 @@ export const AudioSettings = ({
           )}
         </div>
 
-        <label className={styles.Field}>
-          <span>
+        <div className={styles.Field}>
+          <label htmlFor="audio-source-path">
             Путь к аудиофайлу
-          </span>
+          </label>
 
           <FileChooser
+            inputId="audio-source-path"
             value={options.src}
             onChange={(src) => updateOption('src', src)}
             onChoose={handleChooseFile}
@@ -346,7 +347,7 @@ export const AudioSettings = ({
               {importError}
             </small>
           )}
-        </label>
+        </div>
 
         <label className={styles.Field}>
           <span>
@@ -435,12 +436,12 @@ export const AudioSettings = ({
             </label>
 
             <Checkbox checked={options.fadeOutWhenUnload} onChange={handleFadeOutChange}>
-          Плавно затухать при выгрузке
-        </Checkbox>
+              Плавно затухать при выгрузке
+            </Checkbox>
 
             <Checkbox checked={options.screamer} onChange={handleScreamerChange}>
-          Режим скримера (сверхгромкость)
-        </Checkbox>
+              Режим скримера (сверхгромкость)
+            </Checkbox>
           </div>
         </details>
       </div>

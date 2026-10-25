@@ -41,8 +41,8 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
       </summary>
 
       <Checkbox checked={show ?? false} onChange={(e) => handleShowChange(e.target.checked)}>
-                Показывать слой
-              </Checkbox>
+        Показывать слой
+      </Checkbox>
 
       <StyleEditor
         defaultZIndex={2}

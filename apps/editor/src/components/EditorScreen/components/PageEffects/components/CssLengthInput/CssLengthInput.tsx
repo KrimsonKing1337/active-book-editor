@@ -7,6 +7,7 @@ import { InputMask, unformat } from '@react-input/mask';
 import styles from '../EffectControls/EffectControls.module.scss';
 
 type CssLengthInputProps = {
+  label?: string;
   value: string;
   onChange: (value: string) => void;
   allowNegative?: boolean;
@@ -32,6 +33,7 @@ const getParts = (value: string): { amount: string; unit: Unit } => {
 };
 
 export const CssLengthInput = ({
+  label = 'Числовое значение',
   value,
   onChange,
   allowNegative = true,
@@ -105,7 +107,7 @@ export const CssLengthInput = ({
   return (
     <span style={{ display: 'flex', gap: 6, minWidth: 0 }}>
       <InputMask
-        aria-label="Числовое значение"
+        aria-label={label}
         className={styles.Input}
         mask={maskOptions.mask}
         replacement={maskOptions.replacement}
@@ -118,7 +120,7 @@ export const CssLengthInput = ({
       />
 
       <select
-        aria-label="Единица измерения"
+        aria-label={`${label}: единица измерения`}
         className={styles.Select}
         value={unit}
         onChange={handleUnitChange}

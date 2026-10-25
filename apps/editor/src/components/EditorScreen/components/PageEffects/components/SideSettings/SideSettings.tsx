@@ -95,15 +95,23 @@ const LayoutSettings = ({
           </Select>
         </label>
 
-        <label className={styles.Field}>
-          Смещение X
-          <CssLengthInput value={item.offsetX ?? '0px'} onChange={handleOffsetXChange} />
-        </label>
+        <div className={styles.Field}>
+          <span>Смещение X</span>
+          <CssLengthInput
+            label="Смещение X"
+            value={item.offsetX ?? '0px'}
+            onChange={handleOffsetXChange}
+          />
+        </div>
 
-        <label className={styles.Field}>
-          Смещение Y
-          <CssLengthInput value={item.offsetY ?? '0px'} onChange={handleOffsetYChange} />
-        </label>
+        <div className={styles.Field}>
+          <span>Смещение Y</span>
+          <CssLengthInput
+            label="Смещение Y"
+            value={item.offsetY ?? '0px'}
+            onChange={handleOffsetYChange}
+          />
+        </div>
       </div>
 
       <div className={styles.Controls}>
@@ -370,9 +378,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={(changes) => updateText(textCur.id, changes)}
               />
 
-              <label className={styles.Field}>
-                Размер шрифта (CSS)
+              <div className={styles.Field}>
+                <span>Размер шрифта</span>
                 <CssLengthInput
+                  label="Размер шрифта"
                   allowNegative={false}
                   value={String(textCur.style?.fontSize ?? '12px')}
                   onChange={(fontSize) => {
@@ -381,7 +390,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                     updateText(textCur.id, { style });
                   }}
                 />
-              </label>
+              </div>
 
               <details>
                 <summary>Стили текста</summary>
