@@ -1,5 +1,3 @@
-import { IntegerInput } from '../IntegerInput';
-
 import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
@@ -15,6 +13,8 @@ import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../..
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { AnimationSettings } from './components/AnimationSettings';
+
+import { IntegerInput } from '../IntegerInput';
 
 import styles from './SideSettings.module.scss';
 

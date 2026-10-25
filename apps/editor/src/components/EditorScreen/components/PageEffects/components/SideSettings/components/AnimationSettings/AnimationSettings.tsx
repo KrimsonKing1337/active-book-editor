@@ -1,8 +1,8 @@
-import { IntegerInput } from '../../../IntegerInput';
-
 import type { ChangeEvent } from 'react';
 
 import type { SideOptions } from '@active-book/book-builder/effects';
+
+import { IntegerInput } from '../../../IntegerInput';
 
 type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type SideAnimation = NonNullable<ShadowItem['animation']>;
@@ -97,6 +97,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
       <label>
         Повторений
         <IntegerInput
+          maxDigits={8}
           min="1"
           step="1"
           disabled={animation.iterations === 'infinite' || animation.iterations === undefined}

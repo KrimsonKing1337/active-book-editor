@@ -1,5 +1,3 @@
-import { IntegerInput } from '../IntegerInput';
-
 import { type ChangeEvent, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
@@ -10,6 +8,8 @@ import { mainSelectors } from 'activeBook-core/store/main';
 import { useFlashlight } from 'activeBook-core/hooks/effects';
 
 import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
+
+import { IntegerInput } from '../IntegerInput';
 
 import styles from './FlashlightSettings.module.scss';
 
@@ -222,6 +222,7 @@ export const FlashlightSettings = ({
           <IntegerInput
             min={0}
             max={10000}
+            maxDigits={5}
             step={100}
             value={options.duration}
             onChange={handleDurationChange}

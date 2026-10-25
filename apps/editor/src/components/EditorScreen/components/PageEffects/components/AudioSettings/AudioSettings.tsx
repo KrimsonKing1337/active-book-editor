@@ -1,5 +1,3 @@
-import { IntegerInput } from '../IntegerInput';
-
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
@@ -13,6 +11,8 @@ import { isAbortError } from '@project/errors';
 import { AudioPreview } from '../AudioPreview';
 
 import type { AudioEffectDraft, AudioOptions, OptionUpdater } from '../../@types';
+
+import { IntegerInput } from '../IntegerInput';
 
 import styles from './AudioSettings.module.scss';
 

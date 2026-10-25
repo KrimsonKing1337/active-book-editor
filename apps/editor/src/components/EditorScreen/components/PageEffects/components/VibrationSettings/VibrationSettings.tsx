@@ -1,5 +1,3 @@
-import { IntegerInput } from '../IntegerInput';
-
 import { type ChangeEvent, useEffect, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
@@ -8,6 +6,8 @@ import { mainSelectors } from 'activeBook-core/store/main';
 import { useVibration } from 'activeBook-core/hooks/effects';
 
 import type { VibrationEffectDraft, VibrationOptions, OptionUpdater } from '../../@types';
+
+import { IntegerInput } from '../IntegerInput';
 
 import styles from './VibrationSettings.module.scss';
 
@@ -204,6 +204,7 @@ export const VibrationSettings = ({
           <IntegerInput
             min={0}
             max={10000}
+            maxDigits={5}
             step={100}
             value={options.duration}
             onChange={handleDurationChange}
