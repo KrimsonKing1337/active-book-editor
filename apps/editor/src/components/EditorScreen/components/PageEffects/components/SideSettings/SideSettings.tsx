@@ -73,12 +73,12 @@ const LayoutSettings = ({
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
 
-  const handleOffsetXChange = (value: string) => {
-    onChange({ offsetX: value });
+  const handleOffsetXChange = (val: string) => {
+    onChange({ offsetX: val });
   };
 
-  const handleOffsetYChange = (value: string) => {
-    onChange({ offsetY: value });
+  const handleOffsetYChange = (val: string) => {
+    onChange({ offsetY: val });
   };
 
   const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -208,7 +208,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
   const updateShadow = (id: string, changes: Partial<ShadowItem>) => {
     const updated = shadows.map((shadowCur) => {
-      return shadowCur.id === id ? { ...shadowCur, ...changes } : shadowCur;
+      if (shadowCur.id !== id) {
+        return shadowCur;
+      }
+
+      return {
+        ...shadowCur,
+        ...changes,
+      };
     });
 
     updateOptions({ shadows: updated });
@@ -216,7 +223,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
   const updateText = (id: string, changes: Partial<TextItem>) => {
     const updated = texts.map((textCur) => {
-      return textCur.id === id ? { ...textCur, ...changes } : textCur;
+      if (textCur.id !== id) {
+        return textCur;
+      }
+
+      return {
+        ...textCur,
+        ...changes,
+      };
     });
 
     updateOptions({ texts: updated });
@@ -337,7 +351,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           } = shadowCur;
 
           const preset = animation?.preset;
-          const selectedPreset = shadowPresets.find((item) => item.value === (preset ?? 'none'));
+          const selectedPreset = shadowPresets.find((cur) => cur.value === (preset ?? 'none'));
           const canChangeColor = selectedPreset?.canChangeColor ?? true;
 
           const colorDisabledReason = canChangeColor
@@ -417,7 +431,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               </label>
 
               <details>
-                <summary>Стили тени</summary>
+                <summary>
+                  Стили тени
+                </summary>
 
                 <StyleEditor
                   layer="shadow"
@@ -565,7 +581,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               />
 
               <div className={styles.Field}>
-                <span>Размер шрифта</span>
+                <span>
+                  Размер шрифта
+                </span>
                 <CssLengthInput
                   label="Размер шрифта"
                   allowNegative={false}
@@ -575,7 +593,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               </div>
 
               <details>
-                <summary>Стили текста</summary>
+                <summary>
+                  Стили текста
+                </summary>
 
                 <StyleEditor
                   layer="shadow"
