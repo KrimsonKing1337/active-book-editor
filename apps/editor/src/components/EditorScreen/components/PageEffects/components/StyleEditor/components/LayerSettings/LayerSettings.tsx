@@ -8,6 +8,7 @@ type LayerSettingsProps = {
   zIndex: number;
   minimumZIndex?: number;
   maximumZIndex?: number;
+  otherLayersAtSameIndex?: boolean;
   onChange: (value: number) => void;
   onCommit: () => void;
 };
@@ -16,6 +17,7 @@ export const LayerSettings = ({
   zIndex,
   minimumZIndex = zIndex,
   maximumZIndex = zIndex,
+  otherLayersAtSameIndex = false,
   onChange,
   onCommit,
 }: LayerSettingsProps) => {
@@ -47,15 +49,18 @@ export const LayerSettings = ({
     handleStepChange(1);
   };
 
+  const canMoveToBack = zIndex > minimumZIndex || otherLayersAtSameIndex;
+  const canMoveToFront = zIndex < maximumZIndex || otherLayersAtSameIndex;
+
   const handleMoveToBack = () => {
-    if (zIndex > minimumZIndex) {
+    if (canMoveToBack) {
       updateIndex(minimumZIndex - 1);
       onCommit();
     }
   };
 
   const handleMoveToFront = () => {
-    if (zIndex < maximumZIndex) {
+    if (canMoveToFront) {
       updateIndex(maximumZIndex + 1);
       onCommit();
     }
@@ -73,7 +78,7 @@ export const LayerSettings = ({
           onClick={handleMoveToBack}
           aria-label="На самый нижний слой"
           title="На самый нижний слой"
-          disabled={zIndex <= minimumZIndex}
+          disabled={!canMoveToBack}
         >
           ⇤
         </button>
@@ -99,7 +104,7 @@ export const LayerSettings = ({
           onClick={handleMoveToFront}
           aria-label="На самый верхний слой"
           title="На самый верхний слой"
-          disabled={zIndex >= maximumZIndex}
+          disabled={!canMoveToFront}
         >
           ⇥
         </button>

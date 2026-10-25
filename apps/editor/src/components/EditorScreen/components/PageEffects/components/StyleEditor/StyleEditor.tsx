@@ -100,6 +100,10 @@ export const StyleEditor = ({
   const minimumZIndex = Math.min(zIndex, ...layerZIndexes);
   const maximumZIndex = Math.max(zIndex, ...layerZIndexes);
 
+  const sameIndexCount = layerZIndexes.filter((index) => index === zIndex).length;
+  const currentLayerIsRegistered = currentStyle.zIndex !== undefined;
+  const otherLayersAtSameIndex = sameIndexCount > (currentLayerIsRegistered ? 1 : 0);
+
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
   };
@@ -147,6 +151,7 @@ export const StyleEditor = ({
         zIndex={zIndex}
         minimumZIndex={minimumZIndex}
         maximumZIndex={maximumZIndex}
+        otherLayersAtSameIndex={otherLayersAtSameIndex}
         onChange={handleLayerChange}
         onCommit={commitStyle}
       />
