@@ -18,6 +18,7 @@ import {
 import styles from '../../StyleEditor.module.scss';
 
 type ColorSettingsProps = {
+  label?: string;
   color: string;
   onColorChange: (color: string) => void;
   onCommit: () => void;
@@ -37,7 +38,12 @@ const getCompleteHex = (val: string): string | null => {
   return getHexColor('#' + digits);
 };
 
-export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsProps) => {
+export const ColorSettings = ({
+  label = 'Цвет фона (background-color)',
+  color,
+  onColorChange,
+  onCommit,
+}: ColorSettingsProps) => {
   const pickerColor = getHexColor(color);
 
   const [hexDraft, setHexDraft] = useState(pickerColor);
@@ -264,7 +270,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   return (
     <>
       <div className={styles.ColorPropertyHeading}>
-        Цвет фона (background-color)
+        {label}
       </div>
 
       <fieldset className={styles.ManualColorSection}>

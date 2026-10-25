@@ -13,9 +13,9 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { SideEffectDraft } from '../../@types';
 
-import { getSidePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
-import type { SideItemPreviews } from '../../PageEffectsContext';
+import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
 
 const bookRuntime = createBookRuntime('editor');
 
@@ -23,9 +23,10 @@ type SideInstanceProps = {
   effect: SideEffectDraft;
   components: Record<string, ComponentType>;
   previews: SideItemPreviews;
+  stylePreviews: SideStylePreviews;
 };
 
-const SideInstance = ({ effect, components, previews }: SideInstanceProps) => {
+const SideInstance = ({ effect, components, previews, stylePreviews }: SideInstanceProps) => {
   const { component, shadows, texts } = effect.options;
 
   const componentId = component ? `${component.package}/${component.name}` : null;
@@ -39,26 +40,28 @@ const SideInstance = ({ effect, components, previews }: SideInstanceProps) => {
     return <CustomComponent book={bookRuntime} />;
   }, [CustomComponent]);
 
-  const withPreview = <T extends NonNullable<typeof shadows>[number] | NonNullable<typeof texts>[number]>(item: T): T => {
-    const key = getSidePreviewKey(effect.id, item.id);
-    const preview = previews[key];
-
-    if (!preview) {
-      return item;
-    }
+  const withPreview = <T extends NonNullable<typeof shadows>[number] | NonNullable<typeof texts>[number]>(
+    item: T,
+    kind: 'shadow' | 'text',
+  ): T => {
+    const previewKey = getSidePreviewKey(effect.id, item.id);
+    const styleKey = getSideStylePreviewKey(effect.id, kind, item.id);
+    const preview = previews[previewKey];
+    const style = stylePreviews[styleKey] ?? item.style;
 
     return {
       ...item,
-      hidden: preview.hidden ?? item.hidden,
+      style,
+      hidden: preview?.hidden ?? item.hidden,
       animation: {
         ...item.animation,
-        playState: preview.playState ?? item.animation?.playState,
+        playState: preview?.playState ?? item.animation?.playState,
       },
     };
   };
 
-  const previewShadows = shadows?.map(withPreview);
-  const previewTexts = texts?.map(withPreview);
+  const previewShadows = shadows?.map((item) => withPreview(item, 'shadow'));
+  const previewTexts = texts?.map((item) => withPreview(item, 'text'));
   const resolvedOptions = resolveSideOptions({ shadows: previewShadows, texts: previewTexts });
 
   return (
@@ -72,7 +75,7 @@ const SideInstance = ({ effect, components, previews }: SideInstanceProps) => {
 };
 
 export const SideInstances = () => {
-  const { effects, sideItemPreviews } = usePageEffects();
+  const { effects, sideItemPreviews, sideStylePreviews } = usePageEffects();
   const { components } = useCustomComponents();
 
   const sideEffects = effects.filter((effectCur): effectCur is SideEffectDraft => {
@@ -88,6 +91,7 @@ export const SideInstances = () => {
             effect={effectCur}
             components={components}
             previews={sideItemPreviews}
+            stylePreviews={sideStylePreviews}
           />
         );
       })}

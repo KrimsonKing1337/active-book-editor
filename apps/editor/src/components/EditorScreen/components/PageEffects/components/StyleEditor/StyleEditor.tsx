@@ -21,6 +21,8 @@ export type StyleEditorProps = {
   mediaId?: string;
   defaultZIndex?: number;
   colorProperty?: 'color' | 'backgroundColor';
+  additionalColorProperty?: 'color' | 'backgroundColor';
+  colorLabel?: string;
   controller?: StyleEditorController;
   isMediaOverride?: boolean;
 };
@@ -38,6 +40,8 @@ export const StyleEditor = ({
   mediaId,
   defaultZIndex = 0,
   colorProperty = 'backgroundColor',
+  additionalColorProperty,
+  colorLabel,
   controller,
   isMediaOverride,
 }: StyleEditorProps) => {
@@ -58,10 +62,6 @@ export const StyleEditor = ({
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
 
-  const handleColorChange = (val: string) => {
-    setProperty(colorProperty, val);
-  };
-
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
   };
@@ -78,16 +78,32 @@ export const StyleEditor = ({
     }
   };
 
-  const color = String(currentStyle[colorProperty] ?? '');
+  const colorProperties = additionalColorProperty
+    ? [colorProperty, additionalColorProperty]
+    : [colorProperty];
   const isMedia = isMediaOverride ?? (layer === 'image' || layer === 'video');
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
-      <ColorSettings
-        color={color}
-        onColorChange={handleColorChange}
-        onCommit={commitStyle}
-      />
+      {colorProperties.map((property) => {
+        const value = String(currentStyle[property] ?? '');
+
+        let label = property === 'color' ? 'Цвет текста (color)' : 'Цвет фона (background-color)';
+
+        if (property === colorProperty && colorLabel) {
+          label = colorLabel;
+        }
+
+        return (
+          <ColorSettings
+            key={property}
+            label={label}
+            color={value}
+            onColorChange={(nextColor) => setProperty(property, nextColor)}
+            onCommit={commitStyle}
+          />
+        );
+      })}
 
       <LayerSettings
         zIndex={zIndex}
