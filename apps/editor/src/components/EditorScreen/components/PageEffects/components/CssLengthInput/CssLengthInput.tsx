@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { InputMask, unformat } from '@react-input/mask';
 
 import styles from '../EffectControls/EffectControls.module.scss';
+import layoutStyles from './CssLengthInput.module.scss';
 
 type CssLengthInputProps = {
   label?: string;
@@ -105,10 +106,10 @@ export const CssLengthInput = ({
   };
 
   return (
-    <span style={{ display: 'flex', gap: 6, minWidth: 0 }}>
+    <span className={layoutStyles.Container}>
       <InputMask
         aria-label={label}
-        className={styles.Input}
+        className={`${styles.Input} ${layoutStyles.Value}`}
         mask={maskOptions.mask}
         replacement={maskOptions.replacement}
         showMask
@@ -116,12 +117,11 @@ export const CssLengthInput = ({
         inputMode="decimal"
         onChange={handleAmountChange}
         onBlur={handleBlur}
-        style={{ flex: 1, minWidth: 0 }}
       />
 
       <select
         aria-label={`${label}: единица измерения`}
-        className={styles.Select}
+        className={`${styles.Select} ${layoutStyles.Unit}`}
         value={unit}
         onChange={handleUnitChange}
       >

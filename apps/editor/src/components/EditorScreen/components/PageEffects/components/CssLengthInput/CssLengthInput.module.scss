@@ -1,0 +1,20 @@
+.Container {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  gap: 6px;
+}
+
+.Container .Value {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+}
+
+.Container .Unit {
+  flex: 0 0 72px;
+  width: 72px;
+  min-width: 72px;
+  padding-right: 4px;
+  padding-left: 6px;
+}
