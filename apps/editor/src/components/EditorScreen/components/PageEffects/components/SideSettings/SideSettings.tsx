@@ -2,11 +2,11 @@ import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
+import type { SideEffectDraft } from '../../@types';
+
 import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
 import { StyleEditor } from '../StyleEditor';
-
-import type { SideEffectDraft } from '../../@types';
 
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
@@ -38,7 +38,12 @@ type LayoutSettingsProps = {
   onHiddenChange: (hidden: boolean) => void;
 };
 
-const positions: Array<{ value: NonNullable<ItemLayout['position']>; label: string }> = [
+type PositionOption = {
+  value: NonNullable<ItemLayout['position']>;
+  label: string;
+};
+
+const positions: PositionOption[] = [
   { value: 'top-left', label: 'Сверху слева' },
   { value: 'top', label: 'Сверху' },
   { value: 'top-right', label: 'Сверху справа' },
@@ -96,7 +101,9 @@ const LayoutSettings = ({
         </label>
 
         <div className={styles.Field}>
-          <span>Смещение X</span>
+          <span>
+            Смещение X
+          </span>
           <CssLengthInput
             label="Смещение X"
             value={item.offsetX ?? '0px'}
@@ -105,7 +112,9 @@ const LayoutSettings = ({
         </div>
 
         <div className={styles.Field}>
-          <span>Смещение Y</span>
+          <span>
+            Смещение Y
+          </span>
           <CssLengthInput
             label="Смещение Y"
             value={item.offsetY ?? '0px'}
@@ -172,23 +181,27 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       ? currentTexts?.map((item) => item.id === id ? { ...item, styleFilters } : item)
       : currentTexts;
 
+    const updatedOptions = {
+      ...currentEffect.options,
+      shadows: nextShadows,
+      texts: nextTexts,
+    };
+
     onUpdate(effect.id, {
       ...currentEffect,
-      options: {
-        ...currentEffect.options,
-        shadows: nextShadows,
-        texts: nextTexts,
-      },
+      options: updatedOptions,
     });
   };
 
   const updateOptions = (updates: Partial<SideOptions>) => {
+    const updatedOptions = {
+      ...effect.options,
+      ...updates,
+    };
+
     onUpdate(effect.id, {
       ...effect,
-      options: {
-        ...effect.options,
-        ...updates,
-      },
+      options: updatedOptions,
     });
   };
 
@@ -209,35 +222,68 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const addShadow = () => {
+    const shadowStyle = {
+      color: '#ff0000',
+      zIndex: 1,
+    };
+
+    const shadowAnimation = {
+      preset: 'none' as const,
+      duration: 1000,
+      iterations: 'infinite' as const,
+    };
+
     const shadow: ShadowItem = {
       id: crypto.randomUUID(),
       position: 'top-left',
-      style: { color: '#ff0000', zIndex: 1 },
+      style: shadowStyle,
       thickness: 30,
-      animation: { preset: 'none', duration: 1000, iterations: 'infinite' },
+      animation: shadowAnimation,
     };
 
     updateOptions({ shadows: [...shadows, shadow] });
   };
 
   const addText = () => {
+    const textStyle = {
+      color: '#a3a3a3',
+      zIndex: 1,
+      fontSize: '12px',
+    };
+
+    const textAnimation = {
+      preset: 'scroll' as const,
+      duration: 60000,
+      iterations: 'infinite' as const,
+    };
+
     const text: TextItem = {
       id: crypto.randomUUID(),
       leftText: 'Левая сторона',
       rightText: 'Правая сторона',
-      style: { color: '#a3a3a3', zIndex: 1, fontSize: '12px' },
-      animation: { preset: 'scroll', duration: 60000, iterations: 'infinite' },
+      style: textStyle,
+      animation: textAnimation,
     };
 
     updateOptions({ texts: [...texts, text] });
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onUpdate(effect.id, { ...effect, slug: e.target.value });
+    const updatedEffect = {
+      ...effect,
+      slug: e.target.value,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleIdChange = (e: FocusEvent<HTMLInputElement>) => {
-    onUpdate(effect.id, { ...effect, id: e.target.value });
+    const updatedEffect = {
+      ...effect,
+      id: e.target.value,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -249,15 +295,18 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       return;
     }
 
-    updateOptions({
-      component: {
-        package: definition.packageName,
-        name: definition.name,
-      },
-    });
+    const selectedComponent = {
+      package: definition.packageName,
+      name: definition.name,
+    };
+
+    updateOptions({ component: selectedComponent });
   };
 
   const componentId = component ? `${component.package}/${component.name}` : '';
+
+  const shadowCountLabel = `Боковые тени (${shadows.length})`;
+  const textCountLabel = `Боковой текст (${texts.length})`;
 
   return (
     <div className={styles.Settings}>
@@ -272,7 +321,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       </label>
 
       <details className={styles.Section}>
-        <summary>Боковые тени ({shadows.length})</summary>
+        <summary>
+          {shadowCountLabel}
+        </summary>
 
         {shadows.map((shadowCur, index) => {
           const preset = shadowCur.animation?.preset;
@@ -342,11 +393,15 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           );
         })}
 
-        <Button variant="success" onClick={addShadow}>Добавить тень</Button>
+        <Button variant="success" onClick={addShadow}>
+          Добавить тень
+        </Button>
       </details>
 
       <details className={styles.Section}>
-        <summary>Боковой текст ({texts.length})</summary>
+        <summary>
+          {textCountLabel}
+        </summary>
 
         {texts.map((textCur, index) => {
           return (
@@ -430,19 +485,27 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           );
         })}
 
-        <Button variant="success" onClick={addText}>Добавить текст</Button>
+        <Button variant="success" onClick={addText}>
+          Добавить текст
+        </Button>
       </details>
 
       <details className={styles.Section}>
-        <summary>Кастомный компонент</summary>
+        <summary>
+          Кастомный компонент
+        </summary>
 
         <Select value={componentId} onChange={handleComponentChange}>
-          <option value="">Не использовать</option>
+          <option value="">
+            Не использовать
+          </option>
 
           {definitions.map((definitionCur) => {
+            const { id, title } = definitionCur;
+
             return (
-              <option key={definitionCur.id} value={definitionCur.id}>
-                {definitionCur.title}
+              <option key={id} value={id}>
+                {title}
               </option>
             );
           })}
@@ -450,8 +513,13 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       </details>
 
       <div className={styles.Actions}>
-        <Button type="button" onClick={onDuplicate}>Дублировать эффект</Button>
-        <Button variant="danger" onClick={onDelete}>Удалить эффект</Button>
+        <Button onClick={onDuplicate}>
+          Дублировать эффект
+        </Button>
+
+        <Button variant="danger" onClick={onDelete}>
+          Удалить эффект
+        </Button>
       </div>
     </div>
   );
