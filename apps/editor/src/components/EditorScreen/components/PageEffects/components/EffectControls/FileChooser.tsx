@@ -7,6 +7,7 @@ import styles from './EffectControls.module.scss';
 
 type FileChooserProps = {
   value: string;
+  inputId?: string;
   onChange: (value: string) => void;
   onChoose: () => void;
   onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -19,6 +20,7 @@ type FileChooserProps = {
 
 export const FileChooser = ({
   value,
+  inputId,
   onChange,
   onChoose,
   onFileChange,
@@ -35,6 +37,7 @@ export const FileChooser = ({
   return (
     <div className={styles.FileChooser}>
       <TextInput
+        id={inputId}
         className={styles.FilePath}
         value={value}
         maxLength={1024}

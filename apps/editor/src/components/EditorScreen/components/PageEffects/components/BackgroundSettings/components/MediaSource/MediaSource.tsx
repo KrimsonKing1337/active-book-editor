@@ -9,6 +9,8 @@ import {
   VIDEO_MEDIA_EXTENSIONS,
 } from './utils';
 
+import { FileChooser } from '../../../EffectControls';
+
 import styles from '../../BackgroundSettings.module.scss';
 
 type MediaKind = 'image' | 'video';
@@ -129,10 +131,6 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
     }
   };
 
-  const handleSourceChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
   const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     void handleFileChange(e);
   };
@@ -146,29 +144,18 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
         {label}
       </label>
 
-      <div className={styles.SourceRow}>
-        <input
-          id={sourceInputId}
-          type="text"
-          maxLength={1024}
-          value={src}
-          placeholder={placeholder}
-          spellCheck={false}
-          onChange={handleSourceChange}
-        />
-
-        <button type="button" disabled={chooseFileButtonDisabled} onClick={handleChooseFile}>
-          {chooseFileButtonLabel}
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          hidden
-          onChange={handleFileInputChange}
-        />
-      </div>
+      <FileChooser
+        inputId={sourceInputId}
+        fileInputRef={fileInputRef}
+        value={src}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={chooseFileButtonDisabled}
+        onChoose={handleChooseFile}
+        onFileChange={handleFileInputChange}
+        accept={accept}
+        buttonLabel={chooseFileButtonLabel}
+      />
 
       <small className={styles.SourceNote}>
         Файлы из assets/ используются без копирования. Внешние файлы копируются в корень assets/
