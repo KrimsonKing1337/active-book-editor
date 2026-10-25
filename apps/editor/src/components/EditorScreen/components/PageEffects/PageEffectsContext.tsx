@@ -39,6 +39,13 @@ export type SideItemPreview = {
 
 export type SideItemPreviews = Record<string, SideItemPreview>;
 
+export type SideStylePreviewUpdate = {
+  effectId: string;
+  kind: 'shadow' | 'text';
+  itemId: string;
+  style: CSSProperties;
+};
+
 export const getSidePreviewKey = (effectId: string, itemId: string): string => {
   return JSON.stringify([effectId, itemId]);
 };
@@ -54,12 +61,7 @@ type PageEffectsContextValue = {
   markStylesSaved: () => void;
   sideItemPreviews: SideItemPreviews;
   sideStylePreviews: SideStylePreviews;
-  updateSideStylePreview: (
-    effectId: string,
-    kind: 'shadow' | 'text',
-    itemId: string,
-    style: CSSProperties,
-  ) => void;
+  updateSideStylePreview: (update: SideStylePreviewUpdate) => void;
   updateSideItemPreview: (effectId: string, itemId: string, changes: Partial<SideItemPreview>) => void;
 };
 
@@ -154,12 +156,13 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       });
     }, []);
 
-  const updateSideStylePreview = useCallback((
-    effectId: string,
-    kind: 'shadow' | 'text',
-    itemId: string,
-    style: CSSProperties,
-  ) => {
+  const updateSideStylePreview = useCallback((update: SideStylePreviewUpdate) => {
+    const {
+      effectId,
+      kind,
+      itemId,
+      style,
+    } = update;
     const key = getSideStylePreviewKey(effectId, kind, itemId);
 
     sideStylesRef.current = {

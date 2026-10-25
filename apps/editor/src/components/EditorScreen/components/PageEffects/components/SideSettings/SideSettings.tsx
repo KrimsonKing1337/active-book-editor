@@ -357,7 +357,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           };
 
           const handleStylePreview = (val: CSSProperties) => {
-            updateSideStylePreview(effect.id, 'shadow', id, val);
+            const update = {
+              effectId: effect.id,
+              kind: 'shadow' as const,
+              itemId: id,
+              style: val,
+            };
+
+            updateSideStylePreview(update);
           };
 
           const handleFiltersCommit = (val: FilterOperation[]) => {
@@ -490,7 +497,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           };
 
           const handleStylePreview = (val: CSSProperties) => {
-            updateSideStylePreview(effect.id, 'text', id, val);
+            const update = {
+              effectId: effect.id,
+              kind: 'text' as const,
+              itemId: id,
+              style: val,
+            };
+
+            updateSideStylePreview(update);
           };
 
           const handleFiltersCommit = (val: FilterOperation[]) => {
