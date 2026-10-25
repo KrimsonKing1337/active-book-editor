@@ -1,4 +1,4 @@
-import type { ChangeEvent, InputHTMLAttributes } from 'react';
+import type { ChangeEvent, FocusEvent, InputHTMLAttributes } from 'react';
 
 import { useEffect, useState } from 'react';
 
@@ -51,7 +51,7 @@ export const IntegerInput = ({
     onValueChange(number);
   };
 
-  const handleBlur = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
     if (draft === '') {
       setDraft(String(value));
     }

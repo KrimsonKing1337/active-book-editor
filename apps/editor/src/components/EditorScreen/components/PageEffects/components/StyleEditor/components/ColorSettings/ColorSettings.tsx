@@ -121,11 +121,16 @@ export const ColorSettings = ({
   };
 
   const handleChannelChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+    const maskOptions = {
+      mask: 'ddd',
+      replacement: { d: /[0-9]/ },
+    };
 
-    if (/^\d{0,3}$/.test(val)) {
-      updateChannel(index, val);
-    }
+    const raw = unformat(e.target.value, maskOptions);
+    const maximum = index === 3 ? 100 : 255;
+    const value = raw ? String(Math.min(Number(raw), maximum)) : '';
+
+    updateChannel(index, value);
   };
 
   const handleChannelBlur = (index: number) => {
@@ -332,6 +337,7 @@ export const ColorSettings = ({
                   ref={handleInputRef}
                   mask="ddd"
                   replacement={{ d: /[0-9]/ }}
+                  showMask
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={3}

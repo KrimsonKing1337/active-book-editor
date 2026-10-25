@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 
 import { useEffect, useRef } from 'react';
 
-import { InputMask } from '@react-input/mask';
+import { InputMask, unformat } from '@react-input/mask';
 
 import { Slider } from 'activeBook-core/components';
 
@@ -42,8 +42,7 @@ export const isValidNumericValue = (value: string, config: NumericConfig): boole
     return false;
   }
 
-  // Slider limits are suggestions. CSS may accept a wider range.
-  return config.min >= 0 ? number >= 0 : true;
+  return number >= config.min && number <= config.max;
 };
 
 export const NumericControl = ({ value, config, label, onChange }: NumericControlProps) => {
@@ -84,11 +83,27 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+    const maskOptions = {
+      mask: '________',
+      replacement: numericReplacement,
+    };
 
-    if (/^-?\d*(?:\.\d*)?$/.test(val)) {
-      onChange(val);
+    const value = unformat(e.target.value, maskOptions);
+
+    if (!/^-?(?:\d*(?:\.\d{0,2})?)$/.test(value)) {
+      return;
     }
+
+    if (value === '' || value === '-' || value.endsWith('.')) {
+      onChange(value);
+
+      return;
+    }
+
+    const number = Number(value);
+    const bounded = Math.max(config.min, Math.min(config.max, number));
+
+    onChange(String(bounded));
   };
 
   return (
@@ -102,8 +117,9 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
 
         <InputMask
           aria-label={label}
-          mask="____________"
+          mask="________"
           replacement={numericReplacement}
+          showMask
           value={value}
           inputMode="decimal"
           spellCheck={false}

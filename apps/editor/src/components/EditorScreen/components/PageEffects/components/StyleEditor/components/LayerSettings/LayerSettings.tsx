@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-import { removeLeadingZeros } from '../../utils';
+import { InputMask, unformat } from '@react-input/mask';
 
 import styles from '../../StyleEditor.module.scss';
 
@@ -21,18 +21,29 @@ export const LayerSettings = ({
   onChange,
   onCommit,
 }: LayerSettingsProps) => {
+  const maskOptions = {
+    mask: 'sssss',
+    replacement: { s: /[0-9-]/ },
+  };
+
   const updateIndex = (value: number) => {
-    if (Number.isFinite(value)) {
-      onChange(value);
+    if (!Number.isFinite(value)) {
+      return;
     }
+
+    const normalized = Math.max(-9999, Math.min(9999, value));
+
+    onChange(normalized);
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const normalized = removeLeadingZeros(e.target.value);
+    const raw = unformat(e.target.value, maskOptions);
 
-    e.target.value = normalized;
+    if (!/^-?\d{1,4}$/.test(raw)) {
+      return;
+    }
 
-    updateIndex(Number(normalized));
+    updateIndex(Number(raw));
   };
 
   const handleStepChange = (step: number) => {
@@ -87,10 +98,12 @@ export const LayerSettings = ({
           −
         </button>
 
-        <input
-          type="number"
-          step={1}
-          value={zIndex}
+        <InputMask
+          mask={maskOptions.mask}
+          replacement={maskOptions.replacement}
+          showMask
+          inputMode="numeric"
+          value={String(zIndex)}
           onChange={handleInputChange}
           onBlur={onCommit}
         />
