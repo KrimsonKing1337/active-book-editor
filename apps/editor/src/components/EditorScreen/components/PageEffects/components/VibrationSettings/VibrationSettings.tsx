@@ -151,7 +151,7 @@ export const VibrationSettings = ({
       <div className={styles.Fields}>
         <label className={styles.Field}>
           <span>
-            Метка (slug)
+            Название эффекта
           </span>
 
           <input
