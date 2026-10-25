@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 
+import styles from '../EffectControls/EffectControls.module.scss';
+
 type IntegerInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   'value' | 'onChange' | 'type' | 'inputMode' | 'maxLength' | 'min' | 'max' | 'step'
@@ -63,6 +65,7 @@ export const IntegerInput = ({
   return (
     <InputMask
       {...props}
+      className={[styles.Input, props.className].filter(Boolean).join(' ')}
       mask={mask}
       replacement={replacement}
       showMask
