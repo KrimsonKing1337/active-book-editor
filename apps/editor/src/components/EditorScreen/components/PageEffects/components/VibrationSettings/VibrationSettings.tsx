@@ -8,6 +8,7 @@ import { useVibration } from 'activeBook-core/hooks/effects';
 import type { VibrationEffectDraft, VibrationOptions, OptionUpdater } from '../../@types';
 
 import { IntegerInput } from '../IntegerInput';
+import { TextInput, Checkbox, Button } from '../EffectControls';
 
 import styles from './VibrationSettings.module.scss';
 
@@ -156,7 +157,7 @@ export const VibrationSettings = ({
             Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
             maxLength={120}
             value={effect.slug}
@@ -175,7 +176,7 @@ export const VibrationSettings = ({
           </label>
 
           <div className={styles.IdRow}>
-            <input
+            <TextInput
               id="vibration-effect-id"
               type="text"
               maxLength={80}
@@ -186,9 +187,9 @@ export const VibrationSettings = ({
               spellCheck={false}
             />
 
-            <button type="button" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>
+            <Button variant="success" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
 
           {idError && (
@@ -228,22 +229,14 @@ export const VibrationSettings = ({
           </small>
         </label>
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.playOnLoad}
-            onChange={handlePlayOnLoadChange}
-          />
-
-          <span>
-            Вибрировать при открытии страницы
-          </span>
-        </label>
+        <Checkbox checked={options.playOnLoad} onChange={handlePlayOnLoadChange}>
+          Вибрировать при открытии страницы
+        </Checkbox>
 
         <div className={styles.Preview}>
-          <button type="button" disabled={!canPreview} onClick={handlePreview}>
+          <Button type="button" disabled={!canPreview} onClick={handlePreview}>
             Проверить вибрацию
-          </button>
+          </Button>
 
           <small>
             {previewDescription}
@@ -252,13 +245,13 @@ export const VibrationSettings = ({
       </div>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
+        <Button type="button" onClick={onDuplicate}>
           Дублировать
-        </button>
+        </Button>
 
-        <button type="button" className={styles.Delete} onClick={onDelete}>
+        <Button type="button" variant="danger" onClick={onDelete}>
           Удалить эффект
-        </button>
+        </Button>
       </div>
     </div>
   );

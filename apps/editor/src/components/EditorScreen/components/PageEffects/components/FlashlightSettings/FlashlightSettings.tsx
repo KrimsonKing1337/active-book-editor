@@ -10,6 +10,7 @@ import { useFlashlight } from 'activeBook-core/hooks/effects';
 import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
 
 import { IntegerInput } from '../IntegerInput';
+import { TextInput, Checkbox, Button } from '../EffectControls';
 
 import styles from './FlashlightSettings.module.scss';
 
@@ -174,7 +175,7 @@ export const FlashlightSettings = ({
             Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
             maxLength={120}
             value={effect.slug}
@@ -193,7 +194,7 @@ export const FlashlightSettings = ({
           </label>
 
           <div className={styles.IdRow}>
-            <input
+            <TextInput
               id="flashlight-effect-id"
               type="text"
               maxLength={80}
@@ -204,9 +205,9 @@ export const FlashlightSettings = ({
               spellCheck={false}
             />
 
-            <button type="button" disabled={flashLightEffectIdButtonIsDisabled} onClick={updateId}>
+            <Button variant="success" disabled={flashLightEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
 
           {idError && (
@@ -246,29 +247,13 @@ export const FlashlightSettings = ({
           </small>
         </label>
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.playOnLoad}
-            onChange={handlePlayOnLoadChange}
-          />
+        <Checkbox checked={options.playOnLoad} onChange={handlePlayOnLoadChange}>
+          Включать вспышку при открытии страницы
+        </Checkbox>
 
-          <span>
-            Включать вспышку при открытии страницы
-          </span>
-        </label>
-
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.withSideShadow}
-            onChange={handleSideShadowChange}
-          />
-
-          <span>
-            Дублировать вспышку экранной подсветкой (sideShadow)
-          </span>
-        </label>
+        <Checkbox checked={options.withSideShadow} onChange={handleSideShadowChange}>
+          Дублировать вспышку экранной подсветкой (sideShadow)
+        </Checkbox>
 
         {options.withSideShadow && (
           <label className={styles.Field}>
@@ -286,9 +271,9 @@ export const FlashlightSettings = ({
         )}
 
         <div className={styles.Preview}>
-          <button type="button" disabled={!canPreview} onClick={handlePreview}>
+          <Button type="button" disabled={!canPreview} onClick={handlePreview}>
             Проверить вспышку
-          </button>
+          </Button>
 
           <small>
             {previewDescription}
@@ -297,13 +282,13 @@ export const FlashlightSettings = ({
       </div>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
+        <Button type="button" onClick={onDuplicate}>
           Дублировать
-        </button>
+        </Button>
 
-        <button type="button" className={styles.Delete} onClick={onDelete}>
+        <Button type="button" variant="danger" onClick={onDelete}>
           Удалить эффект
-        </button>
+        </Button>
       </div>
     </div>
   );
