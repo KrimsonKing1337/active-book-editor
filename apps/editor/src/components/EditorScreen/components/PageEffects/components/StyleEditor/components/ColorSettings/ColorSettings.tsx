@@ -328,9 +328,10 @@ export const ColorSettings = ({
                   {labelCur}
                 </span>
 
-                <input
+                <InputMask
                   ref={handleInputRef}
-                  type="text"
+                  mask="ddd"
+                  replacement={{ d: /[0-9]/ }}
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={3}
