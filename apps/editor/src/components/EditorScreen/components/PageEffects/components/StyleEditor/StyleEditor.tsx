@@ -25,6 +25,7 @@ export type StyleEditorProps = {
   colorProperty?: 'color' | 'backgroundColor';
   additionalColorProperty?: 'color' | 'backgroundColor';
   colorLabel?: string;
+  colorDisabledReason?: string;
   controller?: StyleEditorController;
   isMediaOverride?: boolean;
 };
@@ -44,6 +45,7 @@ export const StyleEditor = ({
   colorProperty = 'backgroundColor',
   additionalColorProperty,
   colorLabel,
+  colorDisabledReason,
   controller,
   isMediaOverride,
 }: StyleEditorProps) => {
@@ -127,6 +129,12 @@ export const StyleEditor = ({
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
+      {colorDisabledReason && (
+        <p className={styles.ColorNotice} role="note">
+          {colorDisabledReason}
+        </p>
+      )}
+
       {colorProperties.map((property) => {
         const value = String(currentStyle[property] ?? '');
 
@@ -137,13 +145,22 @@ export const StyleEditor = ({
         }
 
         return (
-          <ColorSettings
+          <fieldset
             key={property}
-            label={label}
-            color={value}
-            onColorChange={(nextColor) => setProperty(property, nextColor)}
-            onCommit={commitStyle}
-          />
+            className={colorDisabledReason ? styles.DisabledColors : styles.Colors}
+            disabled={Boolean(colorDisabledReason)}
+          >
+            <ColorSettings
+              label={label}
+              color={value}
+              onColorChange={(nextColor) => {
+                if (!colorDisabledReason) {
+                  setProperty(property, nextColor);
+                }
+              }}
+              onCommit={commitStyle}
+            />
+          </fieldset>
         );
       })}
 

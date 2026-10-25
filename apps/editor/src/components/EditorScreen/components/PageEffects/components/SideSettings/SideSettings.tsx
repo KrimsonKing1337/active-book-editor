@@ -267,6 +267,15 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         <summary>Боковые тени ({shadows.length})</summary>
 
         {shadows.map((shadowCur, index) => {
+          const preset = shadowCur.animation?.preset;
+          const ownsColor = preset === 'police' || preset === 'caramel';
+
+          let colorDisabledReason;
+
+          if (ownsColor) {
+            colorDisabledReason = 'Цвет этого пресета меняется автоматически. Выбери «Пульсация» или «Без анимации», чтобы задать свой.';
+          }
+
           return (
             <div key={shadowCur.id} className={styles.Media}>
               <strong>Тень {index + 1}</strong>
@@ -302,6 +311,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                   layer="shadow"
                   colorProperty="color"
                   colorLabel="Цвет тени (color)"
+                  colorDisabledReason={colorDisabledReason}
                   defaultZIndex={1}
                   value={getStyleForItem('shadow', shadowCur.id, shadowCur.style)}
                   styleFilters={shadowCur.styleFilters}
