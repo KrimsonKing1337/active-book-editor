@@ -2,6 +2,8 @@ import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
+import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
+
 import { StyleEditor } from '../StyleEditor';
 
 import type { SideEffectDraft } from '../../@types';
@@ -44,12 +46,7 @@ const positions: Array<{ value: NonNullable<ItemLayout['position']>; label: stri
   { value: 'bottom-right', label: 'Снизу справа' },
 ];
 
-const shadowPresets = [
-  { value: 'none' as const, label: 'Без анимации' },
-  { value: 'pulse' as const, label: 'Пульсация' },
-  { value: 'police' as const, label: 'Полиция' },
-  { value: 'caramel' as const, label: 'Caramelldansen' },
-];
+const shadowPresets = [...SIDE_SHADOW_PRESETS];
 
 const textPresets = [
   { value: 'scroll' as const, label: 'Прокрутка' },
@@ -206,7 +203,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       position: 'top-left',
       style: { color: '#ff0000', zIndex: 1 },
       thickness: 30,
-      animation: { preset: 'pulse', duration: 1000, iterations: 'infinite' },
+      animation: { preset: 'none', duration: 1000, iterations: 'infinite' },
     };
 
     updateOptions({ shadows: [...shadows, shadow] });
@@ -268,13 +265,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
         {shadows.map((shadowCur, index) => {
           const preset = shadowCur.animation?.preset;
-          const ownsColor = preset === 'police' || preset === 'caramel';
+          const selectedPreset = shadowPresets.find((item) => item.value === (preset ?? 'none'));
+          const canChangeColor = selectedPreset?.canChangeColor ?? true;
 
-          let colorDisabledReason;
-
-          if (ownsColor) {
-            colorDisabledReason = 'Цвет этого пресета меняется автоматически. Выбери «Пульсация» или «Без анимации», чтобы задать свой.';
-          }
+          const colorDisabledReason = canChangeColor
+            ? undefined
+            : 'Цвет этого пресета меняется автоматически. Выбери одноцветный пресет, чтобы настроить его.';
 
           return (
             <div key={shadowCur.id} className={styles.Media}>
