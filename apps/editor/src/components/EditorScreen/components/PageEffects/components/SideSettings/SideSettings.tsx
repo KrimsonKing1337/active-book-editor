@@ -2,6 +2,8 @@ import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { SideOptions } from '@active-book/book-builder/effects';
 
+import { StyleEditor } from '../StyleEditor';
+
 import type { SideEffectDraft } from '../../@types';
 
 import { getSidePreviewKey, usePageEffects } from '../../PageEffectsContext';
@@ -14,7 +16,7 @@ import styles from './SideSettings.module.scss';
 
 type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type TextItem = NonNullable<SideOptions['texts']>[number];
-type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'scale' | 'style' | 'hidden'>;
+type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'scale' | 'hidden'>;
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
@@ -26,7 +28,6 @@ type SideSettingsProps = {
 type LayoutSettingsProps = {
   item: ItemLayout;
   onChange: (changes: Partial<ItemLayout>) => void;
-  defaultColor?: string;
   hidden: boolean;
   onHiddenChange: (hidden: boolean) => void;
 };
@@ -58,7 +59,6 @@ const textPresets = [
 const LayoutSettings = ({
   item,
   onChange,
-  defaultColor = '#ff0000',
   hidden,
   onHiddenChange,
 }: LayoutSettingsProps) => {
@@ -82,22 +82,9 @@ const LayoutSettings = ({
     }
   };
 
-  const handleColorChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const style = {
-      ...item.style,
-      color: e.target.value,
-    };
-
-    onChange({ style });
-  };
-
   const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
     onHiddenChange(e.target.checked);
   };
-
-  const color = typeof item.style?.color === 'string' && /^#[0-9a-f]{6}$/i.test(item.style.color)
-    ? item.style.color
-    : defaultColor;
 
   return (
     <>
@@ -138,11 +125,6 @@ const LayoutSettings = ({
       </div>
 
       <div className={styles.Controls}>
-        <label>
-          Цвет
-          <input type="color" value={color} onChange={handleColorChange} />
-        </label>
-
         <label>
           <input type="checkbox" checked={hidden} onChange={handleHiddenChange} />
           Скрыть элемент
@@ -194,7 +176,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     const shadow: ShadowItem = {
       id: crypto.randomUUID(),
       position: 'top-left',
-      style: { color: '#ff0000' },
+      style: { color: '#ff0000', zIndex: 1 },
       animation: { preset: 'pulse', duration: 1000, iterations: 'infinite' },
     };
 
@@ -206,6 +188,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       id: crypto.randomUUID(),
       leftText: 'Левая сторона',
       rightText: 'Правая сторона',
+      style: { color: '#a3a3a3', zIndex: 1 },
       animation: { preset: 'scroll', duration: 60000, iterations: 'infinite' },
     };
 
@@ -242,21 +225,21 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   return (
     <div className={styles.Settings}>
       <label className={styles.Field}>
-        Название
+        Название эффекта
         <input value={effect.slug} onChange={handleNameChange} />
       </label>
 
       <label className={styles.Field}>
         ID эффекта
-        <input defaultValue={effect.id} onBlur={handleIdChange} />
+        <input key={effect.id} defaultValue={effect.id} onBlur={handleIdChange} />
       </label>
 
-      <section className={styles.Section}>
-        <h3>Боковые тени ({shadows.length})</h3>
+      <details className={styles.Section}>
+        <summary>Боковые тени ({shadows.length})</summary>
 
         {shadows.map((shadowCur, index) => {
           return (
-            <div key={shadowCur.id} className={styles.Element}>
+            <div key={shadowCur.id} className={styles.Media}>
               <strong>Тень {index + 1}</strong>
 
               <LayoutSettings
@@ -265,6 +248,23 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onHiddenChange={(hidden) => updateSideItemPreview(effect.id, shadowCur.id, { hidden })}
                 onChange={(changes) => updateShadow(shadowCur.id, changes)}
               />
+
+              <details>
+                <summary>Стили тени</summary>
+
+                <StyleEditor
+                  layer="shadow"
+                  colorProperty="color"
+                  defaultZIndex={1}
+                  value={shadowCur.style ?? {}}
+                  styleFilters={shadowCur.styleFilters}
+                  controller={{
+                    preview: (style) => updateShadow(shadowCur.id, { style }),
+                    commit: () => true,
+                    commitFilters: (styleFilters) => updateShadow(shadowCur.id, { styleFilters }),
+                  }}
+                />
+              </details>
 
               <AnimationSettings
                 animation={shadowCur.animation}
@@ -286,14 +286,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         })}
 
         <button type="button" onClick={addShadow}>Добавить тень</button>
-      </section>
+      </details>
 
-      <section className={styles.Section}>
-        <h3>Боковой текст ({texts.length})</h3>
+      <details className={styles.Section}>
+        <summary>Боковой текст ({texts.length})</summary>
 
         {texts.map((textCur, index) => {
           return (
-            <div key={textCur.id} className={styles.Element}>
+            <div key={textCur.id} className={styles.Media}>
               <strong>Текст {index + 1}</strong>
 
               <label className={styles.Field}>
@@ -314,11 +314,27 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <LayoutSettings
                 item={textCur}
-                defaultColor="#a3a3a3"
                 hidden={previewFor(textCur.id).hidden ?? textCur.hidden ?? false}
                 onHiddenChange={(hidden) => updateSideItemPreview(effect.id, textCur.id, { hidden })}
                 onChange={(changes) => updateText(textCur.id, changes)}
               />
+
+              <details>
+                <summary>Стили текста</summary>
+
+                <StyleEditor
+                  layer="shadow"
+                  colorProperty="color"
+                  defaultZIndex={1}
+                  value={textCur.style ?? {}}
+                  styleFilters={textCur.styleFilters}
+                  controller={{
+                    preview: (style) => updateText(textCur.id, { style }),
+                    commit: () => true,
+                    commitFilters: (styleFilters) => updateText(textCur.id, { styleFilters }),
+                  }}
+                />
+              </details>
 
               <AnimationSettings
                 animation={textCur.animation}
@@ -340,10 +356,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         })}
 
         <button type="button" onClick={addText}>Добавить текст</button>
-      </section>
+      </details>
 
-      <section className={styles.Section}>
-        <h3>Кастомный компонент</h3>
+      <details className={styles.Section}>
+        <summary>Кастомный компонент</summary>
 
         <select value={componentId} onChange={handleComponentChange}>
           <option value="">Не использовать</option>
@@ -356,9 +372,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             );
           })}
         </select>
-      </section>
+      </details>
 
-      <div className={styles.Controls}>
+      <div className={styles.Actions}>
         <button type="button" onClick={onDuplicate}>Дублировать эффект</button>
         <button type="button" onClick={onDelete}>Удалить эффект</button>
       </div>

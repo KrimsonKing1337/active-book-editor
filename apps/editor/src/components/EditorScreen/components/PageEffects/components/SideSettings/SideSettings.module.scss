@@ -1,52 +1,141 @@
 .Settings {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
+  gap: 18px;
 
-.Section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid rgb(128 128 128 / 35%);
-  border-radius: 8px;
+  input,
+  select {
+    min-width: 0;
+    color: #f5f5f5;
+    background: #292929;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 7px;
+  }
+
+  button {
+    padding: 8px;
+    color: #f5f5f5;
+    background: #383838;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 }
 
 .Field {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 
-  input, select {
-    min-width: 0;
+  input {
+    width: 100%;
   }
 }
 
-.Controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+.Section {
+  padding: 14px;
+  border: 1px solid #464646;
+  border-radius: 8px;
+
+  summary {
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  &[open] > summary {
+    margin-bottom: 12px;
+  }
 }
 
-.Element {
+.Row {
+  display: flex;
+  gap: 6px;
+
+  input {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+.Media {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid rgb(128 128 128 / 20%);
+  gap: 8px;
+  padding: 12px;
+  margin: 10px 0;
+  background: #272727;
   border-radius: 6px;
+}
 
-  fieldset {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.SourceRow {
+  display: flex;
+  gap: 6px;
+
+  input[type='text'] {
+    flex: 1;
+    width: auto;
+    min-width: 0;
   }
+
+  button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+.SourceNote {
+  color: #b5b5b5;
+  font-size: 12px;
+}
+
+.ImportError {
+  color: #f5a4a4;
+  font-size: 12px;
+}
+
+.Checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.Actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .Layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.Controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.Media {
+  fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #464646;
+    border-radius: 6px;
+  }
+
+  > details > summary {
+    cursor: pointer;
+  }
+
+  > details[open] > summary {
+    margin-bottom: 10px;
+  }
 }
