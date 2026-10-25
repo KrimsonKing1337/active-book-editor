@@ -288,16 +288,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <label className={styles.Field}>
                 Толщина тени (px)
                 <IntegerInput
-                  min="0"
-                  step="1"
+                  min={0}
+                  max={999}
                   value={shadowCur.thickness ?? 30}
-                  onChange={(e) => {
-                    const thickness = Number(e.target.value);
-
-                    if (Number.isFinite(thickness) && thickness >= 0) {
-                      updateShadow(shadowCur.id, { thickness });
-                    }
-                  }}
+                  onValueChange={(thickness) => updateShadow(shadowCur.id, { thickness })}
                 />
               </label>
 

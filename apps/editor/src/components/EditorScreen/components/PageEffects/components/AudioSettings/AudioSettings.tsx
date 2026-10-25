@@ -248,12 +248,12 @@ export const AudioSettings = ({
     updateOption('relativeVolume', value);
   };
 
-  const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('delay', event.target.value);
+  const handleDelayChange = (value: number) => {
+    updateNumber('delay', String(value));
   };
 
-  const handleStopByChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('stopBy', event.target.value);
+  const handleStopByChange = (value: number) => {
+    updateNumber('stopBy', String(value));
   };
 
   const handleFadeOutChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -439,9 +439,9 @@ export const AudioSettings = ({
 
               <IntegerInput
                 min={0}
-                step={100}
+                max={999999}
                 value={options.delay}
-                onChange={handleDelayChange}
+                onValueChange={handleDelayChange}
               />
             </label>
 
@@ -452,9 +452,9 @@ export const AudioSettings = ({
 
               <IntegerInput
                 min={0}
-                step={100}
+                max={999999}
                 value={options.stopBy}
-                onChange={handleStopByChange}
+                onValueChange={handleStopByChange}
               />
 
               <small>

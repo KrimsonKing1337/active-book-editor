@@ -29,32 +29,29 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
     updateAnimation({ preset: e.target.value as AnimationPreset });
   };
 
-  const handleDurationChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const duration = Number(e.target.value);
+  const handleDurationChange = (duration: number) => {
 
     if (Number.isFinite(duration) && duration >= 0) {
       updateAnimation({ duration });
     }
   };
 
-  const handleDelayChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const delay = Number(e.target.value);
+  const handleDelayChange = (delay: number) => {
 
     if (Number.isFinite(delay) && delay >= 0) {
       updateAnimation({ delay });
     }
   };
 
-  const handleIterationsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const iterations = Number(e.target.value);
+  const handleIterationsChange = (iterations: number) => {
 
     if (Number.isInteger(iterations) && iterations > 0) {
       updateAnimation({ iterations });
     }
   };
 
-  const handleInfiniteChange = (e: ChangeEvent<HTMLInputElement>) => {
-    updateAnimation({ iterations: e.target.checked ? 'infinite' : 1 });
+  const handleIterationsModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    updateAnimation({ iterations: e.target.value === 'infinite' ? 'infinite' : 1 });
   };
 
   return (
@@ -77,43 +74,45 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
       <label>
         Длительность цикла (мс)
         <IntegerInput
-          min="0"
-          step="100"
+          min={0}
+          max={999999}
           value={animation.duration ?? defaultDuration}
-          onChange={handleDurationChange}
+          onValueChange={handleDurationChange}
         />
       </label>
 
       <label>
         Задержка (мс)
         <IntegerInput
-          min="0"
-          step="100"
+          min={0}
+          max={999999}
           value={animation.delay ?? 0}
-          onChange={handleDelayChange}
+          onValueChange={handleDelayChange}
         />
       </label>
 
       <label>
         Повторений
-        <IntegerInput
-          maxDigits={8}
-          min="1"
-          step="1"
-          disabled={animation.iterations === 'infinite' || animation.iterations === undefined}
-          value={typeof animation.iterations === 'number' ? animation.iterations : 1}
-          onChange={handleIterationsChange}
-        />
+        <select
+          value={typeof animation.iterations === 'number' ? 'count' : 'infinite'}
+          onChange={handleIterationsModeChange}
+        >
+          <option value="infinite">Бесконечно</option>
+          <option value="count">Указать количество</option>
+        </select>
       </label>
 
-      <label>
-        <input
-          type="checkbox"
-          checked={animation.iterations === 'infinite' || animation.iterations === undefined}
-          onChange={handleInfiniteChange}
-        />
-        Бесконечно
-      </label>
+      {typeof animation.iterations === 'number' && (
+        <label>
+          Количество повторений
+          <IntegerInput
+            min={1}
+            max={999}
+            value={animation.iterations}
+            onValueChange={handleIterationsChange}
+          />
+        </label>
+      )}
 
       <div>
         <button type="button" aria-pressed={playState === 'running'} onClick={() => onPlaybackChange('running')}>

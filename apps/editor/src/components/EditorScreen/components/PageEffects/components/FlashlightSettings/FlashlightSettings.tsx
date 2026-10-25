@@ -122,16 +122,16 @@ export const FlashlightSettings = ({
     updateSlug(event.target.value);
   };
 
-  const handleDurationChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('duration', event.target.value);
+  const handleDurationChange = (value: number) => {
+    updateNumber('duration', String(value));
   };
 
-  const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('delay', event.target.value);
+  const handleDelayChange = (value: number) => {
+    updateNumber('delay', String(value));
   };
 
-  const handleSpeedChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('speed', event.target.value);
+  const handleSpeedChange = (value: number) => {
+    updateNumber('speed', String(value));
   };
 
   const handlePlayOnLoadChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -222,10 +222,8 @@ export const FlashlightSettings = ({
           <IntegerInput
             min={0}
             max={10000}
-            maxDigits={5}
-            step={100}
             value={options.duration}
-            onChange={handleDurationChange}
+            onValueChange={handleDurationChange}
           />
         </label>
 
@@ -236,9 +234,9 @@ export const FlashlightSettings = ({
 
           <IntegerInput
             min={0}
-            step={100}
+            max={999999}
             value={options.delay}
-            onChange={handleDelayChange}
+            onValueChange={handleDelayChange}
           />
 
           <small>
@@ -278,9 +276,9 @@ export const FlashlightSettings = ({
 
             <IntegerInput
               min={1}
-              step={10}
+              max={99999}
               value={options.speed}
-              onChange={handleSpeedChange}
+              onValueChange={handleSpeedChange}
             />
           </label>
         )}
