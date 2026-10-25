@@ -10,7 +10,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
 ) => {
   const classes = [styles.Select, className].filter(Boolean).join(' ');
 
-  return <select {...props} ref={ref} className={classes}>{children}</select>;
+  return (
+    <select {...props} ref={ref} className={classes}>
+      {children}
+    </select>
+  );
 });
 
 Select.displayName = 'Select';

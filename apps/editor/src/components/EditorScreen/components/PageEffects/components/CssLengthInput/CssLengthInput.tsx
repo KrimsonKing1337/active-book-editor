@@ -18,19 +18,29 @@ type CssLengthInputProps = {
 const units = ['px', '%', 'rem', 'em', 'vw', 'vh'] as const;
 type Unit = typeof units[number];
 
+const replacement = {
+  n: /[0-9.-]/,
+};
+
 const maskOptions = {
   mask: 'nnnnnnnn',
-  replacement: { n: /[0-9.-]/ },
+  replacement,
 };
 
 const getParts = (value: string): { amount: string; unit: Unit } => {
   const match = value.match(/^(-?(?:\d+(?:\.\d{1,2})?|\.\d{1,2}))(px|%|rem|em|vw|vh)$/);
 
   if (!match) {
-    return { amount: '0', unit: 'px' };
+    return {
+      amount: '0',
+      unit: 'px',
+    };
   }
 
-  return { amount: match[1], unit: match[2] as Unit };
+  return {
+    amount: match[1],
+    unit: match[2] as Unit,
+  };
 };
 
 export const CssLengthInput = ({
@@ -41,13 +51,12 @@ export const CssLengthInput = ({
   max = 9999,
 }: CssLengthInputProps) => {
   const { amount, unit } = getParts(value);
+  const minimum = allowNegative ? -max : 0;
   const [draft, setDraft] = useState(amount);
 
   useEffect(() => {
     setDraft(amount);
   }, [amount]);
-
-  const min = allowNegative ? -max : 0;
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const raw = unformat(event.target.value, maskOptions);
@@ -84,7 +93,7 @@ export const CssLengthInput = ({
       return;
     }
 
-    const normalized = Math.min(max, Math.max(min, parsed));
+    const normalized = Math.min(max, Math.max(minimum, parsed));
     const nextAmount = String(normalized);
 
     setDraft(nextAmount);
@@ -126,7 +135,11 @@ export const CssLengthInput = ({
         onChange={handleUnitChange}
       >
         {units.map((unitCur) => {
-          return <option value={unitCur} key={unitCur}>{unitCur}</option>;
+          return (
+            <option value={unitCur} key={unitCur}>
+              {unitCur}
+            </option>
+          );
         })}
       </select>
     </span>

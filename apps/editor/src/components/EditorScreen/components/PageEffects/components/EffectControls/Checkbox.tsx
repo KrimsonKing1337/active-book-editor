@@ -12,7 +12,10 @@ export const Checkbox = ({ children, className, ...props }: CheckboxProps) => {
   return (
     <label className={classes}>
       <input {...props} type="checkbox" />
-      <span>{children}</span>
+
+      <span>
+        {children}
+      </span>
     </label>
   );
 };

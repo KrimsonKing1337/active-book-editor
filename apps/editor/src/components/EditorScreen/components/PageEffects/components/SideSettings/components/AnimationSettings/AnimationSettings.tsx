@@ -18,7 +18,15 @@ type AnimationSettingsProps = {
   onChange: (animation: SideAnimation) => void;
 };
 
-export const AnimationSettings = ({ animation = {}, presets, defaultDuration, playState, onChange, onPlaybackChange }: AnimationSettingsProps) => {
+export const AnimationSettings = ({
+  animation = {},
+  presets,
+  defaultDuration,
+  playState,
+
+  onChange,
+  onPlaybackChange,
+}: AnimationSettingsProps) => {
   const updateAnimation = (changes: Partial<SideAnimation>) => {
     onChange({
       ...animation,
@@ -30,30 +38,42 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
     updateAnimation({ preset: e.target.value as AnimationPreset });
   };
 
-  const handleDurationChange = (duration: number) => {
-
-    if (Number.isFinite(duration) && duration >= 0) {
-      updateAnimation({ duration });
+  const handleDurationChange = (val: number) => {
+    if (Number.isFinite(val) && val >= 0) {
+      updateAnimation({ duration: val });
     }
   };
 
-  const handleDelayChange = (delay: number) => {
-
-    if (Number.isFinite(delay) && delay >= 0) {
-      updateAnimation({ delay });
+  const handleDelayChange = (val: number) => {
+    if (Number.isFinite(val) && val >= 0) {
+      updateAnimation({ delay: val });
     }
   };
 
-  const handleIterationsChange = (iterations: number) => {
-
-    if (Number.isInteger(iterations) && iterations > 0) {
-      updateAnimation({ iterations });
+  const handleIterationsChange = (val: number) => {
+    if (Number.isInteger(val) && val > 0) {
+      updateAnimation({ iterations: val });
     }
   };
 
   const handleIterationsModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     updateAnimation({ iterations: e.target.value === 'infinite' ? 'infinite' : 1 });
   };
+
+  const handleStart = () => {
+    onPlaybackChange('running');
+  };
+
+  const handlePause = () => {
+    onPlaybackChange('paused');
+  };
+
+  const handleStop = () => {
+    onPlaybackChange('stopped');
+  };
+
+  const iterationsMode = typeof animation.iterations === 'number' ? 'count' : 'infinite';
+  const showIterationsInput = iterationsMode === 'count';
 
   return (
     <fieldset>
@@ -95,34 +115,47 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
       <label>
         Повторений
         <Select
-          value={typeof animation.iterations === 'number' ? 'count' : 'infinite'}
+          value={iterationsMode}
           onChange={handleIterationsModeChange}
         >
-          <option value="infinite">Бесконечно</option>
-          <option value="count">Указать количество</option>
+          <option value="infinite">
+            Бесконечно
+          </option>
+          <option value="count">
+            Указать количество
+          </option>
         </Select>
       </label>
 
-      {typeof animation.iterations === 'number' && (
+      {showIterationsInput && (
         <label>
           Количество повторений
           <IntegerInput
             min={1}
             max={999}
-            value={animation.iterations}
+            value={typeof animation.iterations === 'number' ? animation.iterations : 1}
             onValueChange={handleIterationsChange}
           />
         </label>
       )}
 
       <div>
-        <Button type="button" aria-pressed={playState === 'running'} onClick={() => onPlaybackChange('running')}>
+        <Button
+          aria-pressed={playState === 'running'}
+          onClick={handleStart}
+        >
           Старт
         </Button>
-        <Button type="button" aria-pressed={playState === 'paused'} onClick={() => onPlaybackChange('paused')}>
+        <Button
+          aria-pressed={playState === 'paused'}
+          onClick={handlePause}
+        >
           Пауза
         </Button>
-        <Button type="button" aria-pressed={playState === 'stopped'} onClick={() => onPlaybackChange('stopped')}>
+        <Button
+          aria-pressed={playState === 'stopped'}
+          onClick={handleStop}
+        >
           Стоп
         </Button>
       </div>

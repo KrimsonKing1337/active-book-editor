@@ -8,30 +8,32 @@ import styles from './EffectControls.module.scss';
 type FileChooserProps = {
   value: string;
   inputId?: string;
-  onChange: (value: string) => void;
-  onChoose: () => void;
-  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
   accept?: string;
   placeholder?: string;
   disabled?: boolean;
   buttonLabel?: string;
+
+  onChange: (val: string) => void;
+  onChoose: () => void;
+  onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
 export const FileChooser = ({
   value,
   inputId,
-  onChange,
-  onChoose,
-  onFileChange,
   fileInputRef,
   accept,
   placeholder,
   disabled = false,
   buttonLabel = 'Выбрать файл',
+
+  onChange,
+  onChoose,
+  onFileChange,
 }: FileChooserProps) => {
-  const handlePathChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
+  const handlePathChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
   };
 
   return (
@@ -46,11 +48,21 @@ export const FileChooser = ({
         onChange={handlePathChange}
       />
 
-      <Button className={styles.ChooseButton} disabled={disabled} onClick={onChoose}>
+      <Button
+        className={styles.ChooseButton}
+        disabled={disabled}
+        onClick={onChoose}
+      >
         {buttonLabel}
       </Button>
 
-      <input ref={fileInputRef} type="file" accept={accept} onChange={onFileChange} hidden />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={accept}
+        onChange={onFileChange}
+        hidden
+      />
     </div>
   );
 };

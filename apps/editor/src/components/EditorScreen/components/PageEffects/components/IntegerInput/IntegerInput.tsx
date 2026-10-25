@@ -36,7 +36,12 @@ export const IntegerInput = ({
 
   const digits = maxDigits ?? String(max).length;
   const mask = 'd'.repeat(digits);
-  const maskOptions = { mask, replacement };
+  const maskOptions = {
+    mask,
+    replacement,
+  };
+
+  const classNames = [styles.Input, props.className].filter(Boolean).join(' ');
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const raw = unformat(event.target.value, maskOptions);
@@ -65,7 +70,7 @@ export const IntegerInput = ({
   return (
     <InputMask
       {...props}
-      className={[styles.Input, props.className].filter(Boolean).join(' ')}
+      className={classNames}
       mask={mask}
       replacement={replacement}
       showMask
