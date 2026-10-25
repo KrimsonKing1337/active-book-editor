@@ -1,21 +1,20 @@
 import type { ComponentType } from 'react';
 
+import type { BookComponentProps } from '@active-book/types';
+
+import type { SideEffectDraft } from '../../@types';
+import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
+
 import { useMemo } from 'react';
 
 import { Side } from 'activeBook-core/components/ProxyHooks';
-
-import type { BookComponentProps } from '@active-book/types';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
-
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
-
-import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
 
 const bookRuntime = createBookRuntime('editor');
 
@@ -26,7 +25,12 @@ type SideInstanceProps = {
   stylePreviews: SideStylePreviews;
 };
 
-const SideInstance = ({ effect, components, previews, stylePreviews }: SideInstanceProps) => {
+const SideInstance = ({
+  effect,
+  components,
+  previews,
+  stylePreviews,
+}: SideInstanceProps) => {
   const { component, shadows, texts } = effect.options;
 
   const componentId = component ? `${component.package}/${component.name}` : null;
@@ -49,20 +53,28 @@ const SideInstance = ({ effect, components, previews, stylePreviews }: SideInsta
     const preview = previews[previewKey];
     const style = stylePreviews[styleKey] ?? item.style;
 
+    const animation = {
+      ...item.animation,
+      playState: preview?.playState ?? item.animation?.playState,
+    };
+
     return {
       ...item,
       style,
       hidden: preview?.hidden ?? item.hidden,
-      animation: {
-        ...item.animation,
-        playState: preview?.playState ?? item.animation?.playState,
-      },
+      animation,
     };
   };
 
-  const previewShadows = shadows?.map((item) => withPreview(item, 'shadow'));
-  const previewTexts = texts?.map((item) => withPreview(item, 'text'));
-  const resolvedOptions = resolveSideOptions({ shadows: previewShadows, texts: previewTexts });
+  const previewShadows = shadows?.map((cur) => withPreview(cur, 'shadow'));
+  const previewTexts = texts?.map((cur) => withPreview(cur, 'text'));
+
+  const previewOptions = {
+    shadows: previewShadows,
+    texts: previewTexts,
+  };
+
+  const resolvedOptions = resolveSideOptions(previewOptions);
 
   return (
     <Side

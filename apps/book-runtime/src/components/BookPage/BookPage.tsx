@@ -1,10 +1,12 @@
-import { type ComponentType, createElement } from 'react';
-
-import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration, Flashlight, Background, Side } from 'activeBook-core/components/ProxyHooks';
+import type { ComponentType } from 'react';
 
 import type { BookDocument, CustomComponentType } from '@types';
 import type { BookRuntime } from '@active-book/types';
+
+import { createElement } from 'react';
+
+import { PageWrapper } from 'activeBook-core/components';
+import { Audio, Vibration, Flashlight, Background, Side } from 'activeBook-core/components/ProxyHooks';
 
 import { renderNode } from '@utils/renderNode';
 
@@ -74,10 +76,16 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
           const { component, ...sideOptions } = effectCur.options;
           const options = resolveSideOptions(sideOptions);
           const componentId = component ? `${component.package}/${component.name}` : null;
-          const CustomComponent = componentId ? customComponents[componentId] as CustomComponentType : undefined;
+          const CustomComponent = componentId
+            ? customComponents[componentId] as CustomComponentType
+            : undefined;
+
+          const componentProps = {
+            book: bookRuntime,
+          };
 
           const componentElement = CustomComponent
-            ? createElement(CustomComponent, { book: bookRuntime })
+            ? createElement(CustomComponent, componentProps)
             : null;
 
           return (

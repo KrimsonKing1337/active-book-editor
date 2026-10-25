@@ -44,7 +44,10 @@ export const resolveSideOptions = (options: SideOptions) => {
     };
   });
 
-  return { shadows, texts };
+  return {
+    shadows,
+    texts,
+  };
 };
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
@@ -90,10 +93,14 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       continue;
     }
 
+    const slug = typeof effectCur.slug === 'string'
+      ? effectCur.slug
+      : 'Новый боковой эффект';
+
     result.push({
       id: effectCur.id,
       type: 'side',
-      slug: typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый боковой эффект',
+      slug,
       options: effectCur.options as SideOptions,
     });
   }

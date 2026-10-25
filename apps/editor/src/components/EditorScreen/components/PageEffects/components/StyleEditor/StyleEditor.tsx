@@ -135,29 +135,31 @@ export const StyleEditor = ({
         </p>
       )}
 
-      {colorProperties.map((property) => {
-        const value = String(currentStyle[property] ?? '');
+      {colorProperties.map((propertyCur) => {
+        const value = String(currentStyle[propertyCur] ?? '');
 
-        let label = property === 'color' ? 'Цвет текста (color)' : 'Цвет фона (background-color)';
+        let label = propertyCur === 'color' ? 'Цвет текста (color)' : 'Цвет фона (background-color)';
 
-        if (property === colorProperty && colorLabel) {
+        if (propertyCur === colorProperty && colorLabel) {
           label = colorLabel;
         }
 
+        const handleColorChange = (val: string) => {
+          if (!colorDisabledReason) {
+            setProperty(propertyCur, val);
+          }
+        };
+
         return (
           <fieldset
-            key={property}
+            key={propertyCur}
             className={colorDisabledReason ? styles.DisabledColors : styles.Colors}
             disabled={Boolean(colorDisabledReason)}
           >
             <ColorSettings
               label={label}
               color={value}
-              onColorChange={(nextColor) => {
-                if (!colorDisabledReason) {
-                  setProperty(property, nextColor);
-                }
-              }}
+              onColorChange={handleColorChange}
               onCommit={commitStyle}
             />
           </fieldset>
