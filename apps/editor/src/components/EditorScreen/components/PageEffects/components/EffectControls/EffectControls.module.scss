@@ -1,0 +1,100 @@
+.Input,
+.Select {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 10px;
+  color: #f5f5f5;
+  background: #171717;
+  border: 1px solid #4b4b4b;
+  border-radius: 6px;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #8c9fc3;
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.Input {
+  width: 100%;
+}
+
+.Select {
+  width: 100%;
+}
+
+.Button {
+  min-height: 38px;
+  padding: 8px 12px;
+  color: #f5f5f5;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+
+  &:not(:disabled):hover {
+    background: #444;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.Success {
+  border-color: #46775b;
+  color: #b7edc8;
+
+  &:not(:disabled):hover {
+    background: #254431;
+  }
+}
+
+.Danger {
+  border-color: #8e4545;
+  color: #ffb3b3;
+
+  &:not(:disabled):hover {
+    background: #592828;
+  }
+}
+
+.Checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  cursor: pointer;
+
+  input {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+}
+
+.FileChooser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  .FilePath {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ChooseButton {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
