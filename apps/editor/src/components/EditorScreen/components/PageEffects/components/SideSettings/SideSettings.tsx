@@ -1,4 +1,4 @@
-import type { ChangeEvent, FocusEvent } from 'react';
+import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
@@ -22,6 +22,7 @@ import styles from './SideSettings.module.scss';
 
 type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type TextItem = NonNullable<SideOptions['texts']>[number];
+type SideAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 
 type SideSettingsProps = {
@@ -326,7 +327,16 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         </summary>
 
         {shadows.map((shadowCur, index) => {
-          const preset = shadowCur.animation?.preset;
+          const {
+            id,
+            animation,
+            style,
+            hidden,
+            thickness,
+            styleFilters,
+          } = shadowCur;
+
+          const preset = animation?.preset;
           const selectedPreset = shadowPresets.find((item) => item.value === (preset ?? 'none'));
           const canChangeColor = selectedPreset?.canChangeColor ?? true;
 
@@ -334,15 +344,59 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             ? undefined
             : 'Цвет этого пресета меняется автоматически. Выбери одноцветный пресет, чтобы настроить его.';
 
+          const handleHiddenChange = (val: boolean) => {
+            updateSideItemPreview(effect.id, id, { hidden: val });
+          };
+
+          const handleLayoutChange = (val: Partial<ItemLayout>) => {
+            updateShadow(id, val);
+          };
+
+          const handleThicknessChange = (val: number) => {
+            updateShadow(id, { thickness: val });
+          };
+
+          const handleStylePreview = (val: CSSProperties) => {
+            updateSideStylePreview(effect.id, 'shadow', id, val);
+          };
+
+          const handleFiltersCommit = (val: FilterOperation[]) => {
+            commitItemFilters('shadow', id, val);
+          };
+
+          const handleAnimationChange = (val: SideAnimation) => {
+            updateShadow(id, { animation: val });
+          };
+
+          const handlePlaybackChange = (val: NonNullable<SideAnimation['playState']>) => {
+            updateSideItemPreview(effect.id, id, { playState: val });
+          };
+
+          const handleDelete = () => {
+            const remaining = shadows.filter((cur) => cur.id !== id);
+
+            updateOptions({ shadows: remaining });
+          };
+
+          const controller = {
+            preview: handleStylePreview,
+            commit: flushStylePreviews,
+            commitFilters: handleFiltersCommit,
+          };
+
+          const nameLabel = `Тень ${index + 1}`;
+
           return (
-            <div key={shadowCur.id} className={styles.Media}>
-              <strong>Тень {index + 1}</strong>
+            <div key={id} className={styles.Media}>
+              <strong>
+                {nameLabel}
+              </strong>
 
               <LayoutSettings
                 item={shadowCur}
-                hidden={previewFor(shadowCur.id).hidden ?? shadowCur.hidden ?? false}
-                onHiddenChange={(hidden) => updateSideItemPreview(effect.id, shadowCur.id, { hidden })}
-                onChange={(changes) => updateShadow(shadowCur.id, changes)}
+                hidden={previewFor(id).hidden ?? hidden ?? false}
+                onHiddenChange={handleHiddenChange}
+                onChange={handleLayoutChange}
               />
 
               <label className={styles.Field}>
@@ -350,8 +404,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 <IntegerInput
                   min={0}
                   max={999}
-                  value={shadowCur.thickness ?? 30}
-                  onValueChange={(thickness) => updateShadow(shadowCur.id, { thickness })}
+                  value={thickness ?? 30}
+                  onValueChange={handleThicknessChange}
                 />
               </label>
 
@@ -364,28 +418,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                   colorLabel="Цвет тени (color)"
                   colorDisabledReason={colorDisabledReason}
                   defaultZIndex={1}
-                  value={getStyleForItem('shadow', shadowCur.id, shadowCur.style)}
-                  styleFilters={shadowCur.styleFilters}
-                  controller={{
-                    preview: (style) => updateSideStylePreview(effect.id, 'shadow', shadowCur.id, style),
-                    commit: flushStylePreviews,
-                    commitFilters: (filters) => commitItemFilters('shadow', shadowCur.id, filters),
-                  }}
+                  value={getStyleForItem('shadow', id, style)}
+                  styleFilters={styleFilters}
+                  controller={controller}
                 />
               </details>
 
               <AnimationSettings
-                animation={shadowCur.animation}
-                playState={previewFor(shadowCur.id).playState}
-                onPlaybackChange={(playState) => updateSideItemPreview(effect.id, shadowCur.id, { playState })}
+                animation={animation}
+                playState={previewFor(id).playState}
+                onPlaybackChange={handlePlaybackChange}
                 presets={shadowPresets}
                 defaultDuration={1000}
-                onChange={(animation) => updateShadow(shadowCur.id, { animation })}
+                onChange={handleAnimationChange}
               />
 
               <Button
                 variant="danger"
-                onClick={() => updateOptions({ shadows: shadows.filter((cur) => cur.id !== shadowCur.id) })}
+                onClick={handleDelete}
               >
                 Удалить тень
               </Button>
@@ -404,16 +454,83 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         </summary>
 
         {texts.map((textCur, index) => {
+          const {
+            id,
+            animation,
+            style,
+            hidden,
+            styleFilters,
+            leftText,
+            rightText,
+          } = textCur;
+
+          const handleLeftTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+            updateText(id, { leftText: e.target.value });
+          };
+
+          const handleRightTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+            updateText(id, { rightText: e.target.value });
+          };
+
+          const handleHiddenChange = (val: boolean) => {
+            updateSideItemPreview(effect.id, id, { hidden: val });
+          };
+
+          const handleLayoutChange = (val: Partial<ItemLayout>) => {
+            updateText(id, val);
+          };
+
+          const handleFontSizeChange = (val: string) => {
+            const updatedStyle = {
+              ...style,
+              fontSize: val,
+            };
+
+            updateText(id, { style: updatedStyle });
+          };
+
+          const handleStylePreview = (val: CSSProperties) => {
+            updateSideStylePreview(effect.id, 'text', id, val);
+          };
+
+          const handleFiltersCommit = (val: FilterOperation[]) => {
+            commitItemFilters('text', id, val);
+          };
+
+          const handleAnimationChange = (val: SideAnimation) => {
+            updateText(id, { animation: val });
+          };
+
+          const handlePlaybackChange = (val: NonNullable<SideAnimation['playState']>) => {
+            updateSideItemPreview(effect.id, id, { playState: val });
+          };
+
+          const handleDelete = () => {
+            const remaining = texts.filter((cur) => cur.id !== id);
+
+            updateOptions({ texts: remaining });
+          };
+
+          const controller = {
+            preview: handleStylePreview,
+            commit: flushStylePreviews,
+            commitFilters: handleFiltersCommit,
+          };
+
+          const nameLabel = `Текст ${index + 1}`;
+
           return (
-            <div key={textCur.id} className={styles.Media}>
-              <strong>Текст {index + 1}</strong>
+            <div key={id} className={styles.Media}>
+              <strong>
+                {nameLabel}
+              </strong>
 
               <label className={styles.Field}>
                 Текст слева
                 <TextInput
                   maxLength={500}
-                  value={textCur.leftText}
-                  onChange={(e) => updateText(textCur.id, { leftText: e.target.value })}
+                  value={leftText}
+                  onChange={handleLeftTextChange}
                 />
               </label>
 
@@ -421,16 +538,16 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 Текст справа
                 <TextInput
                   maxLength={500}
-                  value={textCur.rightText}
-                  onChange={(e) => updateText(textCur.id, { rightText: e.target.value })}
+                  value={rightText}
+                  onChange={handleRightTextChange}
                 />
               </label>
 
               <LayoutSettings
                 item={textCur}
-                hidden={previewFor(textCur.id).hidden ?? textCur.hidden ?? false}
-                onHiddenChange={(hidden) => updateSideItemPreview(effect.id, textCur.id, { hidden })}
-                onChange={(changes) => updateText(textCur.id, changes)}
+                hidden={previewFor(id).hidden ?? hidden ?? false}
+                onHiddenChange={handleHiddenChange}
+                onChange={handleLayoutChange}
               />
 
               <div className={styles.Field}>
@@ -438,12 +555,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 <CssLengthInput
                   label="Размер шрифта"
                   allowNegative={false}
-                  value={String(textCur.style?.fontSize ?? '12px')}
-                  onChange={(fontSize) => {
-                    const style = { ...textCur.style, fontSize };
-
-                    updateText(textCur.id, { style });
-                  }}
+                  value={String(style?.fontSize ?? '12px')}
+                  onChange={handleFontSizeChange}
                 />
               </div>
 
@@ -456,28 +569,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                   colorLabel="Цвет текста (color)"
                   additionalColorProperty="backgroundColor"
                   defaultZIndex={1}
-                  value={getStyleForItem('text', textCur.id, textCur.style)}
-                  styleFilters={textCur.styleFilters}
-                  controller={{
-                    preview: (style) => updateSideStylePreview(effect.id, 'text', textCur.id, style),
-                    commit: flushStylePreviews,
-                    commitFilters: (filters) => commitItemFilters('text', textCur.id, filters),
-                  }}
+                  value={getStyleForItem('text', id, style)}
+                  styleFilters={styleFilters}
+                  controller={controller}
                 />
               </details>
 
               <AnimationSettings
-                animation={textCur.animation}
-                playState={previewFor(textCur.id).playState}
-                onPlaybackChange={(playState) => updateSideItemPreview(effect.id, textCur.id, { playState })}
+                animation={animation}
+                playState={previewFor(id).playState}
+                onPlaybackChange={handlePlaybackChange}
                 presets={textPresets}
                 defaultDuration={60000}
-                onChange={(animation) => updateText(textCur.id, { animation })}
+                onChange={handleAnimationChange}
               />
 
               <Button
                 variant="danger"
-                onClick={() => updateOptions({ texts: texts.filter((cur) => cur.id !== textCur.id) })}
+                onClick={handleDelete}
               >
                 Удалить текст
               </Button>
