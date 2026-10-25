@@ -158,6 +158,7 @@ export const VibrationSettings = ({
 
           <input
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleSlugChange}
             placeholder="Например, лёгкий толчок"
@@ -177,6 +178,7 @@ export const VibrationSettings = ({
             <input
               id="vibration-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
               onChange={handleIdChange}
               aria-invalid={Boolean(idError)}

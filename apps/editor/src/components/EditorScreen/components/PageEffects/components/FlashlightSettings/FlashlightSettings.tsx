@@ -176,6 +176,7 @@ export const FlashlightSettings = ({
 
           <input
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleSlugChange}
             placeholder="Например, разряд молнии"
@@ -195,6 +196,7 @@ export const FlashlightSettings = ({
             <input
               id="flashlight-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
               onChange={handleIdChange}
               aria-invalid={Boolean(idError)}

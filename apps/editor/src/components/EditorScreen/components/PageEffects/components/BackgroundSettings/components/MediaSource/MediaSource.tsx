@@ -150,6 +150,7 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
         <input
           id={sourceInputId}
           type="text"
+          maxLength={1024}
           value={src}
           placeholder={placeholder}
           spellCheck={false}

@@ -274,6 +274,7 @@ export const AudioSettings = ({
 
           <input
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleSlugChange}
             placeholder="Например, звук дождя"
@@ -293,6 +294,7 @@ export const AudioSettings = ({
             <input
               id="page-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
               onChange={handleIdDraftChange}
               aria-invalid={Boolean(idError)}
@@ -330,6 +332,7 @@ export const AudioSettings = ({
           <div className={styles.SourceRow}>
             <input
               type="text"
+              maxLength={1024}
               value={options.src}
               onChange={handleSourceChange}
               placeholder="assets/ambient.mp3"

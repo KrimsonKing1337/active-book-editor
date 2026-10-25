@@ -255,12 +255,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     <div className={styles.Settings}>
       <label className={styles.Field}>
         Название эффекта
-        <input value={effect.slug} onChange={handleNameChange} />
+        <input maxLength={120} value={effect.slug} onChange={handleNameChange} />
       </label>
 
       <label className={styles.Field}>
         ID эффекта
-        <input key={effect.id} defaultValue={effect.id} onBlur={handleIdChange} />
+        <input key={effect.id} maxLength={80} defaultValue={effect.id} onBlur={handleIdChange} />
       </label>
 
       <details className={styles.Section}>
@@ -348,6 +348,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <label className={styles.Field}>
                 Текст слева
                 <input
+                  maxLength={500}
                   value={textCur.leftText}
                   onChange={(e) => updateText(textCur.id, { leftText: e.target.value })}
                 />
@@ -356,6 +357,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <label className={styles.Field}>
                 Текст справа
                 <input
+                  maxLength={500}
                   value={textCur.rightText}
                   onChange={(e) => updateText(textCur.id, { rightText: e.target.value })}
                 />

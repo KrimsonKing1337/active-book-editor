@@ -59,6 +59,12 @@ export const CssLengthInput = ({
       return;
     }
 
+    if (next.endsWith('.')) {
+      setDraft(next);
+
+      return;
+    }
+
     const number = Number(next);
 
     if (!Number.isFinite(number)) {

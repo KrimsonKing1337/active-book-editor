@@ -266,6 +266,7 @@ export const BackgroundSettings = ({
 
           <input
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleNameInputChange}
           />
@@ -277,7 +278,7 @@ export const BackgroundSettings = ({
           </span>
 
           <div className={styles.Row}>
-            <input value={idDraft} onChange={handleIdDraftChange} />
+            <input maxLength={80} value={idDraft} onChange={handleIdDraftChange} />
 
             <button type="button" onClick={updateId}>
               Применить
