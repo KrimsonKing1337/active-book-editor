@@ -1,12 +1,18 @@
 import type { SideShadowItem, SideTextItem } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { BackgroundComponentReference } from '../background';
+import type { FilterOperation } from '../style';
+
+import { resolveStyle } from '../style';
 
 import { isRecord } from '../utils';
 
+export type StyledSideShadow = SideShadowItem & { styleFilters?: FilterOperation[] };
+export type StyledSideText = SideTextItem & { styleFilters?: FilterOperation[] };
+
 export type SideOptions = {
-  shadows?: SideShadowItem[];
-  texts?: SideTextItem[];
+  shadows?: StyledSideShadow[];
+  texts?: StyledSideText[];
   component?: BackgroundComponentReference;
 };
 
@@ -18,6 +24,28 @@ export type SideEffect = {
 };
 
 export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
+
+export const resolveSideOptions = (options: SideOptions) => {
+  const shadows = options.shadows?.map((shadowCur) => {
+    const { styleFilters, style, ...item } = shadowCur;
+
+    return {
+      ...item,
+      style: resolveStyle(style, styleFilters),
+    };
+  });
+
+  const texts = options.texts?.map((textCur) => {
+    const { styleFilters, style, ...item } = textCur;
+
+    return {
+      ...item,
+      style: resolveStyle(style, styleFilters),
+    };
+  });
+
+  return { shadows, texts };
+};
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
   if (!isRecord(value) || !Array.isArray(value.side)) {

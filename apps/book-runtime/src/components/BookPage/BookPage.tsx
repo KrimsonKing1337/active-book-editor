@@ -8,7 +8,7 @@ import type { BookRuntime } from '@active-book/types';
 
 import { renderNode } from '@utils/renderNode';
 
-import { resolveBackgroundOptions } from '@active-book/book-builder/effects';
+import { resolveBackgroundOptions, resolveSideOptions } from '@active-book/book-builder/effects';
 
 import {
   getAudioEffects,
@@ -71,7 +71,8 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
         })}
 
         {sideEffects.map((effectCur) => {
-          const { component, ...options } = effectCur.options;
+          const { component, ...sideOptions } = effectCur.options;
+          const options = resolveSideOptions(sideOptions);
           const componentId = component ? `${component.package}/${component.name}` : null;
           const CustomComponent = componentId ? customComponents[componentId] as CustomComponentType : undefined;
 

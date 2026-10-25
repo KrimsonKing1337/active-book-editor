@@ -7,6 +7,7 @@ import { Side } from 'activeBook-core/components/ProxyHooks';
 import type { BookComponentProps } from '@active-book/types';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
+import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
@@ -58,12 +59,13 @@ const SideInstance = ({ effect, components, previews }: SideInstanceProps) => {
 
   const previewShadows = shadows?.map(withPreview);
   const previewTexts = texts?.map(withPreview);
+  const resolvedOptions = resolveSideOptions({ shadows: previewShadows, texts: previewTexts });
 
   return (
     <Side
       id={effect.id}
-      shadows={previewShadows}
-      texts={previewTexts}
+      shadows={resolvedOptions.shadows}
+      texts={resolvedOptions.texts}
       Component={componentElement}
     />
   );
