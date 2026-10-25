@@ -4,6 +4,8 @@ import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
 
+import { usePageEffects } from '../../PageEffectsContext';
+
 import type { StyleEditorController } from './hooks';
 
 import { useStyleEditor } from './hooks';
@@ -58,9 +60,45 @@ export const StyleEditor = ({
   });
 
   const backgroundStyle = useOptionalBackgroundStyle();
+  const { effects } = usePageEffects();
 
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
+
+  const layerZIndexes: number[] = [];
+
+  for (const effectCur of effects) {
+    if (controller && effectCur.type === 'side') {
+      const items = [...(effectCur.options.shadows ?? []), ...(effectCur.options.texts ?? [])];
+
+      for (const item of items) {
+        const value = Number(item.style?.zIndex);
+
+        if (item.style?.zIndex !== undefined && Number.isFinite(value)) {
+          layerZIndexes.push(value);
+        }
+      }
+    } else if (!controller && effectCur.type === 'background') {
+      const options = effectCur.options;
+      const styles = [
+        options.style,
+        options.shadow?.style,
+        ...(options.images ?? []).map((item) => item.style),
+        ...(options.videos ?? []).map((item) => item.style),
+      ];
+
+      for (const style of styles) {
+        const value = Number(style?.zIndex);
+
+        if (style?.zIndex !== undefined && Number.isFinite(value)) {
+          layerZIndexes.push(value);
+        }
+      }
+    }
+  }
+
+  const minimumZIndex = Math.min(zIndex, ...layerZIndexes);
+  const maximumZIndex = Math.max(zIndex, ...layerZIndexes);
 
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
@@ -107,6 +145,8 @@ export const StyleEditor = ({
 
       <LayerSettings
         zIndex={zIndex}
+        minimumZIndex={minimumZIndex}
+        maximumZIndex={maximumZIndex}
         onChange={handleLayerChange}
         onCommit={commitStyle}
       />

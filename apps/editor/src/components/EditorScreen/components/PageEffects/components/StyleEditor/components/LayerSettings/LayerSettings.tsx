@@ -6,11 +6,19 @@ import styles from '../../StyleEditor.module.scss';
 
 type LayerSettingsProps = {
   zIndex: number;
+  minimumZIndex?: number;
+  maximumZIndex?: number;
   onChange: (value: number) => void;
   onCommit: () => void;
 };
 
-export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps) => {
+export const LayerSettings = ({
+  zIndex,
+  minimumZIndex = zIndex,
+  maximumZIndex = zIndex,
+  onChange,
+  onCommit,
+}: LayerSettingsProps) => {
   const updateIndex = (value: number) => {
     if (Number.isFinite(value)) {
       onChange(value);
@@ -39,6 +47,20 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
     handleStepChange(1);
   };
 
+  const handleMoveToBack = () => {
+    if (zIndex > minimumZIndex) {
+      updateIndex(minimumZIndex - 1);
+      onCommit();
+    }
+  };
+
+  const handleMoveToFront = () => {
+    if (zIndex < maximumZIndex) {
+      updateIndex(maximumZIndex + 1);
+      onCommit();
+    }
+  };
+
   return (
     <label className={styles.Field}>
       <span>
@@ -46,6 +68,16 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
       </span>
 
       <div className={styles.LayerControls}>
+        <button
+          type="button"
+          onClick={handleMoveToBack}
+          aria-label="На самый нижний слой"
+          title="На самый нижний слой"
+          disabled={zIndex <= minimumZIndex}
+        >
+          ⇤
+        </button>
+
         <button type="button" onClick={handleStepBack} aria-label="На слой назад">
           −
         </button>
@@ -60,6 +92,16 @@ export const LayerSettings = ({ zIndex, onChange, onCommit }: LayerSettingsProps
 
         <button type="button" onClick={handleStepForward} aria-label="На слой вперёд">
           +
+        </button>
+
+        <button
+          type="button"
+          onClick={handleMoveToFront}
+          aria-label="На самый верхний слой"
+          title="На самый верхний слой"
+          disabled={zIndex >= maximumZIndex}
+        >
+          ⇥
         </button>
       </div>
     </label>
