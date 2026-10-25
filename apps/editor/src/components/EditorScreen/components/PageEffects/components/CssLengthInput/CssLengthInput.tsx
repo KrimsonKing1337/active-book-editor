@@ -9,10 +9,9 @@ type CssLengthInputProps = {
   onChange: (value: string) => void;
   allowNegative?: boolean;
   max?: number;
-  cssProperty?: 'left' | 'font-size';
 };
 
-const units = ['px', '%', 'rem', 'em', 'vw', 'vh', 'css'] as const;
+const units = ['px', '%', 'rem', 'em', 'vw', 'vh'] as const;
 type Unit = typeof units[number];
 
 const maskOptions = {
@@ -24,7 +23,7 @@ const getParts = (value: string): { amount: string; unit: Unit } => {
   const match = value.match(/^(-?(?:\d+(?:\.\d{1,2})?|\.\d{1,2}))(px|%|rem|em|vw|vh)$/);
 
   if (!match) {
-    return { amount: '0', unit: 'css' };
+    return { amount: '0', unit: 'px' };
   }
 
   return { amount: match[1], unit: match[2] as Unit };
@@ -35,115 +34,80 @@ export const CssLengthInput = ({
   onChange,
   allowNegative = true,
   max = 9999,
-  cssProperty = 'left',
 }: CssLengthInputProps) => {
-  const parts = getParts(value);
-  const [draft, setDraft] = useState(parts.amount);
-  const [expressionDraft, setExpressionDraft] = useState(value);
+  const { amount, unit } = getParts(value);
+  const [draft, setDraft] = useState(amount);
 
   useEffect(() => {
-    setDraft(parts.amount);
-    setExpressionDraft(value);
-  }, [value]);
+    setDraft(amount);
+  }, [amount]);
 
   const min = allowNegative ? -max : 0;
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const next = unformat(event.target.value, maskOptions);
+    const raw = unformat(event.target.value, maskOptions);
+    const isPartial = raw === '' || raw === '-' || raw === '.' || raw === '-.';
 
-    if (next === '' || next === '-' || next === '.' || next === '-.') {
-      setDraft(next);
-
-      return;
-    }
-
-    const isNumber = /^-?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(next);
-
-    if (!isNumber) {
-      return;
-    }
-
-    if (next.endsWith('.')) {
-      setDraft(next);
+    if (isPartial) {
+      setDraft(raw);
 
       return;
     }
 
-    const number = Number(next);
+    const validNumber = /^-?(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(raw);
 
-    if (!Number.isFinite(number)) {
+    if (!validNumber) {
       return;
     }
 
-    const bounded = Math.min(max, Math.max(min, number));
-    const nextValue = String(bounded);
+    if (raw.endsWith('.')) {
+      setDraft(raw);
 
-    setDraft(nextValue);
-    onChange(`${nextValue}${parts.unit}`);
-  };
-
-  const handleExpressionChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const next = event.target.value;
-
-    setExpressionDraft(next);
-
-    if (CSS.supports(cssProperty, next)) {
-      onChange(next);
+      return;
     }
+
+    const parsed = Number(raw);
+
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+
+    const normalized = Math.min(max, Math.max(min, parsed));
+    const nextAmount = String(normalized);
+
+    setDraft(nextAmount);
+    onChange(`${nextAmount}${unit}`);
   };
 
   const handleUnitChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const unit = event.target.value;
-
-    if (unit === 'css') {
-      onChange('calc(0px + 0px)');
-
-      return;
-    }
-
-    const amount = parts.unit === 'css' ? '0' : parts.amount;
-
-    onChange(`${amount}${unit}`);
+    onChange(`${amount}${event.target.value}`);
   };
 
   const handleBlur = () => {
-    setDraft(parts.amount);
-    setExpressionDraft(value);
+    setDraft(amount);
   };
 
   return (
     <span style={{ display: 'flex', gap: 6, minWidth: 0 }}>
-      {parts.unit === 'css' ? (
-        <input
-          aria-label="CSS-выражение"
-          type="text"
-          value={expressionDraft}
-          maxLength={120}
-          spellCheck={false}
-          placeholder="calc(100% - 20px)"
-          onChange={handleExpressionChange}
-          onBlur={handleBlur}
-          style={{ flex: 1, minWidth: 0 }}
-        />
-      ) : (
-        <InputMask
-          aria-label="Числовое значение"
-          mask={maskOptions.mask}
-          replacement={maskOptions.replacement}
-          showMask
-          value={draft}
-          inputMode="decimal"
-          onChange={handleAmountChange}
-          onBlur={handleBlur}
-          style={{ flex: 1, minWidth: 0 }}
-        />
-      )}
+      <InputMask
+        aria-label="Числовое значение"
+        mask={maskOptions.mask}
+        replacement={maskOptions.replacement}
+        showMask
+        value={draft}
+        inputMode="decimal"
+        onChange={handleAmountChange}
+        onBlur={handleBlur}
+        style={{ flex: 1, minWidth: 0 }}
+      />
 
-      <select aria-label="Единица измерения" value={parts.unit} onChange={handleUnitChange}>
-        {units.map((unit) => {
-          const label = unit === 'css' ? 'CSS' : unit;
-
-          return <option value={unit} key={unit}>{label}</option>;
+      <select
+        aria-label="Единица измерения"
+        value={unit}
+        onChange={handleUnitChange}
+      >
+        {units.map((unitCur) => {
+          return <option value={unitCur} key={unitCur}>{unitCur}</option>;
         })}
       </select>
     </span>

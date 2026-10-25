@@ -373,7 +373,6 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <label className={styles.Field}>
                 Размер шрифта (CSS)
                 <CssLengthInput
-                  cssProperty="font-size"
                   allowNegative={false}
                   value={String(textCur.style?.fontSize ?? '12px')}
                   onChange={(fontSize) => {
