@@ -40,7 +40,8 @@ export const IntegerInput = ({
     const raw = unformat(event.target.value, maskOptions);
 
     if (!raw) {
-      setDraft('');
+      setDraft(String(min));
+      onValueChange(min);
 
       return;
     }

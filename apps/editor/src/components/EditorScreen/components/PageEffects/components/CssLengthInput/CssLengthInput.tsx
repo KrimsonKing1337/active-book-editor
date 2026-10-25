@@ -48,6 +48,13 @@ export const CssLengthInput = ({
     const raw = unformat(event.target.value, maskOptions);
     const isPartial = raw === '' || raw === '-' || raw === '.' || raw === '-.';
 
+    if (raw === '') {
+      setDraft('0');
+      onChange(`0${unit}`);
+
+      return;
+    }
+
     if (isPartial) {
       setDraft(raw);
 
@@ -84,7 +91,13 @@ export const CssLengthInput = ({
   };
 
   const handleBlur = () => {
-    setDraft(amount);
+    const partial = draft === '-' || draft === '.' || draft === '-.';
+
+    if (partial) {
+      onChange(`0${unit}`);
+    }
+
+    setDraft(partial ? '0' : amount);
   };
 
   return (
