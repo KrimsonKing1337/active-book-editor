@@ -15,6 +15,7 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 import { AnimationSettings } from './components/AnimationSettings';
 
 import { IntegerInput } from '../IntegerInput';
+import { CssLengthInput } from '../CssLengthInput';
 
 import styles from './SideSettings.module.scss';
 
@@ -65,12 +66,12 @@ const LayoutSettings = ({
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
 
-  const handleOffsetXChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ offsetX: e.target.value });
+  const handleOffsetXChange = (value: string) => {
+    onChange({ offsetX: value });
   };
 
-  const handleOffsetYChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ offsetY: e.target.value });
+  const handleOffsetYChange = (value: string) => {
+    onChange({ offsetY: value });
   };
 
   const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -95,12 +96,12 @@ const LayoutSettings = ({
 
         <label className={styles.Field}>
           Смещение X
-          <input value={item.offsetX ?? '0px'} onChange={handleOffsetXChange} />
+          <CssLengthInput value={item.offsetX ?? '0px'} onChange={handleOffsetXChange} />
         </label>
 
         <label className={styles.Field}>
           Смещение Y
-          <input value={item.offsetY ?? '0px'} onChange={handleOffsetYChange} />
+          <CssLengthInput value={item.offsetY ?? '0px'} onChange={handleOffsetYChange} />
         </label>
       </div>
 
@@ -369,15 +370,14 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <label className={styles.Field}>
                 Размер шрифта (CSS)
-                <input
-                  type="text"
-                  value={textCur.style?.fontSize ?? '12px'}
-                  onChange={(e) => {
-                    const style = { ...textCur.style, fontSize: e.target.value };
+                <CssLengthInput
+                  allowNegative={false}
+                  value={String(textCur.style?.fontSize ?? '12px')}
+                  onChange={(fontSize) => {
+                    const style = { ...textCur.style, fontSize };
 
                     updateText(textCur.id, { style });
                   }}
-                  placeholder="12px, 1rem, 1.5vw"
                 />
               </label>
 
