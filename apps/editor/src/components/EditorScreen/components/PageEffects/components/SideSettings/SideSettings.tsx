@@ -1,12 +1,12 @@
 import type { ChangeEvent, FocusEvent } from 'react';
 
-import type { SideOptions } from '@active-book/book-builder/effects';
+import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
 import { StyleEditor } from '../StyleEditor';
 
 import type { SideEffectDraft } from '../../@types';
 
-import { getSidePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
@@ -16,7 +16,7 @@ import styles from './SideSettings.module.scss';
 
 type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type TextItem = NonNullable<SideOptions['texts']>[number];
-type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'scale' | 'hidden'>;
+type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
@@ -74,14 +74,6 @@ const LayoutSettings = ({
     onChange({ offsetY: e.target.value });
   };
 
-  const handleScaleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const scale = Number(e.target.value);
-
-    if (Number.isFinite(scale) && scale > 0) {
-      onChange({ scale });
-    }
-  };
-
   const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
     onHiddenChange(e.target.checked);
   };
@@ -100,17 +92,6 @@ const LayoutSettings = ({
               );
             })}
           </select>
-        </label>
-
-        <label className={styles.Field}>
-          Масштаб
-          <input
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={item.scale ?? 1}
-            onChange={handleScaleChange}
-          />
         </label>
 
         <label className={styles.Field}>
@@ -136,7 +117,14 @@ const LayoutSettings = ({
 
 export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
   const { definitions } = useCustomComponents();
-  const { sideItemPreviews, updateSideItemPreview } = usePageEffects();
+  const {
+    sideItemPreviews,
+    sideStylePreviews,
+    updateSideItemPreview,
+    updateSideStylePreview,
+    flushStylePreviews,
+    getCurrentEffects,
+  } = usePageEffects();
 
   const previewFor = (itemId: string) => {
     const key = getSidePreviewKey(effect.id, itemId);
@@ -145,6 +133,46 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const { shadows = [], texts = [], component } = effect.options;
+
+  const getStyleForItem = (kind: 'shadow' | 'text', itemId: string, style: ShadowItem['style']) => {
+    const key = getSideStylePreviewKey(effect.id, kind, itemId);
+
+    return sideStylePreviews[key] ?? style ?? {};
+  };
+
+  const commitItemFilters = (kind: 'shadow' | 'text', id: string, styleFilters: FilterOperation[]) => {
+    if (!flushStylePreviews()) {
+      return;
+    }
+
+    const current = getCurrentEffects();
+    const currentEffect = current.find((item): item is SideEffectDraft => {
+      return item.type === 'side' && item.id === effect.id;
+    });
+
+    if (!currentEffect) {
+      return;
+    }
+
+    const { shadows: currentShadows, texts: currentTexts } = currentEffect.options;
+
+    const nextShadows = kind === 'shadow'
+      ? currentShadows?.map((item) => item.id === id ? { ...item, styleFilters } : item)
+      : currentShadows;
+
+    const nextTexts = kind === 'text'
+      ? currentTexts?.map((item) => item.id === id ? { ...item, styleFilters } : item)
+      : currentTexts;
+
+    onUpdate(effect.id, {
+      ...currentEffect,
+      options: {
+        ...currentEffect.options,
+        shadows: nextShadows,
+        texts: nextTexts,
+      },
+    });
+  };
 
   const updateOptions = (updates: Partial<SideOptions>) => {
     onUpdate(effect.id, {
@@ -177,6 +205,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       id: crypto.randomUUID(),
       position: 'top-left',
       style: { color: '#ff0000', zIndex: 1 },
+      thickness: 30,
       animation: { preset: 'pulse', duration: 1000, iterations: 'infinite' },
     };
 
@@ -188,7 +217,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       id: crypto.randomUUID(),
       leftText: 'Левая сторона',
       rightText: 'Правая сторона',
-      style: { color: '#a3a3a3', zIndex: 1 },
+      style: { color: '#a3a3a3', zIndex: 1, fontSize: '12px' },
       animation: { preset: 'scroll', duration: 60000, iterations: 'infinite' },
     };
 
@@ -249,19 +278,37 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={(changes) => updateShadow(shadowCur.id, changes)}
               />
 
+              <label className={styles.Field}>
+                Толщина тени (px)
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={shadowCur.thickness ?? 30}
+                  onChange={(e) => {
+                    const thickness = Number(e.target.value);
+
+                    if (Number.isFinite(thickness) && thickness >= 0) {
+                      updateShadow(shadowCur.id, { thickness });
+                    }
+                  }}
+                />
+              </label>
+
               <details>
                 <summary>Стили тени</summary>
 
                 <StyleEditor
                   layer="shadow"
                   colorProperty="color"
+                  colorLabel="Цвет тени (color)"
                   defaultZIndex={1}
-                  value={shadowCur.style ?? {}}
+                  value={getStyleForItem('shadow', shadowCur.id, shadowCur.style)}
                   styleFilters={shadowCur.styleFilters}
                   controller={{
-                    preview: (style) => updateShadow(shadowCur.id, { style }),
-                    commit: () => true,
-                    commitFilters: (styleFilters) => updateShadow(shadowCur.id, { styleFilters }),
+                    preview: (style) => updateSideStylePreview(effect.id, 'shadow', shadowCur.id, style),
+                    commit: flushStylePreviews,
+                    commitFilters: (filters) => commitItemFilters('shadow', shadowCur.id, filters),
                   }}
                 />
               </details>
@@ -319,19 +366,35 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={(changes) => updateText(textCur.id, changes)}
               />
 
+              <label className={styles.Field}>
+                Размер шрифта (CSS)
+                <input
+                  type="text"
+                  value={textCur.style?.fontSize ?? '12px'}
+                  onChange={(e) => {
+                    const style = { ...textCur.style, fontSize: e.target.value };
+
+                    updateText(textCur.id, { style });
+                  }}
+                  placeholder="12px, 1rem, 1.5vw"
+                />
+              </label>
+
               <details>
                 <summary>Стили текста</summary>
 
                 <StyleEditor
                   layer="shadow"
                   colorProperty="color"
+                  colorLabel="Цвет текста (color)"
+                  additionalColorProperty="backgroundColor"
                   defaultZIndex={1}
-                  value={textCur.style ?? {}}
+                  value={getStyleForItem('text', textCur.id, textCur.style)}
                   styleFilters={textCur.styleFilters}
                   controller={{
-                    preview: (style) => updateText(textCur.id, { style }),
-                    commit: () => true,
-                    commitFilters: (styleFilters) => updateText(textCur.id, { styleFilters }),
+                    preview: (style) => updateSideStylePreview(effect.id, 'text', textCur.id, style),
+                    commit: flushStylePreviews,
+                    commitFilters: (filters) => commitItemFilters('text', textCur.id, filters),
                   }}
                 />
               </details>
