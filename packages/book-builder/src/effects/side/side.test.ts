@@ -65,5 +65,5 @@ test('resolves individual shadow and text filters without changing layer positio
     style: { color: '#ffffff', zIndex: 3, filter: 'opacity(50%)' },
   }]);
 
-  assert.equal(options.shadows[0].style.filter, undefined);
+  assert.deepEqual(options.shadows[0].style, { color: '#ff0000', zIndex: 4 });
 });
