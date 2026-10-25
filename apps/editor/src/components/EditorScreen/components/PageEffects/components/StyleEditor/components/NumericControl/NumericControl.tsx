@@ -82,12 +82,22 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
     });
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const maskOptions = {
-      mask: '________',
-      replacement: numericReplacement,
-    };
+  const maximum = Math.max(Math.abs(config.min), Math.abs(config.max));
+  const integerDigits = String(Math.trunc(maximum)).length;
 
+  const fractionDigits = config.step < 1
+    ? (String(config.step).split('.')[1]?.length ?? 2)
+    : 0;
+
+  const signDigits = config.min < 0 ? 1 : 0;
+  const maskLength = integerDigits + signDigits + fractionDigits + (fractionDigits > 0 ? 1 : 0);
+
+  const maskOptions = {
+    mask: '_'.repeat(maskLength),
+    replacement: numericReplacement,
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = unformat(e.target.value, maskOptions);
 
     if (!/^-?(?:\d*(?:\.\d{0,2})?)$/.test(value)) {
@@ -117,7 +127,7 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
 
         <InputMask
           aria-label={label}
-          mask="________"
+          mask={maskOptions.mask}
           replacement={numericReplacement}
           showMask
           value={value}
