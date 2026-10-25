@@ -17,6 +17,8 @@ import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
 import { createDefaultShadowFilters } from '../../utils';
 
+import { TextInput, Button } from '../EffectControls';
+
 import styles from './BackgroundSettings.module.scss';
 
 type BackgroundSettingsProps = {
@@ -264,7 +266,7 @@ export const BackgroundSettings = ({
             Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
             maxLength={120}
             value={effect.slug}
@@ -278,11 +280,11 @@ export const BackgroundSettings = ({
           </span>
 
           <div className={styles.Row}>
-            <input maxLength={80} value={idDraft} onChange={handleIdDraftChange} />
+            <TextInput maxLength={80} value={idDraft} onChange={handleIdDraftChange} />
 
-            <button type="button" onClick={updateId}>
+            <Button variant="success" onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -306,13 +308,13 @@ export const BackgroundSettings = ({
         <CustomComponent component={options.component} onChange={handleComponentChange} />
 
         <div className={styles.Actions}>
-          <button type="button" onClick={onDuplicate}>
+          <Button type="button" onClick={onDuplicate}>
             Дублировать
-          </button>
+          </Button>
 
-          <button type="button" onClick={onDelete}>
+          <Button variant="danger" onClick={onDelete}>
             Удалить эффект
-          </button>
+          </Button>
         </div>
       </div>
     </BackgroundStyleProvider>

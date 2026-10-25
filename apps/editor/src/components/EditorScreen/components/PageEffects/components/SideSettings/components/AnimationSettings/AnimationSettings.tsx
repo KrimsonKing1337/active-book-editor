@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react';
 import type { SideOptions } from '@active-book/book-builder/effects';
 
 import { IntegerInput } from '../../../IntegerInput';
+import { Select, Button } from '../../../EffectControls';
 
 type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type SideAnimation = NonNullable<ShadowItem['animation']>;
@@ -60,7 +61,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
 
       <label>
         Пресет
-        <select value={animation.preset ?? presets[0].value} onChange={handlePresetChange}>
+        <Select value={animation.preset ?? presets[0].value} onChange={handlePresetChange}>
           {presets.map((presetCur) => {
             return (
               <option key={presetCur.value} value={presetCur.value}>
@@ -68,7 +69,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
               </option>
             );
           })}
-        </select>
+        </Select>
       </label>
 
       <label>
@@ -93,13 +94,13 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
 
       <label>
         Повторений
-        <select
+        <Select
           value={typeof animation.iterations === 'number' ? 'count' : 'infinite'}
           onChange={handleIterationsModeChange}
         >
           <option value="infinite">Бесконечно</option>
           <option value="count">Указать количество</option>
-        </select>
+        </Select>
       </label>
 
       {typeof animation.iterations === 'number' && (
@@ -115,15 +116,15 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
       )}
 
       <div>
-        <button type="button" aria-pressed={playState === 'running'} onClick={() => onPlaybackChange('running')}>
+        <Button type="button" aria-pressed={playState === 'running'} onClick={() => onPlaybackChange('running')}>
           Старт
-        </button>
-        <button type="button" aria-pressed={playState === 'paused'} onClick={() => onPlaybackChange('paused')}>
+        </Button>
+        <Button type="button" aria-pressed={playState === 'paused'} onClick={() => onPlaybackChange('paused')}>
           Пауза
-        </button>
-        <button type="button" aria-pressed={playState === 'stopped'} onClick={() => onPlaybackChange('stopped')}>
+        </Button>
+        <Button type="button" aria-pressed={playState === 'stopped'} onClick={() => onPlaybackChange('stopped')}>
           Стоп
-        </button>
+        </Button>
       </div>
     </fieldset>
   );

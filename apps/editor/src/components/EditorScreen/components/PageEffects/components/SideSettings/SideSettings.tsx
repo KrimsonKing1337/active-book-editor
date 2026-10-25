@@ -16,6 +16,7 @@ import { AnimationSettings } from './components/AnimationSettings';
 
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
+import { TextInput, Select, Checkbox, Button } from '../EffectControls';
 
 import styles from './SideSettings.module.scss';
 
@@ -83,7 +84,7 @@ const LayoutSettings = ({
       <div className={styles.Layout}>
         <label className={styles.Field}>
           Точка привязки
-          <select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
+          <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
             {positions.map((positionCur) => {
               return (
                 <option key={positionCur.value} value={positionCur.value}>
@@ -91,7 +92,7 @@ const LayoutSettings = ({
                 </option>
               );
             })}
-          </select>
+          </Select>
         </label>
 
         <label className={styles.Field}>
@@ -106,10 +107,9 @@ const LayoutSettings = ({
       </div>
 
       <div className={styles.Controls}>
-        <label>
-          <input type="checkbox" checked={hidden} onChange={handleHiddenChange} />
+        <Checkbox checked={hidden} onChange={handleHiddenChange}>
           Скрыть элемент
-        </label>
+        </Checkbox>
       </div>
     </>
   );
@@ -255,12 +255,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     <div className={styles.Settings}>
       <label className={styles.Field}>
         Название эффекта
-        <input maxLength={120} value={effect.slug} onChange={handleNameChange} />
+        <TextInput maxLength={120} value={effect.slug} onChange={handleNameChange} />
       </label>
 
       <label className={styles.Field}>
         ID эффекта
-        <input key={effect.id} maxLength={80} defaultValue={effect.id} onBlur={handleIdChange} />
+        <TextInput key={effect.id} maxLength={80} defaultValue={effect.id} onBlur={handleIdChange} />
       </label>
 
       <details className={styles.Section}>
@@ -324,17 +324,17 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={(animation) => updateShadow(shadowCur.id, { animation })}
               />
 
-              <button
-                type="button"
+              <Button
+                variant="danger"
                 onClick={() => updateOptions({ shadows: shadows.filter((cur) => cur.id !== shadowCur.id) })}
               >
                 Удалить тень
-              </button>
+              </Button>
             </div>
           );
         })}
 
-        <button type="button" onClick={addShadow}>Добавить тень</button>
+        <Button variant="success" onClick={addShadow}>Добавить тень</Button>
       </details>
 
       <details className={styles.Section}>
@@ -347,7 +347,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <label className={styles.Field}>
                 Текст слева
-                <input
+                <TextInput
                   maxLength={500}
                   value={textCur.leftText}
                   onChange={(e) => updateText(textCur.id, { leftText: e.target.value })}
@@ -356,7 +356,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <label className={styles.Field}>
                 Текст справа
-                <input
+                <TextInput
                   maxLength={500}
                   value={textCur.rightText}
                   onChange={(e) => updateText(textCur.id, { rightText: e.target.value })}
@@ -411,23 +411,23 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={(animation) => updateText(textCur.id, { animation })}
               />
 
-              <button
-                type="button"
+              <Button
+                variant="danger"
                 onClick={() => updateOptions({ texts: texts.filter((cur) => cur.id !== textCur.id) })}
               >
                 Удалить текст
-              </button>
+              </Button>
             </div>
           );
         })}
 
-        <button type="button" onClick={addText}>Добавить текст</button>
+        <Button variant="success" onClick={addText}>Добавить текст</Button>
       </details>
 
       <details className={styles.Section}>
         <summary>Кастомный компонент</summary>
 
-        <select value={componentId} onChange={handleComponentChange}>
+        <Select value={componentId} onChange={handleComponentChange}>
           <option value="">Не использовать</option>
 
           {definitions.map((definitionCur) => {
@@ -437,12 +437,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               </option>
             );
           })}
-        </select>
+        </Select>
       </details>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>Дублировать эффект</button>
-        <button type="button" onClick={onDelete}>Удалить эффект</button>
+        <Button type="button" onClick={onDuplicate}>Дублировать эффект</Button>
+        <Button variant="danger" onClick={onDelete}>Удалить эффект</Button>
       </div>
     </div>
   );
