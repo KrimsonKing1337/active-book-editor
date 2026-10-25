@@ -3,6 +3,8 @@ import type { BackgroundOptions } from '@components/EditorScreen/components/Page
 import { StyleEditor } from '../../../StyleEditor';
 import { createDefaultShadowFilters } from '../../../../utils';
 
+import { Checkbox } from '../../../EffectControls';
+
 import styles from '../../BackgroundSettings.module.scss';
 
 type BackgroundShadow = NonNullable<BackgroundOptions['shadow']>;
@@ -38,14 +40,9 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
         Затемнение и фильтры
       </summary>
 
-      <label>
-        <input
-          type="checkbox"
-          checked={show ?? false}
-          onChange={(e) => handleShowChange(e.target.checked)}
-        />
-          Показывать слой
-      </label>
+      <Checkbox checked={show ?? false} onChange={(e) => handleShowChange(e.target.checked)}>
+                Показывать слой
+              </Checkbox>
 
       <StyleEditor
         defaultZIndex={2}
