@@ -1,3 +1,5 @@
+import { IntegerInput } from '../IntegerInput';
+
 import { type ChangeEvent, useEffect, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
@@ -199,8 +201,7 @@ export const VibrationSettings = ({
             Длительность вибрации (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             max={10000}
             step={100}
@@ -214,8 +215,7 @@ export const VibrationSettings = ({
             Задержка (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             step={100}
             value={options.delay}

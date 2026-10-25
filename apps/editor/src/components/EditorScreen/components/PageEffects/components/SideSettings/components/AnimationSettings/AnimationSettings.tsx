@@ -1,3 +1,5 @@
+import { IntegerInput } from '../../../IntegerInput';
+
 import type { ChangeEvent } from 'react';
 
 import type { SideOptions } from '@active-book/book-builder/effects';
@@ -74,8 +76,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
 
       <label>
         Длительность цикла (мс)
-        <input
-          type="number"
+        <IntegerInput
           min="0"
           step="100"
           value={animation.duration ?? defaultDuration}
@@ -85,8 +86,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
 
       <label>
         Задержка (мс)
-        <input
-          type="number"
+        <IntegerInput
           min="0"
           step="100"
           value={animation.delay ?? 0}
@@ -96,8 +96,7 @@ export const AnimationSettings = ({ animation = {}, presets, defaultDuration, pl
 
       <label>
         Повторений
-        <input
-          type="number"
+        <IntegerInput
           min="1"
           step="1"
           disabled={animation.iterations === 'infinite' || animation.iterations === undefined}

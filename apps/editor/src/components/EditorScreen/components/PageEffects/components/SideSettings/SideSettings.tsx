@@ -1,3 +1,5 @@
+import { IntegerInput } from '../IntegerInput';
+
 import type { ChangeEvent, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
@@ -285,8 +287,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <label className={styles.Field}>
                 Толщина тени (px)
-                <input
-                  type="number"
+                <IntegerInput
                   min="0"
                   step="1"
                   value={shadowCur.thickness ?? 30}

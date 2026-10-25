@@ -1,3 +1,5 @@
+import { IntegerInput } from '../IntegerInput';
+
 import { type ChangeEvent, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
@@ -217,8 +219,7 @@ export const FlashlightSettings = ({
             Длительность вспышки (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             max={10000}
             step={100}
@@ -232,8 +233,7 @@ export const FlashlightSettings = ({
             Задержка (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             step={100}
             value={options.delay}
@@ -275,8 +275,7 @@ export const FlashlightSettings = ({
               Период мерцания sideShadow (мс)
             </span>
 
-            <input
-              type="number"
+            <IntegerInput
               min={1}
               step={10}
               value={options.speed}

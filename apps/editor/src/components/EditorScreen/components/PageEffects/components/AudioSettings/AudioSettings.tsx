@@ -1,3 +1,5 @@
+import { IntegerInput } from '../IntegerInput';
+
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
 import { Slider } from 'activeBook-core/components';
@@ -435,8 +437,7 @@ export const AudioSettings = ({
                 Задержка (мс)
               </span>
 
-              <input
-                type="number"
+              <IntegerInput
                 min={0}
                 step={100}
                 value={options.delay}
@@ -449,8 +450,7 @@ export const AudioSettings = ({
                 Остановить через (мс)
               </span>
 
-              <input
-                type="number"
+              <IntegerInput
                 min={0}
                 step={100}
                 value={options.stopBy}
