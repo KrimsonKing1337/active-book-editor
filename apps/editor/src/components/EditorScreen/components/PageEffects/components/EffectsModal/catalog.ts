@@ -120,7 +120,9 @@ export const getEffectGroup = (effect: EditorEffectDraft): string => {
 };
 
 export const getCategoryDefinition = (category: EffectCategory): EffectCategoryDefinition => {
-  const definition = EFFECT_CATEGORIES.find((current) => current.value === category);
+  const definition = EFFECT_CATEGORIES.find((categoryCur) => {
+    return categoryCur.value === category;
+  });
 
   if (!definition) {
     throw new Error(`Неизвестная категория эффектов: ${category}`);
@@ -131,9 +133,16 @@ export const getCategoryDefinition = (category: EffectCategory): EffectCategoryD
 
 export const getEffectPath = (effect: EditorEffectDraft): string => {
   const category = getCategoryDefinition(effect.type);
-  const group = category.groups.find((cur) => cur.value === getEffectGroup(effect));
 
-  return [category.label, group?.label].filter(Boolean).join(' / ');
+  const group = category.groups.find((groupCur) => {
+    const effectGroup = getEffectGroup(effect);
+
+    return groupCur.value === effectGroup;
+  });
+
+  const filteredLabels = [category.label, group?.label].filter(Boolean);
+
+  return filteredLabels.join(' / ');
 };
 
 export type FilterEffectsOptions = {
@@ -156,7 +165,9 @@ export const getFilteredEffects = ({
       return false;
     }
 
-    if (group && getEffectGroup(effectCur) !== group) {
+    const effectGroup = getEffectGroup(effectCur);
+
+    if (group && effectGroup !== group) {
       return false;
     }
 
@@ -165,7 +176,12 @@ export const getFilteredEffects = ({
     }
 
     const categoryDefinition = getCategoryDefinition(effectCur.type);
-    const groupDefinition = categoryDefinition.groups.find((cur) => cur.value === getEffectGroup(effectCur));
+
+    const groupDefinition = categoryDefinition.groups.find((groupCur) => {
+      const effectGroup = getEffectGroup(effectCur);
+
+      return groupCur.value === effectGroup;
+    });
 
     const searchable = [
       effectCur.id,
@@ -188,8 +204,8 @@ export const getFilteredEffects = ({
       searchable.push(effectCur.options.component?.name);
     }
 
-    return searchable.some((cur) => {
-      return cur?.toLocaleLowerCase().includes(normalizedQuery);
+    return searchable.some((valueCur) => {
+      return valueCur?.toLocaleLowerCase().includes(normalizedQuery);
     });
   });
 };
