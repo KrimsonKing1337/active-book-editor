@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import type { Editor } from '@tiptap/core';
 
 import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
 
@@ -28,11 +30,12 @@ import {
 import styles from './PageEffects.module.scss';
 
 export type PageEffectsProps = {
+  editor: Editor | null;
   project: BookProject | null;
   onSaveProject: () => Promise<BookProject | null>;
 };
 
-export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
+export const PageEffects = ({ editor, project, onSaveProject }: PageEffectsProps) => {
   const {
     effects,
     writeEffects,
@@ -48,6 +51,25 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   const [styleSaveError, setStyleSaveError] = useState('');
 
   const savingStylesRef = useRef(false);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      return;
+    }
+
+    const previouslyFocusedElement = previouslyFocusedElementRef.current;
+
+    previouslyFocusedElementRef.current = null;
+
+    if (!editor || editor.isDestroyed || !previouslyFocusedElement?.isConnected) {
+      return;
+    }
+
+    if (editor.view.dom.contains(previouslyFocusedElement)) {
+      previouslyFocusedElement.focus({ preventScroll: true });
+    }
+  }, [editor, isOpen]);
 
   const persistStyles = async (): Promise<boolean> => {
     if (savingStylesRef.current) {
@@ -103,6 +125,20 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const selectedEffect = effects.find((cur) => cur.id === selectedEffectId);
+
+  const captureCanvasFocus = () => {
+    const focusedElement = document.activeElement;
+
+    previouslyFocusedElementRef.current = null;
+
+    if (!editor || editor.isDestroyed || !(focusedElement instanceof HTMLElement)) {
+      return;
+    }
+
+    if (editor.view.dom.contains(focusedElement)) {
+      previouslyFocusedElementRef.current = focusedElement;
+    }
+  };
 
   const openEffects = () => {
     setIsOpen(true);
@@ -345,6 +381,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         title="Эффекты страницы"
         aria-label="Эффекты страницы"
         aria-haspopup="dialog"
+        onPointerDownCapture={captureCanvasFocus}
         onClick={openEffects}
       >
         <span className={styles.Icon} aria-hidden="true">
