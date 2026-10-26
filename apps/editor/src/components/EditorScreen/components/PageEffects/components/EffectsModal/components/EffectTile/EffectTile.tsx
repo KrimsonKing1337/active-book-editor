@@ -4,10 +4,11 @@ import styles from '../../EffectsModal.module.scss';
 
 export type EffectTileProps = {
   effect: EditorEffectDraft;
+  path?: string;
   onSelect: (id: string) => void;
 };
 
-export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
+export const EffectTile = ({ effect, path, onSelect }: EffectTileProps) => {
   const effectSlug = effect.slug.trim() || 'Без названия';
 
   let effectType = 'Vibration';
@@ -61,7 +62,7 @@ export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
   return (
     <button className={styles.Tile} type="button" onClick={handleSelect}>
       <span className={styles.Kind}>
-        {effectType}
+        {path ?? effectType}
       </span>
 
       <strong>

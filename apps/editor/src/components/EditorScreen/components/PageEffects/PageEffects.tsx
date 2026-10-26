@@ -123,8 +123,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     afterStylesSaved(() => setSelectedEffectId(id));
   };
 
-  const addAudio = () => {
-    const effect = createAudioEffect();
+  const addAudio = (type: AudioEffectDraft['options']['type'] = 'sfx') => {
+    const effect = createAudioEffect(type);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);

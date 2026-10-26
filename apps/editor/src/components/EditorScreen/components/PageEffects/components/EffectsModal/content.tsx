@@ -12,9 +12,6 @@ import {
   SideSettings,
 } from '../';
 
-import { EffectTile } from './components';
-
-import styles from './EffectsModal.module.scss';
 
 type ContentParams = Pick<
   EffectsModalProps,
@@ -33,6 +30,7 @@ type ContentParams = Pick<
   | 'onDeleteEffect'
 > & {
   onLoadingChange: (loading: boolean, message?: string) => void;
+  browserContent: ReactNode;
 };
 
 type ModalContent = {
@@ -57,113 +55,14 @@ export const getModalContent = ({
   onDuplicateEffect,
   onDeleteEffect,
   onLoadingChange,
+  browserContent,
 }: ContentParams): ModalContent => {
   const existingIds = effects.map((cur) => cur.id);
 
-  const isEffectsEmpty = effects.length === 0;
-
-  const buttons = [
-    {
-      id: 'audio',
-      label: 'Добавить Audio',
-      onClick: onAddAudio,
-    },
-    {
-      id: 'vibration',
-      label: 'Добавить Vibration',
-      onClick: onAddVibration,
-    },
-    {
-      id: 'flashlight',
-      label: 'Добавить Flashlight',
-      onClick: onAddFlashlight,
-    },
-    {
-      id: 'background',
-      label: 'Добавить фон',
-      onClick: () => onAddBackground('background'),
-    },
-    {
-      id: 'background-image',
-      label: 'Добавить изображение',
-      onClick: () => onAddBackground('image'),
-    },
-    {
-      id: 'background-video',
-      label: 'Добавить видео',
-      onClick: () => onAddBackground('video'),
-    },
-    {
-      id: 'background-shadow',
-      label: 'Добавить затемнение',
-      onClick: () => onAddBackground('shadow'),
-    },
-    {
-      id: 'background-component',
-      label: 'Добавить фоновый компонент',
-      onClick: () => onAddBackground('component'),
-    },
-    {
-      id: 'side-shadow',
-      label: 'Добавить боковую тень',
-      onClick: () => onAddSide('shadow'),
-    },
-    {
-      id: 'side-text',
-      label: 'Добавить боковой текст',
-      onClick: () => onAddSide('text'),
-    },
-    {
-      id: 'side-component',
-      label: 'Добавить боковой компонент',
-      onClick: () => onAddSide('component'),
-    },
-  ];
-
   let modalTitle = 'Эффекты страницы';
-  let modalDescription = 'Эффекты, которые относятся к странице';
+  let modalDescription = 'Эффекты текущей страницы';
   let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги';
-
-  let modalContent: ReactNode = (
-    <>
-      {isEffectsEmpty && (
-        <div className={styles.Empty}>
-          Пока нет эффектов
-        </div>
-      )}
-
-      <div className={styles.Tiles}>
-        {effects.map((effectCur) => {
-          return (
-            <EffectTile
-              key={effectCur.id}
-              effect={effectCur}
-              onSelect={onSelectEffect}
-            />
-          );
-        })}
-
-        {buttons.map((buttonCur) => {
-          const { id, label, onClick } = buttonCur;
-
-          return (
-            <button
-              key={id}
-              className={styles.AddTile}
-              type="button"
-              onClick={onClick}
-            >
-              <span className={styles.AddIcon} aria-hidden="true">
-                +
-              </span>
-
-              {label}
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
+  let modalContent: ReactNode = browserContent;
 
   if (selectedEffect?.type === 'audio') {
     modalTitle = 'Настройки Audio';

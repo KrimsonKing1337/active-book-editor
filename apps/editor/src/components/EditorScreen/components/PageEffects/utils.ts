@@ -23,10 +23,10 @@ export const createDefaultShadowFilters = (): FilterOperation[] => {
   return [blurFilter];
 };
 
-export const createAudioEffect = (): AudioEffectDraft => {
+export const createAudioEffect = (type: AudioEffectDraft['options']['type'] = 'sfx'): AudioEffectDraft => {
   const options: AudioEffectDraft['options'] = {
     src: '',
-    type: 'sfx',
+    type,
     loop: false,
     playOnLoad: false,
     stopBy: 0,

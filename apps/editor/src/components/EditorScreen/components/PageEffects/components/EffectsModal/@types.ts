@@ -1,4 +1,4 @@
-import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+import type { AudioOptions, BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 
@@ -11,7 +11,7 @@ export type EffectsModalProps = {
 
   onClose: () => void;
   onBack: () => void;
-  onAddAudio: () => void;
+  onAddAudio: (type: AudioOptions['type']) => void;
   onAddVibration: () => void;
   onAddFlashlight: () => void;
   onAddBackground: (kind: BackgroundEffectKind) => void;
