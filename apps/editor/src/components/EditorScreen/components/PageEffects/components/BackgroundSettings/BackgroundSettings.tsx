@@ -17,6 +17,7 @@ import { BackgroundStyleProvider } from './BackgroundStyleContext';
 import { DEFAULT_SHADOW_OPTIONS } from './constants';
 
 import { TextInput, Button } from '../EffectControls';
+import { StyleEditor } from '../StyleEditor';
 
 import styles from './BackgroundSettings.module.scss';
 
@@ -207,10 +208,25 @@ export const BackgroundSettings = ({
         )}
 
         {effect.kind === 'component' && (
-          <CustomComponent
-            component={options.component}
-            onChange={(component) => updateOptions({ component })}
-          />
+          <>
+            <CustomComponent
+              component={options.component}
+              onChange={(component) => updateOptions({ component })}
+            />
+
+            <details className={styles.Section}>
+              <summary>
+                Стили слоя
+              </summary>
+
+              <StyleEditor
+                layer="background"
+                defaultZIndex={1}
+                value={options.style ?? {}}
+                styleFilters={options.styleFilters}
+              />
+            </details>
+          </>
         )}
 
         <div className={styles.Actions}>

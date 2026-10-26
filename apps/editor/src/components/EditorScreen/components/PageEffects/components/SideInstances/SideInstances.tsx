@@ -60,9 +60,13 @@ const SideInstance = ({ effect, components, previews, stylePreviews }: SideInsta
     },
   };
 
+  const componentStyle = stylePreviews[getSideStylePreviewKey(effect.id, 'component', effect.id)];
+
   const options = resolveSideOptions({
+    ...effect.options,
     shadow: previewShadow || undefined,
     text: previewText || undefined,
+    style: componentStyle ?? effect.options.style,
   });
 
   return (
@@ -71,6 +75,7 @@ const SideInstance = ({ effect, components, previews, stylePreviews }: SideInsta
       kind={effect.kind}
       shadow={options.shadow}
       text={options.text}
+      style={options.style}
       Component={componentElement}
     />
   );

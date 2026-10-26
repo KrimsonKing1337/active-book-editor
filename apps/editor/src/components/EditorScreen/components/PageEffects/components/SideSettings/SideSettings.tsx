@@ -132,13 +132,13 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     }
   };
 
-  const getItemStyle = (kind: 'shadow' | 'text', id: string, style?: CSSProperties) => {
+  const getItemStyle = (kind: 'shadow' | 'text' | 'component', id: string, style?: CSSProperties) => {
     const key = getSideStylePreviewKey(effect.id, kind, id);
 
     return sideStylePreviews[key] ?? style ?? {};
   };
 
-  const handleStylePreview = (kind: 'shadow' | 'text', itemId: string, style: CSSProperties) => {
+  const handleStylePreview = (kind: 'shadow' | 'text' | 'component', itemId: string, style: CSSProperties) => {
     updateSideStylePreview({
       effectId: effect.id,
       kind,
@@ -147,7 +147,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     });
   };
 
-  const commitItemFilters = (kind: 'shadow' | 'text', styleFilters: FilterOperation[]) => {
+  const commitItemFilters = (kind: 'shadow' | 'text' | 'component', styleFilters: FilterOperation[]) => {
     if (!flushStylePreviews()) {
       return;
     }
@@ -166,6 +166,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       options.shadow = { ...options.shadow, styleFilters };
     } else if (kind === 'text' && options.text) {
       options.text = { ...options.text, styleFilters };
+    } else if (kind === 'component') {
+      options.styleFilters = styleFilters;
     }
 
     onUpdate(effect.id, { ...currentEffect, options });
@@ -395,6 +397,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               );
             })}
           </Select>
+
+          <details>
+            <summary>
+              Стили слоя
+            </summary>
+
+            <StyleEditor
+              layer="background"
+              defaultZIndex={1}
+              value={getItemStyle('component', effect.id, effect.options.style)}
+              styleFilters={effect.options.styleFilters}
+              controller={{
+                preview: (style) => handleStylePreview('component', effect.id, style),
+                commit: flushStylePreviews,
+                commitFilters: (filters) => commitItemFilters('component', filters),
+              }}
+            />
+          </details>
         </details>
       )}
 

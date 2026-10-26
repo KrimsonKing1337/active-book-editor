@@ -41,7 +41,7 @@ export type SideItemPreviews = Record<string, SideItemPreview>;
 
 export type SideStylePreviewUpdate = {
   effectId: string;
-  kind: 'shadow' | 'text';
+  kind: 'shadow' | 'text' | 'component';
   itemId: string;
   style: CSSProperties;
 };
@@ -70,7 +70,11 @@ export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video'
 export type BackgroundStylePreviews = Record<string, CSSProperties>;
 export type SideStylePreviews = Record<string, CSSProperties>;
 
-export const getSideStylePreviewKey = (effectId: string, kind: 'shadow' | 'text', itemId: string): string => {
+export const getSideStylePreviewKey = (
+  effectId: string,
+  kind: 'shadow' | 'text' | 'component',
+  itemId: string,
+): string => {
   return JSON.stringify([effectId, kind, itemId]);
 };
 
@@ -320,8 +324,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
         const shadowStyle = shadow && pendingSide[getSideStylePreviewKey(effectCur.id, 'shadow', shadow.id)];
         const textStyle = text && pendingSide[getSideStylePreviewKey(effectCur.id, 'text', text.id)];
+        const componentStyle = pendingSide[getSideStylePreviewKey(effectCur.id, 'component', effectCur.id)];
 
-        if (!shadowStyle && !textStyle) {
+        if (!shadowStyle && !textStyle && !componentStyle) {
           return effectCur;
         }
 
@@ -329,6 +334,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
           ...effectCur.options,
           shadow: shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow,
           text: textStyle && text ? { ...text, style: textStyle } : text,
+          style: componentStyle ?? effectCur.options.style,
         };
 
         return { ...effectCur, options };

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import type { SideShadowItem, SideTextItem } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { BackgroundComponentReference } from '../background';
@@ -17,6 +19,8 @@ export const sideEffectKinds = ['shadow', 'text', 'component'] as const;
 export type SideEffectKind = (typeof sideEffectKinds)[number];
 
 export type SideOptions = {
+  style?: CSSProperties;
+  styleFilters?: FilterOperation[];
   shadow?: StyledSideShadow;
   text?: StyledSideText;
   component?: BackgroundComponentReference;
@@ -43,7 +47,9 @@ export const resolveSideOptions = (options: SideOptions) => {
     style: resolveStyle(options.text.style, options.text.styleFilters),
   };
 
-  return { shadow, text };
+  const style = resolveStyle(options.style, options.styleFilters);
+
+  return { shadow, text, style };
 };
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
