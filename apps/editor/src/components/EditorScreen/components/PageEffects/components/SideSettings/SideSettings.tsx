@@ -308,7 +308,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             <TextInput
               maxLength={500}
               value={text.leftText}
-              onChange={(leftText) => updateText({ leftText })}
+              onChange={(e) => updateText({ leftText: e.target.value })}
             />
           </label>
 
@@ -320,7 +320,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             <TextInput
               maxLength={500}
               value={text.rightText}
-              onChange={(rightText) => updateText({ rightText })}
+              onChange={(e) => updateText({ rightText: e.target.value })}
             />
           </label>
 

@@ -316,126 +316,51 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
     const nextEffects = getPageEffects(editor).map((effectCur) => {
       if (effectCur.type === 'side') {
-        let hasUpdates = false;
+        const { shadow, text } = effectCur.options;
 
-        const shadows = effectCur.options.shadows?.map((item) => {
-          const key = getSideStylePreviewKey(effectCur.id, 'shadow', item.id);
-          const style = pendingSide[key];
+        const shadowStyle = shadow && pendingSide[getSideStylePreviewKey(effectCur.id, 'shadow', shadow.id)];
+        const textStyle = text && pendingSide[getSideStylePreviewKey(effectCur.id, 'text', text.id)];
 
-          if (!style) {
-            return item;
-          }
-
-          hasUpdates = true;
-
-          return { ...item, style };
-        });
-
-        const texts = effectCur.options.texts?.map((item) => {
-          const key = getSideStylePreviewKey(effectCur.id, 'text', item.id);
-          const style = pendingSide[key];
-
-          if (!style) {
-            return item;
-          }
-
-          hasUpdates = true;
-
-          return { ...item, style };
-        });
-
-        if (!hasUpdates) {
+        if (!shadowStyle && !textStyle) {
           return effectCur;
         }
 
-        return {
-          ...effectCur,
-          options: {
-            ...effectCur.options,
-            shadows,
-            texts,
-          },
+        const options = {
+          ...effectCur.options,
+          shadow: shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow,
+          text: textStyle && text ? { ...text, style: textStyle } : text,
         };
+
+        return { ...effectCur, options };
       }
 
       if (effectCur.type !== 'background') {
         return effectCur;
       }
 
+      const { image, video, shadow } = effectCur.options;
       const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
-        const previewKey = getBackgroundPreviewKey(effectCur.id, layer, mediaId);
-
-        return pending[previewKey];
+        return pending[getBackgroundPreviewKey(effectCur.id, layer, mediaId)];
       };
 
       const backgroundStyle = previewStyle('background');
+      const imageStyle = image && previewStyle('image', image.id);
+      const videoStyle = video && previewStyle('video', video.id);
       const shadowStyle = previewStyle('shadow');
 
-      const hasImageChanges = effectCur.options.images?.some((imageCur) => {
-        return previewStyle('image', imageCur.id) !== undefined;
-      });
-
-      const hasVideoChanges = effectCur.options.videos?.some((videoCur) => {
-        return previewStyle('video', videoCur.id) !== undefined;
-      });
-
-      if (!backgroundStyle
-        && !shadowStyle
-        && !hasImageChanges
-        && !hasVideoChanges) {
+      if (!backgroundStyle && !imageStyle && !videoStyle && !shadowStyle) {
         return effectCur;
       }
 
-      const previousShadow = effectCur.options.shadow;
-      let nextShadow = previousShadow;
-
-      if (shadowStyle && previousShadow) {
-        nextShadow = {
-          ...previousShadow,
-          style: shadowStyle,
-        };
-      }
-
-      const images = effectCur.options.images?.map((imageCur) => {
-        const style = previewStyle('image', imageCur.id);
-
-        if (!style) {
-          return imageCur;
-        }
-
-        return {
-          ...imageCur,
-          style,
-        };
-      });
-
-      const videos = effectCur.options.videos?.map((videoCur) => {
-        const style = previewStyle('video', videoCur.id);
-
-        if (!style) {
-          return videoCur;
-        }
-
-        return {
-          ...videoCur,
-          style,
-        };
-      });
-
-      const optionStyle = backgroundStyle ?? effectCur.options.style;
-
       const options = {
         ...effectCur.options,
-        style: optionStyle,
-        shadow: nextShadow,
-        images,
-        videos,
+        style: backgroundStyle ?? effectCur.options.style,
+        image: imageStyle && image ? { ...image, style: imageStyle } : image,
+        video: videoStyle && video ? { ...video, style: videoStyle } : video,
+        shadow: shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow,
       };
 
-      return {
-        ...effectCur,
-        options,
-      };
+      return { ...effectCur, options };
     });
 
     try {
