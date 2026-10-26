@@ -1,4 +1,6 @@
-import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
+import type { ComponentType, CSSProperties } from 'react';
+
+import { useEffect, useMemo, useState } from 'react';
 
 import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
 
@@ -15,10 +17,9 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundEffectDraft } from '../../@types';
 
-import {
-  type BackgroundPreviewLayer,
-  type BackgroundStylePreviews,
+import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
 
+import {
   getBackgroundPreviewKey,
   useBackgroundStylePreviews,
   usePageEffects,
@@ -47,7 +48,14 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
       const trimmed = src.trim();
 
       if (!trimmed || /^(https?:|blob:|data:)/i.test(trimmed)) {
-        setResolved({ src, project, value: trimmed });
+        const resolvedSource = {
+          src,
+          project,
+          value: trimmed,
+        };
+
+        setResolved(resolvedSource);
+
         return;
       }
 
@@ -60,12 +68,24 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
         objectUrl = URL.createObjectURL(file);
 
         if (!cancelled) {
-          setResolved({ src, project, value: objectUrl });
+          const resolvedSource = {
+            src,
+            project,
+            value: objectUrl,
+          };
+
+          setResolved(resolvedSource);
         }
       } catch (error) {
         if (!cancelled) {
           console.error('[background] Failed to load media asset', error);
-          setResolved({ src, project, value: '' });
+          const resolvedSource = {
+            src,
+            project,
+            value: '',
+          };
+
+          setResolved(resolvedSource);
         }
       }
     };
@@ -95,7 +115,12 @@ type BackgroundInstanceProps = {
   stylePreviews: BackgroundStylePreviews;
 };
 
-const BackgroundInstance = ({ effect, project, components, stylePreviews }: BackgroundInstanceProps) => {
+const BackgroundInstance = ({
+  effect,
+  project,
+  components,
+  stylePreviews,
+}: BackgroundInstanceProps) => {
   const options = effect.options;
   let source = '';
 
@@ -121,6 +146,7 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
 
   const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
     const key = getBackgroundPreviewKey(effect.id, layer, mediaId);
+
     return stylePreviews[key];
   };
 
@@ -169,7 +195,9 @@ const BackgroundInstance = ({ effect, project, components, stylePreviews }: Back
     Component: componentElement,
   };
 
-  return <Background {...background} />;
+  return (
+    <Background {...background} />
+  );
 };
 
 export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {

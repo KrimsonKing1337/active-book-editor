@@ -1,4 +1,6 @@
-import { type ComponentType, useMemo } from 'react';
+import type { ComponentType } from 'react';
+
+import { useMemo } from 'react';
 
 import type { BookComponentProps } from '@active-book/types';
 
@@ -13,7 +15,11 @@ import type { SideEffectDraft } from '../../@types';
 
 import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
 
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import {
+  getSidePreviewKey,
+  getSideStylePreviewKey,
+  usePageEffects,
+} from '../../PageEffectsContext';
 
 const bookRuntime = createBookRuntime('editor');
 
@@ -24,7 +30,12 @@ type SideInstanceProps = {
   stylePreviews: SideStylePreviews;
 };
 
-const SideInstance = ({ effect, components, previews, stylePreviews }: SideInstanceProps) => {
+const SideInstance = ({
+  effect,
+  components,
+  previews,
+  stylePreviews,
+}: SideInstanceProps) => {
   const { component, shadow, text } = effect.options;
 
   const componentId = component ? `${component.package}/${component.name}` : '';
@@ -64,8 +75,8 @@ const SideInstance = ({ effect, components, previews, stylePreviews }: SideInsta
 
   const options = resolveSideOptions({
     ...effect.options,
-    shadow: previewShadow || undefined,
-    text: previewText || undefined,
+    shadow: previewShadow ?? undefined,
+    text: previewText ?? undefined,
     style: componentStyle ?? effect.options.style,
   });
 
