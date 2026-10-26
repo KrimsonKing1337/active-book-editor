@@ -181,7 +181,9 @@ export const EditorScreen = () => {
         if (!cancelled) {
           console.error('[custom-components] Load failed.', error);
 
-          const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки библиотек';
+          const errorMessage = error instanceof Error
+            ? error.message
+            : 'Ошибка загрузки библиотек';
 
           setProjectMessage(errorMessage);
 
@@ -236,7 +238,11 @@ export const EditorScreen = () => {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
         console.error('[custom-components] Import failed.', error);
 
-        setProjectMessage(error instanceof Error ? error.message : 'Ошибка импорта TGZ');
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'Ошибка импорта TGZ';
+
+        setProjectMessage(errorMessage);
       }
     } finally {
       setIsProjectBusy(false);
@@ -336,8 +342,14 @@ export const EditorScreen = () => {
             <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
-              {showBackgrounds && <BackgroundInstances project={project} />}
-              {showSideEffects && <SideInstances />}
+              {showBackgrounds && (
+                <BackgroundInstances project={project} />
+              )}
+
+              {showSideEffects && (
+                <SideInstances />
+              )}
+
               <EditorContent editor={editor} />
             </PageWrapper>
           </App>

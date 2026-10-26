@@ -60,8 +60,8 @@ export const FileChooser = ({
         ref={fileInputRef}
         type="file"
         accept={accept}
-        onChange={onFileChange}
         hidden
+        onChange={onFileChange}
       />
     </div>
   );

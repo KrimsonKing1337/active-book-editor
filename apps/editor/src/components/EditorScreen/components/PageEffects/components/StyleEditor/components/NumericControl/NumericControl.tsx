@@ -1,6 +1,4 @@
-import type { ChangeEvent } from 'react';
-
-import { useEffect, useRef } from 'react';
+import { type ChangeEvent, useEffect, useRef } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 
@@ -85,12 +83,19 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
   const maximum = Math.max(Math.abs(config.min), Math.abs(config.max));
   const integerDigits = String(Math.trunc(maximum)).length;
 
-  const fractionDigits = config.step < 1
-    ? (String(config.step).split('.')[1]?.length ?? 2)
-    : 0;
+  let fractionDigits = 0;
+
+  if (config.step < 1) {
+    const stepString = String(config.step);
+    const fractionalPart = stepString.split('.')[1];
+
+    fractionDigits = fractionalPart?.length ?? 2;
+  }
 
   const signDigits = config.min < 0 ? 1 : 0;
-  const maskLength = integerDigits + signDigits + fractionDigits + (fractionDigits > 0 ? 1 : 0);
+
+  const digits = fractionDigits > 0 ? 1 : 0;
+  const maskLength = integerDigits + signDigits + fractionDigits + digits;
 
   const maskOptions = {
     mask: '_'.repeat(maskLength),
@@ -100,7 +105,7 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = unformat(e.target.value, maskOptions);
 
-    if (!/^-?(?:\d*(?:\.\d{0,2})?)$/.test(value)) {
+    if (!/^-?\d*\.?\d{0,2}$/.test(value)) {
       return;
     }
 

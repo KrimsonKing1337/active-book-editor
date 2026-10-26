@@ -1,7 +1,8 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
-import { Slider } from 'activeBook-core/components';
 import type { AudioEffectOptions } from 'activeBook-core/@types';
+
+import { Slider } from 'activeBook-core/components';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
@@ -34,6 +35,7 @@ export const AudioSettings = ({
   effect,
   project,
   existingIds,
+
   onLoadingChange,
   onUpdate,
   onDuplicate,
@@ -42,14 +44,16 @@ export const AudioSettings = ({
   const { options } = effect;
 
   const [idDraft, setIdDraft] = useState(effect.id);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [isImporting, setIsImporting] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [importError, setImportError] = useState('');
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const loadingMessage = isImporting ? 'Загружаем аудиофайл...' : 'Подготавливаем аудио...';
+    const loadingMessage = isImporting
+      ? 'Загружаем аудиофайл...'
+      : 'Подготавливаем аудио...';
 
     const isLoading = isImporting || isPreviewLoading;
 
@@ -329,17 +333,19 @@ export const AudioSettings = ({
           <FileChooser
             inputId="audio-source-path"
             value={options.src}
-            onChange={(src) => updateOption('src', src)}
-            onChoose={handleChooseFile}
-            onFileChange={handleAudioFileChange}
             fileInputRef={fileInputRef}
             accept="audio/*,.mp3,.ogg,.wav,.flac,.m4a,.aac"
             placeholder="assets/ambient.mp3"
             disabled={!project}
+
+            onChange={(src) => updateOption('src', src)}
+            onChoose={handleChooseFile}
+            onFileChange={handleAudioFileChange}
           />
 
           <small>
-            Файлы из assets/ используются без копирования. Внешние файлы копируются в корень assets/
+            Файлы из assets/ используются без копирования.
+            Внешние файлы копируются в корень assets/
           </small>
 
           {importError && (
@@ -431,7 +437,7 @@ export const AudioSettings = ({
               />
 
               <small>
-                0 — без автоматической остановки.
+                0 — без автоматической остановки
               </small>
             </label>
 

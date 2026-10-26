@@ -9,12 +9,19 @@ type ShadowItem = NonNullable<SideOptions['shadows']>[number];
 type SideAnimation = NonNullable<ShadowItem['animation']>;
 type AnimationPreset = NonNullable<SideAnimation['preset']>;
 
+type Preset = {
+  value: AnimationPreset;
+  label: string;
+};
+
+type onPlaybackChangeState = NonNullable<SideAnimation['playState']>;
+
 type AnimationSettingsProps = {
   animation?: SideAnimation;
-  presets: Array<{ value: AnimationPreset; label: string }>;
+  presets: Preset[];
   defaultDuration: number;
   playState?: SideAnimation['playState'];
-  onPlaybackChange: (state: NonNullable<SideAnimation['playState']>) => void;
+  onPlaybackChange: (state: onPlaybackChangeState) => void;
   onChange: (animation: SideAnimation) => void;
 };
 
@@ -23,7 +30,6 @@ export const AnimationSettings = ({
   presets,
   defaultDuration,
   playState,
-
   onChange,
   onPlaybackChange,
 }: AnimationSettingsProps) => {
@@ -57,7 +63,9 @@ export const AnimationSettings = ({
   };
 
   const handleIterationsModeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    updateAnimation({ iterations: e.target.value === 'infinite' ? 'infinite' : 1 });
+    const value = e.target.value === 'infinite' ? 'infinite' : 1;
+
+    updateAnimation({ iterations: value });
   };
 
   const handleStart = () => {
@@ -75,13 +83,21 @@ export const AnimationSettings = ({
   const iterationsMode = typeof animation.iterations === 'number' ? 'count' : 'infinite';
   const showIterationsInput = iterationsMode === 'count';
 
+  const selectPresetValue = animation.preset ?? presets[0].value;
+  const iterationCountInputValue = typeof animation.iterations === 'number' ? animation.iterations : 1;
+
   return (
     <fieldset>
-      <legend>Анимация</legend>
+      <legend>
+        Анимация
+      </legend>
 
       <label>
-        Пресет
-        <Select value={animation.preset ?? presets[0].value} onChange={handlePresetChange}>
+        <span>
+          Пресет
+        </span>
+
+        <Select value={selectPresetValue} onChange={handlePresetChange}>
           {presets.map((presetCur) => {
             return (
               <option key={presetCur.value} value={presetCur.value}>
@@ -93,7 +109,10 @@ export const AnimationSettings = ({
       </label>
 
       <label>
-        Длительность цикла (мс)
+        <span>
+          Длительность цикла (мс)
+        </span>
+
         <IntegerInput
           min={0}
           max={999999}
@@ -103,7 +122,10 @@ export const AnimationSettings = ({
       </label>
 
       <label>
-        Задержка (мс)
+        <span>
+          Задержка (мс)
+        </span>
+
         <IntegerInput
           min={0}
           max={999999}
@@ -113,7 +135,10 @@ export const AnimationSettings = ({
       </label>
 
       <label>
-        Повторений
+        <span>
+          Повторений
+        </span>
+
         <Select
           value={iterationsMode}
           onChange={handleIterationsModeChange}
@@ -121,6 +146,7 @@ export const AnimationSettings = ({
           <option value="infinite">
             Бесконечно
           </option>
+
           <option value="count">
             Указать количество
           </option>
@@ -129,11 +155,14 @@ export const AnimationSettings = ({
 
       {showIterationsInput && (
         <label>
-          Количество повторений
+          <span>
+            Количество повторений
+          </span>
+
           <IntegerInput
             min={1}
             max={999}
-            value={typeof animation.iterations === 'number' ? animation.iterations : 1}
+            value={iterationCountInputValue}
             onValueChange={handleIterationsChange}
           />
         </label>
@@ -146,12 +175,14 @@ export const AnimationSettings = ({
         >
           Старт
         </Button>
+
         <Button
           aria-pressed={playState === 'paused'}
           onClick={handlePause}
         >
           Пауза
         </Button>
+
         <Button
           aria-pressed={playState === 'stopped'}
           onClick={handleStop}

@@ -1,15 +1,21 @@
 import type { ChangeEvent, FocusEvent, InputHTMLAttributes } from 'react';
-
 import { useEffect, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 
 import styles from '../EffectControls/EffectControls.module.scss';
 
-type IntegerInputProps = Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'value' | 'onChange' | 'type' | 'inputMode' | 'maxLength' | 'min' | 'max' | 'step'
-> & {
+type ExcludedInputProps =
+  | 'value'
+  | 'onChange'
+  | 'type'
+  | 'inputMode'
+  | 'maxLength'
+  | 'min'
+  | 'max'
+  | 'step';
+
+type IntegerInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, ExcludedInputProps> & {
   value: number;
   min?: number;
   max?: number;
@@ -36,6 +42,7 @@ export const IntegerInput = ({
 
   const digits = maxDigits ?? String(max).length;
   const mask = 'd'.repeat(digits);
+
   const maskOptions = {
     mask,
     replacement,
@@ -48,6 +55,7 @@ export const IntegerInput = ({
 
     if (!raw) {
       setDraft(String(min));
+
       onValueChange(min);
 
       return;
@@ -56,6 +64,7 @@ export const IntegerInput = ({
     const number = Math.min(max, Math.max(min, Number(raw)));
 
     setDraft(String(number));
+
     onValueChange(number);
   };
 

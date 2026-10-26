@@ -1,11 +1,6 @@
-import type { ComponentType } from 'react';
+import { type ComponentType, useMemo } from 'react';
 
 import type { BookComponentProps } from '@active-book/types';
-
-import type { SideEffectDraft } from '../../@types';
-import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
-
-import { useMemo } from 'react';
 
 import { Side } from 'activeBook-core/components/ProxyHooks';
 
@@ -13,6 +8,10 @@ import { createBookRuntime } from '@active-book/book-builder/components/custom/r
 import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
+
+import type { SideEffectDraft } from '../../@types';
+
+import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
 
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
@@ -33,8 +32,17 @@ const SideInstance = ({
 }: SideInstanceProps) => {
   const { component, shadows, texts } = effect.options;
 
-  const componentId = component ? `${component.package}/${component.name}` : null;
-  const CustomComponent = componentId ? components[componentId] as ComponentType<BookComponentProps> : undefined;
+  let componentId = null;
+
+  if (component) {
+    componentId = `${component.package}/${component.name}`;
+  }
+
+  let CustomComponent: ComponentType<BookComponentProps> | undefined = undefined;
+
+  if (componentId) {
+    CustomComponent = components[componentId] as ComponentType<BookComponentProps>;
+  }
 
   const componentElement = useMemo(() => {
     if (!CustomComponent) {
@@ -44,24 +52,30 @@ const SideInstance = ({
     return <CustomComponent book={bookRuntime} />;
   }, [CustomComponent]);
 
-  const withPreview = <T extends NonNullable<typeof shadows>[number] | NonNullable<typeof texts>[number]>(
-    item: T,
-    kind: 'shadow' | 'text',
-  ): T => {
+  type ShadowItem = NonNullable<typeof shadows>[number];
+  type TextItem = NonNullable<typeof texts>[number];
+
+  type Item = ShadowItem | TextItem;
+
+  const withPreview = <T extends Item>(item: T, kind: 'shadow' | 'text'): T => {
     const previewKey = getSidePreviewKey(effect.id, item.id);
     const styleKey = getSideStylePreviewKey(effect.id, kind, item.id);
+
     const preview = previews[previewKey];
     const style = stylePreviews[styleKey] ?? item.style;
 
+    const playState = preview?.playState ?? item.animation?.playState;
+    const hidden = preview?.hidden ?? item.hidden;
+
     const animation = {
       ...item.animation,
-      playState: preview?.playState ?? item.animation?.playState,
+      playState,
     };
 
     return {
       ...item,
       style,
-      hidden: preview?.hidden ?? item.hidden,
+      hidden,
       animation,
     };
   };

@@ -1,6 +1,4 @@
-import type { ComponentType, CSSProperties } from 'react';
-
-import { useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
 
 import type {
   BackgroundEffect as CoreBackgroundEffect,

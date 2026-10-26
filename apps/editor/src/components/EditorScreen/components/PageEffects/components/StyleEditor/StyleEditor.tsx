@@ -2,19 +2,18 @@ import type { CSSProperties, KeyboardEvent } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
+import { type BackgroundPreviewLayer, usePageEffects } from '../../PageEffectsContext';
 
-import { usePageEffects } from '../../PageEffectsContext';
-
-import type { StyleEditorController } from './hooks';
-
-import { useStyleEditor } from './hooks';
 
 import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+
+import { type StyleEditorController, useStyleEditor } from './hooks';
 
 import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
 
 import styles from './StyleEditor.module.scss';
+
+type ColorProperty = 'color' | 'backgroundColor';
 
 export type StyleEditorProps = {
   value: CSSProperties;
@@ -22,8 +21,8 @@ export type StyleEditorProps = {
   styleFilters?: FilterOperation[];
   mediaId?: string;
   defaultZIndex?: number;
-  colorProperty?: 'color' | 'backgroundColor';
-  additionalColorProperty?: 'color' | 'backgroundColor';
+  colorProperty?: ColorProperty;
+  additionalColorProperty?: ColorProperty;
   colorLabel?: string;
   colorDisabledReason?: string;
   controller?: StyleEditorController;
@@ -71,28 +70,41 @@ export const StyleEditor = ({
 
   for (const effectCur of effects) {
     if (controller && effectCur.type === 'side') {
-      const items = [...(effectCur.options.shadows ?? []), ...(effectCur.options.texts ?? [])];
+      const shadows = effectCur.options.shadows ?? [];
+      const texts = effectCur.options.texts ?? [];
 
-      for (const item of items) {
-        const value = Number(item.style?.zIndex);
+      const items = [
+        ...shadows,
+        ...texts,
+      ];
 
-        if (item.style?.zIndex !== undefined && Number.isFinite(value)) {
+      for (const itemCur of items) {
+        const value = Number(itemCur.style?.zIndex);
+
+        if (itemCur.style?.zIndex !== undefined && Number.isFinite(value)) {
           layerZIndexes.push(value);
         }
       }
     } else if (!controller && effectCur.type === 'background') {
       const options = effectCur.options;
+
+      const images = options.images ?? [];
+      const videos = options.videos ?? [];
+
+      const imagesStyles = images.map((cur) => cur.style);
+      const videosStyles = videos.map((cur) => cur.style);
+
       const styles = [
         options.style,
         options.shadow?.style,
-        ...(options.images ?? []).map((item) => item.style),
-        ...(options.videos ?? []).map((item) => item.style),
+        ...imagesStyles,
+        ...videosStyles,
       ];
 
-      for (const style of styles) {
-        const value = Number(style?.zIndex);
+      for (const styleCur of styles) {
+        const value = Number(styleCur?.zIndex);
 
-        if (style?.zIndex !== undefined && Number.isFinite(value)) {
+        if (styleCur?.zIndex !== undefined && Number.isFinite(value)) {
           layerZIndexes.push(value);
         }
       }
@@ -102,9 +114,12 @@ export const StyleEditor = ({
   const minimumZIndex = Math.min(zIndex, ...layerZIndexes);
   const maximumZIndex = Math.max(zIndex, ...layerZIndexes);
 
-  const sameIndexCount = layerZIndexes.filter((index) => index === zIndex).length;
+  const sameIndexes = layerZIndexes.filter((indexCur) => indexCur === zIndex);
+
   const currentLayerIsRegistered = currentStyle.zIndex !== undefined;
-  const otherLayersAtSameIndex = sameIndexCount > (currentLayerIsRegistered ? 1 : 0);
+  const digit = currentLayerIsRegistered ? 1 : 0;
+
+  const otherLayersAtSameIndex = sameIndexes.length > digit;
 
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
@@ -122,10 +137,14 @@ export const StyleEditor = ({
     }
   };
 
-  const colorProperties = additionalColorProperty
-    ? [colorProperty, additionalColorProperty]
-    : [colorProperty];
-  const isMedia = isMediaOverride ?? (layer === 'image' || layer === 'video');
+  const colorProperties = [colorProperty];
+
+  if (additionalColorProperty) {
+    colorProperties.push(additionalColorProperty);
+  }
+
+  const isMediaLayer = layer === 'image' || layer === 'video';
+  const isMedia = isMediaOverride ?? isMediaLayer;
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>

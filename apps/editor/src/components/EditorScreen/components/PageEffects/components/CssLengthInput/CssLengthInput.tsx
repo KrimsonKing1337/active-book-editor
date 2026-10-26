@@ -1,6 +1,4 @@
-import type { ChangeEvent } from 'react';
-
-import { useEffect, useState } from 'react';
+import { type ChangeEvent, useEffect, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 
@@ -10,12 +8,13 @@ import layoutStyles from './CssLengthInput.module.scss';
 type CssLengthInputProps = {
   label?: string;
   value: string;
-  onChange: (value: string) => void;
   allowNegative?: boolean;
   max?: number;
+  onChange: (value: string) => void;
 };
 
 const units = ['px', '%', 'rem', 'em', 'vw', 'vh'] as const;
+
 type Unit = typeof units[number];
 
 const replacement = {
@@ -46,13 +45,14 @@ const getParts = (value: string): { amount: string; unit: Unit } => {
 export const CssLengthInput = ({
   label = 'Числовое значение',
   value,
-  onChange,
   allowNegative = true,
   max = 9999,
+  onChange,
 }: CssLengthInputProps) => {
   const { amount, unit } = getParts(value);
-  const minimum = allowNegative ? -max : 0;
   const [draft, setDraft] = useState(amount);
+
+  const minimum = allowNegative ? -max : 0;
 
   useEffect(() => {
     setDraft(amount);
@@ -64,6 +64,7 @@ export const CssLengthInput = ({
 
     if (raw === '') {
       setDraft('0');
+
       onChange(`0${unit}`);
 
       return;
@@ -97,6 +98,7 @@ export const CssLengthInput = ({
     const nextAmount = String(normalized);
 
     setDraft(nextAmount);
+
     onChange(`${nextAmount}${unit}`);
   };
 

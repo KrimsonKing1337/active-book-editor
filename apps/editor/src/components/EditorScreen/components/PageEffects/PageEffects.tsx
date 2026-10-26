@@ -44,6 +44,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
   const [isSavingStyles, setIsSavingStyles] = useState(false);
   const [styleSaveError, setStyleSaveError] = useState('');
+
   const savingStylesRef = useRef(false);
 
   const persistStyles = async (): Promise<boolean> => {
@@ -77,7 +78,11 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
       return true;
     } catch (error) {
-      setStyleSaveError(error instanceof Error ? error.message : 'Не удалось сохранить изменения');
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Не удалось сохранить изменения';
+
+      setStyleSaveError(errorMessage);
 
       return false;
     } finally {

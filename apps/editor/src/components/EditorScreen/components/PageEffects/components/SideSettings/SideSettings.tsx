@@ -2,21 +2,20 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
-import type { SideEffectDraft } from '../../@types';
-
 import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
-
-import { StyleEditor } from '../StyleEditor';
-
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { AnimationSettings } from './components/AnimationSettings';
+import type { SideEffectDraft } from '../../@types';
 
+import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
+
+import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
 import { TextInput, Select, Checkbox, Button } from '../EffectControls';
+
+import { AnimationSettings } from './components/AnimationSettings';
 
 import styles from './SideSettings.module.scss';
 
@@ -89,7 +88,10 @@ const LayoutSettings = ({
     <>
       <div className={styles.Layout}>
         <label className={styles.Field}>
-          Точка привязки
+          <span>
+            Точка привязки
+          </span>
+
           <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
             {positions.map((positionCur) => {
               return (
@@ -105,6 +107,7 @@ const LayoutSettings = ({
           <span>
             Смещение X
           </span>
+
           <CssLengthInput
             label="Смещение X"
             value={item.offsetX ?? '0px'}
@@ -116,6 +119,7 @@ const LayoutSettings = ({
           <span>
             Смещение Y
           </span>
+
           <CssLengthInput
             label="Смещение Y"
             value={item.offsetY ?? '0px'}
@@ -135,6 +139,7 @@ const LayoutSettings = ({
 
 export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
   const { definitions } = useCustomComponents();
+
   const {
     sideItemPreviews,
     sideStylePreviews,
@@ -150,7 +155,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     return sideItemPreviews[key] ?? {};
   };
 
-  const { shadows = [], texts = [], component } = effect.options;
+  const {
+    shadows = [],
+    texts = [],
+    component,
+  } = effect.options;
 
   const getStyleForItem = (kind: 'shadow' | 'text', itemId: string, style: ShadowItem['style']) => {
     const key = getSideStylePreviewKey(effect.id, kind, itemId);
@@ -164,8 +173,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     }
 
     const current = getCurrentEffects();
-    const currentEffect = current.find((item): item is SideEffectDraft => {
-      return item.type === 'side' && item.id === effect.id;
+
+    const currentEffect = current.find((effectCur): effectCur is SideEffectDraft => {
+      return effectCur.type === 'side' && effectCur.id === effect.id;
     });
 
     if (!currentEffect) {
@@ -174,13 +184,34 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
     const { shadows: currentShadows, texts: currentTexts } = currentEffect.options;
 
-    const nextShadows = kind === 'shadow'
-      ? currentShadows?.map((item) => item.id === id ? { ...item, styleFilters } : item)
-      : currentShadows;
+    let nextShadows = currentShadows;
+    let nextTexts = currentTexts;
 
-    const nextTexts = kind === 'text'
-      ? currentTexts?.map((item) => item.id === id ? { ...item, styleFilters } : item)
-      : currentTexts;
+    if (kind === 'shadow') {
+      nextShadows = currentShadows?.map((shadowCur) => {
+        if (shadowCur.id !== id) {
+          return shadowCur;
+        }
+
+        return {
+          ...shadowCur,
+          styleFilters,
+        };
+      });
+    }
+
+    if (kind === 'text') {
+      nextTexts = currentTexts?.map((textCur) => {
+        if (textCur.id !== id) {
+          return textCur;
+        }
+
+        return {
+          ...textCur,
+          styleFilters,
+        };
+      });
+    }
 
     const updatedOptions = {
       ...currentEffect.options,
@@ -256,7 +287,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       animation: shadowAnimation,
     };
 
-    updateOptions({ shadows: [...shadows, shadow] });
+    const newShadows = [
+      ...shadows,
+      shadow,
+    ];
+
+    updateOptions({ shadows: newShadows });
   };
 
   const addText = () => {
@@ -280,7 +316,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       animation: textAnimation,
     };
 
-    updateOptions({ texts: [...texts, text] });
+    const newTexts = [
+      ...texts,
+      text,
+    ];
+
+    updateOptions({ texts: newTexts });
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -326,13 +367,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   return (
     <div className={styles.Settings}>
       <label className={styles.Field}>
-        Название эффекта
+        <span>
+          Название эффекта
+        </span>
+
         <TextInput maxLength={120} value={effect.slug} onChange={handleNameChange} />
       </label>
 
       <label className={styles.Field}>
-        ID эффекта
-        <TextInput key={effect.id} maxLength={80} defaultValue={effect.id} onBlur={handleIdChange} />
+        <span>
+          ID эффекта
+        </span>
+
+        <TextInput
+          key={effect.id}
+          maxLength={80}
+          defaultValue={effect.id}
+          onBlur={handleIdChange}
+        />
       </label>
 
       <details className={styles.Section}>
@@ -351,12 +403,19 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           } = shadowCur;
 
           const preset = animation?.preset;
-          const selectedPreset = shadowPresets.find((cur) => cur.value === (preset ?? 'none'));
+
+          const selectedPreset = shadowPresets.find((cur) => {
+            return cur.value === (preset ?? 'none');
+          });
+
           const canChangeColor = selectedPreset?.canChangeColor ?? true;
 
-          const colorDisabledReason = canChangeColor
-            ? undefined
-            : 'Цвет этого пресета меняется автоматически. Выбери одноцветный пресет, чтобы настроить его.';
+          let colorDisabledReason;
+
+          if (canChangeColor) {
+            colorDisabledReason = 'Цвет этого пресета меняется автоматически. ' +
+              'Выберите одноцветный пресет, чтобы настроить его';
+          }
 
           const handleHiddenChange = (val: boolean) => {
             updateSideItemPreview(effect.id, id, { hidden: val });
@@ -407,6 +466,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
           const nameLabel = `Тень ${index + 1}`;
 
+          const preview = previewFor(id);
+          const previewIsHidden = preview.hidden ?? hidden ?? false;
+
+          const shadowStyle = getStyleForItem('shadow', id, style);
+
           return (
             <div key={id} className={styles.Media}>
               <strong>
@@ -415,13 +479,16 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <LayoutSettings
                 item={shadowCur}
-                hidden={previewFor(id).hidden ?? hidden ?? false}
+                hidden={previewIsHidden}
                 onHiddenChange={handleHiddenChange}
                 onChange={handleLayoutChange}
               />
 
               <label className={styles.Field}>
-                Толщина тени (px)
+                <span>
+                  Толщина тени (px)
+                </span>
+
                 <IntegerInput
                   min={0}
                   max={999}
@@ -441,7 +508,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                   colorLabel="Цвет тени (color)"
                   colorDisabledReason={colorDisabledReason}
                   defaultZIndex={1}
-                  value={getStyleForItem('shadow', id, style)}
+                  value={shadowStyle}
                   styleFilters={styleFilters}
                   controller={controller}
                 />
@@ -449,10 +516,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <AnimationSettings
                 animation={animation}
-                playState={previewFor(id).playState}
-                onPlaybackChange={handlePlaybackChange}
+                playState={preview.playState}
                 presets={shadowPresets}
                 defaultDuration={1000}
+                onPlaybackChange={handlePlaybackChange}
                 onChange={handleAnimationChange}
               />
 
@@ -549,6 +616,13 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
           const nameLabel = `Текст ${index + 1}`;
 
+          const preview = previewFor(id);
+          const previewIsHidden = preview.hidden ?? hidden ?? false;
+
+          const fontSizeValue = String(style?.fontSize ?? '12px');
+
+          const textStyle = getStyleForItem('text', id, style);
+
           return (
             <div key={id} className={styles.Media}>
               <strong>
@@ -556,7 +630,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               </strong>
 
               <label className={styles.Field}>
-                Текст слева
+                <span>
+                  Текст слева
+                </span>
+
                 <TextInput
                   maxLength={500}
                   value={leftText}
@@ -565,7 +642,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               </label>
 
               <label className={styles.Field}>
-                Текст справа
+                <span>
+                  Текст справа
+                </span>
+
                 <TextInput
                   maxLength={500}
                   value={rightText}
@@ -575,7 +655,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
               <LayoutSettings
                 item={textCur}
-                hidden={previewFor(id).hidden ?? hidden ?? false}
+                hidden={previewIsHidden}
                 onHiddenChange={handleHiddenChange}
                 onChange={handleLayoutChange}
               />
@@ -584,10 +664,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 <span>
                   Размер шрифта
                 </span>
+
                 <CssLengthInput
                   label="Размер шрифта"
                   allowNegative={false}
-                  value={String(style?.fontSize ?? '12px')}
+                  value={fontSizeValue}
                   onChange={handleFontSizeChange}
                 />
               </div>
@@ -603,7 +684,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                   colorLabel="Цвет текста (color)"
                   additionalColorProperty="backgroundColor"
                   defaultZIndex={1}
-                  value={getStyleForItem('text', id, style)}
+                  value={textStyle}
                   styleFilters={styleFilters}
                   controller={controller}
                 />
@@ -612,9 +693,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               <AnimationSettings
                 animation={animation}
                 playState={previewFor(id).playState}
-                onPlaybackChange={handlePlaybackChange}
                 presets={textPresets}
                 defaultDuration={60000}
+                onPlaybackChange={handlePlaybackChange}
                 onChange={handleAnimationChange}
               />
 

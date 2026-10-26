@@ -1,6 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react';
-
-import { forwardRef } from 'react';
+import { type ButtonHTMLAttributes, forwardRef } from 'react';
 
 import styles from './EffectControls.module.scss';
 

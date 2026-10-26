@@ -148,13 +148,13 @@ export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: M
         inputId={sourceInputId}
         fileInputRef={fileInputRef}
         value={src}
-        onChange={onChange}
         placeholder={placeholder}
         disabled={chooseFileButtonDisabled}
-        onChoose={handleChooseFile}
         onFileChange={handleFileInputChange}
         accept={accept}
         buttonLabel={chooseFileButtonLabel}
+        onChoose={handleChooseFile}
+        onChange={onChange}
       />
 
       <small className={styles.SourceNote}>

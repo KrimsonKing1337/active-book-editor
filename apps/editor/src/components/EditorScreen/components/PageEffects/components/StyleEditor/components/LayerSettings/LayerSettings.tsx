@@ -66,6 +66,7 @@ export const LayerSettings = ({
   const handleMoveToBack = () => {
     if (canMoveToBack) {
       updateIndex(minimumZIndex - 1);
+
       onCommit();
     }
   };
@@ -73,6 +74,7 @@ export const LayerSettings = ({
   const handleMoveToFront = () => {
     if (canMoveToFront) {
       updateIndex(maximumZIndex + 1);
+
       onCommit();
     }
   };
@@ -94,7 +96,7 @@ export const LayerSettings = ({
           ⇤
         </button>
 
-        <button type="button" onClick={handleStepBack} aria-label="На слой назад">
+        <button type="button" aria-label="На слой назад" onClick={handleStepBack}>
           −
         </button>
 
@@ -108,16 +110,16 @@ export const LayerSettings = ({
           onBlur={onCommit}
         />
 
-        <button type="button" onClick={handleStepForward} aria-label="На слой вперёд">
+        <button type="button" aria-label="На слой вперёд" onClick={handleStepForward}>
           +
         </button>
 
         <button
           type="button"
-          onClick={handleMoveToFront}
           aria-label="На самый верхний слой"
           title="На самый верхний слой"
           disabled={!canMoveToFront}
+          onClick={handleMoveToFront}
         >
           ⇥
         </button>

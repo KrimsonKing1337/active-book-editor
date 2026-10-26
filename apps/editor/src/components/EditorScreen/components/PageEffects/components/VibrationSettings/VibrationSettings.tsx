@@ -40,8 +40,12 @@ export const VibrationSettings = ({
 
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
-  const idAlreadyExists = existingIds.some((id) => id !== effect.id && id === normalizedId);
+
   let idError = '';
+
+  const idAlreadyExists = existingIds.some((idCur) => {
+    return idCur !== effect.id && idCur === normalizedId;
+  });
 
   if (idIsEmpty) {
     idError = 'ID не может быть пустым';
@@ -73,7 +77,10 @@ export const VibrationSettings = ({
   };
 
   const updateSlug = (slug: string) => {
-    onUpdate(effect.id, { ...effect, slug });
+    onUpdate(effect.id, {
+      ...effect,
+      slug,
+    });
   };
 
   const updateOption: OptionUpdater<VibrationOptions> = (name, value) => {
@@ -134,8 +141,6 @@ export const VibrationSettings = ({
     vibrationOn(options.duration);
   };
 
-
-
   let previewDescription = 'Вибрация недоступна в этом браузере или на этом устройстве.';
 
   if (isVibrationAvailable && !vibrationIsEnabled) {
@@ -161,8 +166,8 @@ export const VibrationSettings = ({
             type="text"
             maxLength={120}
             value={effect.slug}
-            onChange={handleSlugChange}
             placeholder="Например, лёгкий толчок"
+            onChange={handleSlugChange}
           />
 
           <small>
@@ -181,10 +186,10 @@ export const VibrationSettings = ({
               type="text"
               maxLength={80}
               value={idDraft}
-              onChange={handleIdChange}
               aria-invalid={Boolean(idError)}
               aria-describedby={vibrationEffectIdAriaDescribedBy}
               spellCheck={false}
+              onChange={handleIdChange}
             />
 
             <Button variant="success" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>

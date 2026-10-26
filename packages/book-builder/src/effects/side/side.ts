@@ -1,14 +1,16 @@
 import type { SideShadowItem, SideTextItem } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { BackgroundComponentReference } from '../background';
-import type { FilterOperation } from '../style';
-
-import { resolveStyle } from '../style';
+import { type FilterOperation, resolveStyle } from '../style';
 
 import { isRecord } from '../utils';
 
-export type StyledSideShadow = SideShadowItem & { styleFilters?: FilterOperation[] };
-export type StyledSideText = SideTextItem & { styleFilters?: FilterOperation[] };
+type StyleFilters = {
+  styleFilters?: FilterOperation[];
+};
+
+export type StyledSideShadow = SideShadowItem & StyleFilters;
+export type StyledSideText = SideTextItem & StyleFilters;
 
 export type SideOptions = {
   shadows?: StyledSideShadow[];
@@ -27,20 +29,32 @@ export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
 
 export const resolveSideOptions = (options: SideOptions) => {
   const shadows = options.shadows?.map((shadowCur) => {
-    const { styleFilters, style, ...item } = shadowCur;
+    const {
+      styleFilters,
+      style,
+      ...item
+    } = shadowCur;
+
+    const resolvedStyle = resolveStyle(style, styleFilters);
 
     return {
       ...item,
-      style: resolveStyle(style, styleFilters),
+      style: resolvedStyle,
     };
   });
 
   const texts = options.texts?.map((textCur) => {
-    const { styleFilters, style, ...item } = textCur;
+    const {
+      styleFilters,
+      style,
+      ...item
+    } = textCur;
+
+    const resolvedStyle = resolveStyle(style, styleFilters);
 
     return {
       ...item,
-      style: resolveStyle(style, styleFilters),
+      style: resolvedStyle,
     };
   });
 
@@ -77,11 +91,17 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       continue;
     }
 
-    const validShadows = (shadows ?? []).every((shadowCur: unknown) => {
-      return isRecord(shadowCur) && typeof shadowCur.id === 'string' && Boolean(shadowCur.id.trim());
+    const shadowsSafe = shadows ?? [];
+
+    const validShadows = shadowsSafe.every((shadowCur: unknown) => {
+      return isRecord(shadowCur)
+        && typeof shadowCur.id === 'string'
+        && Boolean(shadowCur.id.trim());
     });
 
-    const validTexts = (texts ?? []).every((textCur: unknown) => {
+    const textsSafe = texts ?? [];
+
+    const validTexts = textsSafe.every((textCur: unknown) => {
       return isRecord(textCur)
         && typeof textCur.id === 'string'
         && Boolean(textCur.id.trim())
@@ -97,11 +117,13 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       ? effectCur.slug
       : 'Новый боковой эффект';
 
+    const options = effectCur.options as SideOptions;
+
     result.push({
       id: effectCur.id,
       type: 'side',
       slug,
-      options: effectCur.options as SideOptions,
+      options,
     });
   }
 
