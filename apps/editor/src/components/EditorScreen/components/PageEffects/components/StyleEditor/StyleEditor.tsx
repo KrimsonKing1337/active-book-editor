@@ -148,6 +148,10 @@ export const StyleEditor = ({
   const isMediaLayer = layer === 'image' || layer === 'video';
   const isMedia = isMediaOverride ?? isMediaLayer;
 
+  const colorFieldsetClassNames = classNames(styles.Colors, {
+    [styles.DisabledColors]: Boolean(colorDisabledReason),
+  });
+
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
       {colorDisabledReason && (
@@ -174,7 +178,7 @@ export const StyleEditor = ({
         return (
           <fieldset
             key={propertyCur}
-            className={classNames(styles.Colors, { [styles.DisabledColors]: Boolean(colorDisabledReason) })}
+            className={colorFieldsetClassNames}
             disabled={Boolean(colorDisabledReason)}
           >
             <ColorSettings

@@ -107,11 +107,14 @@ export const CssLengthInput = ({
     setDraft(partial ? '0' : amount);
   };
 
+  const valueInputClassNames = classNames(sharedStyles.Control, layoutStyles.Value);
+  const unitsSelectClassNames = classNames(sharedStyles.Control, layoutStyles.Unit);
+
   return (
     <span className={layoutStyles.Container}>
       <InputMask
         aria-label={label}
-        className={classNames(sharedStyles.Control, layoutStyles.Value)}
+        className={valueInputClassNames}
         mask={maskOptions.mask}
         replacement={maskOptions.replacement}
         showMask
@@ -123,7 +126,7 @@ export const CssLengthInput = ({
 
       <select
         aria-label={`${label}: единица измерения`}
-        className={classNames(sharedStyles.Control, layoutStyles.Unit)}
+        className={unitsSelectClassNames}
         value={unit}
         onChange={handleUnitChange}
       >
