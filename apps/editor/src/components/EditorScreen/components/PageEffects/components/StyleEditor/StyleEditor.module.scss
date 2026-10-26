@@ -17,7 +17,6 @@
 
   input {
     width: 100%;
-    padding: 7px;
   }
 }
 
@@ -95,7 +94,7 @@
 }
 
 .LayerControls {
-  input[type='number'] {
+  input {
     flex: 1;
     min-width: 0;
     text-align: center;
@@ -126,7 +125,6 @@
   input {
     width: 0;
     flex: 1;
-    padding: 7px;
   }
 
   button {
@@ -150,15 +148,7 @@
   display: flex;
   justify-content: flex-end;
 
-  button {
-    padding: 7px 12px;
-    cursor: pointer;
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
 }
 
 .SearchSelect {
@@ -168,8 +158,6 @@
 
   input {
     width: 100%;
-    box-sizing: border-box;
-    padding: 7px;
   }
 }
 
@@ -188,6 +176,7 @@
   button {
     display: block;
     width: 100%;
+    min-height: 0;
     padding: 7px;
     border: 0;
     background: transparent;
@@ -255,9 +244,7 @@
 
 .NumericFields {
   input {
-    box-sizing: border-box;
     width: 75px;
-    padding: 7px;
   }
 
   span {
