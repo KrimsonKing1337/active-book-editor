@@ -2,10 +2,6 @@ import type { CSSProperties } from 'react';
 
 import type { EditorEffectDraft } from '../../@types';
 
-export const removeLeadingZeros = (value: string): string => {
-  return value.replace(/^(-?)0+(?=\d)/, '$1');
-};
-
 type LayerZIndexParams = {
   effects: EditorEffectDraft[];
   currentStyle: CSSProperties;
@@ -13,7 +9,9 @@ type LayerZIndexParams = {
   isSide: boolean;
 };
 
-const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): (CSSProperties | undefined)[] => {
+type ReturnType = CSSProperties | undefined;
+
+const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): ReturnType[] => {
   if (isSide && effect.type === 'side') {
     const {
       shadow,

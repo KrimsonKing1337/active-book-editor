@@ -111,8 +111,8 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedAudio = grouped.audio ?? [];
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
-  const groupedBackground = grouped.background?.filter((effect) => Boolean(effect.kind)) ?? [];
-  const groupedSide = grouped.side?.filter((effect) => Boolean(effect.kind)) ?? [];
+  const groupedBackground = grouped.background?.filter((cur) => Boolean(cur.kind)) ?? [];
+  const groupedSide = grouped.side?.filter((cur) => Boolean(cur.kind)) ?? [];
 
   return [
     ...groupedAudio,
@@ -242,8 +242,8 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       setEffects((current) => {
         const hasSameEffectCount = current.length === nextEffects.length;
 
-        const everyEffectMatch = current.every((currentEffect, index) => {
-          return currentEffect === nextEffects[index];
+        const everyEffectMatch = current.every((effectCur, index) => {
+          return effectCur === nextEffects[index];
         });
 
         const allEffectReferencesMatch = hasSameEffectCount && everyEffectMatch;

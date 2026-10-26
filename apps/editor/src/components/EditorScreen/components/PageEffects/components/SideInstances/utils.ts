@@ -1,7 +1,7 @@
+import { resolveSideOptions } from '@active-book/book-builder/effects';
+
 import type { SideEffectDraft } from '../../@types';
 import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
-
-import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { getSidePreviewKey, getSideStylePreviewKey } from '../../PageEffectsContext';
 
@@ -68,12 +68,10 @@ export const resolveSideInstanceOptions = ({
   const resolvedText = previewText ?? undefined;
   const previewComponentStyle = componentStyle ?? effect.options.style;
 
-  const options = resolveSideOptions({
+  return resolveSideOptions({
     ...effect.options,
     shadow: resolvedShadow,
     text: resolvedText,
     style: previewComponentStyle,
   });
-
-  return options;
 };
