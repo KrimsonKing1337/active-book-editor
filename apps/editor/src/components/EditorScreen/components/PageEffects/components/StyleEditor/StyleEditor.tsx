@@ -72,12 +72,16 @@ export const StyleEditor = ({
 
   for (const effectCur of effects) {
     if (controller && effectCur.type === 'side') {
-      const items = [effectCur.options.shadow, effectCur.options.text];
+      const styles = [
+        effectCur.options.shadow?.style,
+        effectCur.options.text?.style,
+        effectCur.options.style,
+      ];
 
-      for (const itemCur of items) {
-        const value = Number(itemCur?.style?.zIndex);
+      for (const styleCur of styles) {
+        const value = Number(styleCur?.zIndex);
 
-        if (itemCur?.style?.zIndex !== undefined && Number.isFinite(value)) {
+        if (styleCur?.zIndex !== undefined && Number.isFinite(value)) {
           layerZIndexes.push(value);
         }
       }

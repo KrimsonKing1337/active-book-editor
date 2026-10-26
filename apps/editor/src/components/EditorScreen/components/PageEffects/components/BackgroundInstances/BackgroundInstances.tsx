@@ -97,10 +97,15 @@ type BackgroundInstanceProps = {
 
 const BackgroundInstance = ({ effect, project, components, stylePreviews }: BackgroundInstanceProps) => {
   const options = effect.options;
-  const source = effect.kind === 'image' ? options.image?.src
-    : effect.kind === 'video' ? options.video?.src : '';
+  let source = '';
 
-  const resolvedSource = useResolvedSource(source ?? '', project);
+  if (effect.kind === 'image') {
+    source = options.image?.src ?? '';
+  } else if (effect.kind === 'video') {
+    source = options.video?.src ?? '';
+  }
+
+  const resolvedSource = useResolvedSource(source, project);
 
   const component = options.component;
   const componentId = component ? `${component.package}/${component.name}` : '';
