@@ -25,7 +25,7 @@ type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
-  
+
   onLoadingChange: (loading: boolean, message?: string) => void;
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;

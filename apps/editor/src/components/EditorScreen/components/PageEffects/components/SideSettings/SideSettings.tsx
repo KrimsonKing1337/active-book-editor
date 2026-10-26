@@ -28,6 +28,7 @@ type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
+
   onUpdate: (previousId: string, effect: SideEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -35,12 +36,19 @@ type SideSettingsProps = {
 
 type LayoutSettingsProps = {
   item: ItemLayout;
-  onChange: (changes: Partial<ItemLayout>) => void;
   hidden: boolean;
+
+  onChange: (changes: Partial<ItemLayout>) => void;
   onHiddenChange: (hidden: boolean) => void;
 };
 
-const LayoutSettings = ({ item, onChange, hidden, onHiddenChange }: LayoutSettingsProps) => {
+const LayoutSettings = ({
+  item,
+  hidden,
+
+  onChange,
+  onHiddenChange,
+}: LayoutSettingsProps) => {
   const handlePositionChange = (e: ChangeEvent<HTMLSelectElement>) => {
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
@@ -131,13 +139,17 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   const previewIsHidden = preview.hidden ?? item?.hidden ?? false;
 
   const updateOptions = (updates: Partial<SideOptions>) => {
-    onUpdate(effect.id, {
+    const options = {
+      ...effect.options,
+      ...updates,
+    };
+
+    const updatedEffect = {
       ...effect,
-      options: {
-        ...effect.options,
-        ...updates,
-      },
-    });
+      options,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateShadow = (changes: Partial<ShadowItem>) => {
@@ -216,11 +228,21 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onUpdate(effect.id, { ...effect, slug: e.target.value });
+    const updatedEffect = {
+      ...effect,
+      slug: e.target.value,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleIdChange = (e: FocusEvent<HTMLInputElement>) => {
-    onUpdate(effect.id, { ...effect, id: e.target.value });
+    const updatedEffect = {
+      ...effect,
+      id: e.target.value,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {

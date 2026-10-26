@@ -87,7 +87,7 @@ export const getCategoryDefinition = (category: EffectCategory): EffectCategoryD
 
 export const getEffectPath = (effect: EditorEffectDraft): string => {
   const category = getCategoryDefinition(effect.type);
-  const group = category.groups.find((current) => current.value === getEffectGroup(effect));
+  const group = category.groups.find((cur) => cur.value === getEffectGroup(effect));
 
   return [category.label, group?.label].filter(Boolean).join(' / ');
 };
@@ -107,12 +107,12 @@ export const getFilteredEffects = ({
 }: FilterEffectsOptions): EditorEffectDraft[] => {
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
-  return effects.filter((effect) => {
-    if (category && effect.type !== category) {
+  return effects.filter((effectCur) => {
+    if (category && effectCur.type !== category) {
       return false;
     }
 
-    if (group && getEffectGroup(effect) !== group) {
+    if (group && getEffectGroup(effectCur) !== group) {
       return false;
     }
 
@@ -120,28 +120,28 @@ export const getFilteredEffects = ({
       return true;
     }
 
-    const categoryDefinition = getCategoryDefinition(effect.type);
-    const groupDefinition = categoryDefinition.groups.find((current) => current.value === getEffectGroup(effect));
+    const categoryDefinition = getCategoryDefinition(effectCur.type);
+    const groupDefinition = categoryDefinition.groups.find((cur) => cur.value === getEffectGroup(effectCur));
 
     const searchable = [
-      effect.id,
-      effect.slug,
-      effect.type,
+      effectCur.id,
+      effectCur.slug,
+      effectCur.type,
       categoryDefinition.label,
       groupDefinition?.label,
       groupDefinition?.value,
     ];
 
-    if (effect.type === 'audio') {
-      searchable.push(effect.options.src);
-    } else if (effect.type === 'background') {
-      searchable.push(effect.options.image?.src);
-      searchable.push(effect.options.video?.src);
-      searchable.push(effect.options.component?.name);
-    } else if (effect.type === 'side') {
-      searchable.push(effect.options.text?.leftText);
-      searchable.push(effect.options.text?.rightText);
-      searchable.push(effect.options.component?.name);
+    if (effectCur.type === 'audio') {
+      searchable.push(effectCur.options.src);
+    } else if (effectCur.type === 'background') {
+      searchable.push(effectCur.options.image?.src);
+      searchable.push(effectCur.options.video?.src);
+      searchable.push(effectCur.options.component?.name);
+    } else if (effectCur.type === 'side') {
+      searchable.push(effectCur.options.text?.leftText);
+      searchable.push(effectCur.options.text?.rightText);
+      searchable.push(effectCur.options.component?.name);
     }
 
     return searchable.some((cur) => {
