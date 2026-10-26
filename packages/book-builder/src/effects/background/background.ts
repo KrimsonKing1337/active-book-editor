@@ -66,19 +66,34 @@ export const resolveBackgroundOptions = (options: BackgroundOptions) => {
   const resolvedImage = image && (() => {
     const { styleFilters: filters, style, ...media } = image;
 
-    return { ...media, style: resolveStyle(style, filters) };
+    const resolvedStyle = resolveStyle(style, filters);
+
+    return {
+      ...media,
+      style: resolvedStyle,
+    };
   })();
 
   const resolvedVideo = video && (() => {
     const { styleFilters: filters, style, ...media } = video;
 
-    return { ...media, style: resolveStyle(style, filters) };
+    const resolvedStyle = resolveStyle(style, filters);
+
+    return {
+      ...media,
+      style: resolvedStyle,
+    };
   })();
 
   const resolvedShadow = shadow && (() => {
     const { styleFilters: filters, style, ...shadowOptions } = shadow;
 
-    return { ...shadowOptions, style: resolveStyle(style, filters) };
+    const resolvedStyle = resolveStyle(style, filters);
+
+    return {
+      ...shadowOptions,
+      style: resolvedStyle,
+    };
   })();
 
   return {
@@ -98,7 +113,11 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
   const result: BackgroundEffect[] = [];
 
   for (const effectCur of value.background) {
-    if (!isRecord(effectCur) || effectCur.type !== 'background' || !isRecord(effectCur.options)) {
+    if (
+      !isRecord(effectCur)
+      || effectCur.type !== 'background'
+      || !isRecord(effectCur.options)
+    ) {
       continue;
     }
 
@@ -117,8 +136,12 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     if (kind === 'image' || kind === 'video') {
       const media = options[kind];
 
-      if (!isRecord(media) || typeof media.id !== 'string' || !media.id.trim()
-        || typeof media.src !== 'string') {
+      if (
+        !isRecord(media)
+        || typeof media.id !== 'string'
+        || !media.id.trim()
+        || typeof media.src !== 'string'
+      ) {
         continue;
       }
     }

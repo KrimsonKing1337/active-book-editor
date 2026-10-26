@@ -43,18 +43,32 @@ export const resolveSideOptions = (options: SideOptions) => {
   const shadow = shadowItem && (() => {
     const { styleFilters, style, ...item } = shadowItem;
 
-    return { ...item, style: resolveStyle(style, styleFilters) };
+    const resolvedStyle = resolveStyle(style, styleFilters);
+
+    return {
+      ...item,
+      style: resolvedStyle,
+    };
   })();
 
   const text = textItem && (() => {
     const { styleFilters, style, ...item } = textItem;
 
-    return { ...item, style: resolveStyle(style, styleFilters) };
+    const resolvedStyle = resolveStyle(style, styleFilters);
+
+    return {
+      ...item,
+      style: resolvedStyle,
+    };
   })();
 
   const style = resolveStyle(options.style, options.styleFilters);
 
-  return { shadow, text, style };
+  return {
+    shadow,
+    text,
+    style,
+  };
 };
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
@@ -65,7 +79,11 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
   const result: SideEffect[] = [];
 
   for (const effectCur of value.side) {
-    if (!isRecord(effectCur) || effectCur.type !== 'side' || !isRecord(effectCur.options)) {
+    if (
+      !isRecord(effectCur)
+      || effectCur.type !== 'side'
+      || !isRecord(effectCur.options)
+    ) {
       continue;
     }
 
@@ -82,16 +100,23 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
     const options = effectCur.options;
 
     if (kind === 'shadow') {
-      if (!isRecord(options.shadow) || typeof options.shadow.id !== 'string'
-        || !options.shadow.id.trim()) {
+      if (
+        !isRecord(options.shadow)
+        || typeof options.shadow.id !== 'string'
+        || !options.shadow.id.trim()
+      ) {
         continue;
       }
     }
 
     if (kind === 'text') {
-      if (!isRecord(options.text) || typeof options.text.id !== 'string'
-        || !options.text.id.trim() || typeof options.text.leftText !== 'string'
-        || typeof options.text.rightText !== 'string') {
+      if (
+        !isRecord(options.text)
+        || typeof options.text.id !== 'string'
+        || !options.text.id.trim()
+        || typeof options.text.leftText !== 'string'
+        || typeof options.text.rightText !== 'string'
+      ) {
         continue;
       }
     }
