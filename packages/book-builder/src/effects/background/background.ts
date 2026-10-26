@@ -28,6 +28,10 @@ export type StyledBackgroundShadow = BackgroundEffectShadowOptions & {
   styleFilters?: FilterOperation[];
 };
 
+export const backgroundEffectKinds = ['background', 'image', 'video', 'shadow', 'component'] as const;
+
+export type BackgroundEffectKind = (typeof backgroundEffectKinds)[number];
+
 export type BackgroundOptions = {
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
@@ -40,6 +44,7 @@ export type BackgroundOptions = {
 export type BackgroundEffect = {
   id: string;
   type: 'background';
+  kind?: BackgroundEffectKind;
   slug: string;
   options: BackgroundOptions;
 };
@@ -160,9 +165,12 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фон';
     const options = effectCur.options as BackgroundOptions;
 
+    const kind = backgroundEffectKinds.find((current) => current === effectCur.kind);
+
     result.push({
       id: effectCur.id,
       type: 'background',
+      ...(kind ? { kind } : {}),
       slug,
       options,
     });

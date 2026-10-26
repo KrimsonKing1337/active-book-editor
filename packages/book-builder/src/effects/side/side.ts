@@ -12,6 +12,10 @@ type StyleFilters = {
 export type StyledSideShadow = SideShadowItem & StyleFilters;
 export type StyledSideText = SideTextItem & StyleFilters;
 
+export const sideEffectKinds = ['shadow', 'text', 'component'] as const;
+
+export type SideEffectKind = (typeof sideEffectKinds)[number];
+
 export type SideOptions = {
   shadows?: StyledSideShadow[];
   texts?: StyledSideText[];
@@ -21,6 +25,7 @@ export type SideOptions = {
 export type SideEffect = {
   id: string;
   type: 'side';
+  kind?: SideEffectKind;
   slug: string;
   options: SideOptions;
 };
@@ -119,9 +124,12 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
 
     const options = effectCur.options as SideOptions;
 
+    const kind = sideEffectKinds.find((current) => current === effectCur.kind);
+
     result.push({
       id: effectCur.id,
       type: 'side',
+      ...(kind ? { kind } : {}),
       slug,
       options,
     });
