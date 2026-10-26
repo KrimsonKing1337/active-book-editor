@@ -24,77 +24,44 @@ type SideInstanceProps = {
   stylePreviews: SideStylePreviews;
 };
 
-const SideInstance = ({
-  effect,
-  components,
-  previews,
-  stylePreviews,
-}: SideInstanceProps) => {
-  const { component, shadows, texts } = effect.options;
+const SideInstance = ({ effect, components, previews, stylePreviews }: SideInstanceProps) => {
+  const { component, shadow, text } = effect.options;
 
-  let componentId = null;
-
-  if (component) {
-    componentId = `${component.package}/${component.name}`;
-  }
-
-  let CustomComponent: ComponentType<BookComponentProps> | undefined = undefined;
-
-  if (componentId) {
-    CustomComponent = components[componentId] as ComponentType<BookComponentProps>;
-  }
+  const componentId = component ? `${component.package}/${component.name}` : '';
+  const CustomComponent = components[componentId] as ComponentType<BookComponentProps> | undefined;
 
   const componentElement = useMemo(() => {
-    if (!CustomComponent) {
-      return null;
-    }
-
-    return <CustomComponent book={bookRuntime} />;
+    return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  type ShadowItem = NonNullable<typeof shadows>[number];
-  type TextItem = NonNullable<typeof texts>[number];
-
-  type Item = ShadowItem | TextItem;
-
-  const withPreview = <T extends Item>(item: T, kind: 'shadow' | 'text'): T => {
-    const previewKey = getSidePreviewKey(effect.id, item.id);
-    const styleKey = getSideStylePreviewKey(effect.id, kind, item.id);
-
-    const preview = previews[previewKey];
-    const style = stylePreviews[styleKey] ?? item.style;
-
-    const playState = preview?.playState ?? item.animation?.playState;
-    const hidden = preview?.hidden ?? item.hidden;
+  const withPreview = <T extends NonNullable<typeof shadow | typeof text>>(item: T, kind: 'shadow' | 'text'): T => {
+    const preview = previews[getSidePreviewKey(effect.id, item.id)];
+    const style = stylePreviews[getSideStylePreviewKey(effect.id, kind, item.id)] ?? item.style;
 
     const animation = {
       ...item.animation,
-      playState,
+      playState: preview?.playState ?? item.animation?.playState,
     };
 
     return {
       ...item,
       style,
-      hidden,
+      hidden: preview?.hidden ?? item.hidden,
       animation,
     };
   };
 
-  const previewShadows = shadows?.map((cur) => withPreview(cur, 'shadow'));
-  const previewTexts = texts?.map((cur) => withPreview(cur, 'text'));
-
-  const previewOptions = {
-    shadows: previewShadows,
-    texts: previewTexts,
-  };
-
-  const resolvedOptions = resolveSideOptions(previewOptions);
+  const options = resolveSideOptions({
+    shadow: shadow ? withPreview(shadow, 'shadow') : undefined,
+    text: text ? withPreview(text, 'text') : undefined,
+  });
 
   return (
     <Side
       id={effect.id}
-      shadows={resolvedOptions.shadows}
-      texts={resolvedOptions.texts}
+      kind={effect.kind}
+      shadow={options.shadow}
+      text={options.text}
       Component={componentElement}
     />
   );
