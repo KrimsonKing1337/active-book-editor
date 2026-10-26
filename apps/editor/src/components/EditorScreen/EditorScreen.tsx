@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from 'react';
+
 import { useEffect, useState } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -282,6 +284,29 @@ export const EditorScreen = () => {
     insertTextComponent(editor, name);
   };
 
+  const handleCanvasKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Escape' || !editor) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Node) || !editor.view.dom.contains(target)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const focusedElement = document.activeElement;
+
+    if (focusedElement instanceof HTMLElement && editor.view.dom.contains(focusedElement)) {
+      focusedElement.blur();
+    }
+
+    editor.commands.blur();
+  };
+
   return (
     <PageEffectsProvider editor={editor}>
       <div className={editorScreenClassNames}>
@@ -333,7 +358,7 @@ export const EditorScreen = () => {
           {buildStateLabel}
         </div>
 
-        <main className={styles.Canvas}>
+        <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
           <App
             config={editorConfig}
             appMode="editor"
