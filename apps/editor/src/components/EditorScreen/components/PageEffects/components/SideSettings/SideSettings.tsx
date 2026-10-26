@@ -363,8 +363,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         />
       </label>
 
-      {(!effect.kind || effect.kind === 'shadow') && (
-        <details className={styles.Section}>
+      <details className={styles.Section} hidden={Boolean(effect.kind && effect.kind !== 'shadow')}>
         <summary>
           {shadowCountLabel}
         </summary>
@@ -515,10 +514,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           </Button>
         )}
       </details>
-      )}
 
-      {(!effect.kind || effect.kind === 'text') && (
-      <details className={styles.Section}>
+      <details className={styles.Section} hidden={Boolean(effect.kind && effect.kind !== 'text')}>
         <summary>
           {textCountLabel}
         </summary>
@@ -694,10 +691,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           </Button>
         )}
       </details>
-      )}
 
-      {(!effect.kind || effect.kind === 'component') && (
-      <details className={styles.Section}>
+      <details className={styles.Section} hidden={Boolean(effect.kind && effect.kind !== 'component')}>
         <summary>
           Кастомный компонент
         </summary>
@@ -718,7 +713,6 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           })}
         </Select>
       </details>
-      )}
 
       <div className={styles.Actions}>
         <Button onClick={onDuplicate}>
