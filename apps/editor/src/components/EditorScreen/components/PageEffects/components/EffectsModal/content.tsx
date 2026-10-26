@@ -12,7 +12,7 @@ import {
   SideSettings,
 } from '../';
 
-type ContentParams = Pick<
+type ContentParamsEffectsModalPicked = Pick<
   EffectsModalProps,
   | 'effects'
   | 'project'
@@ -20,7 +20,9 @@ type ContentParams = Pick<
   | 'onUpdateEffect'
   | 'onDuplicateEffect'
   | 'onDeleteEffect'
-> & {
+>;
+
+type ContentParams = ContentParamsEffectsModalPicked & {
   onLoadingChange: (loading: boolean, message?: string) => void;
   browserContent: ReactNode;
 };

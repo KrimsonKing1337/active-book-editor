@@ -1,11 +1,11 @@
-import type { EffectsModalProps } from './@types';
-import type { EffectCategory, GroupingMode } from './catalog';
-
 import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
 import { Rnd } from 'react-rnd';
+
+import type { EffectsModalProps } from './@types';
+import type { EffectCategory, GroupingMode } from './catalog';
 
 import { getCategoryDefinition } from './catalog';
 
@@ -21,6 +21,8 @@ export const EffectsModal = ({
   effects,
   project,
   selectedEffect,
+  isSavingStyles,
+  styleSaveError,
 
   onClose,
   onBack,
@@ -34,8 +36,6 @@ export const EffectsModal = ({
   onDuplicateEffect,
   onDeleteEffect,
   onBeforeCollapse,
-  isSavingStyles,
-  styleSaveError,
 }: EffectsModalProps) => {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [category, setCategory] = useState<EffectCategory | null>(null);
@@ -43,7 +43,9 @@ export const EffectsModal = ({
   const [search, setSearch] = useState('');
 
   const [grouping, setGrouping] = useState<GroupingMode>(() => {
-    return localStorage.getItem('activeBook-editor:effectsGrouping') === 'type' ? 'type' : 'none';
+    const localStorageValue = localStorage.getItem('activeBook-editor:effectsGrouping');
+
+    return localStorageValue === 'type' ? 'type' : 'none';
   });
 
   const handleCategoryChange = (nextCategory: EffectCategory) => {
@@ -102,6 +104,7 @@ export const EffectsModal = ({
       group={group}
       grouping={grouping}
       search={search}
+
       onAddAudio={onAddAudio}
       onAddVibration={onAddVibration}
       onAddFlashlight={onAddFlashlight}
@@ -133,7 +136,7 @@ export const EffectsModal = ({
   });
 
   const categoryDefinition = category ? getCategoryDefinition(category) : null;
-  const groupDefinition = categoryDefinition?.groups.find((current) => current.value === group);
+  const groupDefinition = categoryDefinition?.groups.find((cur) => cur.value === group);
   const browserTitle = groupDefinition?.label ?? categoryDefinition?.label ?? 'Эффекты страницы';
 
   const browserDescription = groupDefinition
@@ -152,6 +155,7 @@ export const EffectsModal = ({
   };
 
   const showBackButton = Boolean(selectedEffect || category) && !isCollapsed;
+
   let activeLoadingMessage: string | null = null;
 
   if (isSavingStyles) {
