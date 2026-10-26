@@ -8,6 +8,8 @@ import type { SideEffectDraft } from '../../@types';
 
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
 
+import type { StyleEditorController } from '../StyleEditor/hooks';
+
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
@@ -43,6 +45,18 @@ const LayoutSettings = ({ item, onChange, hidden, onHiddenChange }: LayoutSettin
     onChange({ position: e.target.value as ItemLayout['position'] });
   };
 
+  const handleOffsetXChange = (val: string) => {
+    onChange({ offsetX: val });
+  };
+
+  const handleOffsetYChange = (val: string) => {
+    onChange({ offsetY: val });
+  };
+
+  const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onHiddenChange(e.target.checked);
+  };
+
   return (
     <>
       <div className={styles.Layout}>
@@ -52,8 +66,14 @@ const LayoutSettings = ({ item, onChange, hidden, onHiddenChange }: LayoutSettin
           </span>
 
           <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
-            {positions.map((current) => {
-              return <option key={current.value} value={current.value}>{current.label}</option>;
+            {positions.map((positionCur) => {
+              const { value, label } = positionCur;
+
+              return (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              );
             })}
           </Select>
         </label>
@@ -66,7 +86,7 @@ const LayoutSettings = ({ item, onChange, hidden, onHiddenChange }: LayoutSettin
           <CssLengthInput
             label="Смещение X"
             value={item.offsetX ?? '0px'}
-            onChange={(offsetX) => onChange({ offsetX })}
+            onChange={handleOffsetXChange}
           />
         </div>
 
@@ -78,13 +98,13 @@ const LayoutSettings = ({ item, onChange, hidden, onHiddenChange }: LayoutSettin
           <CssLengthInput
             label="Смещение Y"
             value={item.offsetY ?? '0px'}
-            onChange={(offsetY) => onChange({ offsetY })}
+            onChange={handleOffsetYChange}
           />
         </div>
       </div>
 
       <div className={styles.Controls}>
-        <Checkbox checked={hidden} onChange={(e) => onHiddenChange(e.target.checked)}>
+        <Checkbox checked={hidden} onChange={handleHiddenChange}>
           Скрыть элемент
         </Checkbox>
       </div>
@@ -122,13 +142,23 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
   const updateShadow = (changes: Partial<ShadowItem>) => {
     if (shadow) {
-      updateOptions({ shadow: { ...shadow, ...changes } });
+      const updatedShadow = {
+        ...shadow,
+        ...changes,
+      };
+
+      updateOptions({ shadow: updatedShadow });
     }
   };
 
   const updateText = (changes: Partial<TextItem>) => {
     if (text) {
-      updateOptions({ text: { ...text, ...changes } });
+      const updatedText = {
+        ...text,
+        ...changes,
+      };
+
+      updateOptions({ text: updatedText });
     }
   };
 
@@ -201,15 +231,70 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       return;
     }
 
-    updateOptions({
-      component: {
-        package: definition.packageName,
-        name: definition.name,
-      },
-    });
+    const updatedComponent = {
+      package: definition.packageName,
+      name: definition.name,
+    };
+
+    updateOptions({ component: updatedComponent });
   };
 
   const componentId = component ? `${component.package}/${component.name}` : '';
+
+  const handleThicknessChange = (val: number) => {
+    updateShadow({ thickness: val });
+  };
+
+  const handleShadowAnimationChange = (val: SideAnimation) => {
+    updateShadow({ animation: val });
+  };
+
+  const handleTextAnimationChange = (val: SideAnimation) => {
+    updateText({ animation: val });
+  };
+
+  const handleLeftTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateText({ leftText: e.target.value });
+  };
+
+  const handleRightTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateText({ rightText: e.target.value });
+  };
+
+  const handleFontSizeChange = (val: string) => {
+    const updatedStyle = {
+      ...text?.style,
+      fontSize: val,
+    };
+
+    updateText({ style: updatedStyle });
+  };
+
+  const shadowController: StyleEditorController = {
+    preview: (val) => {
+      if (shadow) {
+        handleStylePreview('shadow', shadow.id, val);
+      }
+    },
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('shadow', val),
+  };
+
+  const textController: StyleEditorController = {
+    preview: (val) => {
+      if (text) {
+        handleStylePreview('text', text.id, val);
+      }
+    },
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('text', val),
+  };
+
+  const componentController: StyleEditorController = {
+    preview: (val) => handleStylePreview('component', effect.id, val),
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('component', val),
+  };
 
   let colorDisabledReason: string | undefined;
 
@@ -266,7 +351,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               min={0}
               max={999}
               value={shadow.thickness ?? 30}
-              onValueChange={(thickness) => updateShadow({ thickness })}
+              onValueChange={handleThicknessChange}
             />
           </label>
 
@@ -283,11 +368,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               defaultZIndex={1}
               value={getItemStyle('shadow', shadow.id, shadow.style)}
               styleFilters={shadow.styleFilters}
-              controller={{
-                preview: (style) => handleStylePreview('shadow', shadow.id, style),
-                commit: flushStylePreviews,
-                commitFilters: (filters) => commitItemFilters('shadow', filters),
-              }}
+              controller={shadowController}
             />
           </details>
 
@@ -297,7 +378,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             presets={shadowPresets}
             defaultDuration={1000}
             onPlaybackChange={handlePlaybackChange}
-            onChange={(animation) => updateShadow({ animation })}
+            onChange={handleShadowAnimationChange}
           />
         </>
       )}
@@ -312,7 +393,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             <TextInput
               maxLength={500}
               value={text.leftText}
-              onChange={(e) => updateText({ leftText: e.target.value })}
+              onChange={handleLeftTextChange}
             />
           </label>
 
@@ -324,7 +405,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             <TextInput
               maxLength={500}
               value={text.rightText}
-              onChange={(e) => updateText({ rightText: e.target.value })}
+              onChange={handleRightTextChange}
             />
           </label>
 
@@ -344,7 +425,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               label="Размер шрифта"
               allowNegative={false}
               value={String(text.style?.fontSize ?? '12px')}
-              onChange={(fontSize) => updateText({ style: { ...text.style, fontSize } })}
+              onChange={handleFontSizeChange}
             />
           </div>
 
@@ -361,11 +442,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               defaultZIndex={1}
               value={getItemStyle('text', text.id, text.style)}
               styleFilters={text.styleFilters}
-              controller={{
-                preview: (style) => handleStylePreview('text', text.id, style),
-                commit: flushStylePreviews,
-                commitFilters: (filters) => commitItemFilters('text', filters),
-              }}
+              controller={textController}
             />
           </details>
 
@@ -375,7 +452,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             presets={textPresets}
             defaultDuration={60000}
             onPlaybackChange={handlePlaybackChange}
-            onChange={(animation) => updateText({ animation })}
+            onChange={handleTextAnimationChange}
           />
         </>
       )}
@@ -391,10 +468,12 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               Не использовать
             </option>
 
-            {definitions.map((definition) => {
+            {definitions.map((definitionCur) => {
+              const { id, title } = definitionCur;
+
               return (
-                <option key={definition.id} value={definition.id}>
-                  {definition.title}
+                <option key={id} value={id}>
+                  {title}
                 </option>
               );
             })}
@@ -410,11 +489,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               defaultZIndex={1}
               value={getItemStyle('component', effect.id, effect.options.style)}
               styleFilters={effect.options.styleFilters}
-              controller={{
-                preview: (style) => handleStylePreview('component', effect.id, style),
-                commit: flushStylePreviews,
-                commitFilters: (filters) => commitItemFilters('component', filters),
-              }}
+              controller={componentController}
             />
           </details>
         </details>
