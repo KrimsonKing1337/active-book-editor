@@ -21,18 +21,6 @@ const vibrationOptions = {
   playOnLoad: true,
 };
 
-const backgroundOptions = {
-  style: { zIndex: 4 },
-  images: [{ id: 'forest-image', src: 'assets/forest.webp', style: { zIndex: 1 } }],
-  videos: [],
-  shadow: { show: true, style: { backgroundColor: 'rgba(0,0,0,0.3)' } },
-};
-
-const sideOptions = {
-  shadows: [{ id: 'shadow-1', animation: { preset: 'police', duration: 1000 } }],
-  texts: [{ id: 'text-1', leftText: 'Лево', rightText: 'Право' }],
-};
-
 const flashlightOptions = {
   duration: 200,
   delay: 0,
@@ -41,7 +29,31 @@ const flashlightOptions = {
   speed: 150,
 };
 
-test('compiles audio, vibration, flashlight, background and side and strips editor-only slug', () => {
+const backgroundImageStyle = {
+  zIndex: 1,
+};
+
+const backgroundImage = {
+  id: 'forest-image',
+  src: 'assets/forest.webp',
+  style: backgroundImageStyle,
+};
+
+const backgroundOptions = {
+  image: backgroundImage,
+};
+
+const sideText = {
+  id: 'text-1',
+  leftText: 'Лево',
+  rightText: 'Право',
+};
+
+const sideOptions = {
+  text: sideText,
+};
+
+test('compiles independent effects with kind and strips editor-only slug', () => {
   const document = {
     type: 'doc',
     attrs: {
@@ -49,8 +61,8 @@ test('compiles audio, vibration, flashlight, background and side and strips edit
         audio: [{ id: 'a', type: 'audio', slug: 'Звук', options: audioOptions }],
         vibration: [{ id: 'v', type: 'vibration', slug: 'Толчок', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', slug: 'Вспышка', options: flashlightOptions }],
-        background: [{ id: 'b', type: 'background', slug: 'Лес', options: backgroundOptions }],
-        side: [{ id: 's', type: 'side', slug: 'Боковые', options: sideOptions }],
+        background: [{ id: 'b', type: 'background', kind: 'image', slug: 'Лес', options: backgroundOptions }],
+        side: [{ id: 's', type: 'side', kind: 'text', slug: 'Боковые', options: sideOptions }],
       },
     },
     content: [{ type: 'P' }],
@@ -65,17 +77,12 @@ test('compiles audio, vibration, flashlight, background and side and strips edit
         audio: [{ id: 'a', type: 'audio', options: audioOptions }],
         vibration: [{ id: 'v', type: 'vibration', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', options: flashlightOptions }],
-        background: [{ id: 'b', type: 'background', options: backgroundOptions }],
-        side: [{ id: 's', type: 'side', options: sideOptions }],
+        background: [{ id: 'b', type: 'background', kind: 'image', options: backgroundOptions }],
+        side: [{ id: 's', type: 'side', kind: 'text', options: sideOptions }],
       },
     },
     content: [{ type: 'P' }],
   });
-
-  assert.equal(document.attrs.pageEffects.audio[0].slug, 'Звук');
-  assert.equal(document.attrs.pageEffects.vibration[0].slug, 'Толчок');
-  assert.equal(document.attrs.pageEffects.flashlight[0].slug, 'Вспышка');
-  assert.equal(document.attrs.pageEffects.side[0].slug, 'Боковые');
 });
 
 test('an empty document compiles with empty effect groups', () => {

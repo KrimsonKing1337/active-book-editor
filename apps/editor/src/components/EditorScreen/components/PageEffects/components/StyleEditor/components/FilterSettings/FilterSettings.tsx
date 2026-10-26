@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 
 import { resolveStyle } from '@active-book/book-builder/effects';
 
+import { Button } from '../../../EffectControls';
+
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
@@ -234,7 +236,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
 
         return (
           <div key={id} className={styles.FilterRow}>
-            <button
+            <Button
               type="button"
               className={styles.FilterSummary}
               aria-expanded={expanded}
@@ -247,7 +249,7 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
               <span>
                 {expandedIndicator}
               </span>
-            </button>
+            </Button>
 
             {expanded && (
               <div className={styles.FilterBody}>
@@ -277,17 +279,17 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
                 )}
 
                 <div className={styles.FilterActions}>
-                  <button type="button" disabled={index === 0} onClick={handleMoveUp}>
+                  <Button type="button" disabled={index === 0} onClick={handleMoveUp}>
                     ↑
-                  </button>
+                  </Button>
 
-                  <button type="button" disabled={index === drafts.length - 1} onClick={handleMoveDown}>
+                  <Button type="button" disabled={index === drafts.length - 1} onClick={handleMoveDown}>
                     ↓
-                  </button>
+                  </Button>
 
-                  <button type="button" onClick={handleDelete}>
+                  <Button type="button" onClick={handleDelete}>
                     Удалить
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -296,13 +298,13 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
       })}
 
       <div className={styles.FilterActions}>
-        <button type="button" onClick={handleAddFilter}>
+        <Button type="button" onClick={handleAddFilter}>
           + Добавить фильтр
-        </button>
+        </Button>
 
-        <button type="button" onClick={handleApplyFilters}>
+        <Button type="button" onClick={handleApplyFilters}>
           Применить фильтры
-        </button>
+        </Button>
       </div>
 
       {error && (

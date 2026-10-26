@@ -2,11 +2,12 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
+import type { SideEffectDraft } from '../../@types';
+import type { StyleEditorController } from '../StyleEditor/hooks';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
-
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
 
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
@@ -19,13 +20,14 @@ import { positions, shadowPresets, textPresets } from './constants';
 
 import styles from './SideSettings.module.scss';
 
-type ShadowItem = NonNullable<SideOptions['shadows']>[number];
-type TextItem = NonNullable<SideOptions['texts']>[number];
+type ShadowItem = NonNullable<SideOptions['shadow']>;
+type TextItem = NonNullable<SideOptions['text']>;
 type SideAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
+
   onUpdate: (previousId: string, effect: SideEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -33,15 +35,17 @@ type SideSettingsProps = {
 
 type LayoutSettingsProps = {
   item: ItemLayout;
-  onChange: (changes: Partial<ItemLayout>) => void;
   hidden: boolean;
+
+  onChange: (changes: Partial<ItemLayout>) => void;
   onHiddenChange: (hidden: boolean) => void;
 };
 
 const LayoutSettings = ({
   item,
-  onChange,
   hidden,
+
+  onChange,
   onHiddenChange,
 }: LayoutSettingsProps) => {
   const handlePositionChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -70,9 +74,11 @@ const LayoutSettings = ({
 
           <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
             {positions.map((positionCur) => {
+              const { value, label } = positionCur;
+
               return (
-                <option key={positionCur.value} value={positionCur.value}>
-                  {positionCur.label}
+                <option key={value} value={value}>
+                  {label}
                 </option>
               );
             })}
@@ -125,179 +131,115 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     getCurrentEffects,
   } = usePageEffects();
 
-  const previewFor = (itemId: string) => {
-    const key = getSidePreviewKey(effect.id, itemId);
+  const { shadow, text, component } = effect.options;
+  const item = effect.kind === 'shadow' ? shadow : text;
+  const previewKey = item ? getSidePreviewKey(effect.id, item.id) : '';
+  const preview = sideItemPreviews[previewKey] ?? {};
+  const previewIsHidden = preview.hidden ?? item?.hidden ?? false;
 
-    return sideItemPreviews[key] ?? {};
+  const updateOptions = (updates: Partial<SideOptions>) => {
+    const options = {
+      ...effect.options,
+      ...updates,
+    };
+
+    const updatedEffect = {
+      ...effect,
+      options,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
-  const {
-    shadows = [],
-    texts = [],
-    component,
-  } = effect.options;
+  const updateShadow = (changes: Partial<ShadowItem>) => {
+    if (shadow) {
+      const updatedShadow = {
+        ...shadow,
+        ...changes,
+      };
 
-  const getStyleForItem = (kind: 'shadow' | 'text', itemId: string, style: ShadowItem['style']) => {
-    const key = getSideStylePreviewKey(effect.id, kind, itemId);
+      updateOptions({ shadow: updatedShadow });
+    }
+  };
+
+  const updateText = (changes: Partial<TextItem>) => {
+    if (text) {
+      const updatedText = {
+        ...text,
+        ...changes,
+      };
+
+      updateOptions({ text: updatedText });
+    }
+  };
+
+  const getItemStyle = (kind: 'shadow' | 'text' | 'component', id: string, style?: CSSProperties) => {
+    const key = getSideStylePreviewKey({
+      effectId: effect.id,
+      kind,
+      itemId: id,
+    });
 
     return sideStylePreviews[key] ?? style ?? {};
   };
 
-  const commitItemFilters = (kind: 'shadow' | 'text', id: string, styleFilters: FilterOperation[]) => {
+  const handleStylePreview = (kind: 'shadow' | 'text' | 'component', itemId: string, style: CSSProperties) => {
+    updateSideStylePreview({
+      effectId: effect.id,
+      kind,
+      itemId,
+      style,
+    });
+  };
+
+  const commitItemFilters = (kind: 'shadow' | 'text' | 'component', styleFilters: FilterOperation[]) => {
     if (!flushStylePreviews()) {
       return;
     }
 
-    const current = getCurrentEffects();
-
-    const currentEffect = current.find((effectCur): effectCur is SideEffectDraft => {
-      return effectCur.type === 'side' && effectCur.id === effect.id;
+    const currentEffect = getCurrentEffects().find((current): current is SideEffectDraft => {
+      return current.type === 'side' && current.id === effect.id;
     });
 
     if (!currentEffect) {
       return;
     }
 
-    const { shadows: currentShadows, texts: currentTexts } = currentEffect.options;
+    const options = { ...currentEffect.options };
 
-    let nextShadows = currentShadows;
-    let nextTexts = currentTexts;
-
-    if (kind === 'shadow') {
-      nextShadows = currentShadows?.map((shadowCur) => {
-        if (shadowCur.id !== id) {
-          return shadowCur;
-        }
-
-        return {
-          ...shadowCur,
-          styleFilters,
-        };
-      });
+    if (kind === 'shadow' && options.shadow) {
+      options.shadow = { ...options.shadow, styleFilters };
+    } else if (kind === 'text' && options.text) {
+      options.text = { ...options.text, styleFilters };
+    } else if (kind === 'component') {
+      options.styleFilters = styleFilters;
     }
 
-    if (kind === 'text') {
-      nextTexts = currentTexts?.map((textCur) => {
-        if (textCur.id !== id) {
-          return textCur;
-        }
+    onUpdate(effect.id, { ...currentEffect, options });
+  };
 
-        return {
-          ...textCur,
-          styleFilters,
-        };
-      });
+  const handlePlaybackChange = (state: NonNullable<SideAnimation['playState']>) => {
+    if (item) {
+      const update = {
+        effectId: effect.id,
+        itemId: item.id,
+        changes: { playState: state },
+      };
+
+      updateSideItemPreview(update);
     }
-
-    const updatedOptions = {
-      ...currentEffect.options,
-      shadows: nextShadows,
-      texts: nextTexts,
-    };
-
-    onUpdate(effect.id, {
-      ...currentEffect,
-      options: updatedOptions,
-    });
   };
 
-  const updateOptions = (updates: Partial<SideOptions>) => {
-    const updatedOptions = {
-      ...effect.options,
-      ...updates,
-    };
-
-    onUpdate(effect.id, {
-      ...effect,
-      options: updatedOptions,
-    });
-  };
-
-  const updateShadow = (id: string, changes: Partial<ShadowItem>) => {
-    const updated = shadows.map((shadowCur) => {
-      if (shadowCur.id !== id) {
-        return shadowCur;
-      }
-
-      return {
-        ...shadowCur,
-        ...changes,
+  const handleHiddenChange = (hidden: boolean) => {
+    if (item) {
+      const update = {
+        effectId: effect.id,
+        itemId: item.id,
+        changes: { hidden },
       };
-    });
 
-    updateOptions({ shadows: updated });
-  };
-
-  const updateText = (id: string, changes: Partial<TextItem>) => {
-    const updated = texts.map((textCur) => {
-      if (textCur.id !== id) {
-        return textCur;
-      }
-
-      return {
-        ...textCur,
-        ...changes,
-      };
-    });
-
-    updateOptions({ texts: updated });
-  };
-
-  const addShadow = () => {
-    const shadowStyle = {
-      color: '#ff0000',
-      zIndex: 1,
-    };
-
-    const shadowAnimation = {
-      preset: 'none' as const,
-      duration: 1000,
-      iterations: 'infinite' as const,
-    };
-
-    const shadow: ShadowItem = {
-      id: crypto.randomUUID(),
-      position: 'top-left',
-      style: shadowStyle,
-      thickness: 30,
-      animation: shadowAnimation,
-    };
-
-    const newShadows = [
-      ...shadows,
-      shadow,
-    ];
-
-    updateOptions({ shadows: newShadows });
-  };
-
-  const addText = () => {
-    const textStyle = {
-      color: '#a3a3a3',
-      zIndex: 1,
-      fontSize: '12px',
-    };
-
-    const textAnimation = {
-      preset: 'scroll' as const,
-      duration: 60000,
-      iterations: 'infinite' as const,
-    };
-
-    const text: TextItem = {
-      id: crypto.randomUUID(),
-      leftText: 'Левая сторона',
-      rightText: 'Правая сторона',
-      style: textStyle,
-      animation: textAnimation,
-    };
-
-    const newTexts = [
-      ...texts,
-      text,
-    ];
-
-    updateOptions({ texts: newTexts });
+      updateSideItemPreview(update);
+    }
   };
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -319,26 +261,91 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const definition = definitions.find((cur) => cur.id === e.target.value);
+    const definition = definitions.find((current) => current.id === e.target.value);
 
     if (!definition) {
       updateOptions({ component: undefined });
-
       return;
     }
 
-    const selectedComponent = {
+    const updatedComponent = {
       package: definition.packageName,
       name: definition.name,
     };
 
-    updateOptions({ component: selectedComponent });
+    updateOptions({ component: updatedComponent });
   };
 
   const componentId = component ? `${component.package}/${component.name}` : '';
 
-  const shadowCountLabel = `Боковые тени (${shadows.length})`;
-  const textCountLabel = `Боковой текст (${texts.length})`;
+  const handleThicknessChange = (val: number) => {
+    updateShadow({ thickness: val });
+  };
+
+  const handleShadowAnimationChange = (val: SideAnimation) => {
+    updateShadow({ animation: val });
+  };
+
+  const handleTextAnimationChange = (val: SideAnimation) => {
+    updateText({ animation: val });
+  };
+
+  const handleLeftTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateText({ leftText: e.target.value });
+  };
+
+  const handleRightTextChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateText({ rightText: e.target.value });
+  };
+
+  const handleFontSizeChange = (val: string) => {
+    const updatedStyle = {
+      ...text?.style,
+      fontSize: val,
+    };
+
+    updateText({ style: updatedStyle });
+  };
+
+  const shadowController: StyleEditorController = {
+    preview: (val) => {
+      if (shadow) {
+        handleStylePreview('shadow', shadow.id, val);
+      }
+    },
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('shadow', val),
+  };
+
+  const textController: StyleEditorController = {
+    preview: (val) => {
+      if (text) {
+        handleStylePreview('text', text.id, val);
+      }
+    },
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('text', val),
+  };
+
+  const componentController: StyleEditorController = {
+    preview: (val) => handleStylePreview('component', effect.id, val),
+    commit: flushStylePreviews,
+    commitFilters: (val) => commitItemFilters('component', val),
+  };
+
+  let colorDisabledReason: string | undefined;
+
+  if (shadow) {
+    const selectedPreset = shadowPresets.find((current) => {
+      return current.value === (shadow.animation?.preset ?? 'none');
+    });
+
+    const canChangeColor = selectedPreset?.canChangeColor ?? false;
+
+    if (!canChangeColor) {
+      colorDisabledReason = 'Цвет этого пресета меняется автоматически. Выберите одноцветный пресет';
+    }
+  }
 
   return (
     <div className={styles.Settings}>
@@ -363,354 +370,167 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         />
       </label>
 
-      <details className={styles.Section}>
-        <summary>
-          {shadowCountLabel}
-        </summary>
-
-        {shadows.map((shadowCur, index) => {
-          const {
-            id,
-            animation,
-            style,
-            hidden,
-            thickness,
-            styleFilters,
-          } = shadowCur;
-
-          const preset = animation?.preset;
-
-          const selectedPreset = shadowPresets.find((cur) => {
-            return cur.value === (preset ?? 'none');
-          });
-
-          const canChangeColor = selectedPreset?.canChangeColor ?? true;
-
-          let colorDisabledReason;
-
-          if (!canChangeColor) {
-            colorDisabledReason = 'Цвет этого пресета меняется автоматически. ' +
-              'Выберите одноцветный пресет, чтобы настроить его';
-          }
-
-          const handleHiddenChange = (val: boolean) => {
-            updateSideItemPreview(effect.id, id, { hidden: val });
-          };
-
-          const handleLayoutChange = (val: Partial<ItemLayout>) => {
-            updateShadow(id, val);
-          };
-
-          const handleThicknessChange = (val: number) => {
-            updateShadow(id, { thickness: val });
-          };
-
-          const handleStylePreview = (val: CSSProperties) => {
-            const update = {
-              effectId: effect.id,
-              kind: 'shadow' as const,
-              itemId: id,
-              style: val,
-            };
-
-            updateSideStylePreview(update);
-          };
-
-          const handleFiltersCommit = (val: FilterOperation[]) => {
-            commitItemFilters('shadow', id, val);
-          };
-
-          const handleAnimationChange = (val: SideAnimation) => {
-            updateShadow(id, { animation: val });
-          };
-
-          const handlePlaybackChange = (val: NonNullable<SideAnimation['playState']>) => {
-            updateSideItemPreview(effect.id, id, { playState: val });
-          };
-
-          const handleDelete = () => {
-            const remaining = shadows.filter((cur) => cur.id !== id);
-
-            updateOptions({ shadows: remaining });
-          };
-
-          const controller = {
-            preview: handleStylePreview,
-            commit: flushStylePreviews,
-            commitFilters: handleFiltersCommit,
-          };
-
-          const nameLabel = `Тень ${index + 1}`;
-
-          const preview = previewFor(id);
-          const previewIsHidden = preview.hidden ?? hidden ?? false;
-
-          const shadowStyle = getStyleForItem('shadow', id, style);
-
-          return (
-            <div key={id} className={styles.Media}>
-              <strong>
-                {nameLabel}
-              </strong>
-
-              <LayoutSettings
-                item={shadowCur}
-                hidden={previewIsHidden}
-                onHiddenChange={handleHiddenChange}
-                onChange={handleLayoutChange}
-              />
-
-              <label className={styles.Field}>
-                <span>
-                  Толщина тени (px)
-                </span>
-
-                <IntegerInput
-                  min={0}
-                  max={999}
-                  value={thickness ?? 30}
-                  onValueChange={handleThicknessChange}
-                />
-              </label>
-
-              <details>
-                <summary>
-                  Стили тени
-                </summary>
-
-                <StyleEditor
-                  layer="shadow"
-                  colorProperty="color"
-                  colorLabel="Цвет тени (color)"
-                  colorDisabledReason={colorDisabledReason}
-                  defaultZIndex={1}
-                  value={shadowStyle}
-                  styleFilters={styleFilters}
-                  controller={controller}
-                />
-              </details>
-
-              <AnimationSettings
-                animation={animation}
-                playState={preview.playState}
-                presets={shadowPresets}
-                defaultDuration={1000}
-                onPlaybackChange={handlePlaybackChange}
-                onChange={handleAnimationChange}
-              />
-
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-              >
-                Удалить тень
-              </Button>
-            </div>
-          );
-        })}
-
-        <Button variant="success" onClick={addShadow}>
-          Добавить тень
-        </Button>
-      </details>
-
-      <details className={styles.Section}>
-        <summary>
-          {textCountLabel}
-        </summary>
-
-        {texts.map((textCur, index) => {
-          const {
-            id,
-            animation,
-            style,
-            hidden,
-            styleFilters,
-            leftText,
-            rightText,
-          } = textCur;
-
-          const handleLeftTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-            updateText(id, { leftText: e.target.value });
-          };
-
-          const handleRightTextChange = (e: ChangeEvent<HTMLInputElement>) => {
-            updateText(id, { rightText: e.target.value });
-          };
-
-          const handleHiddenChange = (val: boolean) => {
-            updateSideItemPreview(effect.id, id, { hidden: val });
-          };
-
-          const handleLayoutChange = (val: Partial<ItemLayout>) => {
-            updateText(id, val);
-          };
-
-          const handleFontSizeChange = (val: string) => {
-            const updatedStyle = {
-              ...style,
-              fontSize: val,
-            };
-
-            updateText(id, { style: updatedStyle });
-          };
-
-          const handleStylePreview = (val: CSSProperties) => {
-            const update = {
-              effectId: effect.id,
-              kind: 'text' as const,
-              itemId: id,
-              style: val,
-            };
-
-            updateSideStylePreview(update);
-          };
-
-          const handleFiltersCommit = (val: FilterOperation[]) => {
-            commitItemFilters('text', id, val);
-          };
-
-          const handleAnimationChange = (val: SideAnimation) => {
-            updateText(id, { animation: val });
-          };
-
-          const handlePlaybackChange = (val: NonNullable<SideAnimation['playState']>) => {
-            updateSideItemPreview(effect.id, id, { playState: val });
-          };
-
-          const handleDelete = () => {
-            const remaining = texts.filter((cur) => cur.id !== id);
-
-            updateOptions({ texts: remaining });
-          };
-
-          const controller = {
-            preview: handleStylePreview,
-            commit: flushStylePreviews,
-            commitFilters: handleFiltersCommit,
-          };
-
-          const nameLabel = `Текст ${index + 1}`;
-
-          const preview = previewFor(id);
-          const previewIsHidden = preview.hidden ?? hidden ?? false;
-
-          const fontSizeValue = String(style?.fontSize ?? '12px');
-
-          const textStyle = getStyleForItem('text', id, style);
-
-          return (
-            <div key={id} className={styles.Media}>
-              <strong>
-                {nameLabel}
-              </strong>
-
-              <label className={styles.Field}>
-                <span>
-                  Текст слева
-                </span>
-
-                <TextInput
-                  maxLength={500}
-                  value={leftText}
-                  onChange={handleLeftTextChange}
-                />
-              </label>
-
-              <label className={styles.Field}>
-                <span>
-                  Текст справа
-                </span>
-
-                <TextInput
-                  maxLength={500}
-                  value={rightText}
-                  onChange={handleRightTextChange}
-                />
-              </label>
-
-              <LayoutSettings
-                item={textCur}
-                hidden={previewIsHidden}
-                onHiddenChange={handleHiddenChange}
-                onChange={handleLayoutChange}
-              />
-
-              <div className={styles.Field}>
-                <span>
-                  Размер шрифта
-                </span>
-
-                <CssLengthInput
-                  label="Размер шрифта"
-                  allowNegative={false}
-                  value={fontSizeValue}
-                  onChange={handleFontSizeChange}
-                />
-              </div>
-
-              <details>
-                <summary>
-                  Стили текста
-                </summary>
-
-                <StyleEditor
-                  layer="shadow"
-                  colorProperty="color"
-                  colorLabel="Цвет текста (color)"
-                  additionalColorProperty="backgroundColor"
-                  defaultZIndex={1}
-                  value={textStyle}
-                  styleFilters={styleFilters}
-                  controller={controller}
-                />
-              </details>
-
-              <AnimationSettings
-                animation={animation}
-                playState={previewFor(id).playState}
-                presets={textPresets}
-                defaultDuration={60000}
-                onPlaybackChange={handlePlaybackChange}
-                onChange={handleAnimationChange}
-              />
-
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-              >
-                Удалить текст
-              </Button>
-            </div>
-          );
-        })}
-
-        <Button variant="success" onClick={addText}>
-          Добавить текст
-        </Button>
-      </details>
-
-      <details className={styles.Section}>
-        <summary>
-          Кастомный компонент
-        </summary>
-
-        <Select value={componentId} onChange={handleComponentChange}>
-          <option value="">
-            Не использовать
-          </option>
-
-          {definitions.map((definitionCur) => {
-            const { id, title } = definitionCur;
-
-            return (
-              <option key={id} value={id}>
-                {title}
-              </option>
-            );
-          })}
-        </Select>
-      </details>
+      {effect.kind === 'shadow' && shadow && (
+        <>
+          <LayoutSettings
+            item={shadow}
+            hidden={previewIsHidden}
+            onHiddenChange={handleHiddenChange}
+            onChange={updateShadow}
+          />
+
+          <label className={styles.Field}>
+            <span>
+              Толщина тени (px)
+            </span>
+
+            <IntegerInput
+              min={0}
+              max={999}
+              value={shadow.thickness ?? 30}
+              onValueChange={handleThicknessChange}
+            />
+          </label>
+
+          <details className={styles.Section}>
+            <summary>
+              Стили тени
+            </summary>
+
+            <StyleEditor
+              layer="shadow"
+              colorProperty="color"
+              colorLabel="Цвет тени (color)"
+              colorDisabledReason={colorDisabledReason}
+              defaultZIndex={1}
+              value={getItemStyle('shadow', shadow.id, shadow.style)}
+              styleFilters={shadow.styleFilters}
+              controller={shadowController}
+            />
+          </details>
+
+          <AnimationSettings
+            animation={shadow.animation}
+            playState={preview.playState}
+            presets={shadowPresets}
+            defaultDuration={1000}
+            onPlaybackChange={handlePlaybackChange}
+            onChange={handleShadowAnimationChange}
+          />
+        </>
+      )}
+
+      {effect.kind === 'text' && text && (
+        <>
+          <label className={styles.Field}>
+            <span>
+              Текст слева
+            </span>
+
+            <TextInput
+              maxLength={500}
+              value={text.leftText}
+              onChange={handleLeftTextChange}
+            />
+          </label>
+
+          <label className={styles.Field}>
+            <span>
+              Текст справа
+            </span>
+
+            <TextInput
+              maxLength={500}
+              value={text.rightText}
+              onChange={handleRightTextChange}
+            />
+          </label>
+
+          <LayoutSettings
+            item={text}
+            hidden={previewIsHidden}
+            onHiddenChange={handleHiddenChange}
+            onChange={updateText}
+          />
+
+          <div className={styles.Field}>
+            <span>
+              Размер шрифта
+            </span>
+
+            <CssLengthInput
+              label="Размер шрифта"
+              allowNegative={false}
+              value={String(text.style?.fontSize ?? '12px')}
+              onChange={handleFontSizeChange}
+            />
+          </div>
+
+          <details className={styles.Section}>
+            <summary>
+              Стили текста
+            </summary>
+
+            <StyleEditor
+              layer="shadow"
+              colorProperty="color"
+              colorLabel="Цвет текста (color)"
+              additionalColorProperty="backgroundColor"
+              defaultZIndex={1}
+              value={getItemStyle('text', text.id, text.style)}
+              styleFilters={text.styleFilters}
+              controller={textController}
+            />
+          </details>
+
+          <AnimationSettings
+            animation={text.animation}
+            playState={preview.playState}
+            presets={textPresets}
+            defaultDuration={60000}
+            onPlaybackChange={handlePlaybackChange}
+            onChange={handleTextAnimationChange}
+          />
+        </>
+      )}
+
+      {effect.kind === 'component' && (
+        <details className={styles.Section} open>
+          <summary>
+            Кастомный компонент
+          </summary>
+
+          <Select value={componentId} onChange={handleComponentChange}>
+            <option value="">
+              Не использовать
+            </option>
+
+            {definitions.map((definitionCur) => {
+              const { id, title } = definitionCur;
+
+              return (
+                <option key={id} value={id}>
+                  {title}
+                </option>
+              );
+            })}
+          </Select>
+
+          <details>
+            <summary>
+              Стили слоя
+            </summary>
+
+            <StyleEditor
+              layer="background"
+              defaultZIndex={1}
+              value={getItemStyle('component', effect.id, effect.options.style)}
+              styleFilters={effect.options.styleFilters}
+              controller={componentController}
+            />
+          </details>
+        </details>
+      )}
 
       <div className={styles.Actions}>
         <Button onClick={onDuplicate}>

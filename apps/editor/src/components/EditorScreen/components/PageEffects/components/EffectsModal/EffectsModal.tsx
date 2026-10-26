@@ -5,17 +5,24 @@ import { createPortal } from 'react-dom';
 import { Rnd } from 'react-rnd';
 
 import type { EffectsModalProps } from './@types';
+import type { EffectCategory, GroupingMode } from './catalog';
+
+import { getCategoryDefinition } from './catalog';
 
 import { getModalContent } from './content';
 import { usePanelGeometry } from './hooks';
 
 import { Header, PanelBody } from './components';
+import { EffectsBrowser } from './components/EffectsBrowser';
 
 import styles from './EffectsModal.module.scss';
+
 export const EffectsModal = ({
   effects,
   project,
   selectedEffect,
+  isSavingStyles,
+  styleSaveError,
 
   onClose,
   onBack,
@@ -29,10 +36,52 @@ export const EffectsModal = ({
   onDuplicateEffect,
   onDeleteEffect,
   onBeforeCollapse,
-  isSavingStyles,
-  styleSaveError,
 }: EffectsModalProps) => {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const [category, setCategory] = useState<EffectCategory | null>(null);
+  const [group, setGroup] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  const [grouping, setGrouping] = useState<GroupingMode>(() => {
+    const localStorageValue = localStorage.getItem('activeBook-editor:effectsGrouping');
+
+    return localStorageValue === 'type' ? 'type' : 'none';
+  });
+
+  const handleCategoryChange = (nextCategory: EffectCategory) => {
+    setCategory(nextCategory);
+    setGroup(null);
+    setSearch('');
+  };
+
+  const handleGroupChange = (nextGroup: string) => {
+    setGroup(nextGroup);
+    setSearch('');
+  };
+
+  const handleGroupingChange = (nextGrouping: GroupingMode) => {
+    setGrouping(nextGrouping);
+    setGroup(null);
+    setSearch('');
+
+    localStorage.setItem('activeBook-editor:effectsGrouping', nextGrouping);
+  };
+
+  const handleBack = () => {
+    if (selectedEffect) {
+      onBack();
+
+      return;
+    }
+
+    if (group) {
+      setGroup(null);
+    } else {
+      setCategory(null);
+    }
+
+    setSearch('');
+  };
 
   const handleLoadingChange = useCallback((loading: boolean, message?: string) => {
     const loadingMessage = message ?? 'Загружаем файл...';
@@ -48,9 +97,30 @@ export const EffectsModal = ({
     handleResizeStop,
   } = usePanelGeometry();
 
+  const browserContent = (
+    <EffectsBrowser
+      effects={effects}
+      category={category}
+      group={group}
+      grouping={grouping}
+      search={search}
+
+      onAddAudio={onAddAudio}
+      onAddVibration={onAddVibration}
+      onAddFlashlight={onAddFlashlight}
+      onAddBackground={onAddBackground}
+      onAddSide={onAddSide}
+      onSelectEffect={onSelectEffect}
+      onCategoryChange={handleCategoryChange}
+      onGroupChange={handleGroupChange}
+      onGroupingChange={handleGroupingChange}
+      onSearchChange={setSearch}
+    />
+  );
+
   const {
-    title,
-    description,
+    title: settingsTitle,
+    description: settingsDescription,
     notice,
     content,
   } = getModalContent({
@@ -58,17 +128,32 @@ export const EffectsModal = ({
     project,
     selectedEffect,
 
-    onAddAudio,
-    onAddVibration,
-    onAddFlashlight,
-    onAddBackground,
-    onAddSide,
-    onSelectEffect,
     onUpdateEffect,
     onDuplicateEffect,
     onDeleteEffect,
     onLoadingChange: handleLoadingChange,
+    browserContent,
   });
+
+  let browserTitle = 'Эффекты страницы';
+  let browserDescription = 'Эффекты текущей страницы';
+
+  if (category) {
+    const categoryDefinition = getCategoryDefinition(category);
+
+    browserTitle = categoryDefinition.label;
+    browserDescription = categoryDefinition.description;
+
+    const groupDefinition = categoryDefinition.groups.find((cur) => cur.value === group);
+
+    if (groupDefinition) {
+      browserTitle = groupDefinition.label;
+      browserDescription = `Эффекты типа ${groupDefinition.label} в категории ${categoryDefinition.label}`;
+    }
+  }
+
+  const title = selectedEffect ? settingsTitle : browserTitle;
+  const description = selectedEffect ? settingsDescription : browserDescription;
 
   const handleToggleCollapsed = () => {
     void onBeforeCollapse().then((saved) => {
@@ -78,7 +163,8 @@ export const EffectsModal = ({
     });
   };
 
-  const showBackButton = Boolean(selectedEffect) && !isCollapsed;
+  const showBackButton = Boolean(selectedEffect || category) && !isCollapsed;
+
   let activeLoadingMessage: string | null = null;
 
   if (isSavingStyles) {
@@ -93,6 +179,7 @@ export const EffectsModal = ({
       role="dialog"
       aria-label="Эффекты страницы"
       aria-modal={false}
+      data-active-book-effects-ui
       bounds="window"
       dragHandleClassName={styles.Header}
       {...rndOptions}
@@ -106,7 +193,7 @@ export const EffectsModal = ({
         isCollapsed={isCollapsed}
         showBackButton={showBackButton}
 
-        onBack={onBack}
+        onBack={handleBack}
         onToggleCollapsed={handleToggleCollapsed}
         onClose={onClose}
       />

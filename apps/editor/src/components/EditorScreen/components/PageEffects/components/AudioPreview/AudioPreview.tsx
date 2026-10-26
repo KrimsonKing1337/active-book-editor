@@ -4,7 +4,7 @@ import { useAudioController } from 'activeBook-core/hooks/effects';
 
 import type { AudioEffectDraft } from '../../@types';
 
-import { usePageEffects } from '../../PageEffectsContext';
+import { usePageEffects } from '../../context';
 
 import styles from './AudioPreview.module.scss';
 

@@ -21,17 +21,6 @@
     font-weight: 600;
   }
 
-  > input {
-    width: 100%;
-    min-height: 38px;
-    padding: 8px 10px;
-    color: #f5f5f5;
-    background: #171717;
-    border: 1px solid #4b4b4b;
-    border-radius: 6px;
-    font: inherit;
-  }
-
   small {
     color: #a8a8a8;
     font-size: 12px;
@@ -50,22 +39,7 @@
   input {
     flex: 1;
     min-width: 0;
-    min-height: 38px;
-    padding: 8px 10px;
-    color: #f5f5f5;
-    background: #171717;
-    border: 1px solid #4b4b4b;
-    border-radius: 6px;
-    font: inherit;
   }
-}
-
-.Checkbox {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13px;
-  cursor: pointer;
 }
 
 .Preview {

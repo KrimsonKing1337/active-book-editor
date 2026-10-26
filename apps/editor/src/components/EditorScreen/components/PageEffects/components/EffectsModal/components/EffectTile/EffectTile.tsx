@@ -1,53 +1,30 @@
 import type { EditorEffectDraft } from '@components/EditorScreen/components/PageEffects/@types';
 
+import { getEffectTileContent } from './utils';
+
 import styles from '../../EffectsModal.module.scss';
 
 export type EffectTileProps = {
   effect: EditorEffectDraft;
+  path?: string;
   onSelect: (id: string) => void;
 };
 
-export const EffectTile = ({ effect, onSelect }: EffectTileProps) => {
+export const EffectTile = ({ effect, path, onSelect }: EffectTileProps) => {
   const effectSlug = effect.slug.trim() || 'Без названия';
 
-  let effectType = 'Vibration';
-  let effectDetails = '';
-
-  if (effect.type === 'audio') {
-    effectType = `Audio · ${effect.options.type}`;
-    effectDetails = effect.options.src || 'Файл не выбран';
-  } else if (effect.type === 'vibration') {
-    effectDetails = `${effect.options.duration} мс`;
-  } else if (effect.type === 'background') {
-    effectType = 'Background';
-
-    const imageCount = effect.options.images?.length ?? 0;
-    const videoCount = effect.options.videos?.length ?? 0;
-
-    effectDetails = `${imageCount} изображений · ${videoCount} видео`;
-  } else if (effect.type === 'side') {
-    effectType = 'Side';
-
-    const shadowsCount = effect.options.shadows?.length ?? 0;
-    const textsCount = effect.options.texts?.length ?? 0;
-
-    effectDetails = `${shadowsCount} теней · ${textsCount} текстов`;
-  } else {
-    effectType = 'Flashlight';
-
-    const sideShadowLabel = effect.options.withSideShadow ? 'да' : 'нет';
-
-    effectDetails = `${effect.options.duration} мс · sideShadow: ${sideShadowLabel}`;
-  }
+  const { effectType, effectDetails } = getEffectTileContent(effect);
 
   const handleSelect = () => {
     onSelect(effect.id);
   };
 
+  const effectTypeLabel = path ?? effectType;
+
   return (
     <button className={styles.Tile} type="button" onClick={handleSelect}>
       <span className={styles.Kind}>
-        {effectType}
+        {effectTypeLabel}
       </span>
 
       <strong>

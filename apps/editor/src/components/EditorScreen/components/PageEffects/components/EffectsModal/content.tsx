@@ -12,27 +12,19 @@ import {
   SideSettings,
 } from '../';
 
-import { EffectTile } from './components';
-
-import styles from './EffectsModal.module.scss';
-
-type ContentParams = Pick<
+type ContentParamsEffectsModalPicked = Pick<
   EffectsModalProps,
   | 'effects'
   | 'project'
   | 'selectedEffect'
-
-  | 'onAddAudio'
-  | 'onAddVibration'
-  | 'onAddFlashlight'
-  | 'onAddBackground'
-  | 'onAddSide'
-  | 'onSelectEffect'
   | 'onUpdateEffect'
   | 'onDuplicateEffect'
   | 'onDeleteEffect'
-> & {
+>;
+
+type ContentParams = ContentParamsEffectsModalPicked & {
   onLoadingChange: (loading: boolean, message?: string) => void;
+  browserContent: ReactNode;
 };
 
 type ModalContent = {
@@ -47,93 +39,18 @@ export const getModalContent = ({
   project,
   selectedEffect,
 
-  onAddAudio,
-  onAddVibration,
-  onAddFlashlight,
-  onAddBackground,
-  onAddSide,
-  onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,
   onLoadingChange,
+  browserContent,
 }: ContentParams): ModalContent => {
   const existingIds = effects.map((cur) => cur.id);
 
-  const isEffectsEmpty = effects.length === 0;
-
-  const buttons = [
-    {
-      id: 'audio',
-      label: 'Добавить Audio',
-      onClick: onAddAudio,
-    },
-    {
-      id: 'vibration',
-      label: 'Добавить Vibration',
-      onClick: onAddVibration,
-    },
-    {
-      id: 'flashlight',
-      label: 'Добавить Flashlight',
-      onClick: onAddFlashlight,
-    },
-    {
-      id: 'background',
-      label: 'Добавить Background',
-      onClick: onAddBackground,
-    },
-    {
-      id: 'side',
-      label: 'Добавить Side',
-      onClick: onAddSide,
-    },
-  ];
-
   let modalTitle = 'Эффекты страницы';
-  let modalDescription = 'Эффекты, которые относятся к странице';
+  let modalDescription = 'Эффекты текущей страницы';
   let notice = 'Эффекты с автозапуском срабатывают при чтении собранной книги';
-
-  let modalContent: ReactNode = (
-    <>
-      {isEffectsEmpty && (
-        <div className={styles.Empty}>
-          Пока нет эффектов
-        </div>
-      )}
-
-      <div className={styles.Tiles}>
-        {effects.map((effectCur) => {
-          return (
-            <EffectTile
-              key={effectCur.id}
-              effect={effectCur}
-              onSelect={onSelectEffect}
-            />
-          );
-        })}
-
-        {buttons.map((buttonCur) => {
-          const { id, label, onClick } = buttonCur;
-
-          return (
-            <button
-              key={id}
-              className={styles.AddTile}
-              type="button"
-              onClick={onClick}
-            >
-              <span className={styles.AddIcon} aria-hidden="true">
-                +
-              </span>
-
-              {label}
-            </button>
-          );
-        })}
-      </div>
-    </>
-  );
+  let modalContent: ReactNode = browserContent;
 
   if (selectedEffect?.type === 'audio') {
     modalTitle = 'Настройки Audio';
@@ -189,7 +106,15 @@ export const getModalContent = ({
       return effectCur.type === 'background';
     });
 
-    modalTitle = 'Настройки Background';
+    const kindLabel = {
+      background: 'фона',
+      image: 'изображения',
+      video: 'видео',
+      shadow: 'затемнения',
+      component: 'фонового компонента',
+    }[selectedEffect.kind ?? 'background'];
+
+    modalTitle = `Настройки ${kindLabel}`;
     modalDescription = 'Фон отображается прямо на странице книги';
     notice = 'В редакторе можно независимо скрывать фон и нарратив';
 
@@ -208,7 +133,13 @@ export const getModalContent = ({
   }
 
   if (selectedEffect?.type === 'side') {
-    modalTitle = 'Настройки Side';
+    const kindLabel = {
+      shadow: 'боковой тени',
+      text: 'бокового текста',
+      component: 'бокового компонента',
+    }[selectedEffect.kind ?? 'shadow'];
+
+    modalTitle = `Настройки ${kindLabel}`;
     modalDescription = 'Боковые тени, текст и кастомные компоненты';
     notice = 'Расположение и анимации обновляются сразу на странице';
 

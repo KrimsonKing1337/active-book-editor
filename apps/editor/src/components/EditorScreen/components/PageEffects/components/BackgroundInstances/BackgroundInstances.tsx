@@ -1,9 +1,6 @@
 import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
 
-import type {
-  BackgroundEffect as CoreBackgroundEffect,
-} from 'activeBook-core/hooks/effects/background/@types';
-
+import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
 import type { BookComponentProps } from '@active-book/types';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
@@ -17,14 +14,9 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundEffectDraft } from '../../@types';
 
-import {
-  type BackgroundPreviewLayer,
-  type BackgroundStylePreviews,
+import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../context';
 
-  getBackgroundPreviewKey,
-  useBackgroundStylePreviews,
-  usePageEffects,
-} from '../../PageEffectsContext';
+import { getBackgroundPreviewKey, useBackgroundStylePreviews, usePageEffects } from '../../context';
 
 type BackgroundInstancesProps = {
   project: BookProject | null;
@@ -32,110 +24,84 @@ type BackgroundInstancesProps = {
 
 const bookRuntime = createBookRuntime('editor');
 
-type ResolvedMedia = {
-  images: string[];
-  videos: string[];
-};
-
-const resolveSource = async (src: string, project: BookProject | null): Promise<string> => {
-  const trimmed = src.trim();
-
-  if (!trimmed || /^(https?:|blob:|data:)/i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (!project) {
-    throw new Error('Сохраните проект, чтобы использовать файлы из assets/');
-  }
-
-  const file = await project.storage.getAssetFile(trimmed);
-
-  return URL.createObjectURL(file);
-};
-
-export type UseResolvedMediaResolvedState = {
-  pathsKey: string;
+type ResolvedSource = {
+  src: string;
   project: BookProject | null;
-  media: ResolvedMedia;
+  value: string;
 };
 
-const useResolvedMedia = (effect: BackgroundEffectDraft, project: BookProject | null): ResolvedMedia | null => {
-  const imagePaths = effect.options.images?.map((cur) => cur.src) ?? [];
-  const videoPaths = effect.options.videos?.map((cur) => cur.src) ?? [];
-
-  const pathsKey = JSON.stringify([imagePaths, videoPaths]);
-
-  const [resolved, setResolved] = useState<UseResolvedMediaResolvedState | null>(null);
+const useResolvedSource = (src: string, project: BookProject | null): string | null => {
+  const [resolved, setResolved] = useState<ResolvedSource | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    let objectUrl: string | null = null;
 
-    const objectUrls = new Set<string>();
+    const resolve = async () => {
+      const trimmed = src.trim();
+      const directSourcePattern = /^(https?:|blob:|data:)/i;
 
-    const load = async () => {
-      const [imageSources, videoSources] = JSON.parse(pathsKey) as [string[], string[]];
+      if (!trimmed || directSourcePattern.test(trimmed)) {
+        const resolvedSource = {
+          src,
+          project,
+          value: trimmed,
+        };
 
-      const resolvePaths = async (paths: string[]) => {
-        const sources: string[] = [];
+        setResolved(resolvedSource);
 
-        for (const pathCur of paths) {
-          const resolvedSrc = await resolveSource(pathCur, project);
-
-          if (resolvedSrc.startsWith('blob:') && !pathCur.startsWith('blob:')) {
-            objectUrls.add(resolvedSrc);
-          }
-
-          sources.push(resolvedSrc);
-        }
-
-        return sources;
-      };
+        return;
+      }
 
       try {
-        const images = await resolvePaths(imageSources);
-        const videos = await resolvePaths(videoSources);
+        if (!project) {
+          throw new Error('Сохраните проект, чтобы использовать файлы из assets/');
+        }
+
+        const file = await project.storage.getAssetFile(trimmed);
+
+        objectUrl = URL.createObjectURL(file);
 
         if (!cancelled) {
-          const resolvedMedia = {
-            images,
-            videos,
+          const resolvedSource = {
+            src,
+            project,
+            value: objectUrl,
           };
 
-          setResolved({
-            pathsKey,
-            project,
-            media: resolvedMedia,
-          });
+          setResolved(resolvedSource);
         }
       } catch (error) {
         if (!cancelled) {
-          console.error('[background] Failed to load media assets', error);
+          console.error('[background] Failed to load media asset', error);
 
-          setResolved(null);
+          const resolvedSource = {
+            src,
+            project,
+            value: '',
+          };
+
+          setResolved(resolvedSource);
         }
       }
     };
 
-    void load();
+    void resolve();
 
     return () => {
       cancelled = true;
 
-      for (const urlCur of objectUrls) {
-        URL.revokeObjectURL(urlCur);
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [pathsKey, project]);
+  }, [src, project]);
 
-  if (resolved?.pathsKey !== pathsKey || resolved.project !== project) {
+  if (resolved?.src !== src || resolved.project !== project) {
     return null;
   }
 
-  return resolved.media;
-};
-
-const withPreviewStyle = (style: CSSProperties | undefined, preview: CSSProperties | undefined) => {
-  return preview ?? style;
+  return resolved.value;
 };
 
 type BackgroundInstanceProps = {
@@ -145,94 +111,103 @@ type BackgroundInstanceProps = {
   stylePreviews: BackgroundStylePreviews;
 };
 
-const BackgroundInstance = ({ effect, project, components, stylePreviews }: BackgroundInstanceProps) => {
-  const media = useResolvedMedia(effect, project);
+const BackgroundInstance = ({
+  effect,
+  project,
+  components,
+  stylePreviews,
+}: BackgroundInstanceProps) => {
+  const options = effect.options;
 
-  const {
-    component,
-    images = [],
-    videos = [],
-    ...options
-  } = effect.options;
+  let source = '';
 
-  let componentId = null;
-
-  if (component) {
-    componentId = `${component.package}/${component.name}`;
+  if (effect.kind === 'image') {
+    source = options.image?.src ?? '';
+  } else if (effect.kind === 'video') {
+    source = options.video?.src ?? '';
   }
 
-  let CustomComponent: ComponentType<BookComponentProps> | undefined;
+  const resolvedSource = useResolvedSource(source, project);
 
-  if (componentId) {
-    CustomComponent = components[componentId] as ComponentType<BookComponentProps>;
-  }
+  const component = options.component;
+  const componentId = component ? `${component.package}/${component.name}` : '';
+  const CustomComponent = components[componentId] as ComponentType<BookComponentProps> | undefined;
 
   const componentElement = useMemo(() => {
-    if (!CustomComponent) {
-      return null;
-    }
-
-    return <CustomComponent book={bookRuntime} />;
+    return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  if (!media) {
+  if (resolvedSource === null) {
     return null;
   }
 
   const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
-    const key = getBackgroundPreviewKey(effect.id, layer, mediaId);
+    const key = getBackgroundPreviewKey({
+      effectId: effect.id,
+      layer,
+      mediaId,
+    });
 
     return stylePreviews[key];
   };
 
-  const backgroundImages = images.map((imageCur, index) => {
-    const previewedStyle = withPreviewStyle(imageCur.style, previewStyle('image', imageCur.id));
+  const withPreviewStyle = (style: CSSProperties | undefined, preview: CSSProperties | undefined) => {
+    return preview ?? style;
+  };
 
-    const style = resolveStyle(previewedStyle, imageCur.styleFilters);
-    const src = media.images[index];
+  const backgroundPreviewStyle = previewStyle('background');
+  const backgroundStyle = withPreviewStyle(options.style, backgroundPreviewStyle);
 
-    return {
-      ...imageCur,
-      src,
-      style,
-    };
-  });
+  const imagePreviewStyle = options.image
+    ? previewStyle('image', options.image.id)
+    : undefined;
 
-  const backgroundVideos = videos.map((videoCur, index) => {
-    const previewedStyle = withPreviewStyle(videoCur.style, previewStyle('video', videoCur.id));
+  const imageStyle = withPreviewStyle(options.image?.style, imagePreviewStyle);
 
-    const style = resolveStyle(previewedStyle, videoCur.styleFilters);
-    const src = media.videos[index];
+  const videoPreviewStyle = options.video
+    ? previewStyle('video', options.video.id)
+    : undefined;
 
-    return {
-      ...videoCur,
-      src,
-      style,
-    };
-  });
+  const videoStyle = withPreviewStyle(options.video?.style, videoPreviewStyle);
 
-  const previewedShadowStyle = withPreviewStyle(effect.options.shadow?.style, previewStyle('shadow'));
-  const shadowStyle = resolveStyle(previewedShadowStyle, effect.options.shadow?.styleFilters);
+  const shadowPreviewStyle = options.shadow
+    ? previewStyle('shadow')
+    : undefined;
+
+  const shadowStyle = withPreviewStyle(options.shadow?.style, shadowPreviewStyle);
+
+  const style = resolveStyle(backgroundStyle, options.styleFilters);
+
+  const image = options.image && {
+    ...options.image,
+    src: resolvedSource,
+    style: resolveStyle(imageStyle, options.image.styleFilters),
+  };
+
+  const video = options.video && {
+    ...options.video,
+    src: resolvedSource,
+    style: resolveStyle(videoStyle, options.video.styleFilters),
+  };
 
   const shadow = options.shadow && {
     ...options.shadow,
-    style: shadowStyle,
+    style: resolveStyle(shadowStyle, options.shadow.styleFilters),
   };
-
-  const previewedBackgroundStyle = withPreviewStyle(effect.options.style, previewStyle('background'));
-  const backgroundStyle = resolveStyle(previewedBackgroundStyle, effect.options.styleFilters);
 
   const background: CoreBackgroundEffect = {
     id: effect.id,
-    ...options,
-    style: backgroundStyle,
+    kind: effect.kind,
+    style,
+    image,
+    video,
     shadow,
-    images: backgroundImages,
-    videos: backgroundVideos,
     Component: componentElement,
   };
 
-  return <Background {...background} />;
+  return (
+    <Background {...background} />
+  );
 };
 
 export const BackgroundInstances = ({ project }: BackgroundInstancesProps) => {

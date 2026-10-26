@@ -3,90 +3,173 @@ import test from 'node:test';
 
 import { normalizeBackgroundEffects, resolveBackgroundOptions } from './background';
 
-test('preserves background image IDs', () => {
-  const image = {
-    id: 'tree',
-    src: 'assets/tree.webp',
-  };
+test('accepts independent background, image, video and shadow effects', () => {
+  const background = [
+    {
+      id: 'bg',
+      type: 'background',
+      kind: 'background',
+      options: {
+        style: {
+          backgroundColor: '#000',
+        },
+      },
+    },
+    {
+      id: 'img',
+      type: 'background',
+      kind: 'image',
+      options: {
+        image: {
+          id: 'img-1',
+          src: 'forest.webp',
+        },
+      },
+    },
+    {
+      id: 'vid',
+      type: 'background',
+      kind: 'video',
+      options: {
+        video: {
+          id: 'vid-1',
+          src: 'fog.webm',
+        },
+      },
+    },
+    {
+      id: 'shadow',
+      type: 'background',
+      kind: 'shadow',
+      options: {
+        shadow: {
+          show: true,
+        },
+      },
+    },
+    {
+      id: 'component',
+      type: 'background',
+      kind: 'component',
+      options: {},
+    },
+  ];
 
-  const options = {
-    images: [image],
-  };
+  const effects = normalizeBackgroundEffects({ background });
 
-  const backgroundEffect = {
-    id: 'forest',
-    type: 'background',
-    options,
-  };
-
-  const background = [backgroundEffect];
-
-  const normalized = normalizeBackgroundEffects({ background });
-
-  assert.equal(normalized[0].options.images?.[0].id, 'tree');
+  assert.equal(effects.length, 5);
+  assert.deepEqual(effects.map((cur) => cur.kind), [
+    'background', 'image', 'video', 'shadow', 'component',
+  ]);
+  assert.equal(effects[1].options.image?.id, 'img-1');
 });
 
-test('rejects background images without IDs', () => {
-  const image = {
-    src: 'assets/tree.webp',
-  };
-
-  const options = {
-    images: [image],
-  };
-
-  const backgroundEffect = {
-    id: 'forest',
+test('rejects legacy grouped background effects and missing media IDs', () => {
+  const legacy = {
+    id: 'old',
     type: 'background',
-    options,
+    options: {
+      images: [{
+        id: 'img',
+        src: 'forest.webp',
+      }],
+    },
   };
 
-  const background = [backgroundEffect];
+  const invalid = {
+    id: 'new',
+    type: 'background',
+    kind: 'image',
+    options: {
+      image: {
+        src: 'forest.webp',
+      },
+    },
+  };
 
-  assert.deepEqual(normalizeBackgroundEffects({ background }), []);
+  assert.deepEqual(normalizeBackgroundEffects({ background: [legacy, invalid] }), []);
 });
 
-test('resolves per-layer filter arrays while preserving media options', () => {
+test('resolves filters on the selected layer without changing media settings', () => {
   const operation = {
-    id: 'blur-one',
-    property: 'backdropFilter' as const,
+    id: 'blur',
+    property: 'filter' as const,
     function: 'blur' as const,
     value: '12px',
   };
 
-  const imageFilter = {
-    ...operation,
-    property: 'filter' as const,
-  };
-
   const image = {
-    id: 'image',
+    id: 'img',
     src: 'assets/tree.webp',
-    styleFilters: [imageFilter],
+    styleFilters: [operation],
   };
 
   const video = {
-    id: 'video',
+    id: 'vid',
     src: 'assets/fog.webm',
-    autoPlay: false,
+    loop: false,
+  };
+
+  const backdropOperation = {
+    ...operation,
+    property: 'backdropFilter' as const,
   };
 
   const shadow = {
     show: true,
-    styleFilters: [operation],
+    styleFilters: [backdropOperation],
+  };
+
+  const style = {
+    backgroundColor: '#222',
   };
 
   const options = resolveBackgroundOptions({
-    style: { opacity: 0.8 },
-    styleFilters: [operation],
-    images: [image],
-    videos: [video],
+    image,
+    video,
     shadow,
+    style,
   });
 
-  assert.equal(options.style.backdropFilter, 'blur(12px)');
-  assert.equal(options.images?.[0].style.filter, 'blur(12px)');
-  assert.equal(options.images?.[0].src, 'assets/tree.webp');
-  assert.equal(options.videos?.[0].autoPlay, false);
+  assert.equal(options.image?.style.filter, 'blur(12px)');
+  assert.equal(options.image?.src, image.src);
+  assert.equal(options.video?.loop, false);
   assert.equal(options.shadow?.style.backdropFilter, 'blur(12px)');
+  assert.equal(options.style.backgroundColor, '#222');
+});
+
+test('rejects non-record entries and invalid media properties', () => {
+  const malformed = [
+    null,
+    {
+      id: 'invalid-options',
+      type: 'background',
+      kind: 'background',
+      options: null,
+    },
+    {
+      id: 'invalid-image-source',
+      type: 'background',
+      kind: 'image',
+      options: {
+        image: {
+          id: 'image-1',
+          src: 42,
+        },
+      },
+    },
+    {
+      id: 'blank-video-id',
+      type: 'background',
+      kind: 'video',
+      options: {
+        video: {
+          id: ' ',
+          src: 'assets/video.webm',
+        },
+      },
+    },
+  ];
+
+  assert.deepEqual(normalizeBackgroundEffects({ background: malformed }), []);
 });

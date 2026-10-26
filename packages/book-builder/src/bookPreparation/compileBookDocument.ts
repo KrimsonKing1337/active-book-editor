@@ -15,15 +15,15 @@ import type {
 import { normalizePageEffects, isRecord } from '../effects/utils';
 
 type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect | SideEffect;
-type MappedEffect<T extends EffectForGetMappedEffects> = Pick<T, 'id' | 'type' | 'options'>;
+type MappedEffect<T extends EffectForGetMappedEffects> = Omit<T, 'slug'>;
+type GetMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]) => MappedEffect<T>[];
 
-const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): MappedEffect<T>[] => {
+const getMappedEffects: GetMappedEffects = (effects) => {
   return effects.map((effectCur) => {
-    return {
-      id: effectCur.id,
-      type: effectCur.type,
-      options: effectCur.options,
-    };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { slug: _slug, ...builtEffect } = effectCur;
+
+    return builtEffect;
   });
 };
 

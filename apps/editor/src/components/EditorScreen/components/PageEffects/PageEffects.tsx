@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 
+import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+
 import type { BookProject } from '@project/@types';
 
 import type {
@@ -11,7 +13,7 @@ import type {
   SideEffectDraft,
 } from './@types';
 
-import { usePageEffects } from './PageEffectsContext';
+import { usePageEffects } from './context';
 
 import { EffectsModal } from './components';
 
@@ -121,8 +123,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     afterStylesSaved(() => setSelectedEffectId(id));
   };
 
-  const addAudio = () => {
-    const effect = createAudioEffect();
+  const addAudio = (type: AudioEffectDraft['options']['type'] = 'sfx') => {
+    const effect = createAudioEffect(type);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -139,8 +141,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addBackground = () => {
-    const effect = createBackgroundEffect();
+  const addBackground = (kind: BackgroundEffectKind) => {
+    const effect = createBackgroundEffect(kind);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -148,8 +150,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addSide = () => {
-    const effect = createSideEffect();
+  const addSide = (kind: SideEffectKind) => {
+    const effect = createSideEffect(kind);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -256,19 +258,13 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       } else if (selectedEffect.type === 'background') {
         const options = structuredClone(selectedEffect.options);
 
-        options.images = options.images?.map((imageCur) => {
-          return {
-            ...imageCur,
-            id: crypto.randomUUID(),
-          };
-        });
+        if (options.image) {
+          options.image.id = crypto.randomUUID();
+        }
 
-        options.videos = options.videos?.map((videoCur) => {
-          return {
-            ...videoCur,
-            id: crypto.randomUUID(),
-          };
-        });
+        if (options.video) {
+          options.video.id = crypto.randomUUID();
+        }
 
         const duplicate: BackgroundEffectDraft = {
           ...selectedEffect,
@@ -281,13 +277,13 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       } else if (selectedEffect.type === 'side') {
         const options = structuredClone(selectedEffect.options);
 
-        options.shadows = options.shadows?.map((shadowCur) => {
-          return { ...shadowCur, id: crypto.randomUUID() };
-        });
+        if (options.shadow) {
+          options.shadow.id = crypto.randomUUID();
+        }
 
-        options.texts = options.texts?.map((textCur) => {
-          return { ...textCur, id: crypto.randomUUID() };
-        });
+        if (options.text) {
+          options.text.id = crypto.randomUUID();
+        }
 
         const duplicate: SideEffectDraft = {
           ...selectedEffect,
@@ -349,6 +345,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         title="Эффекты страницы"
         aria-label="Эффекты страницы"
         aria-haspopup="dialog"
+        data-active-book-effects-ui
         onClick={openEffects}
       >
         <span className={styles.Icon} aria-hidden="true">

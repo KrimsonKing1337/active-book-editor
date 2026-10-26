@@ -1,6 +1,10 @@
 import { type ChangeEvent, useEffect, useRef } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
+import classNames from 'classnames';
+
+import controlStyles from '../../../EffectControls/EffectControls.module.scss';
+import inputStyles from '../../../EffectControls/TextInput/TextInput.module.scss';
 
 import { Slider } from 'activeBook-core/components';
 
@@ -117,6 +121,8 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
     onChange(String(bounded));
   };
 
+  const inputClassNames = classNames(controlStyles.Control, inputStyles.Input);
+
   return (
     <div className={styles.NumericControl}>
       <div className={styles.NumericFields}>
@@ -127,6 +133,7 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
         />
 
         <InputMask
+          className={inputClassNames}
           aria-label={label}
           mask={maskOptions.mask}
           replacement={numericReplacement}

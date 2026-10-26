@@ -3,6 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 import { HexAlphaColorPicker } from 'react-colorful';
+import classNames from 'classnames';
+
+import { Button } from '../../../EffectControls';
+
+import controlStyles from '../../../EffectControls/EffectControls.module.scss';
+import inputStyles from '../../../EffectControls/TextInput/TextInput.module.scss';
 
 import type { RgbaChannels } from '../../color';
 
@@ -269,6 +275,8 @@ export const ColorSettings = ({
     requestAnimationFrame(onCommit);
   };
 
+  const maskedInputClassNames = classNames(controlStyles.Control, inputStyles.Input);
+
   const applyButtonIsDisabled = !hasManualChanges || Boolean(validationError);
   const showValidationError = showValidation && validationError;
 
@@ -289,6 +297,7 @@ export const ColorSettings = ({
           </span>
 
           <InputMask
+            className={maskedInputClassNames}
             aria-label="HEX"
             {...hexMaskOptions}
             showMask
@@ -334,6 +343,7 @@ export const ColorSettings = ({
                 </span>
 
                 <InputMask
+                  className={maskedInputClassNames}
                   ref={handleInputRef}
                   mask="ddd"
                   replacement={{ d: /[0-9]/ }}
@@ -359,13 +369,13 @@ export const ColorSettings = ({
         </div>
 
         <div className={styles.ColorActions}>
-          <button
+          <Button
             type="button"
             disabled={applyButtonIsDisabled}
             onClick={handleApplyColor}
           >
             Применить
-          </button>
+          </Button>
         </div>
 
         {showValidationError && (

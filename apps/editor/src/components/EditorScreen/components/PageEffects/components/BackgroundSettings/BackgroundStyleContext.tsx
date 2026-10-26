@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
+import type { BackgroundPreviewLayer } from '../../context';
 
 type BackgroundStyleContextValue = {
   preview: (layer: BackgroundPreviewLayer, mediaId: string | null, style: CSSProperties) => void;

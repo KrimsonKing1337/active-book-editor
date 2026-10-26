@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 import { useEffect, useState } from 'react';
 
+import { Button } from '../../../EffectControls';
+
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
@@ -245,21 +247,21 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
               </div>
             )}
 
-            <button type="button" onClick={handleDelete}>
+            <Button type="button" variant="danger" onClick={handleDelete}>
               Удалить
-            </button>
+            </Button>
           </div>
         );
       })}
 
       <div className={styles.FilterActions}>
-        <button type="button" onClick={handleAddProperty}>
+        <Button type="button" onClick={handleAddProperty}>
           + Добавить свойство
-        </button>
+        </Button>
 
-        <button type="button" onClick={handleApplyProperties}>
+        <Button type="button" onClick={handleApplyProperties}>
           Применить свойства
-        </button>
+        </Button>
       </div>
 
       {error && (

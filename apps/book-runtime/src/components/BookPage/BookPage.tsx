@@ -101,6 +101,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
             <Side
               key={effectCur.id}
               id={effectCur.id}
+              kind={effectCur.kind}
               {...options}
               Component={componentElement}
             />
@@ -139,6 +140,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
             <Background
               key={effectCur.id}
               id={effectCur.id}
+              kind={effectCur.kind}
               {...options}
               Component={componentElement}
             />

@@ -50,15 +50,6 @@
 .Close {
   flex-shrink: 0;
   padding: 6px 9px;
-  color: #f5f5f5;
-  background: #303030;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-
-  &:hover {
-    background: #424242;
-  }
 }
 
 .Close {
@@ -87,6 +78,7 @@
 }
 
 .Tile,
+.FolderTile,
 .AddTile {
   display: flex;
   flex-direction: column;
@@ -99,7 +91,8 @@
   cursor: pointer;
 }
 
-.Tile {
+.Tile,
+.FolderTile {
   color: #f5f5f5;
   background: #2b2b2b;
   text-align: left;
@@ -130,6 +123,46 @@
   color: #bcbcbc;
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.FolderTile {
+  justify-content: space-between;
+}
+
+.FolderCount {
+  margin-top: auto;
+  color: #d0d0d0;
+  font-size: 12px;
+}
+
+.Browser {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.BrowserControls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.GroupingControl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+
+  select {
+    max-width: 200px;
+  }
+}
+
+.ResultCount {
+  margin: 0;
+  color: #a8a8a8;
+  font-size: 12px;
 }
 
 .AddTile {

@@ -1,19 +1,20 @@
-import { type ComponentType, useMemo } from 'react';
+import type { ComponentType } from 'react';
 
 import type { BookComponentProps } from '@active-book/types';
+import type { SideEffectDraft } from '../../@types';
+import type { SideItemPreviews, SideStylePreviews } from '../../context';
+
+import { useMemo } from 'react';
 
 import { Side } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
-import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
+import { usePageEffects } from '../../context';
 
-import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
-
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import { resolveSideInstanceOptions } from './utils';
 
 const bookRuntime = createBookRuntime('editor');
 
@@ -30,71 +31,28 @@ const SideInstance = ({
   previews,
   stylePreviews,
 }: SideInstanceProps) => {
-  const { component, shadows, texts } = effect.options;
+  const { component } = effect.options;
 
-  let componentId = null;
-
-  if (component) {
-    componentId = `${component.package}/${component.name}`;
-  }
-
-  let CustomComponent: ComponentType<BookComponentProps> | undefined = undefined;
-
-  if (componentId) {
-    CustomComponent = components[componentId] as ComponentType<BookComponentProps>;
-  }
+  const componentId = component ? `${component.package}/${component.name}` : '';
+  const CustomComponent = components[componentId] as ComponentType<BookComponentProps> | undefined;
 
   const componentElement = useMemo(() => {
-    if (!CustomComponent) {
-      return null;
-    }
-
-    return <CustomComponent book={bookRuntime} />;
+    return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  type ShadowItem = NonNullable<typeof shadows>[number];
-  type TextItem = NonNullable<typeof texts>[number];
-
-  type Item = ShadowItem | TextItem;
-
-  const withPreview = <T extends Item>(item: T, kind: 'shadow' | 'text'): T => {
-    const previewKey = getSidePreviewKey(effect.id, item.id);
-    const styleKey = getSideStylePreviewKey(effect.id, kind, item.id);
-
-    const preview = previews[previewKey];
-    const style = stylePreviews[styleKey] ?? item.style;
-
-    const playState = preview?.playState ?? item.animation?.playState;
-    const hidden = preview?.hidden ?? item.hidden;
-
-    const animation = {
-      ...item.animation,
-      playState,
-    };
-
-    return {
-      ...item,
-      style,
-      hidden,
-      animation,
-    };
-  };
-
-  const previewShadows = shadows?.map((cur) => withPreview(cur, 'shadow'));
-  const previewTexts = texts?.map((cur) => withPreview(cur, 'text'));
-
-  const previewOptions = {
-    shadows: previewShadows,
-    texts: previewTexts,
-  };
-
-  const resolvedOptions = resolveSideOptions(previewOptions);
+  const options = resolveSideInstanceOptions({
+    effect,
+    previews,
+    stylePreviews,
+  });
 
   return (
     <Side
       id={effect.id}
-      shadows={resolvedOptions.shadows}
-      texts={resolvedOptions.texts}
+      kind={effect.kind}
+      shadow={options.shadow}
+      text={options.text}
+      style={options.style}
       Component={componentElement}
     />
   );

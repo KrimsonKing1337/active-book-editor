@@ -1,3 +1,5 @@
+import { Button } from '../../../EffectControls';
+
 import styles from '../../EffectsModal.module.scss';
 
 type HeaderProps = {
@@ -26,9 +28,9 @@ export const Header = ({
   return (
     <div className={styles.Header}>
       {showBackButton && (
-        <button className={styles.Back} type="button" onClick={onBack}>
+        <Button className={styles.Back} type="button" onClick={onBack}>
           ← Назад
-        </button>
+        </Button>
       )}
 
       <div className={styles.Title}>
@@ -43,23 +45,23 @@ export const Header = ({
         )}
       </div>
 
-      <button
+      <Button
         className={styles.Close}
         type="button"
         aria-label={collapseButtonAriaLabel}
         onClick={onToggleCollapsed}
       >
         {collapseButtonLabel}
-      </button>
+      </Button>
 
-      <button
+      <Button
         className={styles.Close}
         type="button"
         onClick={onClose}
         aria-label="Закрыть"
       >
         ×
-      </button>
+      </Button>
     </div>
   );
 };

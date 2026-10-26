@@ -28,11 +28,15 @@ export type StyledBackgroundShadow = BackgroundEffectShadowOptions & {
   styleFilters?: FilterOperation[];
 };
 
+export const backgroundEffectKinds = ['background', 'image', 'video', 'shadow', 'component'] as const;
+
+export type BackgroundEffectKind = (typeof backgroundEffectKinds)[number];
+
 export type BackgroundOptions = {
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
-  images?: StyledBackgroundMedia[];
-  videos?: StyledBackgroundVideo[];
+  image?: StyledBackgroundMedia;
+  video?: StyledBackgroundVideo;
   shadow?: StyledBackgroundShadow;
   component?: BackgroundComponentReference;
 };
@@ -40,131 +44,125 @@ export type BackgroundOptions = {
 export type BackgroundEffect = {
   id: string;
   type: 'background';
+  kind: BackgroundEffectKind;
   slug: string;
   options: BackgroundOptions;
 };
 
 export type BuiltBackgroundEffect = Omit<BackgroundEffect, 'slug'>;
 
+type StyledLayer = {
+  style?: CSSProperties;
+  styleFilters?: FilterOperation[];
+};
+
+const resolveLayerStyle = <T extends StyledLayer>(layer: T) => {
+  const {
+    styleFilters,
+    style,
+    ...layerOptions
+  } = layer;
+
+  const resolvedStyle = resolveStyle(style, styleFilters);
+
+  return {
+    ...layerOptions,
+    style: resolvedStyle,
+  };
+};
+
 export const resolveBackgroundOptions = (options: BackgroundOptions) => {
   const {
     style,
     styleFilters,
-    images,
-    videos,
+    image,
+    video,
     shadow,
     ...rest
   } = options;
 
   const resolvedStyle = resolveStyle(style, styleFilters);
-
-  const resolvedImages = images?.map((imageCur) => {
-    const {
-      style: mediaStyle,
-      styleFilters: mediaFilters,
-      ...mediaOptions
-    } = imageCur;
-
-    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
-
-    return {
-      ...mediaOptions,
-      style: resolvedMediaStyle,
-    };
-  });
-
-  const resolvedVideos = videos?.map((videoCur) => {
-    const {
-      style: mediaStyle,
-      styleFilters: mediaFilters,
-      ...mediaOptions
-    } = videoCur;
-
-    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
-
-    return {
-      ...mediaOptions,
-      style: resolvedMediaStyle,
-    };
-  });
-
-  let resolvedShadow;
-
-  if (shadow) {
-    const style = resolveStyle(shadow.style, shadow.styleFilters);
-
-    resolvedShadow = {
-      show: shadow.show,
-      style,
-    };
-  }
+  const resolvedImage = image ? resolveLayerStyle(image) : undefined;
+  const resolvedVideo = video ? resolveLayerStyle(video) : undefined;
+  const resolvedShadow = shadow ? resolveLayerStyle(shadow) : undefined;
 
   return {
     ...rest,
     style: resolvedStyle,
-    images: resolvedImages,
-    videos: resolvedVideos,
+    image: resolvedImage,
+    video: resolvedVideo,
     shadow: resolvedShadow,
   };
 };
 
 export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] => {
-  if (!isRecord(value) || !Array.isArray(value.background)) {
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  if (!Array.isArray(value.background)) {
     return [];
   }
 
   const result: BackgroundEffect[] = [];
 
   for (const effectCur of value.background) {
-    if (
-      !isRecord(effectCur)
-      || effectCur.type !== 'background'
-      || !isRecord(effectCur.options)
-    ) {
+    if (!isRecord(effectCur)) {
       continue;
     }
 
-    if (typeof effectCur.id !== 'string' || !effectCur.id.trim()) {
+    const hasCorrectType = effectCur.type === 'background';
+
+    if (!hasCorrectType) {
       continue;
     }
 
-    const images = Array.isArray(effectCur.options.images) ? effectCur.options.images : [];
-    const videos = Array.isArray(effectCur.options.videos) ? effectCur.options.videos : [];
+    const options = effectCur.options;
 
-    const imagesAreValid = images.every((imageCur) => {
-      if (!isRecord(imageCur)) {
-        return false;
-      }
+    if (!isRecord(options)) {
+      continue;
+    }
 
-      const idIsValid = typeof imageCur.id === 'string' && !!imageCur.id.trim();
-      const srcIsValid = typeof imageCur.src === 'string';
+    const id = effectCur.id;
 
-      return idIsValid && srcIsValid;
+    if (typeof id !== 'string' || !id.trim()) {
+      continue;
+    }
+
+    const kind = backgroundEffectKinds.find((kindCur) => {
+      return kindCur === effectCur.kind;
     });
 
-    const videosAreValid = videos.every((videoCur) => {
-      if (!isRecord(videoCur)) {
-        return false;
-      }
-
-      const idIsValid = typeof videoCur.id === 'string';
-      const srcIsValid = typeof videoCur.src === 'string';
-
-      return idIsValid && srcIsValid;
-    });
-
-    if (!imagesAreValid || !videosAreValid) {
+    if (!kind) {
       continue;
     }
 
-    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фон';
-    const options = effectCur.options as BackgroundOptions;
+    if (kind === 'image' || kind === 'video') {
+      const media = options[kind];
+
+      if (!isRecord(media)) {
+        continue;
+      }
+
+      const mediaId = media.id;
+      const mediaSource = media.src;
+
+      const hasValidMediaId = typeof mediaId === 'string' && Boolean(mediaId.trim());
+      const hasValidSource = typeof mediaSource === 'string';
+
+      if (!hasValidMediaId || !hasValidSource) {
+        continue;
+      }
+    }
+
+    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фоновый эффект';
 
     result.push({
-      id: effectCur.id,
+      id,
       type: 'background',
+      kind,
       slug,
-      options,
+      options: options as BackgroundOptions,
     });
   }
 

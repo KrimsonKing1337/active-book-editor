@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from 'react';
+
 import { useEffect, useState } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -67,6 +69,7 @@ export const EditorScreen = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
   const [showSavedStatus, setShowSavedStatus] = useState(false);
+  const [isNodeSelectionActive, setIsNodeSelectionActive] = useState(false);
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
   const [showStructure, setShowStructure] = useState(() => {
@@ -158,6 +161,40 @@ export const EditorScreen = () => {
   useSaveShortcut(handleSaveProject);
 
   useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    const handleCanvasInteraction = (event: Event) => {
+      const target = event.target;
+
+      if (!(target instanceof Node)) {
+        return;
+      }
+
+      if (editor.view.dom.contains(target)) {
+        setIsNodeSelectionActive(true);
+
+        return;
+      }
+
+      if (target instanceof Element && target.closest('[data-active-book-effects-ui]')) {
+        return;
+      }
+
+      setIsNodeSelectionActive(false);
+    };
+
+    document.addEventListener('pointerdown', handleCanvasInteraction, true);
+    document.addEventListener('focusin', handleCanvasInteraction, true);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleCanvasInteraction, true);
+      document.removeEventListener('focusin', handleCanvasInteraction, true);
+    };
+  }, [editor]);
+
+  useEffect(() => {
     localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
   }, [showStructure]);
 
@@ -210,6 +247,7 @@ export const EditorScreen = () => {
     [styles.EditorScreen]: true,
     [styles.isStructureVisible]: showStructure,
     [styles.isNarrativeHidden]: !showNarrative,
+    [styles.isNodeSelectionActive]: isNodeSelectionActive,
   });
 
   const toggleStructure = () => {
@@ -282,6 +320,30 @@ export const EditorScreen = () => {
     insertTextComponent(editor, name);
   };
 
+  const handleCanvasKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Escape' || !editor) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Node) || !editor.view.dom.contains(target)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const focusedElement = document.activeElement;
+
+    if (focusedElement instanceof HTMLElement && editor.view.dom.contains(focusedElement)) {
+      focusedElement.blur();
+    }
+
+    editor.commands.blur();
+    setIsNodeSelectionActive(false);
+  };
+
   return (
     <PageEffectsProvider editor={editor}>
       <div className={editorScreenClassNames}>
@@ -333,7 +395,7 @@ export const EditorScreen = () => {
           {buildStateLabel}
         </div>
 
-        <main className={styles.Canvas}>
+        <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
           <App
             config={editorConfig}
             appMode="editor"

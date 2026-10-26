@@ -1,5 +1,5 @@
-export * from './Images';
-export * from './Videos';
+export * from './Image';
+export * from './Video';
 export * from './Shadow';
 export * from './Background';
 export * from './CustomComponent';

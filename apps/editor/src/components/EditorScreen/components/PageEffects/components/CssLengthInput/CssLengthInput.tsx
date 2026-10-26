@@ -3,8 +3,10 @@ import { type ChangeEvent, useEffect, useState } from 'react';
 import { InputMask, unformat } from '@react-input/mask';
 import classNames from 'classnames';
 
+import { Select } from '../EffectControls';
+
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
-import layoutStyles from './CssLengthInput.module.scss';
+import styles from './CssLengthInput.module.scss';
 
 import { type Unit, units, maskOptions } from './constants';
 
@@ -50,6 +52,7 @@ export const CssLengthInput = ({
 
   const handleAmountChange = (event: ChangeEvent<HTMLInputElement>) => {
     const raw = unformat(event.target.value, maskOptions);
+
     const isPartial = raw === '' || raw === '-' || raw === '.' || raw === '-.';
 
     if (raw === '') {
@@ -93,24 +96,29 @@ export const CssLengthInput = ({
   };
 
   const handleUnitChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    onChange(`${amount}${event.target.value}`);
+    const value = `${amount}${event.target.value}`;
+
+    onChange(value);
   };
 
   const handleBlur = () => {
     const partial = draft === '-' || draft === '.' || draft === '-.';
 
     if (partial) {
-      onChange(`0${unit}`);
+      const value = `0${unit}`;
+
+      onChange(value);
     }
 
-    setDraft(partial ? '0' : amount);
+    const value = partial ? '0' : amount;
+
+    setDraft(value);
   };
 
-  const valueInputClassNames = classNames(sharedStyles.Control, layoutStyles.Value);
-  const unitsSelectClassNames = classNames(sharedStyles.Control, layoutStyles.Unit);
+  const valueInputClassNames = classNames(sharedStyles.Control, styles.Value);
 
   return (
-    <span className={layoutStyles.Container}>
+    <span className={styles.Container}>
       <InputMask
         className={valueInputClassNames}
         aria-label={label}
@@ -123,8 +131,8 @@ export const CssLengthInput = ({
         onBlur={handleBlur}
       />
 
-      <select
-        className={unitsSelectClassNames}
+      <Select
+        className={styles.Unit}
         aria-label={`${label}: единица измерения`}
         value={unit}
         onChange={handleUnitChange}
@@ -136,7 +144,7 @@ export const CssLengthInput = ({
             </option>
           );
         })}
-      </select>
+      </Select>
     </span>
   );
 };

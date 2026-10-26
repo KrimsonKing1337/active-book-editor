@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import { type BackgroundPreviewLayer, usePageEffects } from '../../PageEffectsContext';
+import { type BackgroundPreviewLayer, usePageEffects } from '../../context';
 
 
 import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
@@ -12,6 +12,7 @@ import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyl
 import { type StyleEditorController, useStyleEditor } from './hooks';
 
 import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
+import { getLayerZIndexData } from './utils';
 
 import styles from './StyleEditor.module.scss';
 
@@ -65,63 +66,17 @@ export const StyleEditor = ({
   const backgroundStyle = useOptionalBackgroundStyle();
   const { effects } = usePageEffects();
 
-  const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
-  const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
-
-  const layerZIndexes: number[] = [];
-
-  for (const effectCur of effects) {
-    if (controller && effectCur.type === 'side') {
-      const shadows = effectCur.options.shadows ?? [];
-      const texts = effectCur.options.texts ?? [];
-
-      const items = [
-        ...shadows,
-        ...texts,
-      ];
-
-      for (const itemCur of items) {
-        const value = Number(itemCur.style?.zIndex);
-
-        if (itemCur.style?.zIndex !== undefined && Number.isFinite(value)) {
-          layerZIndexes.push(value);
-        }
-      }
-    } else if (!controller && effectCur.type === 'background') {
-      const options = effectCur.options;
-
-      const images = options.images ?? [];
-      const videos = options.videos ?? [];
-
-      const imagesStyles = images.map((cur) => cur.style);
-      const videosStyles = videos.map((cur) => cur.style);
-
-      const layerStyles = [
-        options.style,
-        options.shadow?.style,
-        ...imagesStyles,
-        ...videosStyles,
-      ];
-
-      for (const styleCur of layerStyles) {
-        const value = Number(styleCur?.zIndex);
-
-        if (styleCur?.zIndex !== undefined && Number.isFinite(value)) {
-          layerZIndexes.push(value);
-        }
-      }
-    }
-  }
-
-  const minimumZIndex = Math.min(zIndex, ...layerZIndexes);
-  const maximumZIndex = Math.max(zIndex, ...layerZIndexes);
-
-  const sameIndexes = layerZIndexes.filter((indexCur) => indexCur === zIndex);
-
-  const currentLayerIsRegistered = currentStyle.zIndex !== undefined;
-  const digit = currentLayerIsRegistered ? 1 : 0;
-
-  const otherLayersAtSameIndex = sameIndexes.length > digit;
+  const {
+    zIndex,
+    minimumZIndex,
+    maximumZIndex,
+    otherLayersAtSameIndex,
+  } = getLayerZIndexData({
+    effects,
+    currentStyle,
+    defaultZIndex,
+    isSide: Boolean(controller),
+  });
 
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
