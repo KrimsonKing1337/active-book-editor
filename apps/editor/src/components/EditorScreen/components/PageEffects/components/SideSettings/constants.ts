@@ -1,4 +1,5 @@
 import type { SideOptions } from '@active-book/book-builder/effects';
+import type { SideShadowPreset } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
 import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
@@ -21,7 +22,7 @@ export const positions: PositionOption[] = [
   { value: 'bottom-right', label: 'Снизу справа' },
 ];
 
-export const shadowPresets = [...SIDE_SHADOW_PRESETS];
+export const shadowPresets: SideShadowPreset[] = [...SIDE_SHADOW_PRESETS];
 
 export const textPresets = [
   { value: 'scroll' as const, label: 'Прокрутка' },

@@ -218,7 +218,9 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       return current.value === (shadow.animation?.preset ?? 'none');
     });
 
-    if (selectedPreset?.canChangeColor === false) {
+    const canChangeColor = selectedPreset?.canChangeColor ?? false;
+
+    if (!canChangeColor) {
       colorDisabledReason = 'Цвет этого пресета меняется автоматически. Выберите одноцветный пресет';
     }
   }
