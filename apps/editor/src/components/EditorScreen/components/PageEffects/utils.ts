@@ -113,7 +113,9 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
     };
   } else if (kind === 'component') {
     slug = 'Новый фоновый компонент';
-    options = {};
+    options = {
+      style: { zIndex: 1 },
+    };
   }
 
   return {
@@ -129,7 +131,9 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
   const id = crypto.randomUUID();
 
   let slug = 'Новый боковой компонент';
-  let options: SideEffectDraft['options'] = {};
+  let options: SideEffectDraft['options'] = {
+    style: { zIndex: 1 },
+  };
 
   if (kind === 'shadow') {
     slug = 'Новая боковая тень';
