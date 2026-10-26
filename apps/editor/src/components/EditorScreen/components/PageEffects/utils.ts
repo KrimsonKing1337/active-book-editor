@@ -87,20 +87,20 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
   if (kind === 'image') {
     slug = 'Новое изображение';
     options = {
-      images: [{
+      image: {
         id: crypto.randomUUID(),
         src: '',
         style: { zIndex: 1 },
-      }],
+      },
     };
   } else if (kind === 'video') {
     slug = 'Новое видео';
     options = {
-      videos: [{
+      video: {
         id: crypto.randomUUID(),
         src: '',
         style: { zIndex: 1 },
-      }],
+      },
     };
   } else if (kind === 'shadow') {
     slug = 'Новое затемнение';
@@ -134,7 +134,7 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
   if (kind === 'shadow') {
     slug = 'Новая боковая тень';
     options = {
-      shadows: [{
+      shadow: {
         id: crypto.randomUUID(),
         position: 'top-left',
         style: {
@@ -147,12 +147,12 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
           duration: 1000,
           iterations: 'infinite',
         },
-      }],
+      },
     };
   } else if (kind === 'text') {
     slug = 'Новый боковой текст';
     options = {
-      texts: [{
+      text: {
         id: crypto.randomUUID(),
         leftText: 'Левая сторона',
         rightText: 'Правая сторона',
@@ -166,7 +166,7 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
           duration: 60000,
           iterations: 'infinite',
         },
-      }],
+      },
     };
   }
 

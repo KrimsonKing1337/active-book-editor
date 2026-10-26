@@ -258,19 +258,13 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       } else if (selectedEffect.type === 'background') {
         const options = structuredClone(selectedEffect.options);
 
-        options.images = options.images?.map((imageCur) => {
-          return {
-            ...imageCur,
-            id: crypto.randomUUID(),
-          };
-        });
+        if (options.image) {
+          options.image.id = crypto.randomUUID();
+        }
 
-        options.videos = options.videos?.map((videoCur) => {
-          return {
-            ...videoCur,
-            id: crypto.randomUUID(),
-          };
-        });
+        if (options.video) {
+          options.video.id = crypto.randomUUID();
+        }
 
         const duplicate: BackgroundEffectDraft = {
           ...selectedEffect,
@@ -283,13 +277,13 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       } else if (selectedEffect.type === 'side') {
         const options = structuredClone(selectedEffect.options);
 
-        options.shadows = options.shadows?.map((shadowCur) => {
-          return { ...shadowCur, id: crypto.randomUUID() };
-        });
+        if (options.shadow) {
+          options.shadow.id = crypto.randomUUID();
+        }
 
-        options.texts = options.texts?.map((textCur) => {
-          return { ...textCur, id: crypto.randomUUID() };
-        });
+        if (options.text) {
+          options.text.id = crypto.randomUUID();
+        }
 
         const duplicate: SideEffectDraft = {
           ...selectedEffect,
