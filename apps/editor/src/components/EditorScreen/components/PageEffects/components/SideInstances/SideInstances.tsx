@@ -43,39 +43,61 @@ const SideInstance = ({
     return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  const shadowPreview = shadow && previews[getSidePreviewKey(effect.id, shadow.id)];
-  const textPreview = text && previews[getSidePreviewKey(effect.id, text.id)];
+  const shadowPreviewKey = shadow && getSidePreviewKey(effect.id, shadow.id);
+  const textPreviewKey = text && getSidePreviewKey(effect.id, text.id);
 
-  const shadowStyle = shadow && stylePreviews[getSideStylePreviewKey(effect.id, 'shadow', shadow.id)];
-  const textStyle = text && stylePreviews[getSideStylePreviewKey(effect.id, 'text', text.id)];
+  const shadowPreview = shadowPreviewKey && previews[shadowPreviewKey];
+  const textPreview = textPreviewKey && previews[textPreviewKey];
+
+  const shadowStyleKey = shadow && getSideStylePreviewKey(effect.id, 'shadow', shadow.id);
+  const textStyleKey = text && getSideStylePreviewKey(effect.id, 'text', text.id);
+  const componentStyleKey = getSideStylePreviewKey(effect.id, 'component', effect.id);
+
+  const shadowStyle = shadowStyleKey && stylePreviews[shadowStyleKey];
+  const textStyle = textStyleKey && stylePreviews[textStyleKey];
+  const componentStyle = stylePreviews[componentStyleKey];
+
+  const previewShadowStyle = shadowStyle ?? shadow?.style;
+  const previewShadowHidden = shadowPreview?.hidden ?? shadow?.hidden;
+  const shadowPlayState = shadowPreview?.playState ?? shadow?.animation?.playState;
+
+  const shadowAnimation = {
+    ...shadow?.animation,
+    playState: shadowPlayState,
+  };
 
   const previewShadow = shadow && {
     ...shadow,
-    style: shadowStyle ?? shadow.style,
-    hidden: shadowPreview?.hidden ?? shadow.hidden,
-    animation: {
-      ...shadow.animation,
-      playState: shadowPreview?.playState ?? shadow.animation?.playState,
-    },
+    style: previewShadowStyle,
+    hidden: previewShadowHidden,
+    animation: shadowAnimation,
+  };
+
+  const previewTextStyle = textStyle ?? text?.style;
+  const previewTextHidden = textPreview?.hidden ?? text?.hidden;
+  const textPlayState = textPreview?.playState ?? text?.animation?.playState;
+
+  const textAnimation = {
+    ...text?.animation,
+    playState: textPlayState,
   };
 
   const previewText = text && {
     ...text,
-    style: textStyle ?? text.style,
-    hidden: textPreview?.hidden ?? text.hidden,
-    animation: {
-      ...text.animation,
-      playState: textPreview?.playState ?? text.animation?.playState,
-    },
+    style: previewTextStyle,
+    hidden: previewTextHidden,
+    animation: textAnimation,
   };
 
-  const componentStyle = stylePreviews[getSideStylePreviewKey(effect.id, 'component', effect.id)];
+  const resolvedShadow = previewShadow ?? undefined;
+  const resolvedText = previewText ?? undefined;
+  const previewComponentStyle = componentStyle ?? effect.options.style;
 
   const options = resolveSideOptions({
     ...effect.options,
-    shadow: previewShadow ?? undefined,
-    text: previewText ?? undefined,
-    style: componentStyle ?? effect.options.style,
+    shadow: resolvedShadow,
+    text: resolvedText,
+    style: previewComponentStyle,
   });
 
   return (
