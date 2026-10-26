@@ -1,9 +1,6 @@
 import type { ProjectDirectoryHandle } from './fileSystemAccess';
 
-const DATABASE_NAME = 'active-book-editor';
-const DATABASE_VERSION = 1;
-const STORE_NAME = 'project-handles';
-const LAST_PROJECT_KEY = 'last-project';
+import { DATABASE_NAME, DATABASE_VERSION, STORE_NAME, LAST_PROJECT_KEY } from './constants';
 
 const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => {
   return new Promise((resolve, reject) => {

@@ -47,11 +47,13 @@ import {
 
 import styles from './EditorScreen.module.scss';
 
-const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
-const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
-const SHOW_NARRATIVE_STORAGE_KEY = 'activeBook-editor:showNarrative';
-const SHOW_BACKGROUNDS_STORAGE_KEY = 'activeBook-editor:showBackgrounds';
-const SHOW_SIDE_EFFECTS_STORAGE_KEY = 'activeBook-editor:showSideEffects';
+import {
+  SHOW_STRUCTURE_STORAGE_KEY,
+  HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY,
+  SHOW_NARRATIVE_STORAGE_KEY,
+  SHOW_BACKGROUNDS_STORAGE_KEY,
+  SHOW_SIDE_EFFECTS_STORAGE_KEY,
+} from './constants';
 
 export const EditorScreen = () => {
   const { definitions: customComponentDefinitions } = useCustomComponents();
