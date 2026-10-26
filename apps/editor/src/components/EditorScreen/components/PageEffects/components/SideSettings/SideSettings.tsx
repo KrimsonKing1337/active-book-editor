@@ -363,7 +363,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         />
       </label>
 
-      <details className={styles.Section}>
+      {(!effect.kind || effect.kind === 'shadow') && (
+        <details className={styles.Section}>
         <summary>
           {shadowCountLabel}
         </summary>
@@ -499,21 +500,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={handleAnimationChange}
               />
 
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-              >
-                Удалить тень
-              </Button>
+              {!effect.kind && (
+                <Button variant="danger" onClick={handleDelete}>
+                  Удалить тень
+                </Button>
+              )}
             </div>
           );
         })}
 
-        <Button variant="success" onClick={addShadow}>
-          Добавить тень
-        </Button>
+        {!effect.kind && (
+          <Button variant="success" onClick={addShadow}>
+            Добавить тень
+          </Button>
+        )}
       </details>
+      )}
 
+      {(!effect.kind || effect.kind === 'text') && (
       <details className={styles.Section}>
         <summary>
           {textCountLabel}
@@ -675,21 +679,24 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
                 onChange={handleAnimationChange}
               />
 
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-              >
-                Удалить текст
-              </Button>
+              {!effect.kind && (
+                <Button variant="danger" onClick={handleDelete}>
+                  Удалить текст
+                </Button>
+              )}
             </div>
           );
         })}
 
-        <Button variant="success" onClick={addText}>
-          Добавить текст
-        </Button>
+        {!effect.kind && (
+          <Button variant="success" onClick={addText}>
+            Добавить текст
+          </Button>
+        )}
       </details>
+      )}
 
+      {(!effect.kind || effect.kind === 'component') && (
       <details className={styles.Section}>
         <summary>
           Кастомный компонент
@@ -711,6 +718,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           })}
         </Select>
       </details>
+      )}
 
       <div className={styles.Actions}>
         <Button onClick={onDuplicate}>

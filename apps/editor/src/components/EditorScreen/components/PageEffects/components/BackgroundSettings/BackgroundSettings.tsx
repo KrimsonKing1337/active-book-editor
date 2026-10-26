@@ -278,24 +278,37 @@ export const BackgroundSettings = ({
           </div>
         </div>
 
-        <Background style={style} styleFilters={options.styleFilters} />
+        {(!effect.kind || effect.kind === 'background') && (
+          <Background style={style} styleFilters={options.styleFilters} />
+        )}
 
-        <Images
-          images={images}
-          canImport={Boolean(project)}
-          onChange={handleImagesChange}
-          onImportAsset={handleImportImage}
-        />
+        {(!effect.kind || effect.kind === 'image') && (
+          <Images
+            images={images}
+            canImport={Boolean(project)}
+            allowMultiple={!effect.kind}
+            onChange={handleImagesChange}
+            onImportAsset={handleImportImage}
+          />
+        )}
 
-        <Videos
-          videos={videos}
-          canImport={Boolean(project)}
-          onChange={handleVideosChange}
-          onImportAsset={handleImportVideo}
-        />
+        {(!effect.kind || effect.kind === 'video') && (
+          <Videos
+            videos={videos}
+            canImport={Boolean(project)}
+            allowMultiple={!effect.kind}
+            onChange={handleVideosChange}
+            onImportAsset={handleImportVideo}
+          />
+        )}
 
-        <Shadow shadow={shadow} onChange={handleShadowChange} />
-        <CustomComponent component={options.component} onChange={handleComponentChange} />
+        {(!effect.kind || effect.kind === 'shadow') && (
+          <Shadow shadow={shadow} onChange={handleShadowChange} />
+        )}
+
+        {(!effect.kind || effect.kind === 'component') && (
+          <CustomComponent component={options.component} onChange={handleComponentChange} />
+        )}
 
         <div className={styles.Actions}>
           <Button type="button" onClick={onDuplicate}>

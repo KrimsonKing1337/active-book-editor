@@ -16,6 +16,7 @@ export type BackgroundImagesProps = {
   images: BackgroundImages;
   onChange: (images: BackgroundImages) => void;
   canImport: boolean;
+  allowMultiple?: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
@@ -23,6 +24,7 @@ export const Images = ({
   images,
 
   canImport,
+  allowMultiple = true,
   onChange,
   onImportAsset,
 }: BackgroundImagesProps) => {
@@ -103,16 +105,20 @@ export const Images = ({
               />
             </details>
 
-            <Button variant="danger" onClick={handleDeleteImage}>
-              Удалить изображение
-            </Button>
+            {allowMultiple && (
+              <Button variant="danger" onClick={handleDeleteImage}>
+                Удалить изображение
+              </Button>
+            )}
           </div>
         );
       })}
 
-      <Button variant="success" onClick={handleAdd}>
-        Добавить изображение
-      </Button>
+      {allowMultiple && (
+        <Button variant="success" onClick={handleAdd}>
+          Добавить изображение
+        </Button>
+      )}
     </details>
   );
 };

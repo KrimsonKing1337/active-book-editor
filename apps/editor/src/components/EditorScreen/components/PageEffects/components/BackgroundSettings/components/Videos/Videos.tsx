@@ -19,6 +19,7 @@ export type BackgroundVideosProps = {
 
   onChange: (videos: BackgroundVideos) => void;
   canImport: boolean;
+  allowMultiple?: boolean;
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
@@ -26,6 +27,7 @@ export const Videos = ({
   videos,
 
   canImport,
+  allowMultiple = true,
   onChange,
   onImportAsset,
 }: BackgroundVideosProps) => {
@@ -150,16 +152,20 @@ export const Videos = ({
               />
             </details>
 
-            <Button variant="danger" onClick={handleDeleteVideo}>
-              Удалить видео
-            </Button>
+            {allowMultiple && (
+              <Button variant="danger" onClick={handleDeleteVideo}>
+                Удалить видео
+              </Button>
+            )}
           </div>
         );
       })}
 
-      <Button variant="success" onClick={handleAdd}>
-        Добавить видео
-      </Button>
+      {allowMultiple && (
+        <Button variant="success" onClick={handleAdd}>
+          Добавить видео
+        </Button>
+      )}
     </details>
   );
 };
