@@ -7,7 +7,7 @@ import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
-import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
+import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../context';
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 

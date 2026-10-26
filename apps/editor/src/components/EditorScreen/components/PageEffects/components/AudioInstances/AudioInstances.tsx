@@ -9,7 +9,7 @@ import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from '../../@types';
 
-import { usePageEffects } from '../../PageEffectsContext';
+import { usePageEffects } from '../../context';
 
 import { type ResolvedAudioSource, resolveAudioSource } from './utils';
 

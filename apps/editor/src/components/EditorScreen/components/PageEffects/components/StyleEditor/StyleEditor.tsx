@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import { type BackgroundPreviewLayer, usePageEffects } from '../../PageEffectsContext';
+import { type BackgroundPreviewLayer, usePageEffects } from '../../context';
 
 
 import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';

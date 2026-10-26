@@ -2,7 +2,7 @@ import type { ComponentType } from 'react';
 
 import type { BookComponentProps } from '@active-book/types';
 import type { SideEffectDraft } from '../../@types';
-import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
+import type { SideItemPreviews, SideStylePreviews } from '../../context';
 
 import { useMemo } from 'react';
 
@@ -12,7 +12,7 @@ import { createBookRuntime } from '@active-book/book-builder/components/custom/r
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { usePageEffects } from '../../PageEffectsContext';
+import { usePageEffects } from '../../context';
 
 import { resolveSideInstanceOptions } from './utils';
 

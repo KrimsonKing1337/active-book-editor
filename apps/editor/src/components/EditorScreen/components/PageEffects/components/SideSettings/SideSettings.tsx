@@ -7,7 +7,7 @@ import type { StyleEditorController } from '../StyleEditor/hooks';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
+import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
 
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';

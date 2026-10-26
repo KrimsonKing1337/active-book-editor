@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { EditorEffectDraft } from './@types';
+import type { EditorEffectDraft } from '../@types';
 
 export type AudioPreviewStatus = {
   state: 'empty' | 'loading' | 'ready' | 'error';

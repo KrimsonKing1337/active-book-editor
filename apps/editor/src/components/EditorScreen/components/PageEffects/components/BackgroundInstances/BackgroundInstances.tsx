@@ -14,9 +14,9 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundEffectDraft } from '../../@types';
 
-import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
+import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../context';
 
-import { getBackgroundPreviewKey, useBackgroundStylePreviews, usePageEffects } from '../../PageEffectsContext';
+import { getBackgroundPreviewKey, useBackgroundStylePreviews, usePageEffects } from '../../context';
 
 type BackgroundInstancesProps = {
   project: BookProject | null;

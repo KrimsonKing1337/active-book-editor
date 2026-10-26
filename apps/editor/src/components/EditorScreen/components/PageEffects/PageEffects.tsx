@@ -13,7 +13,7 @@ import type {
   SideEffectDraft,
 } from './@types';
 
-import { usePageEffects } from './PageEffectsContext';
+import { usePageEffects } from './context';
 
 import { EffectsModal } from './components';
 

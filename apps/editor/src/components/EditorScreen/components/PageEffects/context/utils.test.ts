@@ -1,4 +1,4 @@
-import type { EditorEffectDraft } from './@types';
+import type { EditorEffectDraft } from '../@types';
 
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -9,7 +9,7 @@ import {
   getSidePreviewKey,
   getSideStylePreviewKey,
   groupPageEffects,
-} from './PageEffectsContext.utils';
+} from './utils';
 
 const background = {
   id: 'background-1',

@@ -11,14 +11,14 @@ import type {
   FlashlightEffectDraft,
   SideEffectDraft,
   VibrationEffectDraft,
-} from './@types';
+} from '../@types';
 
 import type {
   BackgroundPreviewKeyParams,
   BackgroundStylePreviews,
   SideStylePreviewKeyParams,
   SideStylePreviews,
-} from './PageEffectsContext.types';
+} from './@types';
 
 type GroupPageEffectsParams = {
   effects: EditorEffectDraft[];
@@ -136,8 +136,22 @@ const applySideStylePreviews = (
     return effect;
   }
 
-  const updatedShadow = shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow;
-  const updatedText = textStyle && text ? { ...text, style: textStyle } : text;
+  let updatedShadow = shadow;
+  let updatedText = text;
+
+  if (shadowStyle && shadow) {
+    updatedShadow = {
+      ...shadow,
+      style: shadowStyle,
+    };
+  }
+
+  if (textStyle && text) {
+    updatedText = {
+      ...text,
+      style: textStyle,
+    };
+  }
   const updatedStyle = componentStyle ?? effect.options.style;
 
   const options = {
@@ -157,7 +171,11 @@ const applyBackgroundStylePreviews = (
   effect: BackgroundEffectDraft,
   previews: BackgroundStylePreviews,
 ): BackgroundEffectDraft => {
-  const { image, video, shadow } = effect.options;
+  const {
+    image,
+    video,
+    shadow,
+  } = effect.options;
 
   const backgroundKey = getBackgroundPreviewKey({
     effectId: effect.id,
@@ -196,9 +214,30 @@ const applyBackgroundStylePreviews = (
   }
 
   const updatedStyle = backgroundStyle ?? effect.options.style;
-  const updatedImage = imageStyle && image ? { ...image, style: imageStyle } : image;
-  const updatedVideo = videoStyle && video ? { ...video, style: videoStyle } : video;
-  const updatedShadow = shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow;
+  let updatedImage = image;
+  let updatedVideo = video;
+  let updatedShadow = shadow;
+
+  if (imageStyle && image) {
+    updatedImage = {
+      ...image,
+      style: imageStyle,
+    };
+  }
+
+  if (videoStyle && video) {
+    updatedVideo = {
+      ...video,
+      style: videoStyle,
+    };
+  }
+
+  if (shadowStyle && shadow) {
+    updatedShadow = {
+      ...shadow,
+      style: shadowStyle,
+    };
+  }
 
   const options = {
     ...effect.options,

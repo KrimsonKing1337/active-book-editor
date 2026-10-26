@@ -134,3 +134,39 @@ test('resolves filters on one side effect at a time', () => {
   assert.equal(result.text?.style.filter, 'opacity(50%)');
   assert.deepEqual(shadow.style, { color: '#ff0000', zIndex: 4 });
 });
+
+test('rejects missing side text fields and invalid shadow IDs', () => {
+  const malformed = [
+    {
+      id: 'shadow',
+      type: 'side',
+      kind: 'shadow',
+      options: {
+        shadow: {
+          id: ' ',
+        },
+      },
+    },
+    {
+      id: 'text',
+      type: 'side',
+      kind: 'text',
+      options: {
+        text: {
+          id: 'text-1',
+          leftText: 'Left',
+        },
+      },
+    },
+    {
+      id: 'not-an-object',
+      type: 'side',
+      kind: 'text',
+      options: {
+        text: null,
+      },
+    },
+  ];
+
+  assert.deepEqual(normalizeSideEffects({ side: malformed }), []);
+});

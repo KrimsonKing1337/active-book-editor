@@ -3,8 +3,9 @@ import type { CSSProperties } from 'react';
 import type { SideShadowItem, SideTextItem } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { BackgroundComponentReference } from '../background';
-import { type FilterOperation, resolveStyle } from '../style';
+import type { FilterOperation } from '../style';
 
+import { resolveStyle } from '../style';
 import { isRecord } from '../utils';
 
 type StyleFilters = {
@@ -36,62 +37,75 @@ export type SideEffect = {
 
 export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
 
-export const resolveSideOptions = (options: SideOptions) => {
-  const shadowItem = options.shadow;
-  const textItem = options.text;
+type StyledItem = {
+  style?: CSSProperties;
+  styleFilters?: FilterOperation[];
+};
 
-  const shadow = shadowItem && (() => {
-    const { styleFilters, style, ...item } = shadowItem;
+const resolveItemStyle = <T extends StyledItem>(item: T) => {
+  const {
+    styleFilters,
+    style,
+    ...itemOptions
+  } = item;
 
-    const resolvedStyle = resolveStyle(style, styleFilters);
-
-    return {
-      ...item,
-      style: resolvedStyle,
-    };
-  })();
-
-  const text = textItem && (() => {
-    const { styleFilters, style, ...item } = textItem;
-
-    const resolvedStyle = resolveStyle(style, styleFilters);
-
-    return {
-      ...item,
-      style: resolvedStyle,
-    };
-  })();
-
-  const style = resolveStyle(options.style, options.styleFilters);
+  const resolvedStyle = resolveStyle(style, styleFilters);
 
   return {
+    ...itemOptions,
+    style: resolvedStyle,
+  };
+};
+
+export const resolveSideOptions = (options: SideOptions) => {
+  const {
     shadow,
     text,
     style,
+    styleFilters,
+  } = options;
+
+  const resolvedShadow = shadow ? resolveItemStyle(shadow) : undefined;
+  const resolvedText = text ? resolveItemStyle(text) : undefined;
+  const resolvedStyle = resolveStyle(style, styleFilters);
+
+  return {
+    shadow: resolvedShadow,
+    text: resolvedText,
+    style: resolvedStyle,
   };
 };
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
-  if (!isRecord(value) || !Array.isArray(value.side)) {
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  if (!Array.isArray(value.side)) {
     return [];
   }
 
   const result: SideEffect[] = [];
 
   for (const effectCur of value.side) {
-    if (
-      !isRecord(effectCur)
-      || effectCur.type !== 'side'
-      || !isRecord(effectCur.options)
-    ) {
+    if (!isRecord(effectCur)) {
       continue;
     }
 
-    if (typeof effectCur.id !== 'string' || !effectCur.id.trim()) {
+    const hasCorrectType = effectCur.type === 'side';
+    const hasOptions = isRecord(effectCur.options);
+
+    if (!hasCorrectType || !hasOptions) {
       continue;
     }
 
-    const kind = sideEffectKinds.find((current) => current === effectCur.kind);
+    const id = effectCur.id;
+
+    if (typeof id !== 'string' || !id.trim()) {
+      continue;
+    }
+
+    const kind = sideEffectKinds.find((cur) => cur === effectCur.kind);
 
     if (!kind) {
       continue;
@@ -100,23 +114,38 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
     const options = effectCur.options;
 
     if (kind === 'shadow') {
-      if (
-        !isRecord(options.shadow)
-        || typeof options.shadow.id !== 'string'
-        || !options.shadow.id.trim()
-      ) {
+      const shadow = options.shadow;
+
+      if (!isRecord(shadow)) {
+        continue;
+      }
+
+      const shadowId = shadow.id;
+      const hasValidShadowId = typeof shadowId === 'string' && Boolean(shadowId.trim());
+
+      if (!hasValidShadowId) {
         continue;
       }
     }
 
     if (kind === 'text') {
-      if (
-        !isRecord(options.text)
-        || typeof options.text.id !== 'string'
-        || !options.text.id.trim()
-        || typeof options.text.leftText !== 'string'
-        || typeof options.text.rightText !== 'string'
-      ) {
+      const text = options.text;
+
+      if (!isRecord(text)) {
+        continue;
+      }
+
+      const {
+        id: textId,
+        leftText,
+        rightText,
+      } = text;
+
+      const hasValidTextId = typeof textId === 'string' && Boolean(textId.trim());
+      const hasLeftText = typeof leftText === 'string';
+      const hasRightText = typeof rightText === 'string';
+
+      if (!hasValidTextId || !hasLeftText || !hasRightText) {
         continue;
       }
     }
@@ -124,7 +153,7 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
     const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый боковой эффект';
 
     result.push({
-      id: effectCur.id,
+      id,
       type: 'side',
       kind,
       slug,

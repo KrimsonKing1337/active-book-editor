@@ -2,7 +2,7 @@ import { type CSSProperties, useRef, useState } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
+import type { BackgroundPreviewLayer } from '../../context';
 
 import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
 

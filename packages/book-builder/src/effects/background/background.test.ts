@@ -137,3 +137,39 @@ test('resolves filters on the selected layer without changing media settings', (
   assert.equal(options.shadow?.style.backdropFilter, 'blur(12px)');
   assert.equal(options.style.backgroundColor, '#222');
 });
+
+test('rejects non-record entries and invalid media properties', () => {
+  const malformed = [
+    null,
+    {
+      id: 'invalid-options',
+      type: 'background',
+      kind: 'background',
+      options: null,
+    },
+    {
+      id: 'invalid-image-source',
+      type: 'background',
+      kind: 'image',
+      options: {
+        image: {
+          id: 'image-1',
+          src: 42,
+        },
+      },
+    },
+    {
+      id: 'blank-video-id',
+      type: 'background',
+      kind: 'video',
+      options: {
+        video: {
+          id: ' ',
+          src: 'assets/video.webm',
+        },
+      },
+    },
+  ];
+
+  assert.deepEqual(normalizeBackgroundEffects({ background: malformed }), []);
+});
