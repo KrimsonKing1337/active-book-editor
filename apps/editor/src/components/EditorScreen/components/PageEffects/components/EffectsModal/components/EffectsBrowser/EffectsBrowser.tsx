@@ -1,11 +1,21 @@
 import type { ChangeEvent, KeyboardEvent } from 'react';
 
-import type { AudioOptions, BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+import type {
+  AudioOptions,
+  BackgroundEffectKind,
+  SideEffectKind,
+} from '@active-book/book-builder/effects';
 
 import { Select, TextInput } from '../../../EffectControls';
 
 import type { EffectCategory, GroupingMode } from '../../catalog';
-import { EFFECT_CATEGORIES, getCategoryDefinition, getEffectPath, getFilteredEffects, getEffectGroup } from '../../catalog';
+import {
+  EFFECT_CATEGORIES,
+  getCategoryDefinition,
+  getEffectGroup,
+  getEffectPath,
+  getFilteredEffects,
+} from '../../catalog';
 
 import type { EffectsModalProps } from '../../@types';
 
@@ -72,7 +82,8 @@ export const EffectsBrowser = ({
 
   const filteredEffects = getFilteredEffects(effects, category, group, search);
   const isSearching = search.trim().length > 0;
-  const showGroups = category && !group && grouping === 'type' && availableGroups.length > 1 && !isSearching;
+  const showGroups = Boolean(category && !group && grouping === 'type'
+    && availableGroups.length > 1 && !isSearching);
   const showCategories = !category && !isSearching;
   const showEffects = !showCategories && !showGroups;
 
@@ -88,6 +99,7 @@ export const EffectsBrowser = ({
     if (search) {
       event.preventDefault();
       event.stopPropagation();
+
       onSearchChange('');
 
       return;
@@ -119,8 +131,11 @@ export const EffectsBrowser = ({
     }
   };
 
-  const searchPlaceholder = categoryDefinition
-    ? `Поиск в ${group ?? categoryDefinition.label}…`
+  const selectedGroup = availableGroups.find((current) => current.value === group);
+  const searchScope = selectedGroup?.label ?? categoryDefinition?.label;
+
+  const searchPlaceholder = searchScope
+    ? `Поиск в ${searchScope}…`
     : 'Поиск по всем эффектам…';
 
   return (
