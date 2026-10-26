@@ -9,9 +9,9 @@ type LayerZIndexParams = {
   isSide: boolean;
 };
 
-type ReturnType = CSSProperties | undefined;
+type LayerStyle = CSSProperties | undefined;
 
-const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): ReturnType[] => {
+const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): LayerStyle[] => {
   if (isSide && effect.type === 'side') {
     const {
       shadow,
@@ -74,9 +74,9 @@ export const getLayerZIndexData = ({
   const sameIndexes = layerZIndexes.filter((indexCur) => indexCur === zIndex);
 
   const currentLayerIsRegistered = currentStyle.zIndex !== undefined;
-  const digit = currentLayerIsRegistered ? 1 : 0;
+  const currentLayerCount = currentLayerIsRegistered ? 1 : 0;
 
-  const otherLayersAtSameIndex = sameIndexes.length > digit;
+  const otherLayersAtSameIndex = sameIndexes.length > currentLayerCount;
 
   return {
     zIndex,

@@ -39,9 +39,9 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
 
     const resolve = async () => {
       const trimmed = src.trim();
-      const re = /^(https?:|blob:|data:)/i;
+      const directSourcePattern = /^(https?:|blob:|data:)/i;
 
-      if (!trimmed || re.test(trimmed)) {
+      if (!trimmed || directSourcePattern.test(trimmed)) {
         const resolvedSource = {
           src,
           project,

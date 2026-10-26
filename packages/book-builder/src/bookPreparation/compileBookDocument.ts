@@ -20,10 +20,10 @@ type GetMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]) => M
 
 const getMappedEffects: GetMappedEffects = (effects) => {
   return effects.map((effectCur) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { slug: _slug, ...rest } = effectCur;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { slug: _slug, ...builtEffect } = effectCur;
 
-    return rest;
+    return builtEffect;
   });
 };
 

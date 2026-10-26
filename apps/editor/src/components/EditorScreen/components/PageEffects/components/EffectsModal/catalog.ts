@@ -133,10 +133,9 @@ export const getCategoryDefinition = (category: EffectCategory): EffectCategoryD
 
 export const getEffectPath = (effect: EditorEffectDraft): string => {
   const category = getCategoryDefinition(effect.type);
+  const effectGroup = getEffectGroup(effect);
 
   const group = category.groups.find((groupCur) => {
-    const effectGroup = getEffectGroup(effect);
-
     return groupCur.value === effectGroup;
   });
 
@@ -178,8 +177,6 @@ export const getFilteredEffects = ({
     const categoryDefinition = getCategoryDefinition(effectCur.type);
 
     const groupDefinition = categoryDefinition.groups.find((groupCur) => {
-      const effectGroup = getEffectGroup(effectCur);
-
       return groupCur.value === effectGroup;
     });
 
