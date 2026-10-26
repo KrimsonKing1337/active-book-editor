@@ -265,7 +265,7 @@ export const EffectsBrowser = ({
         </>
       )}
 
-      {showEffects && filteredEffects.length > 0 && (
+      {showEffects && isSearching && filteredEffects.length > 0 && (
         <p className={styles.ResultCount}>
           Найдено эффектов: {filteredEffects.length}
         </p>

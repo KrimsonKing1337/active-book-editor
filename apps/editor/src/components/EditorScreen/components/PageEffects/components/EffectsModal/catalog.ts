@@ -1,4 +1,4 @@
-import type { EditorEffectDraft } from '../../../@types';
+import type { EditorEffectDraft } from '../../@types';
 
 export type EffectCategory = EditorEffectDraft['type'];
 export type GroupingMode = 'none' | 'type';

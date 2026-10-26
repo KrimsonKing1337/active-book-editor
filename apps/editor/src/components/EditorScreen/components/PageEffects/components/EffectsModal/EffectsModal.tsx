@@ -16,6 +16,7 @@ import { Header, PanelBody } from './components';
 import { EffectsBrowser } from './components/EffectsBrowser';
 
 import styles from './EffectsModal.module.scss';
+
 export const EffectsModal = ({
   effects,
   project,
@@ -124,12 +125,6 @@ export const EffectsModal = ({
     project,
     selectedEffect,
 
-    onAddAudio,
-    onAddVibration,
-    onAddFlashlight,
-    onAddBackground,
-    onAddSide,
-    onSelectEffect,
     onUpdateEffect,
     onDuplicateEffect,
     onDeleteEffect,

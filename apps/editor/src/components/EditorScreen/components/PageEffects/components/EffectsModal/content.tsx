@@ -12,19 +12,11 @@ import {
   SideSettings,
 } from '../';
 
-
 type ContentParams = Pick<
   EffectsModalProps,
   | 'effects'
   | 'project'
   | 'selectedEffect'
-
-  | 'onAddAudio'
-  | 'onAddVibration'
-  | 'onAddFlashlight'
-  | 'onAddBackground'
-  | 'onAddSide'
-  | 'onSelectEffect'
   | 'onUpdateEffect'
   | 'onDuplicateEffect'
   | 'onDeleteEffect'
@@ -45,12 +37,6 @@ export const getModalContent = ({
   project,
   selectedEffect,
 
-  onAddAudio,
-  onAddVibration,
-  onAddFlashlight,
-  onAddBackground,
-  onAddSide,
-  onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,
