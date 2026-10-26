@@ -37,14 +37,17 @@ export type SideEffect = {
 export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
 
 export const resolveSideOptions = (options: SideOptions) => {
-  const shadow = options.shadow && (() => {
-    const { styleFilters, style, ...item } = options.shadow;
+  const shadowItem = options.shadow;
+  const textItem = options.text;
+
+  const shadow = shadowItem && (() => {
+    const { styleFilters, style, ...item } = shadowItem;
 
     return { ...item, style: resolveStyle(style, styleFilters) };
   })();
 
-  const text = options.text && (() => {
-    const { styleFilters, style, ...item } = options.text;
+  const text = textItem && (() => {
+    const { styleFilters, style, ...item } = textItem;
 
     return { ...item, style: resolveStyle(style, styleFilters) };
   })();
