@@ -1,7 +1,7 @@
-import { resolveSideOptions } from '@active-book/book-builder/effects';
-
 import type { SideEffectDraft } from '../../@types';
 import type { SideItemPreviews, SideStylePreviews } from '../../PageEffectsContext';
+
+import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { getSidePreviewKey, getSideStylePreviewKey } from '../../PageEffectsContext';
 
@@ -24,9 +24,26 @@ export const resolveSideInstanceOptions = ({
   const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
   const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
 
-  const shadowStyleKey = shadow ? getSideStylePreviewKey(effect.id, 'shadow', shadow.id) : undefined;
-  const textStyleKey = text ? getSideStylePreviewKey(effect.id, 'text', text.id) : undefined;
-  const componentStyleKey = getSideStylePreviewKey(effect.id, 'component', effect.id);
+  const shadowStyleKey = shadow
+    ? getSideStylePreviewKey({
+      effectId: effect.id,
+      kind: 'shadow',
+      itemId: shadow.id,
+    })
+    : undefined;
+
+  const textStyleKey = text
+    ? getSideStylePreviewKey({
+      effectId: effect.id,
+      kind: 'text',
+      itemId: text.id,
+    })
+    : undefined;
+  const componentStyleKey = getSideStylePreviewKey({
+    effectId: effect.id,
+    kind: 'component',
+    itemId: effect.id,
+  });
 
   const shadowStyle = shadowStyleKey ? stylePreviews[shadowStyleKey] : undefined;
   const textStyle = textStyleKey ? stylePreviews[textStyleKey] : undefined;

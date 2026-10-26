@@ -1,4 +1,20 @@
-import type { CSSProperties, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+
+import type { Editor } from '@tiptap/core';
+
+import type { EditorEffectDraft } from './@types';
+
+import type {
+  AudioPreviewStatus,
+  BackgroundStylePreviewUpdater,
+  BackgroundStylePreviews,
+  PageEffectsContextValue,
+  SideItemPreview,
+  SideItemPreviews,
+  SideItemPreviewUpdate,
+  SideStylePreviewUpdate,
+  SideStylePreviews,
+} from './PageEffectsContext.types';
 
 import {
   createContext,
@@ -10,88 +26,35 @@ import {
   useState,
 } from 'react';
 
-import type { Editor } from '@tiptap/core';
-
-import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
-
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
 
-import type {
-  AudioEffectDraft,
-  BackgroundEffectDraft,
-  EditorEffectDraft,
-  FlashlightEffectDraft,
-  VibrationEffectDraft,
-  SideEffectDraft,
-} from './@types';
+import {
+  applyPendingStylePreviews,
+  getBackgroundPreviewKey,
+  getPageEffects,
+  getSidePreviewKey,
+  getSideStylePreviewKey,
+  groupPageEffects,
+} from './PageEffectsContext.utils';
 
-export type AudioPreviewStatus = {
-  state: 'empty' | 'loading' | 'ready' | 'error';
-  error?: string;
-};
+export type {
+  AudioPreviewStatus,
+  BackgroundPreviewLayer,
+  BackgroundStylePreviews,
+  SideItemPreview,
+  SideItemPreviews,
+  SideItemPreviewUpdate,
+  SideStylePreviewUpdate,
+  SideStylePreviews,
+} from './PageEffectsContext.types';
 
-export type SideItemPreview = {
-  playState?: 'running' | 'paused' | 'stopped';
-  hidden?: boolean;
-};
-
-export type SideItemPreviews = Record<string, SideItemPreview>;
-
-export type SideStylePreviewUpdate = {
-  effectId: string;
-  kind: 'shadow' | 'text' | 'component';
-  itemId: string;
-  style: CSSProperties;
-};
-
-export const getSidePreviewKey = (effectId: string, itemId: string): string => {
-  return JSON.stringify([effectId, itemId]);
-};
-
-type PageEffectsContextValue = {
-  effects: EditorEffectDraft[];
-  writeEffects: (effects: EditorEffectDraft[]) => void;
-  getCurrentEffects: () => EditorEffectDraft[];
-  audioPreviewStatuses: Record<string, AudioPreviewStatus>;
-  setAudioPreviewStatus: (id: string, status: AudioPreviewStatus | null) => void;
-  flushStylePreviews: () => boolean;
-  hasUnsavedStyleChanges: () => boolean;
-  markStylesSaved: () => void;
-  sideItemPreviews: SideItemPreviews;
-  sideStylePreviews: SideStylePreviews;
-  updateSideStylePreview: (update: SideStylePreviewUpdate) => void;
-  updateSideItemPreview: (effectId: string, itemId: string, changes: Partial<SideItemPreview>) => void;
-};
-
-export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
-
-export type BackgroundStylePreviews = Record<string, CSSProperties>;
-export type SideStylePreviews = Record<string, CSSProperties>;
-
-export const getSideStylePreviewKey = (
-  effectId: string,
-  kind: 'shadow' | 'text' | 'component',
-  itemId: string,
-): string => {
-  return JSON.stringify([effectId, kind, itemId]);
-};
-
-type BackgroundStylePreviewUpdater = (
-  effectId: string,
-  layer: BackgroundPreviewLayer,
-  mediaId: string | null,
-  style: CSSProperties
-) => void;
-
-export const getBackgroundPreviewKey = (
-  effectId: string,
-  layer: BackgroundPreviewLayer,
-  mediaId: string | null = null,
-): string => {
-  return JSON.stringify([effectId, layer, mediaId]);
-};
+export {
+  getBackgroundPreviewKey,
+  getSidePreviewKey,
+  getSideStylePreviewKey,
+} from './PageEffectsContext.utils';
 
 type PageEffectsProviderProps = PropsWithChildren<{
   editor: Editor | null;
@@ -101,28 +64,6 @@ const PageEffectsContext = createContext<PageEffectsContextValue | null>(null);
 const BackgroundStylePreviewsContext = createContext<BackgroundStylePreviews>({});
 const BackgroundStylePreviewUpdaterContext = createContext<BackgroundStylePreviewUpdater | null>(null);
 
-const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
-  const grouped = editor?.state.doc.attrs.pageEffects as GroupedPageEffects | undefined;
-
-  if (!grouped) {
-    return [];
-  }
-
-  const groupedAudio = grouped.audio ?? [];
-  const groupedVibration = grouped.vibration ?? [];
-  const groupedFlashlight = grouped.flashlight ?? [];
-  const groupedBackground = grouped.background?.filter((cur) => Boolean(cur.kind)) ?? [];
-  const groupedSide = grouped.side?.filter((cur) => Boolean(cur.kind)) ?? [];
-
-  return [
-    ...groupedAudio,
-    ...groupedVibration,
-    ...groupedFlashlight,
-    ...groupedBackground,
-    ...groupedSide,
-  ];
-};
-
 export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
@@ -130,51 +71,49 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   const [sideStylePreviews, setSideStylePreviews] = useState<SideStylePreviews>({});
   const [sideItemPreviews, setSideItemPreviews] = useState<SideItemPreviews>({});
 
-  const previewStylesRef = useRef<BackgroundStylePreviews>({});
+  const backgroundStylesRef = useRef<BackgroundStylePreviews>({});
   const sideStylesRef = useRef<SideStylePreviews>({});
   const sideFrameRef = useRef<number | null>(null);
-  const previewFrameRef = useRef<number | null>(null);
-  const unsavedStylesRef = useRef(false);
+  const backgroundFrameRef = useRef<number | null>(null);
+  const hasUnsavedStylesRef = useRef(false);
 
-  const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>(
-    (effectId, layer, mediaId, style) => {
-      const key = getBackgroundPreviewKey(effectId, layer, mediaId);
+  const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>((update) => {
+    const { style } = update;
+    const key = getBackgroundPreviewKey(update);
 
-      previewStylesRef.current = {
-        ...previewStylesRef.current,
-        [key]: style,
-      };
+    const updatedStyles = {
+      ...backgroundStylesRef.current,
+      [key]: style,
+    };
 
-      unsavedStylesRef.current = true;
+    backgroundStylesRef.current = updatedStyles;
+    hasUnsavedStylesRef.current = true;
 
-      setHasPendingStyles(true);
+    setHasPendingStyles(true);
 
-      if (previewFrameRef.current !== null) {
-        cancelAnimationFrame(previewFrameRef.current);
-      }
+    if (backgroundFrameRef.current !== null) {
+      cancelAnimationFrame(backgroundFrameRef.current);
+    }
 
-      previewFrameRef.current = requestAnimationFrame(() => {
-        setBackgroundStylePreviews(previewStylesRef.current);
+    backgroundFrameRef.current = requestAnimationFrame(() => {
+      setBackgroundStylePreviews(backgroundStylesRef.current);
 
-        previewFrameRef.current = null;
-      });
-    }, []);
+      backgroundFrameRef.current = null;
+    });
+  }, []);
 
   const updateSideStylePreview = useCallback((update: SideStylePreviewUpdate) => {
-    const {
-      effectId,
-      kind,
-      itemId,
-      style,
-    } = update;
-    const key = getSideStylePreviewKey(effectId, kind, itemId);
+    const { style } = update;
+    const key = getSideStylePreviewKey(update);
 
-    sideStylesRef.current = {
+    const updatedStyles = {
       ...sideStylesRef.current,
       [key]: style,
     };
 
-    unsavedStylesRef.current = true;
+    sideStylesRef.current = updatedStyles;
+    hasUnsavedStylesRef.current = true;
+
     setHasPendingStyles(true);
 
     if (sideFrameRef.current !== null) {
@@ -183,6 +122,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
     sideFrameRef.current = requestAnimationFrame(() => {
       setSideStylePreviews(sideStylesRef.current);
+
       sideFrameRef.current = null;
     });
   }, []);
@@ -193,8 +133,8 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
         cancelAnimationFrame(sideFrameRef.current);
       }
 
-      if (previewFrameRef.current !== null) {
-        cancelAnimationFrame(previewFrameRef.current);
+      if (backgroundFrameRef.current !== null) {
+        cancelAnimationFrame(backgroundFrameRef.current);
       }
     };
   }, []);
@@ -266,36 +206,12 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return;
     }
 
-    const currentPageEffects = normalizePageEffects(editor.state.doc.attrs.pageEffects);
+    const previous = normalizePageEffects(editor.state.doc.attrs.pageEffects);
 
-    const audioEffects = nextEffects.filter((effectCur): effectCur is AudioEffectDraft => {
-      return effectCur.type === 'audio';
+    const groupedEffects = groupPageEffects({
+      effects: nextEffects,
+      previous,
     });
-
-    const vibrationEffects = nextEffects.filter((effectCur): effectCur is VibrationEffectDraft => {
-      return effectCur.type === 'vibration';
-    });
-
-    const flashlightEffects = nextEffects.filter((effectCur): effectCur is FlashlightEffectDraft => {
-      return effectCur.type === 'flashlight';
-    });
-
-    const backgroundEffects = nextEffects.filter((effectCur): effectCur is BackgroundEffectDraft => {
-      return effectCur.type === 'background';
-    });
-
-    const sideEffects = nextEffects.filter((effectCur): effectCur is SideEffectDraft => {
-      return effectCur.type === 'side';
-    });
-
-    const groupedEffects: GroupedPageEffects = {
-      ...currentPageEffects,
-      audio: audioEffects,
-      vibration: vibrationEffects,
-      flashlight: flashlightEffects,
-      background: backgroundEffects,
-      side: sideEffects,
-    };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
 
@@ -307,7 +223,7 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   }, [editor]);
 
   const flushStylePreviews = useCallback((): boolean => {
-    const pending = previewStylesRef.current;
+    const pending = backgroundStylesRef.current;
     const pendingSide = sideStylesRef.current;
 
     if (Object.keys(pending).length === 0 && Object.keys(pendingSide).length === 0) {
@@ -318,60 +234,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return false;
     }
 
-    const nextEffects = getPageEffects(editor).map((effectCur) => {
-      if (effectCur.type === 'side') {
-        const { shadow, text } = effectCur.options;
-
-        const shadowStyle = shadow && pendingSide[getSideStylePreviewKey(effectCur.id, 'shadow', shadow.id)];
-        const textStyle = text && pendingSide[getSideStylePreviewKey(effectCur.id, 'text', text.id)];
-        const componentStyle = pendingSide[getSideStylePreviewKey(effectCur.id, 'component', effectCur.id)];
-
-        if (!shadowStyle && !textStyle && !componentStyle) {
-          return effectCur;
-        }
-
-        const options = {
-          ...effectCur.options,
-          shadow: shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow,
-          text: textStyle && text ? { ...text, style: textStyle } : text,
-          style: componentStyle ?? effectCur.options.style,
-        };
-
-        return { ...effectCur, options };
-      }
-
-      if (effectCur.type !== 'background') {
-        return effectCur;
-      }
-
-      const { image, video, shadow } = effectCur.options;
-      const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
-        return pending[getBackgroundPreviewKey(effectCur.id, layer, mediaId)];
-      };
-
-      const backgroundStyle = previewStyle('background');
-      const imageStyle = image && previewStyle('image', image.id);
-      const videoStyle = video && previewStyle('video', video.id);
-      const shadowStyle = previewStyle('shadow');
-
-      if (
-        !backgroundStyle
-        && !imageStyle
-        && !videoStyle
-        && !shadowStyle
-      ) {
-        return effectCur;
-      }
-
-      const options = {
-        ...effectCur.options,
-        style: backgroundStyle ?? effectCur.options.style,
-        image: imageStyle && image ? { ...image, style: imageStyle } : image,
-        video: videoStyle && video ? { ...video, style: videoStyle } : video,
-        shadow: shadowStyle && shadow ? { ...shadow, style: shadowStyle } : shadow,
-      };
-
-      return { ...effectCur, options };
+    const nextEffects = applyPendingStylePreviews({
+      effects: getPageEffects(editor),
+      backgroundPreviews: pending,
+      sidePreviews: pendingSide,
     });
 
     try {
@@ -382,17 +248,17 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return false;
     }
 
-    previewStylesRef.current = {};
+    backgroundStylesRef.current = {};
     sideStylesRef.current = {};
 
     setBackgroundStylePreviews({});
     setSideStylePreviews({});
     markStylePreviewsCommitted();
 
-    if (previewFrameRef.current !== null) {
-      cancelAnimationFrame(previewFrameRef.current);
+    if (backgroundFrameRef.current !== null) {
+      cancelAnimationFrame(backgroundFrameRef.current);
 
-      previewFrameRef.current = null;
+      backgroundFrameRef.current = null;
     }
 
     if (sideFrameRef.current !== null) {
@@ -405,29 +271,28 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   }, [editor, writeEffects]);
 
   const hasUnsavedStyleChanges = useCallback(() => {
-    return unsavedStylesRef.current;
+    return hasUnsavedStylesRef.current;
   }, []);
 
-  const updateSideItemPreview = useCallback((
-    effectId: string,
-    itemId: string,
-    changes: Partial<SideItemPreview>,
-  ) => {
+  const updateSideItemPreview = useCallback((update: SideItemPreviewUpdate) => {
+    const { effectId, itemId, changes } = update;
     const key = getSidePreviewKey(effectId, itemId);
 
     setSideItemPreviews((current) => {
+      const itemPreview = {
+        ...current[key],
+        ...changes,
+      };
+
       return {
         ...current,
-        [key]: {
-          ...current[key],
-          ...changes,
-        },
+        [key]: itemPreview,
       };
     });
   }, []);
 
   const markStylesSaved = useCallback(() => {
-    unsavedStylesRef.current = false;
+    hasUnsavedStylesRef.current = false;
 
     setHasPendingStyles(false);
   }, []);

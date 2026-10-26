@@ -142,7 +142,11 @@ const BackgroundInstance = ({
   }
 
   const previewStyle = (layer: BackgroundPreviewLayer, mediaId: string | null = null) => {
-    const key = getBackgroundPreviewKey(effect.id, layer, mediaId);
+    const key = getBackgroundPreviewKey({
+      effectId: effect.id,
+      layer,
+      mediaId,
+    });
 
     return stylePreviews[key];
   };

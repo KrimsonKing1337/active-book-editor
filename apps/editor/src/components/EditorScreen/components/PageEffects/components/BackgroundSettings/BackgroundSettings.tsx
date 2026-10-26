@@ -118,7 +118,14 @@ export const BackgroundSettings = ({
     mediaId: string | null,
     style: CSSProperties,
   ) => {
-    updateStylePreview(effect.id, layer, mediaId, style);
+    const update = {
+      effectId: effect.id,
+      layer,
+      mediaId,
+      style,
+    };
+
+    updateStylePreview(update);
   };
 
   const commitFilters = (

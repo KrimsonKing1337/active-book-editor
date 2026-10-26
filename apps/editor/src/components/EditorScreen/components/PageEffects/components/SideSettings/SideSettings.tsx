@@ -174,7 +174,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const getItemStyle = (kind: 'shadow' | 'text' | 'component', id: string, style?: CSSProperties) => {
-    const key = getSideStylePreviewKey(effect.id, kind, id);
+    const key = getSideStylePreviewKey({
+      effectId: effect.id,
+      kind,
+      itemId: id,
+    });
 
     return sideStylePreviews[key] ?? style ?? {};
   };
@@ -216,13 +220,25 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
   const handlePlaybackChange = (state: NonNullable<SideAnimation['playState']>) => {
     if (item) {
-      updateSideItemPreview(effect.id, item.id, { playState: state });
+      const update = {
+        effectId: effect.id,
+        itemId: item.id,
+        changes: { playState: state },
+      };
+
+      updateSideItemPreview(update);
     }
   };
 
   const handleHiddenChange = (hidden: boolean) => {
     if (item) {
-      updateSideItemPreview(effect.id, item.id, { hidden });
+      const update = {
+        effectId: effect.id,
+        itemId: item.id,
+        changes: { hidden },
+      };
+
+      updateSideItemPreview(update);
     }
   };
 
