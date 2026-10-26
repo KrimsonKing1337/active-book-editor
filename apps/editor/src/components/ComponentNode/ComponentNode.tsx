@@ -2,17 +2,12 @@ import type { ComponentType } from 'react';
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-
-import {
-  type NodeViewProps,
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-} from '@tiptap/react';
-
-import { useCustomComponents } from '@project/customComponentRegistry';
+import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import type { BookComponentProps } from '@active-book/types';
+
+import { useCustomComponents } from '@project/customComponentRegistry';
 
 import styles from './ComponentNode.module.scss';
 
@@ -24,11 +19,18 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   const name = node.attrs.name as string;
   const packageName = node.attrs.package as string | null;
   const customId = packageName ? `${packageName}/${name}` : null;
-  const definition = customComponentDefinitions.find((cur) => cur.id === customId);
+
+  const definition = customComponentDefinitions.find((cur) => {
+    return cur.id === customId;
+  });
+
   const componentLabel = definition?.title ?? name;
 
-  const Component = (customId ? customComponents[customId] : undefined) as
-    ComponentType<BookComponentProps> | undefined;
+  let Component;
+
+  if (customId) {
+    Component = customComponents[customId] as ComponentType<BookComponentProps> | undefined;
+  }
 
   const handleSelectComponent = () => {
     const position = getPos();
@@ -38,7 +40,10 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
     }
 
     const selection = editor.state.selection;
-    const isAlreadySelected = selection instanceof NodeSelection && selection.from === position;
+
+    const isAlreadySelected =
+      selection instanceof NodeSelection
+      && selection.from === position;
 
     if (isAlreadySelected) {
       return;
@@ -55,11 +60,15 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
     editor.commands.focus();
   };
 
+  const unknownComponentName = customId ?? name;
+
   const unknownComponent = (
     <div>
-      Unknown component: {customId ?? name}
+      Unknown component: {unknownComponentName}
     </div>
   );
+
+  const component = Component ? <Component book={bookRuntime} /> : unknownComponent;
 
   return (
     <NodeViewWrapper
@@ -74,7 +83,7 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
         {componentLabel}
       </button>
 
-      {Component ? <Component book={bookRuntime} /> : unknownComponent}
+      {component}
     </NodeViewWrapper>
   );
 };
@@ -121,17 +130,20 @@ export const ComponentNode = Node.create({
   addKeyboardShortcuts() {
     const deleteSelectedComponent = () => {
       const { doc, selection } = this.editor.state;
-      const isSelectedComponent = selection instanceof NodeSelection && selection.node.type.name === this.name;
+
+      const isSelectedComponent =
+        selection instanceof NodeSelection
+        && selection.node.type.name === this.name;
 
       if (!isSelectedComponent) {
         return false;
       }
 
       if (doc.childCount === 1) {
-        return this.editor.commands.insertContentAt(
-          { from: selection.from, to: selection.to },
-          { type: 'P' },
-        );
+        const selectionContent = { from: selection.from, to: selection.to };
+        const typeContent = { type: 'P' };
+
+        return this.editor.commands.insertContentAt(selectionContent, typeContent);
       }
 
       return this.editor.commands.deleteSelection();

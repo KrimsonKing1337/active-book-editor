@@ -1,26 +1,22 @@
-import type { ComponentType, CSSProperties } from 'react';
+import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
 
 import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
 import type { BookComponentProps } from '@active-book/types';
-import type { BookProject } from '@project/@types';
-
-import type { BackgroundEffectDraft } from '../../@types';
-import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
-
-import { useEffect, useMemo, useState } from 'react';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import { resolveStyle } from '@active-book/book-builder/effects';
 
+import type { BookProject } from '@project/@types';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import {
-  getBackgroundPreviewKey,
-  useBackgroundStylePreviews,
-  usePageEffects,
-} from '../../PageEffectsContext';
+import type { BackgroundEffectDraft } from '../../@types';
+
+import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
+
+import { getBackgroundPreviewKey, useBackgroundStylePreviews, usePageEffects } from '../../PageEffectsContext';
 
 type BackgroundInstancesProps = {
   project: BookProject | null;
@@ -43,8 +39,9 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
 
     const resolve = async () => {
       const trimmed = src.trim();
+      const re = /^(https?:|blob:|data:)/i;
 
-      if (!trimmed || /^(https?:|blob:|data:)/i.test(trimmed)) {
+      if (!trimmed || re.test(trimmed)) {
         const resolvedSource = {
           src,
           project,
@@ -62,6 +59,7 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
         }
 
         const file = await project.storage.getAssetFile(trimmed);
+
         objectUrl = URL.createObjectURL(file);
 
         if (!cancelled) {
@@ -76,6 +74,7 @@ const useResolvedSource = (src: string, project: BookProject | null): string | n
       } catch (error) {
         if (!cancelled) {
           console.error('[background] Failed to load media asset', error);
+
           const resolvedSource = {
             src,
             project,
@@ -119,6 +118,7 @@ const BackgroundInstance = ({
   stylePreviews,
 }: BackgroundInstanceProps) => {
   const options = effect.options;
+
   let source = '';
 
   if (effect.kind === 'image') {
