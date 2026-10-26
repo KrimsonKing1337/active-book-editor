@@ -25,6 +25,7 @@ type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
+  
   onLoadingChange: (loading: boolean, message?: string) => void;
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;
@@ -35,6 +36,7 @@ export const BackgroundSettings = ({
   effect,
   effects,
   project,
+
   onLoadingChange,
   onUpdate,
   onDuplicate,
@@ -48,21 +50,35 @@ export const BackgroundSettings = ({
   const options = effect.options;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
-    onUpdate(effect.id, {
+    const options = {
+      ...effect.options,
+      ...updates,
+    };
+
+    const updatedEffect = {
       ...effect,
-      options: { ...effect.options, ...updates },
-    });
+      options,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const updateId = () => {
     const normalized = idDraft.trim();
-    const alreadyExists = effects.some((current) => current.id === normalized && current.id !== effect.id);
+    const alreadyExists = effects.some((effectCur) => {
+      return effectCur.id === normalized && effectCur.id !== effect.id;
+    });
 
     if (!normalized || alreadyExists) {
       return;
     }
 
-    onUpdate(effect.id, { ...effect, id: normalized });
+    const updatedEffect = {
+      ...effect,
+      id: normalized,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const importAsset = async (
@@ -75,7 +91,11 @@ export const BackgroundSettings = ({
     }
 
     importsInProgressRef.current += 1;
-    onLoadingChange(true, kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...');
+    const loadingMessage = kind === 'image'
+      ? 'Загружаем изображение...'
+      : 'Загружаем видео...';
+
+    onLoadingChange(true, loadingMessage);
 
     try {
       return await project.storage.importAssetFile(file, fileHandle);
@@ -126,7 +146,12 @@ export const BackgroundSettings = ({
       nextOptions.shadow = { ...currentOptions.shadow, styleFilters };
     }
 
-    onUpdate(effect.id, { ...currentEffect, options: nextOptions });
+    const updatedEffect = {
+      ...currentEffect,
+      options: nextOptions,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleIdDraftChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +159,12 @@ export const BackgroundSettings = ({
   };
 
   const handleNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onUpdate(effect.id, { ...effect, slug: e.target.value });
+    const updatedEffect = {
+      ...effect,
+      slug: e.target.value,
+    };
+
+    onUpdate(effect.id, updatedEffect);
   };
 
   const handleImportImage = (file: File, handle?: ProjectFileHandle) => {
@@ -143,6 +173,22 @@ export const BackgroundSettings = ({
 
   const handleImportVideo = (file: File, handle?: ProjectFileHandle) => {
     return importAsset(file, handle, 'video');
+  };
+
+  const handleImageChange = (val: NonNullable<BackgroundOptions['image']>) => {
+    updateOptions({ image: val });
+  };
+
+  const handleVideoChange = (val: NonNullable<BackgroundOptions['video']>) => {
+    updateOptions({ video: val });
+  };
+
+  const handleShadowChange = (val: NonNullable<BackgroundOptions['shadow']>) => {
+    updateOptions({ shadow: val });
+  };
+
+  const handleComponentChange = (val: BackgroundOptions['component']) => {
+    updateOptions({ component: val });
   };
 
   return (
@@ -186,7 +232,7 @@ export const BackgroundSettings = ({
           <Image
             image={options.image}
             canImport={Boolean(project)}
-            onChange={(image) => updateOptions({ image })}
+            onChange={handleImageChange}
             onImportAsset={handleImportImage}
           />
         )}
@@ -195,7 +241,7 @@ export const BackgroundSettings = ({
           <Video
             video={options.video}
             canImport={Boolean(project)}
-            onChange={(video) => updateOptions({ video })}
+            onChange={handleVideoChange}
             onImportAsset={handleImportVideo}
           />
         )}
@@ -203,7 +249,7 @@ export const BackgroundSettings = ({
         {effect.kind === 'shadow' && (
           <Shadow
             shadow={options.shadow ?? DEFAULT_SHADOW_OPTIONS}
-            onChange={(shadow) => updateOptions({ shadow })}
+            onChange={handleShadowChange}
           />
         )}
 
@@ -211,7 +257,7 @@ export const BackgroundSettings = ({
           <>
             <CustomComponent
               component={options.component}
-              onChange={(component) => updateOptions({ component })}
+              onChange={handleComponentChange}
             />
 
             <details className={styles.Section}>
