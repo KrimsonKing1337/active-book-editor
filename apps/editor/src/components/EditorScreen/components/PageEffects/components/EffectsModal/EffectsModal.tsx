@@ -135,13 +135,22 @@ export const EffectsModal = ({
     browserContent,
   });
 
-  const categoryDefinition = category ? getCategoryDefinition(category) : null;
-  const groupDefinition = categoryDefinition?.groups.find((cur) => cur.value === group);
-  const browserTitle = groupDefinition?.label ?? categoryDefinition?.label ?? 'Эффекты страницы';
+  let browserTitle = 'Эффекты страницы';
+  let browserDescription = 'Эффекты текущей страницы';
 
-  const browserDescription = groupDefinition
-    ? `Эффекты типа ${groupDefinition.label} в категории ${categoryDefinition?.label}`
-    : categoryDefinition?.description ?? 'Эффекты текущей страницы';
+  if (category) {
+    const categoryDefinition = getCategoryDefinition(category);
+
+    browserTitle = categoryDefinition.label;
+    browserDescription = categoryDefinition.description;
+
+    const groupDefinition = categoryDefinition.groups.find((cur) => cur.value === group);
+
+    if (groupDefinition) {
+      browserTitle = groupDefinition.label;
+      browserDescription = `Эффекты типа ${groupDefinition.label} в категории ${categoryDefinition.label}`;
+    }
+  }
 
   const title = selectedEffect ? settingsTitle : browserTitle;
   const description = selectedEffect ? settingsDescription : browserDescription;
