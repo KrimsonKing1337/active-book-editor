@@ -44,6 +44,22 @@ test('rejects legacy side groups and invalid independent text', () => {
   assert.deepEqual(normalizeSideEffects({ side: [legacy, invalid] }), []);
 });
 
+test('resolves custom side layer styles on the wrapper', () => {
+  const result = resolveSideOptions({
+    style: { zIndex: 7, opacity: 0.8 },
+    styleFilters: [{
+      id: 'blur-one',
+      property: 'backdropFilter',
+      function: 'blur',
+      value: '3px',
+    }],
+  });
+
+  assert.equal(result.style.zIndex, 7);
+  assert.equal(result.style.opacity, 0.8);
+  assert.equal(result.style.backdropFilter, 'blur(3px)');
+});
+
 test('resolves filters on one side effect at a time', () => {
   const shadow = {
     id: 'shadow',
