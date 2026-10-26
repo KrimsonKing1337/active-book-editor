@@ -43,18 +43,18 @@ const SideInstance = ({
     return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  const shadowPreviewKey = shadow && getSidePreviewKey(effect.id, shadow.id);
-  const textPreviewKey = text && getSidePreviewKey(effect.id, text.id);
+  const shadowPreviewKey = shadow ? getSidePreviewKey(effect.id, shadow.id) : undefined;
+  const textPreviewKey = text ? getSidePreviewKey(effect.id, text.id) : undefined;
 
-  const shadowPreview = shadowPreviewKey && previews[shadowPreviewKey];
-  const textPreview = textPreviewKey && previews[textPreviewKey];
+  const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
+  const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
 
-  const shadowStyleKey = shadow && getSideStylePreviewKey(effect.id, 'shadow', shadow.id);
-  const textStyleKey = text && getSideStylePreviewKey(effect.id, 'text', text.id);
+  const shadowStyleKey = shadow ? getSideStylePreviewKey(effect.id, 'shadow', shadow.id) : undefined;
+  const textStyleKey = text ? getSideStylePreviewKey(effect.id, 'text', text.id) : undefined;
   const componentStyleKey = getSideStylePreviewKey(effect.id, 'component', effect.id);
 
-  const shadowStyle = shadowStyleKey && stylePreviews[shadowStyleKey];
-  const textStyle = textStyleKey && stylePreviews[textStyleKey];
+  const shadowStyle = shadowStyleKey ? stylePreviews[shadowStyleKey] : undefined;
+  const textStyle = textStyleKey ? stylePreviews[textStyleKey] : undefined;
   const componentStyle = stylePreviews[componentStyleKey];
 
   const previewShadowStyle = shadowStyle ?? shadow?.style;
