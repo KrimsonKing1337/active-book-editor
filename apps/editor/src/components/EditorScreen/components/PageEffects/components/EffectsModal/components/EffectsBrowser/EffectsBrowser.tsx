@@ -23,7 +23,7 @@ import { EffectTile } from '../EffectTile';
 
 import styles from '../../EffectsModal.module.scss';
 
-type EffectsBrowserProps = Pick<
+type EffectsBrowserPicked = Pick<
   EffectsModalProps,
   | 'effects'
   | 'onAddAudio'
@@ -32,7 +32,9 @@ type EffectsBrowserProps = Pick<
   | 'onAddBackground'
   | 'onAddSide'
   | 'onSelectEffect'
-> & {
+>;
+
+type EffectsBrowserProps = EffectsBrowserPicked & {
   category: EffectCategory | null;
   group: string | null;
   grouping: GroupingMode;
@@ -88,15 +90,19 @@ export const EffectsBrowser = ({
     group,
     query: search,
   });
+
   const isSearching = search.trim().length > 0;
   const hasAvailableGroups = availableGroups.length > 1;
-  const showGroups = Boolean(
-    category
-    && !group
-    && grouping === 'type'
-    && hasAvailableGroups
-    && !isSearching
-  );
+
+  const showGroupsRaw =
+      category
+      && !group
+      && grouping === 'type'
+      && hasAvailableGroups
+      && !isSearching;
+
+  const showGroups = Boolean(showGroupsRaw);
+
   const showCategories = !category && !isSearching;
   const showEffects = !showCategories && !showGroups;
 
@@ -155,6 +161,9 @@ export const EffectsBrowser = ({
     ? 'По запросу ничего не найдено'
     : 'В этом разделе пока нет эффектов';
 
+  const showFilter = categoryDefinition && availableGroups.length > 1 && !group;
+  const showEffectsCount = showEffects && isSearching && filteredEffects.length > 0;
+
   return (
     <div className={styles.Browser}>
       <div className={styles.BrowserControls}>
@@ -167,7 +176,7 @@ export const EffectsBrowser = ({
           onKeyDown={handleSearchKeyDown}
         />
 
-        {categoryDefinition && availableGroups.length > 1 && !group && (
+        {showFilter && (
           <label className={styles.GroupingControl}>
             <span>
               Группировка
@@ -195,7 +204,8 @@ export const EffectsBrowser = ({
               description,
             } = categoryCur;
 
-            const count = effects.filter((cur) => cur.type === value).length;
+            const filteredEffects = effects.filter((cur) => cur.type === value);
+            const count = filteredEffects.length;
 
             const handleOpenCategory = () => {
               onCategoryChange(value);
@@ -234,9 +244,13 @@ export const EffectsBrowser = ({
           {availableGroups.map((groupCur) => {
             const { value, label } = groupCur;
 
-            const count = effects.filter((effectCur) => {
-              return effectCur.type === category && getEffectGroup(effectCur) === value;
-            }).length;
+            const filteredEffects = effects.filter((effectCur) => {
+              const effectGroup = getEffectGroup(effectCur);
+
+              return effectCur.type === category && effectGroup === value;
+            });
+
+            const count = filteredEffects.length;
 
             const handleOpenGroup = () => {
               onGroupChange(value);
@@ -276,7 +290,11 @@ export const EffectsBrowser = ({
 
           <div className={styles.Tiles}>
             {filteredEffects.map((effectCur) => {
-              const path = !category ? getEffectPath(effectCur) : undefined;
+              let path;
+
+              if (!category) {
+                path = getEffectPath(effectCur);
+              }
 
               return (
                 <EffectTile
@@ -307,7 +325,7 @@ export const EffectsBrowser = ({
         </>
       )}
 
-      {showEffects && isSearching && filteredEffects.length > 0 && (
+      {showEffectsCount && (
         <p className={styles.ResultCount}>
           Найдено эффектов: {filteredEffects.length}
         </p>

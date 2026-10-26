@@ -20,7 +20,10 @@ export const Image = ({ image, canImport, onChange, onImportAsset }: ImageProps)
   const { id, src, style, styleFilters } = image;
 
   const handlePathChange = (path: string) => {
-    onChange({ ...image, src: path });
+    onChange({
+      ...image,
+      src: path,
+    });
   };
 
   return (

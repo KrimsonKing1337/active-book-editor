@@ -1,6 +1,4 @@
-import type { ChangeEvent, CSSProperties } from 'react';
-
-import { useRef, useState } from 'react';
+import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
@@ -11,8 +9,9 @@ import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
 import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
 
-import { Image, Video, Shadow, Background, CustomComponent } from './components';
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
+
+import { Image, Video, Shadow, Background, CustomComponent } from './components';
 
 import { DEFAULT_SHADOW_OPTIONS } from './constants';
 
@@ -21,7 +20,9 @@ import { StyleEditor } from '../StyleEditor';
 
 import styles from './BackgroundSettings.module.scss';
 
-type BackgroundSettingsProps = {
+type Layer = 'background' | 'image' | 'video' | 'shadow';
+
+export type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
@@ -44,7 +45,9 @@ export const BackgroundSettings = ({
 }: BackgroundSettingsProps) => {
   const updateStylePreview = useBackgroundStylePreviewUpdater();
   const { flushStylePreviews, getCurrentEffects } = usePageEffects();
+
   const [idDraft, setIdDraft] = useState(effect.id);
+
   const importsInProgressRef = useRef(0);
 
   const options = effect.options;
@@ -65,6 +68,7 @@ export const BackgroundSettings = ({
 
   const updateId = () => {
     const normalized = idDraft.trim();
+
     const alreadyExists = effects.some((effectCur) => {
       return effectCur.id === normalized && effectCur.id !== effect.id;
     });
@@ -91,6 +95,7 @@ export const BackgroundSettings = ({
     }
 
     importsInProgressRef.current += 1;
+
     const loadingMessage = kind === 'image'
       ? 'Загружаем изображение...'
       : 'Загружаем видео...';
@@ -109,7 +114,7 @@ export const BackgroundSettings = ({
   };
 
   const updateStylePreviewForEffect = (
-    layer: 'background' | 'image' | 'video' | 'shadow',
+    layer: Layer,
     mediaId: string | null,
     style: CSSProperties,
   ) => {
@@ -117,7 +122,7 @@ export const BackgroundSettings = ({
   };
 
   const commitFilters = (
-    layer: 'background' | 'image' | 'video' | 'shadow',
+    layer: Layer,
     mediaId: string | null,
     styleFilters: FilterOperation[],
   ) => {
@@ -125,8 +130,10 @@ export const BackgroundSettings = ({
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((current): current is BackgroundEffectDraft => {
-      return current.type === 'background' && current.id === effect.id;
+    const currentEffects = getCurrentEffects();
+
+    const currentEffect = currentEffects.find((effectCur): effectCur is BackgroundEffectDraft => {
+      return effectCur.type === 'background' && effectCur.id === effect.id;
     });
 
     if (!currentEffect) {
@@ -134,16 +141,26 @@ export const BackgroundSettings = ({
     }
 
     const currentOptions = currentEffect.options;
+
     const nextOptions = { ...currentOptions };
 
     if (layer === 'background') {
       nextOptions.styleFilters = styleFilters;
     } else if (layer === 'image' && currentOptions.image?.id === mediaId) {
-      nextOptions.image = { ...currentOptions.image, styleFilters };
+      nextOptions.image = {
+        ...currentOptions.image,
+        styleFilters,
+      };
     } else if (layer === 'video' && currentOptions.video?.id === mediaId) {
-      nextOptions.video = { ...currentOptions.video, styleFilters };
+      nextOptions.video = {
+        ...currentOptions.video,
+        styleFilters,
+      };
     } else if (layer === 'shadow' && currentOptions.shadow) {
-      nextOptions.shadow = { ...currentOptions.shadow, styleFilters };
+      nextOptions.shadow = {
+        ...currentOptions.shadow,
+        styleFilters,
+      };
     }
 
     const updatedEffect = {
@@ -203,11 +220,7 @@ export const BackgroundSettings = ({
             Название эффекта
           </span>
 
-          <TextInput
-            maxLength={120}
-            value={effect.slug}
-            onChange={handleNameInputChange}
-          />
+          <TextInput maxLength={120} value={effect.slug} onChange={handleNameInputChange} />
         </label>
 
         <div className={styles.Field}>

@@ -151,35 +151,44 @@ const BackgroundInstance = ({
     return preview ?? style;
   };
 
-  const style = resolveStyle(
-    withPreviewStyle(options.style, previewStyle('background')),
-    options.styleFilters,
-  );
+  const backgroundPreviewStyle = previewStyle('background');
+  const backgroundStyle = withPreviewStyle(options.style, backgroundPreviewStyle);
+
+  const imagePreviewStyle = options.image
+    ? previewStyle('image', options.image.id)
+    : undefined;
+
+  const imageStyle = withPreviewStyle(options.image?.style, imagePreviewStyle);
+
+  const videoPreviewStyle = options.video
+    ? previewStyle('video', options.video.id)
+    : undefined;
+
+  const videoStyle = withPreviewStyle(options.video?.style, videoPreviewStyle);
+
+  const shadowPreviewStyle = options.shadow
+    ? previewStyle('shadow')
+    : undefined;
+
+  const shadowStyle = withPreviewStyle(options.shadow?.style, shadowPreviewStyle);
+
+  const style = resolveStyle(backgroundStyle, options.styleFilters);
 
   const image = options.image && {
     ...options.image,
     src: resolvedSource,
-    style: resolveStyle(
-      withPreviewStyle(options.image.style, previewStyle('image', options.image.id)),
-      options.image.styleFilters,
-    ),
+    style: resolveStyle(imageStyle, options.image.styleFilters),
   };
 
   const video = options.video && {
     ...options.video,
     src: resolvedSource,
-    style: resolveStyle(
-      withPreviewStyle(options.video.style, previewStyle('video', options.video.id)),
-      options.video.styleFilters,
-    ),
+    style: resolveStyle(videoStyle, options.video.styleFilters),
   };
 
   const shadow = options.shadow && {
     ...options.shadow,
-    style: resolveStyle(
-      withPreviewStyle(options.shadow.style, previewStyle('shadow')),
-      options.shadow.styleFilters,
-    ),
+    style: resolveStyle(shadowStyle, options.shadow.styleFilters),
   };
 
   const background: CoreBackgroundEffect = {

@@ -24,19 +24,31 @@ export const Video = ({ video, canImport, onChange, onImportAsset }: VideoProps)
   const { id, src, style, styleFilters, loop, autoPlay, muted } = video;
 
   const handlePathChange = (path: string) => {
-    onChange({ ...video, src: path });
+    onChange({
+      ...video,
+      src: path,
+    });
   };
 
   const handleLoopChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...video, loop: e.target.checked });
+    onChange({
+      ...video,
+      loop: e.target.checked,
+    });
   };
 
   const handleAutoPlayChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...video, autoPlay: e.target.checked });
+    onChange({
+      ...video,
+      autoPlay: e.target.checked,
+    });
   };
 
   const handleMutedChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...video, muted: e.target.checked });
+    onChange({
+      ...video,
+      muted: e.target.checked,
+    });
   };
 
   return (

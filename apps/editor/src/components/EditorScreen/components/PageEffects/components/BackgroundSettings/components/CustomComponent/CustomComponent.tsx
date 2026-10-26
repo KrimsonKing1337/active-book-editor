@@ -2,9 +2,9 @@ import type { ChangeEvent } from 'react';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import { Select } from '../../../EffectControls';
-
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
+
+import { Select } from '../../../EffectControls';
 
 import styles from '../../BackgroundSettings.module.scss';
 
