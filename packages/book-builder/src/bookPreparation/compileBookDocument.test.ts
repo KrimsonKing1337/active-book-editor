@@ -29,12 +29,28 @@ const flashlightOptions = {
   speed: 150,
 };
 
+const backgroundImageStyle = {
+  zIndex: 1,
+};
+
+const backgroundImage = {
+  id: 'forest-image',
+  src: 'assets/forest.webp',
+  style: backgroundImageStyle,
+};
+
 const backgroundOptions = {
-  image: { id: 'forest-image', src: 'assets/forest.webp', style: { zIndex: 1 } },
+  image: backgroundImage,
+};
+
+const sideText = {
+  id: 'text-1',
+  leftText: 'Лево',
+  rightText: 'Право',
 };
 
 const sideOptions = {
-  text: { id: 'text-1', leftText: 'Лево', rightText: 'Право' },
+  text: sideText,
 };
 
 test('compiles independent effects with kind and strips editor-only slug', () => {
