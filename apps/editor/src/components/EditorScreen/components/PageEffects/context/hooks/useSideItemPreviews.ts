@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 
-import type { SideItemPreviews, SideItemPreviewUpdate } from './@types';
+import type { SideItemPreviews, SideItemPreviewUpdate } from '../@types';
 
-import { getSidePreviewKey } from './utils';
+import { getSidePreviewKey } from '../utils';
 
 export const useSideItemPreviews = () => {
   const [sideItemPreviews, setSideItemPreviews] = useState<SideItemPreviews>({});

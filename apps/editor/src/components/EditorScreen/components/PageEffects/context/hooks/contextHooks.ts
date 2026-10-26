@@ -4,13 +4,13 @@ import type {
   BackgroundStylePreviewUpdater,
   BackgroundStylePreviews,
   PageEffectsContextValue,
-} from './@types';
+} from '../@types';
 
 import {
   BackgroundStylePreviewUpdaterContext,
   BackgroundStylePreviewsContext,
   PageEffectsContext,
-} from './contexts';
+} from '../contexts';
 
 export const usePageEffects = (): PageEffectsContextValue => {
   const context = useContext(PageEffectsContext);

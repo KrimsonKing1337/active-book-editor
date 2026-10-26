@@ -93,9 +93,14 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
     }
 
     const hasCorrectType = effectCur.type === 'side';
-    const hasOptions = isRecord(effectCur.options);
 
-    if (!hasCorrectType || !hasOptions) {
+    if (!hasCorrectType) {
+      continue;
+    }
+
+    const options = effectCur.options;
+
+    if (!isRecord(options)) {
       continue;
     }
 
@@ -110,8 +115,6 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
     if (!kind) {
       continue;
     }
-
-    const options = effectCur.options as SideOptions;
 
     if (kind === 'shadow') {
       const shadow = options.shadow;
@@ -157,7 +160,7 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       type: 'side',
       kind,
       slug,
-      options,
+      options: options as SideOptions,
     });
   }
 

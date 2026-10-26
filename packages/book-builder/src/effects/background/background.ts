@@ -112,9 +112,14 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     }
 
     const hasCorrectType = effectCur.type === 'background';
-    const hasOptions = isRecord(effectCur.options);
 
-    if (!hasCorrectType || !hasOptions) {
+    if (!hasCorrectType) {
+      continue;
+    }
+
+    const options = effectCur.options;
+
+    if (!isRecord(options)) {
       continue;
     }
 
@@ -131,8 +136,6 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
     if (!kind) {
       continue;
     }
-
-    const options = effectCur.options as BackgroundOptions;
 
     if (kind === 'image' || kind === 'video') {
       const media = options[kind];
@@ -159,7 +162,7 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
       type: 'background',
       kind,
       slug,
-      options,
+      options: options as BackgroundOptions,
     });
   }
 

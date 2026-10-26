@@ -4,10 +4,10 @@ import type { Editor } from '@tiptap/core';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
-import type { EditorEffectDraft } from '../@types';
-import type { AudioPreviewStatus } from './@types';
+import type { EditorEffectDraft } from '../../@types';
+import type { AudioPreviewStatus } from '../@types';
 
-import { getPageEffects, groupPageEffects } from './utils';
+import { getPageEffects, groupPageEffects } from '../utils';
 
 export const usePageEffectsState = (editor: Editor | null) => {
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));

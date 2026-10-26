@@ -4,21 +4,21 @@ import type { Editor } from '@tiptap/core';
 
 import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
 
-import type { EditorEffectDraft } from '../@types';
+import type { EditorEffectDraft } from '../../@types';
 
 import type {
   BackgroundStylePreviewUpdater,
   BackgroundStylePreviews,
   SideStylePreviewUpdate,
   SideStylePreviews,
-} from './@types';
+} from '../@types';
 
 import {
   applyPendingStylePreviews,
   getBackgroundPreviewKey,
   getPageEffects,
   getSideStylePreviewKey,
-} from './utils';
+} from '../utils';
 
 type UseStylePreviewsParams = {
   editor: Editor | null;

@@ -2,9 +2,11 @@ import { type PropsWithChildren, useMemo } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
-import { usePageEffectsState } from './usePageEffectsState';
-import { useSideItemPreviews } from './useSideItemPreviews';
-import { useStylePreviews } from './useStylePreviews';
+import {
+  usePageEffectsState,
+  useSideItemPreviews,
+  useStylePreviews,
+} from './hooks';
 
 import {
   BackgroundStylePreviewUpdaterContext,
