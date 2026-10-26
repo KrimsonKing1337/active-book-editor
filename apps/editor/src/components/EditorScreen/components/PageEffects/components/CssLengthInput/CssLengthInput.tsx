@@ -3,10 +3,10 @@ import { type ChangeEvent, useEffect, useState } from 'react';
 import { InputMask, unformat } from '@react-input/mask';
 import classNames from 'classnames';
 
+import { Select } from '../EffectControls';
+
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import layoutStyles from './CssLengthInput.module.scss';
-
-import { Select } from '../EffectControls';
 
 import { type Unit, units, maskOptions } from './constants';
 
