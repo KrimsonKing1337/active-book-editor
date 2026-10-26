@@ -67,7 +67,7 @@ test('lists every top-level effect category with its supported subtypes', () => 
 test('filters globally without changing the order of effects', () => {
   assert.deepEqual(
     getFilteredEffects({
-        effects,
+      effects,
       category: null,
       group: null,
       query: '',
@@ -77,7 +77,7 @@ test('filters globally without changing the order of effects', () => {
 
   assert.deepEqual(
     getFilteredEffects({
-        effects,
+      effects,
       category: null,
       group: null,
       query: 'лес',
@@ -89,7 +89,7 @@ test('filters globally without changing the order of effects', () => {
 test('limits a search to the current category or type', () => {
   assert.deepEqual(
     getFilteredEffects({
-        effects,
+      effects,
       category: 'audio',
       group: null,
       query: 'assets',
@@ -99,7 +99,7 @@ test('limits a search to the current category or type', () => {
 
   assert.deepEqual(
     getFilteredEffects({
-        effects,
+      effects,
       category: 'audio',
       group: 'music',
       query: '',
@@ -109,7 +109,7 @@ test('limits a search to the current category or type', () => {
 
   assert.deepEqual(
     getFilteredEffects({
-        effects,
+      effects,
       category: 'background',
       group: 'video',
       query: '',
