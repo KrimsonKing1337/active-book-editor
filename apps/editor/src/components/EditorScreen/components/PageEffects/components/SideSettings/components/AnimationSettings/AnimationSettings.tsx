@@ -5,7 +5,7 @@ import type { SideOptions } from '@active-book/book-builder/effects';
 import { IntegerInput } from '../../../IntegerInput';
 import { Select, Button } from '../../../EffectControls';
 
-type ShadowItem = NonNullable<SideOptions['shadows']>[number];
+type ShadowItem = NonNullable<SideOptions['shadow']>;
 type SideAnimation = NonNullable<ShadowItem['animation']>;
 type AnimationPreset = NonNullable<SideAnimation['preset']>;
 

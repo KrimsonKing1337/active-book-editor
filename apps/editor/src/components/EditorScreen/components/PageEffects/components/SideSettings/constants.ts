@@ -2,7 +2,7 @@ import type { SideOptions } from '@active-book/book-builder/effects';
 
 import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
-type ShadowItem = NonNullable<SideOptions['shadows']>[number];
+type ShadowItem = NonNullable<SideOptions['shadow']>;
 
 type PositionOption = {
   value: NonNullable<ShadowItem['position']>;
