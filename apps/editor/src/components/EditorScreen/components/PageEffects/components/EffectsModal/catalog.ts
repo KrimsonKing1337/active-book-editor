@@ -22,9 +22,21 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
     label: 'Audio',
     description: 'Звуковые эффекты и музыка',
     groups: [
-      { value: 'sfx', label: 'SFX', addLabel: 'Добавить SFX' },
-      { value: 'music', label: 'Music', addLabel: 'Добавить музыку' },
-      { value: 'bg', label: 'Background', addLabel: 'Добавить фоновый звук' },
+      {
+        value: 'sfx',
+        label: 'SFX',
+        addLabel: 'Добавить SFX',
+      },
+      {
+        value: 'music',
+        label: 'Music',
+        addLabel: 'Добавить музыку',
+      },
+      {
+        value: 'bg',
+        label: 'Background',
+        addLabel: 'Добавить фоновый звук',
+      },
     ],
   },
   {
@@ -32,11 +44,31 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
     label: 'Background',
     description: 'Фон, изображения, видео и затемнение',
     groups: [
-      { value: 'background', label: 'Background', addLabel: 'Добавить фон' },
-      { value: 'image', label: 'Image', addLabel: 'Добавить изображение' },
-      { value: 'video', label: 'Video', addLabel: 'Добавить видео' },
-      { value: 'shadow', label: 'Shadow', addLabel: 'Добавить затемнение' },
-      { value: 'component', label: 'Component', addLabel: 'Добавить фоновый компонент' },
+      {
+        value: 'background',
+        label: 'Background',
+        addLabel: 'Добавить фон',
+      },
+      {
+        value: 'image',
+        label: 'Image',
+        addLabel: 'Добавить изображение',
+      },
+      {
+        value: 'video',
+        label: 'Video',
+        addLabel: 'Добавить видео',
+      },
+      {
+        value: 'shadow',
+        label: 'Shadow',
+        addLabel: 'Добавить затемнение',
+      },
+      {
+        value: 'component',
+        label: 'Component',
+        addLabel: 'Добавить фоновый компонент',
+      },
     ],
   },
   {
@@ -44,9 +76,21 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
     label: 'Side',
     description: 'Боковые тени, текст и компоненты',
     groups: [
-      { value: 'shadow', label: 'Shadow', addLabel: 'Добавить боковую тень' },
-      { value: 'text', label: 'Text', addLabel: 'Добавить боковой текст' },
-      { value: 'component', label: 'Component', addLabel: 'Добавить боковой компонент' },
+      {
+        value: 'shadow',
+        label: 'Shadow',
+        addLabel: 'Добавить боковую тень',
+      },
+      {
+        value: 'text',
+        label: 'Text',
+        addLabel: 'Добавить боковой текст',
+      },
+      {
+        value: 'component',
+        label: 'Component',
+        addLabel: 'Добавить боковой компонент',
+      },
     ],
   },
   {

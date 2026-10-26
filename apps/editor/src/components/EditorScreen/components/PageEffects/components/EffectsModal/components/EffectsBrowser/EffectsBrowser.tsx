@@ -37,6 +37,7 @@ type EffectsBrowserProps = Pick<
   group: string | null;
   grouping: GroupingMode;
   search: string;
+
   onCategoryChange: (category: EffectCategory) => void;
   onGroupChange: (group: string) => void;
   onGroupingChange: (grouping: GroupingMode) => void;
@@ -66,6 +67,7 @@ export const EffectsBrowser = ({
   group,
   grouping,
   search,
+
   onAddAudio,
   onAddVibration,
   onAddFlashlight,
@@ -142,7 +144,7 @@ export const EffectsBrowser = ({
     }
   };
 
-  const selectedGroup = availableGroups.find((current) => current.value === group);
+  const selectedGroup = availableGroups.find((cur) => cur.value === group);
   const searchScope = selectedGroup?.label ?? categoryDefinition?.label;
 
   const searchPlaceholder = searchScope
