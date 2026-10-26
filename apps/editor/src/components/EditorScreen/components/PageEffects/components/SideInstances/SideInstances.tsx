@@ -34,26 +34,35 @@ const SideInstance = ({ effect, components, previews, stylePreviews }: SideInsta
     return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  const withPreview = <T extends NonNullable<typeof shadow | typeof text>>(item: T, kind: 'shadow' | 'text'): T => {
-    const preview = previews[getSidePreviewKey(effect.id, item.id)];
-    const style = stylePreviews[getSideStylePreviewKey(effect.id, kind, item.id)] ?? item.style;
+  const shadowPreview = shadow && previews[getSidePreviewKey(effect.id, shadow.id)];
+  const textPreview = text && previews[getSidePreviewKey(effect.id, text.id)];
 
-    const animation = {
-      ...item.animation,
-      playState: preview?.playState ?? item.animation?.playState,
-    };
+  const shadowStyle = shadow && stylePreviews[getSideStylePreviewKey(effect.id, 'shadow', shadow.id)];
+  const textStyle = text && stylePreviews[getSideStylePreviewKey(effect.id, 'text', text.id)];
 
-    return {
-      ...item,
-      style,
-      hidden: preview?.hidden ?? item.hidden,
-      animation,
-    };
+  const previewShadow = shadow && {
+    ...shadow,
+    style: shadowStyle ?? shadow.style,
+    hidden: shadowPreview?.hidden ?? shadow.hidden,
+    animation: {
+      ...shadow.animation,
+      playState: shadowPreview?.playState ?? shadow.animation?.playState,
+    },
+  };
+
+  const previewText = text && {
+    ...text,
+    style: textStyle ?? text.style,
+    hidden: textPreview?.hidden ?? text.hidden,
+    animation: {
+      ...text.animation,
+      playState: textPreview?.playState ?? text.animation?.playState,
+    },
   };
 
   const options = resolveSideOptions({
-    shadow: shadow ? withPreview(shadow, 'shadow') : undefined,
-    text: text ? withPreview(text, 'text') : undefined,
+    shadow: previewShadow || undefined,
+    text: previewText || undefined,
   });
 
   return (

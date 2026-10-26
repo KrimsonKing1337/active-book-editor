@@ -107,8 +107,8 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedAudio = grouped.audio ?? [];
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
-  const groupedBackground = grouped.background ?? [];
-  const groupedSide = grouped.side ?? [];
+  const groupedBackground = grouped.background?.filter((effect) => Boolean(effect.kind)) ?? [];
+  const groupedSide = grouped.side?.filter((effect) => Boolean(effect.kind)) ?? [];
 
   return [
     ...groupedAudio,
