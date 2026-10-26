@@ -46,37 +46,77 @@ test('lists every top-level effect category with its supported subtypes', () => 
 
 test('filters globally without changing the order of effects', () => {
   assert.deepEqual(
-    getFilteredEffects(effects, null, null, '').map((effect) => effect.id),
+    getFilteredEffects({
+      effects,
+      category: null,
+      group: null,
+      query: '',
+    }).map((effect) => effect.id),
     ['rain', 'soundtrack', 'forest', 'shadow'],
   );
 
   assert.deepEqual(
-    getFilteredEffects(effects, null, null, 'лес').map((effect) => effect.id),
+    getFilteredEffects({
+      effects,
+      category: null,
+      group: null,
+      query: 'лес',
+    }).map((effect) => effect.id),
     ['forest'],
   );
 });
 
 test('limits a search to the current category or type', () => {
   assert.deepEqual(
-    getFilteredEffects(effects, 'audio', null, 'assets').map((effect) => effect.id),
+    getFilteredEffects({
+      effects,
+      category: 'audio',
+      group: null,
+      query: 'assets',
+    }).map((effect) => effect.id),
     ['rain', 'soundtrack'],
   );
 
   assert.deepEqual(
-    getFilteredEffects(effects, 'audio', 'music', '').map((effect) => effect.id),
+    getFilteredEffects({
+      effects,
+      category: 'audio',
+      group: 'music',
+      query: '',
+    }).map((effect) => effect.id),
     ['soundtrack'],
   );
 
   assert.deepEqual(
-    getFilteredEffects(effects, 'background', 'video', '').map((effect) => effect.id),
+    getFilteredEffects({
+      effects,
+      category: 'background',
+      group: 'video',
+      query: '',
+    }).map((effect) => effect.id),
     [],
   );
 });
 
 test('searches names, IDs and media paths without case sensitivity', () => {
-  assert.equal(getFilteredEffects(effects, null, null, 'RAIN.MP3')[0].id, 'rain');
-  assert.equal(getFilteredEffects(effects, null, null, 'SOUNDTRACK')[0].id, 'soundtrack');
-  assert.equal(getFilteredEffects(effects, 'side', null, 'SHADOW')[0].id, 'shadow');
+  assert.equal(getFilteredEffects({
+      effects,
+      category: null,
+      group: null,
+      query: 'RAIN.MP3',
+    })[0].id, 'rain');
+  assert.equal(getFilteredEffects({
+      effects,
+      category: null,
+      group: null,
+      query: 'SOUNDTRACK',
+    })[0].id, 'soundtrack');
+  assert.equal(getFilteredEffects({
+      effects,
+      category: 'side',
+      group: null,
+      query: 'SHADOW',
+    })[0].id, 'shadow');
 });
 
 test('keeps subtype and breadcrumb information independent of search', () => {

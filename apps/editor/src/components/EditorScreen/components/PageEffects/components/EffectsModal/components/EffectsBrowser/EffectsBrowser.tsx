@@ -6,9 +6,9 @@ import type {
   SideEffectKind,
 } from '@active-book/book-builder/effects';
 
-import { Select, TextInput } from '../../../EffectControls';
-
 import type { EffectCategory, GroupingMode } from '../../catalog';
+
+import { Select, TextInput } from '../../../EffectControls';
 import {
   EFFECT_CATEGORIES,
   getCategoryDefinition,
@@ -80,10 +80,21 @@ export const EffectsBrowser = ({
   const categoryDefinition = category ? getCategoryDefinition(category) : null;
   const availableGroups = categoryDefinition?.groups ?? [];
 
-  const filteredEffects = getFilteredEffects(effects, category, group, search);
+  const filteredEffects = getFilteredEffects({
+    effects,
+    category,
+    group,
+    query: search,
+  });
   const isSearching = search.trim().length > 0;
-  const showGroups = Boolean(category && !group && grouping === 'type'
-    && availableGroups.length > 1 && !isSearching);
+  const hasAvailableGroups = availableGroups.length > 1;
+  const showGroups = Boolean(
+    category
+    && !group
+    && grouping === 'type'
+    && hasAvailableGroups
+    && !isSearching
+  );
   const showCategories = !category && !isSearching;
   const showEffects = !showCategories && !showGroups;
 
@@ -138,6 +149,10 @@ export const EffectsBrowser = ({
     ? `Поиск в ${searchScope}…`
     : 'Поиск по всем эффектам…';
 
+  const emptyMessage = isSearching
+    ? 'По запросу ничего не найдено'
+    : 'В этом разделе пока нет эффектов';
+
   return (
     <div className={styles.Browser}>
       <div className={styles.BrowserControls}>
@@ -171,16 +186,22 @@ export const EffectsBrowser = ({
 
       {showCategories && (
         <div className={styles.Tiles}>
-          {EFFECT_CATEGORIES.map((current) => {
-            const count = effects.filter((effect) => effect.type === current.value).length;
+          {EFFECT_CATEGORIES.map((categoryCur) => {
+            const {
+              value,
+              label,
+              description,
+            } = categoryCur;
+
+            const count = effects.filter((cur) => cur.type === value).length;
 
             const handleOpenCategory = () => {
-              onCategoryChange(current.value);
+              onCategoryChange(value);
             };
 
             return (
               <button
-                key={current.value}
+                key={value}
                 type="button"
                 className={styles.FolderTile}
                 onClick={handleOpenCategory}
@@ -190,11 +211,11 @@ export const EffectsBrowser = ({
                 </span>
 
                 <strong>
-                  {current.label}
+                  {label}
                 </strong>
 
                 <span className={styles.Source}>
-                  {current.description}
+                  {description}
                 </span>
 
                 <span className={styles.FolderCount}>
@@ -208,18 +229,20 @@ export const EffectsBrowser = ({
 
       {showGroups && (
         <div className={styles.Tiles}>
-          {availableGroups.map((current) => {
-            const count = effects.filter((effect) => {
-              return effect.type === category && getEffectGroup(effect) === current.value;
+          {availableGroups.map((groupCur) => {
+            const { value, label } = groupCur;
+
+            const count = effects.filter((effectCur) => {
+              return effectCur.type === category && getEffectGroup(effectCur) === value;
             }).length;
 
             const handleOpenGroup = () => {
-              onGroupChange(current.value);
+              onGroupChange(value);
             };
 
             return (
               <button
-                key={current.value}
+                key={value}
                 type="button"
                 className={styles.FolderTile}
                 onClick={handleOpenGroup}
@@ -229,7 +252,7 @@ export const EffectsBrowser = ({
                 </span>
 
                 <strong>
-                  {current.label}
+                  {label}
                 </strong>
 
                 <span className={styles.FolderCount}>
@@ -245,35 +268,37 @@ export const EffectsBrowser = ({
         <>
           {filteredEffects.length === 0 && (
             <div className={styles.Empty}>
-              {isSearching ? 'По запросу ничего не найдено' : 'В этом разделе пока нет эффектов'}
+              {emptyMessage}
             </div>
           )}
 
           <div className={styles.Tiles}>
-            {filteredEffects.map((effect) => {
-              const path = !category ? getEffectPath(effect) : undefined;
+            {filteredEffects.map((effectCur) => {
+              const path = !category ? getEffectPath(effectCur) : undefined;
 
               return (
                 <EffectTile
-                  key={effect.id}
-                  effect={effect}
+                  key={effectCur.id}
+                  effect={effectCur}
                   path={path}
                   onSelect={handleSelectEffect}
                 />
               );
             })}
 
-            {!isSearching && categoryDefinition && availableGroups.map((current) => {
-              if (group && current.value !== group) {
+            {!isSearching && categoryDefinition && availableGroups.map((groupCur) => {
+              const { value, addLabel } = groupCur;
+
+              if (group && value !== group) {
                 return null;
               }
 
               const handleAdd = () => {
-                addEffect(categoryDefinition.value, current.value);
+                addEffect(categoryDefinition.value, value);
               };
 
               return (
-                <AddTile key={current.value} label={current.addLabel} onClick={handleAdd} />
+                <AddTile key={value} label={addLabel} onClick={handleAdd} />
               );
             })}
           </div>

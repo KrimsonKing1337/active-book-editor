@@ -92,12 +92,19 @@ export const getEffectPath = (effect: EditorEffectDraft): string => {
   return [category.label, group?.label].filter(Boolean).join(' / ');
 };
 
-export const getFilteredEffects = (
-  effects: EditorEffectDraft[],
-  category: EffectCategory | null,
-  group: string | null,
-  query: string,
-): EditorEffectDraft[] => {
+export type FilterEffectsOptions = {
+  effects: EditorEffectDraft[];
+  category: EffectCategory | null;
+  group: string | null;
+  query: string;
+};
+
+export const getFilteredEffects = ({
+  effects,
+  category,
+  group,
+  query,
+}: FilterEffectsOptions): EditorEffectDraft[] => {
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
   return effects.filter((effect) => {
@@ -137,8 +144,8 @@ export const getFilteredEffects = (
       searchable.push(effect.options.component?.name);
     }
 
-    return searchable.some((value) => {
-      return value?.toLocaleLowerCase().includes(normalizedQuery);
+    return searchable.some((cur) => {
+      return cur?.toLocaleLowerCase().includes(normalizedQuery);
     });
   });
 };
