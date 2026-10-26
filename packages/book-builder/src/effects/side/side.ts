@@ -17,15 +17,15 @@ export const sideEffectKinds = ['shadow', 'text', 'component'] as const;
 export type SideEffectKind = (typeof sideEffectKinds)[number];
 
 export type SideOptions = {
-  shadows?: StyledSideShadow[];
-  texts?: StyledSideText[];
+  shadow?: StyledSideShadow;
+  text?: StyledSideText;
   component?: BackgroundComponentReference;
 };
 
 export type SideEffect = {
   id: string;
   type: 'side';
-  kind?: SideEffectKind;
+  kind: SideEffectKind;
   slug: string;
   options: SideOptions;
 };
@@ -33,40 +33,17 @@ export type SideEffect = {
 export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
 
 export const resolveSideOptions = (options: SideOptions) => {
-  const shadows = options.shadows?.map((shadowCur) => {
-    const {
-      styleFilters,
-      style,
-      ...item
-    } = shadowCur;
-
-    const resolvedStyle = resolveStyle(style, styleFilters);
-
-    return {
-      ...item,
-      style: resolvedStyle,
-    };
-  });
-
-  const texts = options.texts?.map((textCur) => {
-    const {
-      styleFilters,
-      style,
-      ...item
-    } = textCur;
-
-    const resolvedStyle = resolveStyle(style, styleFilters);
-
-    return {
-      ...item,
-      style: resolvedStyle,
-    };
-  });
-
-  return {
-    shadows,
-    texts,
+  const shadow = options.shadow && {
+    ...options.shadow,
+    style: resolveStyle(options.shadow.style, options.shadow.styleFilters),
   };
+
+  const text = options.text && {
+    ...options.text,
+    style: resolveStyle(options.text.style, options.text.styleFilters),
+  };
+
+  return { shadow, text };
 };
 
 export const normalizeSideEffects = (value: unknown): SideEffect[] => {
@@ -85,53 +62,37 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       continue;
     }
 
-    const shadows = effectCur.options.shadows;
-    const texts = effectCur.options.texts;
-
-    if (shadows !== undefined && !Array.isArray(shadows)) {
-      continue;
-    }
-
-    if (texts !== undefined && !Array.isArray(texts)) {
-      continue;
-    }
-
-    const shadowsSafe = shadows ?? [];
-
-    const validShadows = shadowsSafe.every((shadowCur: unknown) => {
-      return isRecord(shadowCur)
-        && typeof shadowCur.id === 'string'
-        && Boolean(shadowCur.id.trim());
-    });
-
-    const textsSafe = texts ?? [];
-
-    const validTexts = textsSafe.every((textCur: unknown) => {
-      return isRecord(textCur)
-        && typeof textCur.id === 'string'
-        && Boolean(textCur.id.trim())
-        && typeof textCur.leftText === 'string'
-        && typeof textCur.rightText === 'string';
-    });
-
-    if (!validShadows || !validTexts) {
-      continue;
-    }
-
-    const slug = typeof effectCur.slug === 'string'
-      ? effectCur.slug
-      : 'Новый боковой эффект';
-
-    const options = effectCur.options as SideOptions;
-
     const kind = sideEffectKinds.find((current) => current === effectCur.kind);
+
+    if (!kind) {
+      continue;
+    }
+
+    const options = effectCur.options;
+
+    if (kind === 'shadow') {
+      if (!isRecord(options.shadow) || typeof options.shadow.id !== 'string'
+        || !options.shadow.id.trim()) {
+        continue;
+      }
+    }
+
+    if (kind === 'text') {
+      if (!isRecord(options.text) || typeof options.text.id !== 'string'
+        || !options.text.id.trim() || typeof options.text.leftText !== 'string'
+        || typeof options.text.rightText !== 'string') {
+        continue;
+      }
+    }
+
+    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый боковой эффект';
 
     result.push({
       id: effectCur.id,
       type: 'side',
-      ...(kind ? { kind } : {}),
+      kind,
       slug,
-      options,
+      options: options as SideOptions,
     });
   }
 

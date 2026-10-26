@@ -35,8 +35,8 @@ export type BackgroundEffectKind = (typeof backgroundEffectKinds)[number];
 export type BackgroundOptions = {
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
-  images?: StyledBackgroundMedia[];
-  videos?: StyledBackgroundVideo[];
+  image?: StyledBackgroundMedia;
+  video?: StyledBackgroundVideo;
   shadow?: StyledBackgroundShadow;
   component?: BackgroundComponentReference;
 };
@@ -44,7 +44,7 @@ export type BackgroundOptions = {
 export type BackgroundEffect = {
   id: string;
   type: 'background';
-  kind?: BackgroundEffectKind;
+  kind: BackgroundEffectKind;
   slug: string;
   options: BackgroundOptions;
 };
@@ -55,60 +55,34 @@ export const resolveBackgroundOptions = (options: BackgroundOptions) => {
   const {
     style,
     styleFilters,
-    images,
-    videos,
+    image,
+    video,
     shadow,
     ...rest
   } = options;
 
   const resolvedStyle = resolveStyle(style, styleFilters);
 
-  const resolvedImages = images?.map((imageCur) => {
-    const {
-      style: mediaStyle,
-      styleFilters: mediaFilters,
-      ...mediaOptions
-    } = imageCur;
+  const resolvedImage = image && {
+    ...image,
+    style: resolveStyle(image.style, image.styleFilters),
+  };
 
-    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
+  const resolvedVideo = video && {
+    ...video,
+    style: resolveStyle(video.style, video.styleFilters),
+  };
 
-    return {
-      ...mediaOptions,
-      style: resolvedMediaStyle,
-    };
-  });
-
-  const resolvedVideos = videos?.map((videoCur) => {
-    const {
-      style: mediaStyle,
-      styleFilters: mediaFilters,
-      ...mediaOptions
-    } = videoCur;
-
-    const resolvedMediaStyle = resolveStyle(mediaStyle, mediaFilters);
-
-    return {
-      ...mediaOptions,
-      style: resolvedMediaStyle,
-    };
-  });
-
-  let resolvedShadow;
-
-  if (shadow) {
-    const style = resolveStyle(shadow.style, shadow.styleFilters);
-
-    resolvedShadow = {
-      show: shadow.show,
-      style,
-    };
-  }
+  const resolvedShadow = shadow && {
+    ...shadow,
+    style: resolveStyle(shadow.style, shadow.styleFilters),
+  };
 
   return {
     ...rest,
     style: resolvedStyle,
-    images: resolvedImages,
-    videos: resolvedVideos,
+    image: resolvedImage,
+    video: resolvedVideo,
     shadow: resolvedShadow,
   };
 };
@@ -121,11 +95,7 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
   const result: BackgroundEffect[] = [];
 
   for (const effectCur of value.background) {
-    if (
-      !isRecord(effectCur)
-      || effectCur.type !== 'background'
-      || !isRecord(effectCur.options)
-    ) {
+    if (!isRecord(effectCur) || effectCur.type !== 'background' || !isRecord(effectCur.options)) {
       continue;
     }
 
@@ -133,46 +103,31 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
       continue;
     }
 
-    const images = Array.isArray(effectCur.options.images) ? effectCur.options.images : [];
-    const videos = Array.isArray(effectCur.options.videos) ? effectCur.options.videos : [];
+    const kind = backgroundEffectKinds.find((current) => current === effectCur.kind);
 
-    const imagesAreValid = images.every((imageCur) => {
-      if (!isRecord(imageCur)) {
-        return false;
-      }
-
-      const idIsValid = typeof imageCur.id === 'string' && !!imageCur.id.trim();
-      const srcIsValid = typeof imageCur.src === 'string';
-
-      return idIsValid && srcIsValid;
-    });
-
-    const videosAreValid = videos.every((videoCur) => {
-      if (!isRecord(videoCur)) {
-        return false;
-      }
-
-      const idIsValid = typeof videoCur.id === 'string';
-      const srcIsValid = typeof videoCur.src === 'string';
-
-      return idIsValid && srcIsValid;
-    });
-
-    if (!imagesAreValid || !videosAreValid) {
+    if (!kind) {
       continue;
     }
 
-    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фон';
-    const options = effectCur.options as BackgroundOptions;
+    const options = effectCur.options;
 
-    const kind = backgroundEffectKinds.find((current) => current === effectCur.kind);
+    if (kind === 'image' || kind === 'video') {
+      const media = options[kind];
+
+      if (!isRecord(media) || typeof media.id !== 'string' || !media.id.trim()
+        || typeof media.src !== 'string') {
+        continue;
+      }
+    }
+
+    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый фоновый эффект';
 
     result.push({
       id: effectCur.id,
       type: 'background',
-      ...(kind ? { kind } : {}),
+      kind,
       slug,
-      options,
+      options: options as BackgroundOptions,
     });
   }
 
