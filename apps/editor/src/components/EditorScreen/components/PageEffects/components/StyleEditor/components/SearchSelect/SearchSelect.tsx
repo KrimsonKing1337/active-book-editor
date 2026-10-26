@@ -7,6 +7,8 @@ import type {
 
 import { useId, useState } from 'react';
 
+import { TextInput, Button } from '../../../EffectControls';
+
 import styles from '../../StyleEditor.module.scss';
 
 export type SearchSelectOption = {
@@ -102,7 +104,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
 
   return (
     <div className={styles.SearchSelect} onBlur={handleBlur}>
-      <input
+      <TextInput
         type="search"
         maxLength={120}
         role="combobox"
@@ -142,7 +144,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
             const isActive = index === activeIndex;
 
             return (
-              <button
+              <Button
                 key={optionValue}
                 type="button"
                 role="option"
@@ -153,7 +155,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
                 onClick={handleOptionClick}
               >
                 {label}
-              </button>
+              </Button>
             );
           })}
         </div>

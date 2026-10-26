@@ -2,6 +2,8 @@ import type { ChangeEvent } from 'react';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
+import { Select } from '../../../EffectControls';
+
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import styles from '../../BackgroundSettings.module.scss';
@@ -49,7 +51,7 @@ export const CustomComponent = ({ component, onChange }: CustomComponentProps) =
         Кастомный компонент
       </summary>
 
-      <select value={componentId} onChange={handleComponentChange}>
+      <Select value={componentId} onChange={handleComponentChange}>
         <option value="">
           Не использовать
         </option>
@@ -61,7 +63,7 @@ export const CustomComponent = ({ component, onChange }: CustomComponentProps) =
             </option>
           );
         })}
-      </select>
+      </Select>
     </details>
   );
 };

@@ -1,6 +1,12 @@
 import type { ChangeEvent } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
+import classNames from 'classnames';
+
+import { Button } from '../../../EffectControls';
+
+import controlStyles from '../../../EffectControls/EffectControls.module.scss';
+import inputStyles from '../../../EffectControls/TextInput/TextInput.module.scss';
 
 import styles from '../../StyleEditor.module.scss';
 
@@ -25,6 +31,8 @@ export const LayerSettings = ({
     mask: 'sssss',
     replacement: { s: /[0-9-]/ },
   };
+
+  const inputClassNames = classNames(controlStyles.Control, inputStyles.Input);
 
   const updateIndex = (value: number) => {
     if (!Number.isFinite(value)) {
@@ -86,7 +94,7 @@ export const LayerSettings = ({
       </span>
 
       <div className={styles.LayerControls}>
-        <button
+        <Button
           type="button"
           onClick={handleMoveToBack}
           aria-label="На самый нижний слой"
@@ -94,13 +102,14 @@ export const LayerSettings = ({
           disabled={!canMoveToBack}
         >
           ⇤
-        </button>
+        </Button>
 
-        <button type="button" aria-label="На слой назад" onClick={handleStepBack}>
+        <Button type="button" aria-label="На слой назад" onClick={handleStepBack}>
           −
-        </button>
+        </Button>
 
         <InputMask
+          className={inputClassNames}
           mask={maskOptions.mask}
           replacement={maskOptions.replacement}
           showMask
@@ -110,11 +119,11 @@ export const LayerSettings = ({
           onBlur={onCommit}
         />
 
-        <button type="button" aria-label="На слой вперёд" onClick={handleStepForward}>
+        <Button type="button" aria-label="На слой вперёд" onClick={handleStepForward}>
           +
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           aria-label="На самый верхний слой"
           title="На самый верхний слой"
@@ -122,7 +131,7 @@ export const LayerSettings = ({
           onClick={handleMoveToFront}
         >
           ⇥
-        </button>
+        </Button>
       </div>
     </label>
   );
