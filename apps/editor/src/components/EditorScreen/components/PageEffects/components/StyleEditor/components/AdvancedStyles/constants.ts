@@ -70,4 +70,3 @@ export const Y_OPTIONS = ['top', 'center', 'bottom'].map((cur) => ({
   value: cur,
   label: cur,
 }));
-

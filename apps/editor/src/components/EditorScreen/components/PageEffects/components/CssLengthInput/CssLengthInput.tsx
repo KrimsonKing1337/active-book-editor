@@ -6,8 +6,8 @@ import classNames from 'classnames';
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import layoutStyles from './CssLengthInput.module.scss';
 
-import { units, maskOptions } from './constants';
 import type { Unit } from './constants';
+import { units, maskOptions } from './constants';
 
 type CssLengthInputProps = {
   label?: string;

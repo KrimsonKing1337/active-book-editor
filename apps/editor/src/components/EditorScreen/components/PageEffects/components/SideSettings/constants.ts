@@ -27,4 +27,3 @@ export const textPresets = [
   { value: 'scroll' as const, label: 'Прокрутка' },
   { value: 'none' as const, label: 'Без анимации' },
 ];
-

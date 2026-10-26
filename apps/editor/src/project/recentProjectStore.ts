@@ -1,6 +1,11 @@
 import type { ProjectDirectoryHandle } from './fileSystemAccess';
 
-import { DATABASE_NAME, DATABASE_VERSION, STORE_NAME, LAST_PROJECT_KEY } from './constants';
+import {
+  DATABASE_NAME,
+  DATABASE_VERSION,
+  STORE_NAME,
+  LAST_PROJECT_KEY,
+} from './constants';
 
 const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => {
   return new Promise((resolve, reject) => {

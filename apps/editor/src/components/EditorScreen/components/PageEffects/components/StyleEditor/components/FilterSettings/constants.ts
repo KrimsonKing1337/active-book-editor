@@ -87,4 +87,3 @@ export const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((filterCur) => {
     label: filterCur,
   };
 });
-

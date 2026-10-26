@@ -10,4 +10,3 @@ export const maskOptions = {
   mask: 'nnnnnnnn',
   replacement,
 };
-

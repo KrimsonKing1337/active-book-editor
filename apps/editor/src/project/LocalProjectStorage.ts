@@ -12,7 +12,12 @@ import type {
 
 import { trackProjectWrite } from './pendingOperations';
 
-import { BOOK_FILE_NAME, PACKAGE_FILE_NAME, ASSETS_DIRECTORY_NAME, DEPENDENCIES_DIRECTORY_NAME } from './constants';
+import {
+  BOOK_FILE_NAME,
+  PACKAGE_FILE_NAME,
+  ASSETS_DIRECTORY_NAME,
+  DEPENDENCIES_DIRECTORY_NAME,
+} from './constants';
 
 import {
   ExistingProjectError,

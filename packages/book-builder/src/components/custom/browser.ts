@@ -2,7 +2,13 @@ import * as React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
 import * as jsxDevRuntime from 'react/jsx-dev-runtime';
 
-import { MAX_ARCHIVE_BYTES, MAX_EXTRACTED_BYTES, MAX_FILE_BYTES, TAR_BLOCK_SIZE, textDecoder } from './constants';
+import {
+  MAX_ARCHIVE_BYTES,
+  MAX_EXTRACTED_BYTES,
+  MAX_FILE_BYTES,
+  TAR_BLOCK_SIZE,
+  textDecoder,
+} from './constants';
 
 type ManifestComponent = {
   title: string;

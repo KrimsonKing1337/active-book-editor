@@ -15,7 +15,7 @@ import { Images, Videos, Shadow, Background, CustomComponent } from './component
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
-import { createDefaultShadowFilters } from '../../utils';
+import { DEFAULT_SHADOW_OPTIONS } from './constants';
 
 import { TextInput, Button } from '../EffectControls';
 
@@ -33,16 +33,6 @@ type BackgroundSettingsProps = {
 };
 
 export type BackgroundEffectLayer = 'background' | 'shadow' | 'image' | 'video';
-
-const defaultShadowStyle = {
-  zIndex: 2,
-};
-
-const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
-  show: false,
-  style: defaultShadowStyle,
-  styleFilters: createDefaultShadowFilters(),
-};
 
 export const BackgroundSettings = ({
   effect,
@@ -66,7 +56,7 @@ export const BackgroundSettings = ({
   const style = options.style ?? {};
   const images = options.images ?? [];
   const videos = options.videos ?? [];
-  const shadow = options.shadow ?? defaultShadowOptions;
+  const shadow = options.shadow ?? DEFAULT_SHADOW_OPTIONS;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
     const updatedOptions = {

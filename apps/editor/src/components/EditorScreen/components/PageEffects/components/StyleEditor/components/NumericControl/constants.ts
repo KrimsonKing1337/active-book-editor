@@ -3,4 +3,3 @@ export const numericReplacement = {
 };
 
 export const NUMBER_PATTERN = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
-
