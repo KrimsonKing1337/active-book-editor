@@ -354,7 +354,12 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       const videoStyle = video && previewStyle('video', video.id);
       const shadowStyle = previewStyle('shadow');
 
-      if (!backgroundStyle && !imageStyle && !videoStyle && !shadowStyle) {
+      if (
+        !backgroundStyle
+        && !imageStyle
+        && !videoStyle
+        && !shadowStyle
+      ) {
         return effectCur;
       }
 

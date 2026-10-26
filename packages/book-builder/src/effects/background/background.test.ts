@@ -5,17 +5,60 @@ import { normalizeBackgroundEffects, resolveBackgroundOptions } from './backgrou
 
 test('accepts independent background, image, video and shadow effects', () => {
   const background = [
-    { id: 'bg', type: 'background', kind: 'background', options: { style: { backgroundColor: '#000' } } },
-    { id: 'img', type: 'background', kind: 'image', options: { image: { id: 'img-1', src: 'forest.webp' } } },
-    { id: 'vid', type: 'background', kind: 'video', options: { video: { id: 'vid-1', src: 'fog.webm' } } },
-    { id: 'shadow', type: 'background', kind: 'shadow', options: { shadow: { show: true } } },
-    { id: 'component', type: 'background', kind: 'component', options: {} },
+    {
+      id: 'bg',
+      type: 'background',
+      kind: 'background',
+      options: {
+        style: {
+          backgroundColor: '#000',
+        },
+      },
+    },
+    {
+      id: 'img',
+      type: 'background',
+      kind: 'image',
+      options: {
+        image: {
+          id: 'img-1',
+          src: 'forest.webp',
+        },
+      },
+    },
+    {
+      id: 'vid',
+      type: 'background',
+      kind: 'video',
+      options: {
+        video: {
+          id: 'vid-1',
+          src: 'fog.webm',
+        },
+      },
+    },
+    {
+      id: 'shadow',
+      type: 'background',
+      kind: 'shadow',
+      options: {
+        shadow: {
+          show: true,
+        },
+      },
+    },
+    {
+      id: 'component',
+      type: 'background',
+      kind: 'component',
+      options: {},
+    },
   ];
 
   const effects = normalizeBackgroundEffects({ background });
 
   assert.equal(effects.length, 5);
-  assert.deepEqual(effects.map((effect) => effect.kind), [
+  assert.deepEqual(effects.map((cur) => cur.kind), [
     'background', 'image', 'video', 'shadow', 'component',
   ]);
   assert.equal(effects[1].options.image?.id, 'img-1');
@@ -25,14 +68,23 @@ test('rejects legacy grouped background effects and missing media IDs', () => {
   const legacy = {
     id: 'old',
     type: 'background',
-    options: { images: [{ id: 'img', src: 'forest.webp' }] },
+    options: {
+      images: [{
+        id: 'img',
+        src: 'forest.webp',
+      }],
+    },
   };
 
   const invalid = {
     id: 'new',
     type: 'background',
     kind: 'image',
-    options: { image: { src: 'forest.webp' } },
+    options: {
+      image: {
+        src: 'forest.webp',
+      },
+    },
   };
 
   assert.deepEqual(normalizeBackgroundEffects({ background: [legacy, invalid] }), []);
@@ -58,14 +110,25 @@ test('resolves filters on the selected layer without changing media settings', (
     loop: false,
   };
 
+  const backdropOperation = {
+    ...operation,
+    property: 'backdropFilter' as const,
+  };
+
+  const shadow = {
+    show: true,
+    styleFilters: [backdropOperation],
+  };
+
+  const style = {
+    backgroundColor: '#222',
+  };
+
   const options = resolveBackgroundOptions({
     image,
     video,
-    shadow: {
-      show: true,
-      styleFilters: [{ ...operation, property: 'backdropFilter' }],
-    },
-    style: { backgroundColor: '#222' },
+    shadow,
+    style,
   });
 
   assert.equal(options.image?.style.filter, 'blur(12px)');

@@ -9,15 +9,31 @@ test('normalizes independent shadow, text and component effects', () => {
       id: 'shadow',
       type: 'side',
       kind: 'shadow',
-      options: { shadow: { id: 'shadow-1', thickness: 40 } },
+      options: {
+        shadow: {
+          id: 'shadow-1',
+          thickness: 40,
+        },
+      },
     },
     {
       id: 'text',
       type: 'side',
       kind: 'text',
-      options: { text: { id: 'text-1', leftText: 'Лево', rightText: 'Право' } },
+      options: {
+        text: {
+          id: 'text-1',
+          leftText: 'Лево',
+          rightText: 'Право',
+        },
+      },
     },
-    { id: 'component', type: 'side', kind: 'component', options: {} },
+    {
+      id: 'component',
+      type: 'side',
+      kind: 'component',
+      options: {},
+    },
   ];
 
   const result = normalizeSideEffects({ side });
@@ -31,14 +47,24 @@ test('rejects legacy side groups and invalid independent text', () => {
   const legacy = {
     id: 'legacy',
     type: 'side',
-    options: { shadows: [{ id: 'shadow-1' }] },
+    options: {
+      shadows: [{
+        id: 'shadow-1',
+      }],
+    },
   };
 
   const invalid = {
     id: 'invalid',
     type: 'side',
     kind: 'text',
-    options: { text: { id: 'text-1', leftText: 123, rightText: '' } },
+    options: {
+      text: {
+        id: 'text-1',
+        leftText: 123,
+        rightText: '',
+      },
+    },
   };
 
   assert.deepEqual(normalizeSideEffects({ side: [legacy, invalid] }), []);
@@ -46,7 +72,10 @@ test('rejects legacy side groups and invalid independent text', () => {
 
 test('resolves custom side layer styles on the wrapper', () => {
   const result = resolveSideOptions({
-    style: { zIndex: 7, opacity: 0.8 },
+    style: {
+      zIndex: 7,
+      opacity: 0.8,
+    },
     styleFilters: [{
       id: 'blur-one',
       property: 'backdropFilter',
@@ -63,23 +92,43 @@ test('resolves custom side layer styles on the wrapper', () => {
 test('resolves filters on one side effect at a time', () => {
   const shadow = {
     id: 'shadow',
-    style: { color: '#ff0000', zIndex: 4 },
-    styleFilters: [{ id: 'blur', property: 'filter' as const, function: 'blur' as const, value: '5px' }],
+    style: {
+      color: '#ff0000',
+      zIndex: 4,
+    },
+    styleFilters: [{
+      id: 'blur',
+      property: 'filter' as const,
+      function: 'blur' as const,
+      value: '5px',
+    }],
   };
 
   const text = {
     id: 'text',
     leftText: 'Left',
     rightText: 'Right',
-    style: { color: '#ffffff', zIndex: 3 },
-    styleFilters: [{ id: 'fade', property: 'filter' as const, function: 'opacity' as const, value: '50%' }],
+    style: {
+      color: '#ffffff',
+      zIndex: 3,
+    },
+    styleFilters: [{
+      id: 'fade',
+      property: 'filter' as const,
+      function: 'opacity' as const,
+      value: '50%',
+    }],
   };
 
   const result = resolveSideOptions({ shadow, text });
 
   assert.deepEqual(result.shadow, {
     id: 'shadow',
-    style: { color: '#ff0000', zIndex: 4, filter: 'blur(5px)' },
+    style: {
+      color: '#ff0000',
+      zIndex: 4,
+      filter: 'blur(5px)',
+    },
   });
 
   assert.equal(result.text?.style.filter, 'opacity(50%)');
