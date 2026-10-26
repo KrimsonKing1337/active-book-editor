@@ -166,6 +166,7 @@ export const EffectsModal = ({
       role="dialog"
       aria-label="Эффекты страницы"
       aria-modal={false}
+      data-active-book-effects-ui
       bounds="window"
       dragHandleClassName={styles.Header}
       {...rndOptions}
