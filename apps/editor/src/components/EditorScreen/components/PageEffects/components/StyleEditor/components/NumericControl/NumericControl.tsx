@@ -6,6 +6,8 @@ import { Slider } from 'activeBook-core/components';
 
 import styles from '../../StyleEditor.module.scss';
 
+import { numericReplacement, NUMBER_PATTERN } from './constants';
+
 export type NumericConfig = {
   min: number;
   max: number;
@@ -20,12 +22,6 @@ type NumericControlProps = {
   label: string;
   onChange: (value: string) => void;
 };
-
-const numericReplacement = {
-  _: /[0-9.-]/,
-};
-
-const NUMBER_PATTERN = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
 
 export const isValidNumericValue = (value: string, config: NumericConfig): boolean => {
   const trimmedValue = value.trim();

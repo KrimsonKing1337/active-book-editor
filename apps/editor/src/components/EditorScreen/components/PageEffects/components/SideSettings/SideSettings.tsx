@@ -2,8 +2,6 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
-import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
-
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { SideEffectDraft } from '../../@types';
@@ -16,6 +14,8 @@ import { CssLengthInput } from '../CssLengthInput';
 import { TextInput, Select, Checkbox, Button } from '../EffectControls';
 
 import { AnimationSettings } from './components/AnimationSettings';
+
+import { positions, shadowPresets, textPresets } from './constants';
 
 import styles from './SideSettings.module.scss';
 
@@ -37,30 +37,6 @@ type LayoutSettingsProps = {
   hidden: boolean;
   onHiddenChange: (hidden: boolean) => void;
 };
-
-type PositionOption = {
-  value: NonNullable<ItemLayout['position']>;
-  label: string;
-};
-
-const positions: PositionOption[] = [
-  { value: 'top-left', label: 'Сверху слева' },
-  { value: 'top', label: 'Сверху' },
-  { value: 'top-right', label: 'Сверху справа' },
-  { value: 'left', label: 'Слева' },
-  { value: 'center', label: 'По центру' },
-  { value: 'right', label: 'Справа' },
-  { value: 'bottom-left', label: 'Снизу слева' },
-  { value: 'bottom', label: 'Снизу' },
-  { value: 'bottom-right', label: 'Снизу справа' },
-];
-
-const shadowPresets = [...SIDE_SHADOW_PRESETS];
-
-const textPresets = [
-  { value: 'scroll' as const, label: 'Прокрутка' },
-  { value: 'none' as const, label: 'Без анимации' },
-];
 
 const LayoutSettings = ({
   item,

@@ -2,14 +2,13 @@ import type { CSSProperties } from 'react';
 
 import { useEffect, useState } from 'react';
 
-import type { NumericConfig } from '../NumericControl';
-
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
-import styles from '../../StyleEditor.module.scss';
+import type { AdvancedProperty } from './constants';
+import { NUMERIC, PROPERTY_OPTIONS, FIT_OPTIONS, X_OPTIONS, Y_OPTIONS } from './constants';
 
-type AdvancedProperty = 'opacity' | 'borderRadius' | 'objectFit' | 'objectPosition';
+import styles from '../../StyleEditor.module.scss';
 
 type AdvancedStylesProps = {
   style: CSSProperties;
@@ -23,75 +22,6 @@ type Draft = {
   property: AdvancedProperty | '';
   value: string;
 };
-
-const NUMERIC: Partial<Record<AdvancedProperty, NumericConfig>> = {
-  opacity: {
-    min: 0,
-    max: 1,
-    step: 0.01,
-    unit: '',
-    initial: '1',
-  },
-  borderRadius: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: 'px',
-    initial: '0',
-  },
-};
-
-const PROPERTY_OPTIONS = [
-  {
-    value: 'opacity',
-    label: 'opacity',
-  },
-  {
-    value: 'borderRadius',
-    label: 'border-radius',
-  },
-  {
-    value: 'objectFit',
-    label: 'object-fit',
-  },
-  {
-    value: 'objectPosition',
-    label: 'object-position',
-  },
-];
-
-const FIT_OPTIONS = [
-  {
-    value: 'fill',
-    label: 'fill',
-  },
-  {
-    value: 'contain',
-    label: 'contain',
-  },
-  {
-    value: 'cover',
-    label: 'cover',
-  },
-  {
-    value: 'none',
-    label: 'none',
-  },
-  {
-    value: 'scale-down',
-    label: 'scale-down',
-  },
-];
-
-const X_OPTIONS = ['left', 'center', 'right'].map((cur) => ({
-  value: cur,
-  label: cur,
-}));
-
-const Y_OPTIONS = ['top', 'center', 'bottom'].map((cur) => ({
-  value: cur,
-  label: cur,
-}));
 
 const getDrafts = (style: CSSProperties): Draft[] => {
   return PROPERTY_OPTIONS

@@ -14,14 +14,14 @@ type Preset = {
   label: string;
 };
 
-type onPlaybackChangeState = NonNullable<SideAnimation['playState']>;
+type PlaybackState = NonNullable<SideAnimation['playState']>;
 
 type AnimationSettingsProps = {
   animation?: SideAnimation;
   presets: Preset[];
   defaultDuration: number;
   playState?: SideAnimation['playState'];
-  onPlaybackChange: (state: onPlaybackChangeState) => void;
+  onPlaybackChange: (state: PlaybackState) => void;
   onChange: (animation: SideAnimation) => void;
 };
 

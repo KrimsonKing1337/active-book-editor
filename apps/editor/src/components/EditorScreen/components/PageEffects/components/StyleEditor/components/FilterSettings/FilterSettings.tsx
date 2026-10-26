@@ -4,14 +4,14 @@ import type {
   FilterProperty,
 } from '@active-book/book-builder/effects';
 
-import type { NumericConfig } from '../NumericControl';
-
 import { useEffect, useState } from 'react';
 
-import { FILTER_FUNCTIONS, resolveStyle } from '@active-book/book-builder/effects';
+import { resolveStyle } from '@active-book/book-builder/effects';
 
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
+
+import { CONFIG, PROPERTY_OPTIONS, FUNCTION_OPTIONS } from './constants';
 
 import styles from '../../StyleEditor.module.scss';
 
@@ -26,90 +26,6 @@ type FilterDraft = {
   function: FilterFunction | '';
   value: string;
 };
-
-const CONFIG: Record<FilterFunction, NumericConfig> = {
-  blur: {
-    min: 0,
-    max: 50,
-    step: 1,
-    unit: 'px',
-    initial: '0',
-  },
-  brightness: {
-    min: 0,
-    max: 300,
-    step: 1,
-    unit: '%',
-    initial: '100',
-  },
-  contrast: {
-    min: 0,
-    max: 300,
-    step: 1,
-    unit: '%',
-    initial: '100',
-  },
-  grayscale: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%',
-    initial: '0',
-  },
-  'hue-rotate': {
-    min: -360,
-    max: 360,
-    step: 1,
-    unit: 'deg',
-    initial: '0',
-  },
-  invert: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%',
-    initial: '0',
-  },
-  opacity: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%',
-    initial: '100',
-  },
-  saturate: {
-    min: 0,
-    max: 300,
-    step: 1,
-    unit: '%',
-    initial: '100',
-  },
-  sepia: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: '%',
-    initial: '0',
-  },
-};
-
-const PROPERTY_OPTIONS = [
-  {
-    value: 'filter',
-    label: 'filter',
-  },
-  {
-    value: 'backdropFilter',
-    label: 'backdrop-filter',
-  },
-];
-
-const FUNCTION_OPTIONS = FILTER_FUNCTIONS.map((filterCur) => {
-  return {
-    value: filterCur,
-    label: filterCur,
-  };
-});
 
 const getDrafts = (operations: FilterOperation[] | undefined): FilterDraft[] => {
   const operationsSafe = operations ?? [];

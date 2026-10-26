@@ -17,6 +17,8 @@ import {
 
 import styles from '../../StyleEditor.module.scss';
 
+import { CHANNEL_LABELS } from './constants';
+
 type ColorSettingsProps = {
   label?: string;
   color: string;
@@ -25,8 +27,6 @@ type ColorSettingsProps = {
 };
 
 type EditedFormat = 'hex' | 'rgba' | null;
-
-const CHANNEL_LABELS = ['R', 'G', 'B', 'A'];
 
 const getCompleteHex = (val: string): string | null => {
   const digits = unformat(val, hexMaskOptions);

@@ -7,6 +7,8 @@ import classNames from 'classnames';
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import inputStyles from '../EffectControls/TextInput/TextInput.module.scss';
 
+import { replacement } from './constants';
+
 type ExcludedInputProps =
   | 'value'
   | 'onChange'
@@ -24,8 +26,6 @@ type IntegerInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, ExcludedInp
   maxDigits?: number;
   onValueChange: (value: number) => void;
 };
-
-const replacement = { d: /[0-9]/ };
 
 export const IntegerInput = ({
   value,

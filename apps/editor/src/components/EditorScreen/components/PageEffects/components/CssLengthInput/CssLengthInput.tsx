@@ -6,25 +6,15 @@ import classNames from 'classnames';
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import layoutStyles from './CssLengthInput.module.scss';
 
+import { units, maskOptions } from './constants';
+import type { Unit } from './constants';
+
 type CssLengthInputProps = {
   label?: string;
   value: string;
   allowNegative?: boolean;
   max?: number;
   onChange: (value: string) => void;
-};
-
-const units = ['px', '%', 'rem', 'em', 'vw', 'vh'] as const;
-
-type Unit = typeof units[number];
-
-const replacement = {
-  n: /[0-9.-]/,
-};
-
-const maskOptions = {
-  mask: 'nnnnnnnn',
-  replacement,
 };
 
 const getParts = (value: string): { amount: string; unit: Unit } => {
