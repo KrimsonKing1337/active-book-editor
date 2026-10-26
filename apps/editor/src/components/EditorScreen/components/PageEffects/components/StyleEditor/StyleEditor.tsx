@@ -72,35 +72,23 @@ export const StyleEditor = ({
 
   for (const effectCur of effects) {
     if (controller && effectCur.type === 'side') {
-      const shadows = effectCur.options.shadows ?? [];
-      const texts = effectCur.options.texts ?? [];
-
-      const items = [
-        ...shadows,
-        ...texts,
-      ];
+      const items = [effectCur.options.shadow, effectCur.options.text];
 
       for (const itemCur of items) {
-        const value = Number(itemCur.style?.zIndex);
+        const value = Number(itemCur?.style?.zIndex);
 
-        if (itemCur.style?.zIndex !== undefined && Number.isFinite(value)) {
+        if (itemCur?.style?.zIndex !== undefined && Number.isFinite(value)) {
           layerZIndexes.push(value);
         }
       }
     } else if (!controller && effectCur.type === 'background') {
       const options = effectCur.options;
 
-      const images = options.images ?? [];
-      const videos = options.videos ?? [];
-
-      const imagesStyles = images.map((cur) => cur.style);
-      const videosStyles = videos.map((cur) => cur.style);
-
       const layerStyles = [
         options.style,
         options.shadow?.style,
-        ...imagesStyles,
-        ...videosStyles,
+        options.image?.style,
+        options.video?.style,
       ];
 
       for (const styleCur of layerStyles) {

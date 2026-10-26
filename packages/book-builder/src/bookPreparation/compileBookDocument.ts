@@ -15,17 +15,10 @@ import type {
 import { normalizePageEffects, isRecord } from '../effects/utils';
 
 type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect | SideEffect;
-type MappedEffect<T extends EffectForGetMappedEffects> = Pick<T, 'id' | 'type' | 'options'>;
+type MappedEffect<T extends EffectForGetMappedEffects> = Omit<T, 'slug'>;
 
 const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): MappedEffect<T>[] => {
-  return effects.map((effectCur) => {
-    return {
-      id: effectCur.id,
-      type: effectCur.type,
-      options: effectCur.options,
-      ...('kind' in effectCur ? { kind: effectCur.kind } : {}),
-    };
-  });
+  return effects.map(({ slug: _slug, ...effectCur }) => effectCur);
 };
 
 export const compileBookDocument = (document: unknown): Record<string, unknown> => {
