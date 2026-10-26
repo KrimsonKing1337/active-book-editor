@@ -412,7 +412,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
 
           let colorDisabledReason;
 
-          if (canChangeColor) {
+          if (!canChangeColor) {
             colorDisabledReason = 'Цвет этого пресета меняется автоматически. ' +
               'Выберите одноцветный пресет, чтобы настроить его';
           }

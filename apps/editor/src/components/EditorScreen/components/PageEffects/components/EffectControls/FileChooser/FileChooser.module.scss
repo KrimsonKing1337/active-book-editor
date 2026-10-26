@@ -1,0 +1,16 @@
+.FileChooser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  .FilePath {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ChooseButton {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}

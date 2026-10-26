@@ -2,8 +2,10 @@ import type { ChangeEvent, FocusEvent, InputHTMLAttributes } from 'react';
 import { useEffect, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
+import classNames from 'classnames';
 
-import styles from '../EffectControls/EffectControls.module.scss';
+import sharedStyles from '../EffectControls/EffectControls.module.scss';
+import inputStyles from '../EffectControls/TextInput/TextInput.module.scss';
 
 type ExcludedInputProps =
   | 'value'
@@ -48,7 +50,7 @@ export const IntegerInput = ({
     replacement,
   };
 
-  const classNames = [styles.Input, props.className].filter(Boolean).join(' ');
+  const inputClassNames = classNames(sharedStyles.Control, inputStyles.Input, props.className);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const raw = unformat(event.target.value, maskOptions);
@@ -79,7 +81,7 @@ export const IntegerInput = ({
   return (
     <InputMask
       {...props}
-      className={classNames}
+      className={inputClassNames}
       mask={mask}
       replacement={replacement}
       showMask

@@ -1,5 +1,7 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
 
+import classNames from 'classnames';
+
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import { type BackgroundPreviewLayer, usePageEffects } from '../../PageEffectsContext';
@@ -94,14 +96,14 @@ export const StyleEditor = ({
       const imagesStyles = images.map((cur) => cur.style);
       const videosStyles = videos.map((cur) => cur.style);
 
-      const styles = [
+      const layerStyles = [
         options.style,
         options.shadow?.style,
         ...imagesStyles,
         ...videosStyles,
       ];
 
-      for (const styleCur of styles) {
+      for (const styleCur of layerStyles) {
         const value = Number(styleCur?.zIndex);
 
         if (styleCur?.zIndex !== undefined && Number.isFinite(value)) {
@@ -172,7 +174,7 @@ export const StyleEditor = ({
         return (
           <fieldset
             key={propertyCur}
-            className={colorDisabledReason ? styles.DisabledColors : styles.Colors}
+            className={classNames(styles.Colors, { [styles.DisabledColors]: Boolean(colorDisabledReason) })}
             disabled={Boolean(colorDisabledReason)}
           >
             <ColorSettings

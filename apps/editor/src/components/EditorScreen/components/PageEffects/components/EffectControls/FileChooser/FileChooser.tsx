@@ -1,9 +1,9 @@
 import type { ChangeEvent, RefObject } from 'react';
 
-import { Button } from './Button';
-import { TextInput } from './TextInput';
+import { Button } from '../Button';
+import { TextInput } from '../TextInput';
 
-import styles from './EffectControls.module.scss';
+import styles from './FileChooser.module.scss';
 
 type FileChooserProps = {
   value: string;

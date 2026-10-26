@@ -1,16 +1,18 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
-import styles from './EffectControls.module.scss';
+import classNames from 'classnames';
+
+import styles from './Checkbox.module.scss';
 
 type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'children'> & {
   children: ReactNode;
 };
 
 export const Checkbox = ({ children, className, ...props }: CheckboxProps) => {
-  const classes = [styles.Checkbox, className].filter(Boolean).join(' ');
+  const checkboxClassNames = classNames(styles.Checkbox, className);
 
   return (
-    <label className={classes}>
+    <label className={checkboxClassNames}>
       <input {...props} type="checkbox" />
 
       <span>

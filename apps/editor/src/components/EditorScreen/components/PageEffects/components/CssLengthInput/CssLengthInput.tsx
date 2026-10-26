@@ -1,8 +1,9 @@
 import { type ChangeEvent, useEffect, useState } from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
+import classNames from 'classnames';
 
-import styles from '../EffectControls/EffectControls.module.scss';
+import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import layoutStyles from './CssLengthInput.module.scss';
 
 type CssLengthInputProps = {
@@ -120,7 +121,7 @@ export const CssLengthInput = ({
     <span className={layoutStyles.Container}>
       <InputMask
         aria-label={label}
-        className={`${styles.Input} ${layoutStyles.Value}`}
+        className={classNames(sharedStyles.Control, layoutStyles.Value)}
         mask={maskOptions.mask}
         replacement={maskOptions.replacement}
         showMask
@@ -132,7 +133,7 @@ export const CssLengthInput = ({
 
       <select
         aria-label={`${label}: единица измерения`}
-        className={`${styles.Select} ${layoutStyles.Unit}`}
+        className={classNames(sharedStyles.Control, layoutStyles.Unit)}
         value={unit}
         onChange={handleUnitChange}
       >
