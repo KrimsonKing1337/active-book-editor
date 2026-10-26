@@ -74,4 +74,6 @@ export const resolveSideInstanceOptions = ({
     text: resolvedText,
     style: previewComponentStyle,
   });
+
+  return options;
 };
