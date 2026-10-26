@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 
+import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+
 import type { BookProject } from '@project/@types';
 
 import type {
@@ -139,8 +141,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addBackground = () => {
-    const effect = createBackgroundEffect();
+  const addBackground = (kind: BackgroundEffectKind) => {
+    const effect = createBackgroundEffect(kind);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -148,8 +150,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addSide = () => {
-    const effect = createSideEffect();
+  const addSide = (kind: SideEffectKind) => {
+    const effect = createSideEffect(kind);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);

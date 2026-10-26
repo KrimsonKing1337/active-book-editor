@@ -1,3 +1,5 @@
+import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+
 import type { BookProject } from '@project/@types';
 
 import type { EditorEffectDraft } from '../../@types';
@@ -12,8 +14,8 @@ export type EffectsModalProps = {
   onAddAudio: () => void;
   onAddVibration: () => void;
   onAddFlashlight: () => void;
-  onAddBackground: () => void;
-  onAddSide: () => void;
+  onAddBackground: (kind: BackgroundEffectKind) => void;
+  onAddSide: (kind: SideEffectKind) => void;
   onSelectEffect: (id: string) => void;
   onUpdateEffect: (previousId: string, effect: EditorEffectDraft) => void;
   onDuplicateEffect: () => void;

@@ -80,13 +80,43 @@ export const getModalContent = ({
     },
     {
       id: 'background',
-      label: 'Добавить Background',
-      onClick: onAddBackground,
+      label: 'Добавить фон',
+      onClick: () => onAddBackground('background'),
     },
     {
-      id: 'side',
-      label: 'Добавить Side',
-      onClick: onAddSide,
+      id: 'background-image',
+      label: 'Добавить изображение',
+      onClick: () => onAddBackground('image'),
+    },
+    {
+      id: 'background-video',
+      label: 'Добавить видео',
+      onClick: () => onAddBackground('video'),
+    },
+    {
+      id: 'background-shadow',
+      label: 'Добавить затемнение',
+      onClick: () => onAddBackground('shadow'),
+    },
+    {
+      id: 'background-component',
+      label: 'Добавить фоновый компонент',
+      onClick: () => onAddBackground('component'),
+    },
+    {
+      id: 'side-shadow',
+      label: 'Добавить боковую тень',
+      onClick: () => onAddSide('shadow'),
+    },
+    {
+      id: 'side-text',
+      label: 'Добавить боковой текст',
+      onClick: () => onAddSide('text'),
+    },
+    {
+      id: 'side-component',
+      label: 'Добавить боковой компонент',
+      onClick: () => onAddSide('component'),
     },
   ];
 
@@ -189,7 +219,15 @@ export const getModalContent = ({
       return effectCur.type === 'background';
     });
 
-    modalTitle = 'Настройки Background';
+    const kindLabel = {
+      background: 'фона',
+      image: 'изображения',
+      video: 'видео',
+      shadow: 'затемнения',
+      component: 'фонового компонента',
+    }[selectedEffect.kind ?? 'background'];
+
+    modalTitle = `Настройки ${kindLabel}`;
     modalDescription = 'Фон отображается прямо на странице книги';
     notice = 'В редакторе можно независимо скрывать фон и нарратив';
 
@@ -208,7 +246,13 @@ export const getModalContent = ({
   }
 
   if (selectedEffect?.type === 'side') {
-    modalTitle = 'Настройки Side';
+    const kindLabel = {
+      shadow: 'боковой тени',
+      text: 'бокового текста',
+      component: 'бокового компонента',
+    }[selectedEffect.kind ?? 'shadow'];
+
+    modalTitle = `Настройки ${kindLabel}`;
     modalDescription = 'Боковые тени, текст и кастомные компоненты';
     notice = 'Расположение и анимации обновляются сразу на странице';
 
