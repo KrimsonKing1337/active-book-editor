@@ -23,6 +23,7 @@ const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): Ma
       id: effectCur.id,
       type: effectCur.type,
       options: effectCur.options,
+      ...('kind' in effectCur ? { kind: effectCur.kind } : {}),
     };
   });
 };

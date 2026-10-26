@@ -26,6 +26,18 @@ test('preserves background image IDs', () => {
   assert.equal(normalized[0].options.images?.[0].id, 'tree');
 });
 
+test('retains the kind of an independent image effect', () => {
+  const effect = {
+    id: 'image-effect',
+    type: 'background',
+    kind: 'image',
+    slug: 'Изображение',
+    options: { images: [{ id: 'image-1', src: 'assets/image.webp' }] },
+  };
+
+  assert.deepEqual(normalizeBackgroundEffects({ background: [effect] }), [effect]);
+});
+
 test('rejects background images without IDs', () => {
   const image = {
     src: 'assets/tree.webp',

@@ -23,6 +23,18 @@ test('normalizes multiple side effects with multiple shadows and texts', () => {
   assert.deepEqual(normalizeSideEffects({ side: [effect] }), [effect]);
 });
 
+test('retains the kind of an independent side shadow effect', () => {
+  const effect = {
+    id: 'side-shadow-effect',
+    type: 'side',
+    kind: 'shadow',
+    slug: 'Боковая тень',
+    options: { shadows: [{ id: 'shadow-1', thickness: 20 }] },
+  };
+
+  assert.deepEqual(normalizeSideEffects({ side: [effect] }), [effect]);
+});
+
 test('rejects side effects with invalid text entries', () => {
   const invalid = {
     id: 'side-1',

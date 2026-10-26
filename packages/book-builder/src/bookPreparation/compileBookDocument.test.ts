@@ -78,6 +78,38 @@ test('compiles audio, vibration, flashlight, background and side and strips edit
   assert.equal(document.attrs.pageEffects.side[0].slug, 'Боковые');
 });
 
+test('preserves independent visual effect kinds in the built book', () => {
+  const document = {
+    type: 'doc',
+    attrs: {
+      pageEffects: {
+        background: [{
+          id: 'image-effect',
+          type: 'background',
+          kind: 'image',
+          slug: 'Изображение',
+          options: { images: [{ id: 'image-1', src: 'assets/image.webp' }] },
+        }],
+        side: [{
+          id: 'text-effect',
+          type: 'side',
+          kind: 'text',
+          slug: 'Боковой текст',
+          options: { texts: [{ id: 'text-1', leftText: 'Лево', rightText: 'Право' }] },
+        }],
+      },
+    },
+  };
+
+  const built = compileBookDocument(document);
+  const effects = (built.attrs as { pageEffects: Record<string, Array<Record<string, unknown>>> }).pageEffects;
+
+  assert.equal(effects.background[0].kind, 'image');
+  assert.equal(effects.side[0].kind, 'text');
+  assert.equal(effects.background[0].slug, undefined);
+  assert.equal(effects.side[0].slug, undefined);
+});
+
 test('an empty document compiles with empty effect groups', () => {
   assert.deepEqual(compileBookDocument({ type: 'doc', content: [] }), {
     type: 'doc',
