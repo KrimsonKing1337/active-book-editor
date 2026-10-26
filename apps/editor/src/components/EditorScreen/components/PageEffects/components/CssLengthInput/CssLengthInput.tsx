@@ -6,8 +6,7 @@ import classNames from 'classnames';
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import layoutStyles from './CssLengthInput.module.scss';
 
-import type { Unit } from './constants';
-import { units, maskOptions } from './constants';
+import { type Unit, units, maskOptions } from './constants';
 
 type CssLengthInputProps = {
   label?: string;
@@ -113,8 +112,8 @@ export const CssLengthInput = ({
   return (
     <span className={layoutStyles.Container}>
       <InputMask
-        aria-label={label}
         className={valueInputClassNames}
+        aria-label={label}
         mask={maskOptions.mask}
         replacement={maskOptions.replacement}
         showMask
@@ -125,8 +124,8 @@ export const CssLengthInput = ({
       />
 
       <select
-        aria-label={`${label}: единица измерения`}
         className={unitsSelectClassNames}
+        aria-label={`${label}: единица измерения`}
         value={unit}
         onChange={handleUnitChange}
       >
