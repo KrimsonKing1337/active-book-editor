@@ -64,7 +64,6 @@ test('resolves filters on one side effect at a time', () => {
   assert.deepEqual(result.shadow, {
     id: 'shadow',
     style: { color: '#ff0000', zIndex: 4, filter: 'blur(5px)' },
-    styleFilters: shadow.styleFilters,
   });
 
   assert.equal(result.text?.style.filter, 'opacity(50%)');

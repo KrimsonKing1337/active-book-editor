@@ -63,20 +63,23 @@ export const resolveBackgroundOptions = (options: BackgroundOptions) => {
 
   const resolvedStyle = resolveStyle(style, styleFilters);
 
-  const resolvedImage = image && {
-    ...image,
-    style: resolveStyle(image.style, image.styleFilters),
-  };
+  const resolvedImage = image && (() => {
+    const { styleFilters: filters, style, ...media } = image;
 
-  const resolvedVideo = video && {
-    ...video,
-    style: resolveStyle(video.style, video.styleFilters),
-  };
+    return { ...media, style: resolveStyle(style, filters) };
+  })();
 
-  const resolvedShadow = shadow && {
-    ...shadow,
-    style: resolveStyle(shadow.style, shadow.styleFilters),
-  };
+  const resolvedVideo = video && (() => {
+    const { styleFilters: filters, style, ...media } = video;
+
+    return { ...media, style: resolveStyle(style, filters) };
+  })();
+
+  const resolvedShadow = shadow && (() => {
+    const { styleFilters: filters, style, ...shadowOptions } = shadow;
+
+    return { ...shadowOptions, style: resolveStyle(style, filters) };
+  })();
 
   return {
     ...rest,
