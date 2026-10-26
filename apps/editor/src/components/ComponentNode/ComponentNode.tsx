@@ -37,7 +37,22 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
       return;
     }
 
-    editor.chain().focus().setNodeSelection(position).run();
+    const selection = editor.state.selection;
+    const isAlreadySelected = selection instanceof NodeSelection && selection.from === position;
+
+    if (isAlreadySelected) {
+      return;
+    }
+
+    // Select the TipTap node without stealing focus from interactive custom components.
+    editor.commands.setNodeSelection(position);
+  };
+
+  const handleSelectComponentLabel = () => {
+    handleSelectComponent();
+
+    // The node label is an editor control, unlike interactive elements inside the component.
+    editor.commands.focus();
   };
 
   const unknownComponent = (
@@ -47,8 +62,15 @@ const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
   );
 
   return (
-    <NodeViewWrapper className={styles.ComponentNode} data-component={name} data-active-book-node={name}>
-      <button className={styles.Label} type="button" onClick={handleSelectComponent}>
+    <NodeViewWrapper
+      className={styles.ComponentNode}
+      data-component={name}
+      data-active-book-node={name}
+      onPointerDownCapture={handleSelectComponent}
+      onClickCapture={handleSelectComponent}
+      onFocusCapture={handleSelectComponent}
+    >
+      <button className={styles.Label} type="button" onClick={handleSelectComponentLabel}>
         {componentLabel}
       </button>
 
