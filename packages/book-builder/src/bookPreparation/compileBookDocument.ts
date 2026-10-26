@@ -16,9 +16,15 @@ import { normalizePageEffects, isRecord } from '../effects/utils';
 
 type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect | SideEffect;
 type MappedEffect<T extends EffectForGetMappedEffects> = Omit<T, 'slug'>;
+type GetMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]) => MappedEffect<T>[];
 
-const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): MappedEffect<T>[] => {
-  return effects.map(({ slug: _slug, ...effectCur }) => effectCur);
+const getMappedEffects: GetMappedEffects = (effects) => {
+  return effects.map((effectCur) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { slug: _slug, ...rest } = effectCur;
+
+    return rest;
+  });
 };
 
 export const compileBookDocument = (document: unknown): Record<string, unknown> => {
