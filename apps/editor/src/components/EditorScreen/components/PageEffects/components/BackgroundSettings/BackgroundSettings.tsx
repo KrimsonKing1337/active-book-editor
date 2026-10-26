@@ -11,8 +11,7 @@ import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
 import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../PageEffectsContext';
 
-import { Images, Videos, Shadow, Background, CustomComponent } from './components';
-
+import { Image, Video, Shadow, Background, CustomComponent } from './components';
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
 import { DEFAULT_SHADOW_OPTIONS } from './constants';
@@ -26,69 +25,43 @@ type BackgroundSettingsProps = {
   effects: BackgroundEffectDraft[];
   project: BookProject | null;
   onLoadingChange: (loading: boolean, message?: string) => void;
-
   onUpdate: (previousId: string, effect: BackgroundEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
-
-export type BackgroundEffectLayer = 'background' | 'shadow' | 'image' | 'video';
 
 export const BackgroundSettings = ({
   effect,
   effects,
   project,
   onLoadingChange,
-
   onUpdate,
   onDuplicate,
   onDelete,
 }: BackgroundSettingsProps) => {
   const updateStylePreview = useBackgroundStylePreviewUpdater();
   const { flushStylePreviews, getCurrentEffects } = usePageEffects();
-
   const [idDraft, setIdDraft] = useState(effect.id);
-
   const importsInProgressRef = useRef(0);
 
   const options = effect.options;
 
-  const style = options.style ?? {};
-  const images = options.images ?? [];
-  const videos = options.videos ?? [];
-  const shadow = options.shadow ?? DEFAULT_SHADOW_OPTIONS;
-
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
-    const updatedOptions = {
-      ...options,
-      ...updates,
-    };
-
-    const updatedEffect = {
+    onUpdate(effect.id, {
       ...effect,
-      options: updatedOptions,
-    };
-
-    onUpdate(effect.id, updatedEffect);
+      options: { ...effect.options, ...updates },
+    });
   };
 
   const updateId = () => {
     const normalized = idDraft.trim();
-
-    const alreadyExists = effects.some((effectCur) => {
-      return effectCur.id === normalized && effectCur.id !== effect.id;
-    });
+    const alreadyExists = effects.some((current) => current.id === normalized && current.id !== effect.id);
 
     if (!normalized || alreadyExists) {
       return;
     }
 
-    const updatedEffect = {
-      ...effect,
-      id: normalized,
-    };
-
-    onUpdate(effect.id, updatedEffect);
+    onUpdate(effect.id, { ...effect, id: normalized });
   };
 
   const importAsset = async (
@@ -101,10 +74,7 @@ export const BackgroundSettings = ({
     }
 
     importsInProgressRef.current += 1;
-
-    const loadingMessage = kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...';
-
-    onLoadingChange(true, loadingMessage);
+    onLoadingChange(true, kind === 'image' ? 'Загружаем изображение...' : 'Загружаем видео...');
 
     try {
       return await project.storage.importAssetFile(file, fileHandle);
@@ -117,29 +87,8 @@ export const BackgroundSettings = ({
     }
   };
 
-  const handleNameChange = (name: string) => {
-    const updatedEffect = {
-      ...effect,
-      slug: name,
-    };
-
-    onUpdate(effect.id, updatedEffect);
-  };
-
-  const handleImagesChange = (nextImages: NonNullable<BackgroundOptions['images']>) => {
-    updateOptions({ images: nextImages });
-  };
-
-  const handleVideosChange = (nextVideos: NonNullable<BackgroundOptions['videos']>) => {
-    updateOptions({ videos: nextVideos });
-  };
-
-  const handleShadowChange = (nextShadow: NonNullable<BackgroundOptions['shadow']>) => {
-    updateOptions({ shadow: nextShadow });
-  };
-
   const updateStylePreviewForEffect = (
-    layer: BackgroundEffectLayer,
+    layer: 'background' | 'image' | 'video' | 'shadow',
     mediaId: string | null,
     style: CSSProperties,
   ) => {
@@ -147,7 +96,7 @@ export const BackgroundSettings = ({
   };
 
   const commitFilters = (
-    layer: BackgroundEffectLayer,
+    layer: 'background' | 'image' | 'video' | 'shadow',
     mediaId: string | null,
     styleFilters: FilterOperation[],
   ) => {
@@ -155,8 +104,8 @@ export const BackgroundSettings = ({
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((cur): cur is BackgroundEffectDraft => {
-      return cur.type === 'background' && cur.id === effect.id;
+    const currentEffect = getCurrentEffects().find((current): current is BackgroundEffectDraft => {
+      return current.type === 'background' && current.id === effect.id;
     });
 
     if (!currentEffect) {
@@ -164,68 +113,19 @@ export const BackgroundSettings = ({
     }
 
     const currentOptions = currentEffect.options;
-
-    let nextOptions: BackgroundOptions = currentOptions;
+    const nextOptions = { ...currentOptions };
 
     if (layer === 'background') {
-      nextOptions = {
-        ...currentOptions,
-        styleFilters,
-      };
+      nextOptions.styleFilters = styleFilters;
+    } else if (layer === 'image' && currentOptions.image?.id === mediaId) {
+      nextOptions.image = { ...currentOptions.image, styleFilters };
+    } else if (layer === 'video' && currentOptions.video?.id === mediaId) {
+      nextOptions.video = { ...currentOptions.video, styleFilters };
     } else if (layer === 'shadow' && currentOptions.shadow) {
-      const shadow = {
-        ...currentOptions.shadow,
-        styleFilters,
-      };
-
-      nextOptions = {
-        ...currentOptions,
-        shadow,
-      };
-    } else if (layer === 'image') {
-      const images = currentOptions.images?.map((imageCur) => {
-        if (imageCur.id !== mediaId) {
-          return imageCur;
-        }
-
-        return {
-          ...imageCur,
-          styleFilters,
-        };
-      });
-
-      nextOptions = {
-        ...currentOptions,
-        images,
-      };
-    } else if (layer === 'video') {
-      const videos = currentOptions.videos?.map((videoCur) => {
-        if (videoCur.id !== mediaId) {
-          return videoCur;
-        }
-
-        return {
-          ...videoCur,
-          styleFilters,
-        };
-      });
-
-      nextOptions = {
-        ...currentOptions,
-        videos,
-      };
+      nextOptions.shadow = { ...currentOptions.shadow, styleFilters };
     }
 
-    const updatedEffect = {
-      ...currentEffect,
-      options: nextOptions,
-    };
-
-    onUpdate(effect.id, updatedEffect);
-  };
-
-  const handleComponentChange = (component: BackgroundOptions['component']) => {
-    updateOptions({ component });
+    onUpdate(effect.id, { ...currentEffect, options: nextOptions });
   };
 
   const handleIdDraftChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -233,7 +133,7 @@ export const BackgroundSettings = ({
   };
 
   const handleNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    handleNameChange(e.target.value);
+    onUpdate(effect.id, { ...effect, slug: e.target.value });
   };
 
   const handleImportImage = (file: File, handle?: ProjectFileHandle) => {
@@ -257,7 +157,6 @@ export const BackgroundSettings = ({
           </span>
 
           <TextInput
-            type="text"
             maxLength={120}
             value={effect.slug}
             onChange={handleNameInputChange}
@@ -278,36 +177,40 @@ export const BackgroundSettings = ({
           </div>
         </div>
 
-        {(!effect.kind || effect.kind === 'background') && (
-          <Background style={style} styleFilters={options.styleFilters} />
+        {effect.kind === 'background' && (
+          <Background style={options.style ?? {}} styleFilters={options.styleFilters} />
         )}
 
-        {(!effect.kind || effect.kind === 'image') && (
-          <Images
-            images={images}
+        {effect.kind === 'image' && options.image && (
+          <Image
+            image={options.image}
             canImport={Boolean(project)}
-            allowMultiple={!effect.kind}
-            onChange={handleImagesChange}
+            onChange={(image) => updateOptions({ image })}
             onImportAsset={handleImportImage}
           />
         )}
 
-        {(!effect.kind || effect.kind === 'video') && (
-          <Videos
-            videos={videos}
+        {effect.kind === 'video' && options.video && (
+          <Video
+            video={options.video}
             canImport={Boolean(project)}
-            allowMultiple={!effect.kind}
-            onChange={handleVideosChange}
+            onChange={(video) => updateOptions({ video })}
             onImportAsset={handleImportVideo}
           />
         )}
 
-        {(!effect.kind || effect.kind === 'shadow') && (
-          <Shadow shadow={shadow} onChange={handleShadowChange} />
+        {effect.kind === 'shadow' && (
+          <Shadow
+            shadow={options.shadow ?? DEFAULT_SHADOW_OPTIONS}
+            onChange={(shadow) => updateOptions({ shadow })}
+          />
         )}
 
-        {(!effect.kind || effect.kind === 'component') && (
-          <CustomComponent component={options.component} onChange={handleComponentChange} />
+        {effect.kind === 'component' && (
+          <CustomComponent
+            component={options.component}
+            onChange={(component) => updateOptions({ component })}
+          />
         )}
 
         <div className={styles.Actions}>
