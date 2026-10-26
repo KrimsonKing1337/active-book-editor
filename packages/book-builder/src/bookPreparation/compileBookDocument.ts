@@ -3,16 +3,18 @@ import type {
   BuiltVibrationEffect,
   BuiltFlashlightEffect,
   BuiltBackgroundEffect,
+  BuiltSideEffect,
 
   AudioEffect,
   VibrationEffect,
   FlashlightEffect,
   BackgroundEffect,
+  SideEffect,
 } from '../effects';
 
 import { normalizePageEffects, isRecord } from '../effects/utils';
 
-type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect;
+type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect | SideEffect;
 type MappedEffect<T extends EffectForGetMappedEffects> = Pick<T, 'id' | 'type' | 'options'>;
 
 const getMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]): MappedEffect<T>[] => {
@@ -37,11 +39,13 @@ export const compileBookDocument = (document: unknown): Record<string, unknown> 
   const effectsVibration = pageEffects.vibration ?? [];
   const effectsFlashlight = pageEffects.flashlight ?? [];
   const effectsBackground = pageEffects.background ?? [];
+  const effectsSide = pageEffects.side ?? [];
 
   const audio: BuiltAudioEffect[] = getMappedEffects(effectsAudio);
   const vibration: BuiltVibrationEffect[] = getMappedEffects(effectsVibration);
   const flashlight: BuiltFlashlightEffect[] = getMappedEffects(effectsFlashlight);
   const background: BuiltBackgroundEffect[] = getMappedEffects(effectsBackground);
+  const side: BuiltSideEffect[] = getMappedEffects(effectsSide);
 
   return {
     ...document,
@@ -54,6 +58,7 @@ export const compileBookDocument = (document: unknown): Record<string, unknown> 
         vibration,
         flashlight,
         background,
+        side,
       },
     },
   };

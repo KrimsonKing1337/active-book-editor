@@ -1,12 +1,12 @@
-import type { ChangeEvent } from 'react';
+import { type ChangeEvent, useEffect, useRef } from 'react';
 
-import { useEffect, useRef } from 'react';
-
-import { InputMask } from '@react-input/mask';
+import { InputMask, unformat } from '@react-input/mask';
 
 import { Slider } from 'activeBook-core/components';
 
 import styles from '../../StyleEditor.module.scss';
+
+import { numericReplacement, NUMBER_PATTERN } from './constants';
 
 export type NumericConfig = {
   min: number;
@@ -23,12 +23,6 @@ type NumericControlProps = {
   onChange: (value: string) => void;
 };
 
-const numericReplacement = {
-  _: /[0-9.-]/,
-};
-
-const NUMBER_PATTERN = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
-
 export const isValidNumericValue = (value: string, config: NumericConfig): boolean => {
   const trimmedValue = value.trim();
 
@@ -42,8 +36,7 @@ export const isValidNumericValue = (value: string, config: NumericConfig): boole
     return false;
   }
 
-  // Slider limits are suggestions. CSS may accept a wider range.
-  return config.min >= 0 ? number >= 0 : true;
+  return number >= config.min && number <= config.max;
 };
 
 export const NumericControl = ({ value, config, label, onChange }: NumericControlProps) => {
@@ -83,12 +76,45 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
     });
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+  const maximum = Math.max(Math.abs(config.min), Math.abs(config.max));
+  const integerDigits = String(Math.trunc(maximum)).length;
 
-    if (/^-?\d*(?:\.\d*)?$/.test(val)) {
-      onChange(val);
+  let fractionDigits = 0;
+
+  if (config.step < 1) {
+    const stepString = String(config.step);
+    const fractionalPart = stepString.split('.')[1];
+
+    fractionDigits = fractionalPart?.length ?? 2;
+  }
+
+  const signDigits = config.min < 0 ? 1 : 0;
+
+  const digits = fractionDigits > 0 ? 1 : 0;
+  const maskLength = integerDigits + signDigits + fractionDigits + digits;
+
+  const maskOptions = {
+    mask: '_'.repeat(maskLength),
+    replacement: numericReplacement,
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = unformat(e.target.value, maskOptions);
+
+    if (!/^-?\d*\.?\d{0,2}$/.test(value)) {
+      return;
     }
+
+    if (value === '' || value === '-' || value.endsWith('.')) {
+      onChange(value);
+
+      return;
+    }
+
+    const number = Number(value);
+    const bounded = Math.max(config.min, Math.min(config.max, number));
+
+    onChange(String(bounded));
   };
 
   return (
@@ -102,8 +128,9 @@ export const NumericControl = ({ value, config, label, onChange }: NumericContro
 
         <InputMask
           aria-label={label}
-          mask="____________"
+          mask={maskOptions.mask}
           replacement={numericReplacement}
+          showMask
           value={value}
           inputMode="decimal"
           spellCheck={false}

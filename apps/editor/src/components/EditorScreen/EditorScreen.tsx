@@ -34,6 +34,7 @@ import {
 
 import { AudioInstances } from './components/PageEffects/components/AudioInstances';
 import { BackgroundInstances } from './components/PageEffects/components/BackgroundInstances';
+import { SideInstances } from './components/PageEffects/components/SideInstances';
 
 import {
   editorConfig,
@@ -46,10 +47,13 @@ import {
 
 import styles from './EditorScreen.module.scss';
 
-const SHOW_STRUCTURE_STORAGE_KEY = 'activeBook-editor:showStructure';
-const HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY = 'activeBook-editor:hideCustomComponentsImportWarning';
-const SHOW_NARRATIVE_STORAGE_KEY = 'activeBook-editor:showNarrative';
-const SHOW_BACKGROUNDS_STORAGE_KEY = 'activeBook-editor:showBackgrounds';
+import {
+  SHOW_STRUCTURE_STORAGE_KEY,
+  HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY,
+  SHOW_NARRATIVE_STORAGE_KEY,
+  SHOW_BACKGROUNDS_STORAGE_KEY,
+  SHOW_SIDE_EFFECTS_STORAGE_KEY,
+} from './constants';
 
 export const EditorScreen = () => {
   const { definitions: customComponentDefinitions } = useCustomComponents();
@@ -77,6 +81,10 @@ export const EditorScreen = () => {
     return localStorage.getItem(SHOW_BACKGROUNDS_STORAGE_KEY) !== 'false';
   });
 
+  const [showSideEffects, setShowSideEffects] = useState(() => {
+    return localStorage.getItem(SHOW_SIDE_EFFECTS_STORAGE_KEY) !== 'false';
+  });
+
   const editor = useEditor({
     content: createEmptyDocument(),
     editable: false,
@@ -96,6 +104,10 @@ export const EditorScreen = () => {
   useEffect(() => {
     localStorage.setItem(SHOW_BACKGROUNDS_STORAGE_KEY, String(showBackgrounds));
   }, [showBackgrounds]);
+
+  useEffect(() => {
+    localStorage.setItem(SHOW_SIDE_EFFECTS_STORAGE_KEY, String(showSideEffects));
+  }, [showSideEffects]);
 
   const autosave = useAutosave({
     editor,
@@ -171,7 +183,9 @@ export const EditorScreen = () => {
         if (!cancelled) {
           console.error('[custom-components] Load failed.', error);
 
-          const errorMessage = error instanceof Error ? error.message : 'Ошибка загрузки библиотек';
+          const errorMessage = error instanceof Error
+            ? error.message
+            : 'Ошибка загрузки библиотек';
 
           setProjectMessage(errorMessage);
 
@@ -226,7 +240,11 @@ export const EditorScreen = () => {
       if (!(error instanceof DOMException && error.name === 'AbortError')) {
         console.error('[custom-components] Import failed.', error);
 
-        setProjectMessage(error instanceof Error ? error.message : 'Ошибка импорта TGZ');
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'Ошибка импорта TGZ';
+
+        setProjectMessage(errorMessage);
       }
     } finally {
       setIsProjectBusy(false);
@@ -276,6 +294,7 @@ export const EditorScreen = () => {
           showStructure={showStructure}
           showNarrative={showNarrative}
           showBackgrounds={showBackgrounds}
+          showSideEffects={showSideEffects}
           buildState={buildState}
           buttonIsDisabled={buttonIsDisabled}
           structureButtonIsDisabled={structureButtonIsDisabled}
@@ -286,6 +305,7 @@ export const EditorScreen = () => {
           onToggleStructure={toggleStructure}
           onToggleNarrative={() => setShowNarrative((visible) => !visible)}
           onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
+          onToggleSideEffects={() => setShowSideEffects((visible) => !visible)}
           onInsertCustomComponent={handleInsertCustomComponent}
           customComponentDefinitions={customComponentDefinitions}
           onInsertTextComponent={handleInsertTextComponent}
@@ -324,7 +344,14 @@ export const EditorScreen = () => {
             <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
-              {showBackgrounds && <BackgroundInstances project={project} />}
+              {showBackgrounds && (
+                <BackgroundInstances project={project} />
+              )}
+
+              {showSideEffects && (
+                <SideInstances />
+              )}
+
               <EditorContent editor={editor} />
             </PageWrapper>
           </App>

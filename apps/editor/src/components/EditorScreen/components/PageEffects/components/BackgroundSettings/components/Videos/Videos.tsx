@@ -8,6 +8,8 @@ import { StyleEditor } from '../../../StyleEditor';
 
 import { MediaSource } from '../MediaSource';
 
+import { Checkbox, Button } from '../../../EffectControls';
+
 import styles from '../../BackgroundSettings.module.scss';
 
 type BackgroundVideos = NonNullable<BackgroundOptions['videos']>;
@@ -121,32 +123,17 @@ export const Videos = ({
             />
 
             <div className={styles.Checkboxes}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={loop ?? true}
-                  onChange={handleLoopChangeForVideo}
-                />
+              <Checkbox checked={loop ?? true} onChange={handleLoopChangeForVideo}>
                 Зациклить
-              </label>
+              </Checkbox>
 
-              <label>
-                <input
-                  type="checkbox"
-                  checked={autoPlay ?? true}
-                  onChange={handleAutoPlayChangeForVideo}
-                />
+              <Checkbox checked={autoPlay ?? true} onChange={handleAutoPlayChangeForVideo}>
                 Автозапуск
-              </label>
+              </Checkbox>
 
-              <label>
-                <input
-                  type="checkbox"
-                  checked={muted ?? true}
-                  onChange={handleMutedChangeForVideo}
-                />
+              <Checkbox checked={muted ?? true} onChange={handleMutedChangeForVideo}>
                 Без звука
-              </label>
+              </Checkbox>
             </div>
 
             <details>
@@ -163,16 +150,16 @@ export const Videos = ({
               />
             </details>
 
-            <button type="button" onClick={handleDeleteVideo}>
+            <Button variant="danger" onClick={handleDeleteVideo}>
               Удалить видео
-            </button>
+            </Button>
           </div>
         );
       })}
 
-      <button type="button" onClick={handleAdd}>
+      <Button variant="success" onClick={handleAdd}>
         Добавить видео
-      </button>
+      </Button>
     </details>
   );
 };

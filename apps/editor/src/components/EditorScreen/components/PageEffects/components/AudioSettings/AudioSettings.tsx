@@ -1,7 +1,8 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
-import { Slider } from 'activeBook-core/components';
 import type { AudioEffectOptions } from 'activeBook-core/@types';
+
+import { Slider } from 'activeBook-core/components';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
@@ -11,6 +12,9 @@ import { isAbortError } from '@project/errors';
 import { AudioPreview } from '../AudioPreview';
 
 import type { AudioEffectDraft, AudioOptions, OptionUpdater } from '../../@types';
+
+import { IntegerInput } from '../IntegerInput';
+import { TextInput, Select, Checkbox, Button, FileChooser } from '../EffectControls';
 
 import styles from './AudioSettings.module.scss';
 
@@ -31,6 +35,7 @@ export const AudioSettings = ({
   effect,
   project,
   existingIds,
+
   onLoadingChange,
   onUpdate,
   onDuplicate,
@@ -39,14 +44,16 @@ export const AudioSettings = ({
   const { options } = effect;
 
   const [idDraft, setIdDraft] = useState(effect.id);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [isImporting, setIsImporting] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [importError, setImportError] = useState('');
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const loadingMessage = isImporting ? 'Загружаем аудиофайл...' : 'Подготавливаем аудио...';
+    const loadingMessage = isImporting
+      ? 'Загружаем аудиофайл...'
+      : 'Подготавливаем аудио...';
 
     const isLoading = isImporting || isPreviewLoading;
 
@@ -146,10 +153,6 @@ export const AudioSettings = ({
     updateSlug(event.target.value);
   };
 
-  const handleSourceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateOption('src', event.target.value);
-  };
-
   const importAudioFile = async (file: File, fileHandle?: ProjectFileHandle) => {
     if (!project) {
       setImportError('Сначала создайте или откройте проект книги');
@@ -246,12 +249,12 @@ export const AudioSettings = ({
     updateOption('relativeVolume', value);
   };
 
-  const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('delay', event.target.value);
+  const handleDelayChange = (value: number) => {
+    updateNumber('delay', String(value));
   };
 
-  const handleStopByChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('stopBy', event.target.value);
+  const handleStopByChange = (value: number) => {
+    updateNumber('stopBy', String(value));
   };
 
   const handleFadeOutChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -267,11 +270,12 @@ export const AudioSettings = ({
       <div className={styles.Fields}>
         <label className={styles.Field}>
           <span>
-            Метка (slug)
+            Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleSlugChange}
             placeholder="Например, звук дождя"
@@ -288,9 +292,10 @@ export const AudioSettings = ({
           </label>
 
           <div className={styles.IdRow}>
-            <input
+            <TextInput
               id="page-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
               onChange={handleIdDraftChange}
               aria-invalid={Boolean(idError)}
@@ -298,13 +303,13 @@ export const AudioSettings = ({
               spellCheck={false}
             />
 
-            <button
-              type="button"
+            <Button
+              variant="success"
               disabled={idUpdateDisabled}
               onClick={updateId}
             >
               Применить
-            </button>
+            </Button>
           </div>
 
           {idError && (
@@ -320,35 +325,27 @@ export const AudioSettings = ({
           )}
         </div>
 
-        <label className={styles.Field}>
-          <span>
+        <div className={styles.Field}>
+          <label htmlFor="audio-source-path">
             Путь к аудиофайлу
-          </span>
+          </label>
 
-          <div className={styles.SourceRow}>
-            <input
-              type="text"
-              value={options.src}
-              onChange={handleSourceChange}
-              placeholder="assets/ambient.mp3"
-              spellCheck={false}
-            />
+          <FileChooser
+            inputId="audio-source-path"
+            value={options.src}
+            fileInputRef={fileInputRef}
+            accept="audio/*,.mp3,.ogg,.wav,.flac,.m4a,.aac"
+            placeholder="assets/ambient.mp3"
+            disabled={!project}
 
-            <button type="button" onClick={handleChooseFile} disabled={!project}>
-              Выбрать файл
-            </button>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="audio/*,.mp3,.ogg,.wav,.flac,.m4a,.aac"
-              onChange={handleAudioFileChange}
-              hidden
-            />
-          </div>
+            onChange={(src) => updateOption('src', src)}
+            onChoose={handleChooseFile}
+            onFileChange={handleAudioFileChange}
+          />
 
           <small>
-            Файлы из assets/ используются без копирования. Внешние файлы копируются в корень assets/
+            Файлы из assets/ используются без копирования.
+            Внешние файлы копируются в корень assets/
           </small>
 
           {importError && (
@@ -356,14 +353,14 @@ export const AudioSettings = ({
               {importError}
             </small>
           )}
-        </label>
+        </div>
 
         <label className={styles.Field}>
           <span>
             Тип звука
           </span>
 
-          <select value={options.type} onChange={handleTypeChange}>
+          <Select value={options.type} onChange={handleTypeChange}>
             <option value="sfx">
               Звуковой эффект (sfx)
             </option>
@@ -375,20 +372,12 @@ export const AudioSettings = ({
             <option value="bg">
               Фоновый звук (bg)
             </option>
-          </select>
+          </Select>
         </label>
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.playOnLoad}
-            onChange={handlePlayOnLoadChange}
-          />
-
-          <span>
-            Воспроизводить при открытии страницы
-          </span>
-        </label>
+        <Checkbox checked={options.playOnLoad} onChange={handlePlayOnLoadChange}>
+          Воспроизводить при открытии страницы
+        </Checkbox>
 
         <small>
           Автозапуск работает только в собранной книге (режим чтения).
@@ -400,17 +389,9 @@ export const AudioSettings = ({
           onLoadingChange={setIsPreviewLoading}
         />
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.loop}
-            onChange={handleLoopChange}
-          />
-
-          <span>
-            Зациклить воспроизведение
-          </span>
-        </label>
+        <Checkbox checked={options.loop} onChange={handleLoopChange}>
+          Зациклить воспроизведение
+        </Checkbox>
 
         <div className={styles.Field}>
           <span className={styles.VolumeLabel}>
@@ -435,12 +416,11 @@ export const AudioSettings = ({
                 Задержка (мс)
               </span>
 
-              <input
-                type="number"
+              <IntegerInput
                 min={0}
-                step={100}
+                max={999999}
                 value={options.delay}
-                onChange={handleDelayChange}
+                onValueChange={handleDelayChange}
               />
             </label>
 
@@ -449,54 +429,37 @@ export const AudioSettings = ({
                 Остановить через (мс)
               </span>
 
-              <input
-                type="number"
+              <IntegerInput
                 min={0}
-                step={100}
+                max={999999}
                 value={options.stopBy}
-                onChange={handleStopByChange}
+                onValueChange={handleStopByChange}
               />
 
               <small>
-                0 — без автоматической остановки.
+                0 — без автоматической остановки
               </small>
             </label>
 
-            <label className={styles.Checkbox}>
-              <input
-                type="checkbox"
-                checked={options.fadeOutWhenUnload}
-                onChange={handleFadeOutChange}
-              />
+            <Checkbox checked={options.fadeOutWhenUnload} onChange={handleFadeOutChange}>
+              Плавно затухать при выгрузке
+            </Checkbox>
 
-              <span>
-                Плавно затухать при выгрузке
-              </span>
-            </label>
-
-            <label className={styles.Checkbox}>
-              <input
-                type="checkbox"
-                checked={options.screamer}
-                onChange={handleScreamerChange}
-              />
-
-              <span>
-                Режим скримера (сверхгромкость)
-              </span>
-            </label>
+            <Checkbox checked={options.screamer} onChange={handleScreamerChange}>
+              Режим скримера (сверхгромкость)
+            </Checkbox>
           </div>
         </details>
       </div>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
+        <Button type="button" onClick={onDuplicate}>
           Дублировать
-        </button>
+        </Button>
 
-        <button type="button" className={styles.Delete} onClick={onDelete}>
+        <Button variant="danger" onClick={onDelete}>
           Удалить эффект
-        </button>
+        </Button>
       </div>
     </div>
   );

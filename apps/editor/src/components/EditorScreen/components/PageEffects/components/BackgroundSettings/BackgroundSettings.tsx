@@ -15,7 +15,9 @@ import { Images, Videos, Shadow, Background, CustomComponent } from './component
 
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
-import { createDefaultShadowFilters } from '../../utils';
+import { DEFAULT_SHADOW_OPTIONS } from './constants';
+
+import { TextInput, Button } from '../EffectControls';
 
 import styles from './BackgroundSettings.module.scss';
 
@@ -31,16 +33,6 @@ type BackgroundSettingsProps = {
 };
 
 export type BackgroundEffectLayer = 'background' | 'shadow' | 'image' | 'video';
-
-const defaultShadowStyle = {
-  zIndex: 2,
-};
-
-const defaultShadowOptions: NonNullable<BackgroundOptions['shadow']> = {
-  show: false,
-  style: defaultShadowStyle,
-  styleFilters: createDefaultShadowFilters(),
-};
 
 export const BackgroundSettings = ({
   effect,
@@ -64,7 +56,7 @@ export const BackgroundSettings = ({
   const style = options.style ?? {};
   const images = options.images ?? [];
   const videos = options.videos ?? [];
-  const shadow = options.shadow ?? defaultShadowOptions;
+  const shadow = options.shadow ?? DEFAULT_SHADOW_OPTIONS;
 
   const updateOptions = (updates: Partial<BackgroundOptions>) => {
     const updatedOptions = {
@@ -264,8 +256,9 @@ export const BackgroundSettings = ({
             Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleNameInputChange}
           />
@@ -277,11 +270,11 @@ export const BackgroundSettings = ({
           </span>
 
           <div className={styles.Row}>
-            <input value={idDraft} onChange={handleIdDraftChange} />
+            <TextInput maxLength={80} value={idDraft} onChange={handleIdDraftChange} />
 
-            <button type="button" onClick={updateId}>
+            <Button variant="success" onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -305,13 +298,13 @@ export const BackgroundSettings = ({
         <CustomComponent component={options.component} onChange={handleComponentChange} />
 
         <div className={styles.Actions}>
-          <button type="button" onClick={onDuplicate}>
+          <Button type="button" onClick={onDuplicate}>
             Дублировать
-          </button>
+          </Button>
 
-          <button type="button" onClick={onDelete}>
+          <Button variant="danger" onClick={onDelete}>
             Удалить эффект
-          </button>
+          </Button>
         </div>
       </div>
     </BackgroundStyleProvider>

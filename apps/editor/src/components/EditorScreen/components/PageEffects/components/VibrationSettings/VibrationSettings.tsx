@@ -7,6 +7,9 @@ import { useVibration } from 'activeBook-core/hooks/effects';
 
 import type { VibrationEffectDraft, VibrationOptions, OptionUpdater } from '../../@types';
 
+import { IntegerInput } from '../IntegerInput';
+import { TextInput, Checkbox, Button } from '../EffectControls';
+
 import styles from './VibrationSettings.module.scss';
 
 type NumericVibrationOptionName = keyof Pick<VibrationOptions, 'duration' | 'delay'>;
@@ -37,8 +40,12 @@ export const VibrationSettings = ({
 
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
-  const idAlreadyExists = existingIds.some((id) => id !== effect.id && id === normalizedId);
+
   let idError = '';
+
+  const idAlreadyExists = existingIds.some((idCur) => {
+    return idCur !== effect.id && idCur === normalizedId;
+  });
 
   if (idIsEmpty) {
     idError = 'ID не может быть пустым';
@@ -70,7 +77,10 @@ export const VibrationSettings = ({
   };
 
   const updateSlug = (slug: string) => {
-    onUpdate(effect.id, { ...effect, slug });
+    onUpdate(effect.id, {
+      ...effect,
+      slug,
+    });
   };
 
   const updateOption: OptionUpdater<VibrationOptions> = (name, value) => {
@@ -110,12 +120,12 @@ export const VibrationSettings = ({
     updateSlug(event.target.value);
   };
 
-  const handleDurationChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('duration', event.target.value);
+  const handleDurationChange = (value: number) => {
+    updateNumber('duration', String(value));
   };
 
-  const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('delay', event.target.value);
+  const handleDelayChange = (value: number) => {
+    updateNumber('delay', String(value));
   };
 
   const handlePlayOnLoadChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -130,8 +140,6 @@ export const VibrationSettings = ({
     // The preview is immediate; delay only applies when opening the page in the reader.
     vibrationOn(options.duration);
   };
-
-
 
   let previewDescription = 'Вибрация недоступна в этом браузере или на этом устройстве.';
 
@@ -151,14 +159,15 @@ export const VibrationSettings = ({
       <div className={styles.Fields}>
         <label className={styles.Field}>
           <span>
-            Метка (slug)
+            Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
+            maxLength={120}
             value={effect.slug}
-            onChange={handleSlugChange}
             placeholder="Например, лёгкий толчок"
+            onChange={handleSlugChange}
           />
 
           <small>
@@ -172,19 +181,20 @@ export const VibrationSettings = ({
           </label>
 
           <div className={styles.IdRow}>
-            <input
+            <TextInput
               id="vibration-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
-              onChange={handleIdChange}
               aria-invalid={Boolean(idError)}
               aria-describedby={vibrationEffectIdAriaDescribedBy}
               spellCheck={false}
+              onChange={handleIdChange}
             />
 
-            <button type="button" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>
+            <Button variant="success" disabled={vibrationEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
 
           {idError && (
@@ -199,13 +209,11 @@ export const VibrationSettings = ({
             Длительность вибрации (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             max={10000}
-            step={100}
             value={options.duration}
-            onChange={handleDurationChange}
+            onValueChange={handleDurationChange}
           />
         </label>
 
@@ -214,12 +222,11 @@ export const VibrationSettings = ({
             Задержка (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
-            step={100}
+            max={999999}
             value={options.delay}
-            onChange={handleDelayChange}
+            onValueChange={handleDelayChange}
           />
 
           <small>
@@ -227,22 +234,14 @@ export const VibrationSettings = ({
           </small>
         </label>
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.playOnLoad}
-            onChange={handlePlayOnLoadChange}
-          />
-
-          <span>
-            Вибрировать при открытии страницы
-          </span>
-        </label>
+        <Checkbox checked={options.playOnLoad} onChange={handlePlayOnLoadChange}>
+          Вибрировать при открытии страницы
+        </Checkbox>
 
         <div className={styles.Preview}>
-          <button type="button" disabled={!canPreview} onClick={handlePreview}>
+          <Button type="button" disabled={!canPreview} onClick={handlePreview}>
             Проверить вибрацию
-          </button>
+          </Button>
 
           <small>
             {previewDescription}
@@ -251,13 +250,13 @@ export const VibrationSettings = ({
       </div>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
+        <Button type="button" onClick={onDuplicate}>
           Дублировать
-        </button>
+        </Button>
 
-        <button type="button" className={styles.Delete} onClick={onDelete}>
+        <Button type="button" variant="danger" onClick={onDelete}>
           Удалить эффект
-        </button>
+        </Button>
       </div>
     </div>
   );

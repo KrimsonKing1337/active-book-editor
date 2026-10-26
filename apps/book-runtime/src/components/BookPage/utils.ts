@@ -3,6 +3,7 @@ import type {
   BuiltVibrationEffect,
   BuiltFlashlightEffect,
   BuiltBackgroundEffect,
+  BuiltSideEffect,
 } from '@active-book/book-builder/effects';
 
 import type { BookDocument } from '@types';
@@ -28,4 +29,8 @@ export const getFlashlightEffects = (document: BookDocument): BuiltFlashlightEff
 
 export const getBackgroundEffects = (document: BookDocument): BuiltBackgroundEffect[] => {
   return document.attrs?.pageEffects?.background ?? [];
+};
+
+export const getSideEffects = (document: BookDocument): BuiltSideEffect[] => {
+  return document.attrs?.pageEffects?.side ?? [];
 };

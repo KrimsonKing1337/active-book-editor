@@ -17,15 +17,16 @@ import {
 
 import styles from '../../StyleEditor.module.scss';
 
+import { CHANNEL_LABELS } from './constants';
+
 type ColorSettingsProps = {
+  label?: string;
   color: string;
   onColorChange: (color: string) => void;
   onCommit: () => void;
 };
 
 type EditedFormat = 'hex' | 'rgba' | null;
-
-const CHANNEL_LABELS = ['R', 'G', 'B', 'A'];
 
 const getCompleteHex = (val: string): string | null => {
   const digits = unformat(val, hexMaskOptions);
@@ -37,7 +38,12 @@ const getCompleteHex = (val: string): string | null => {
   return getHexColor('#' + digits);
 };
 
-export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsProps) => {
+export const ColorSettings = ({
+  label = 'Цвет фона (background-color)',
+  color,
+  onColorChange,
+  onCommit,
+}: ColorSettingsProps) => {
   const pickerColor = getHexColor(color);
 
   const [hexDraft, setHexDraft] = useState(pickerColor);
@@ -115,11 +121,16 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   };
 
   const handleChannelChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+    const maskOptions = {
+      mask: 'ddd',
+      replacement: { d: /[0-9]/ },
+    };
 
-    if (/^\d{0,3}$/.test(val)) {
-      updateChannel(index, val);
-    }
+    const raw = unformat(e.target.value, maskOptions);
+    const maximum = index === 3 ? 100 : 255;
+    const value = raw ? String(Math.min(Number(raw), maximum)) : '';
+
+    updateChannel(index, value);
   };
 
   const handleChannelBlur = (index: number) => {
@@ -264,7 +275,7 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
   return (
     <>
       <div className={styles.ColorPropertyHeading}>
-        Цвет фона (background-color)
+        {label}
       </div>
 
       <fieldset className={styles.ManualColorSection}>
@@ -322,9 +333,11 @@ export const ColorSettings = ({ color, onColorChange, onCommit }: ColorSettingsP
                   {labelCur}
                 </span>
 
-                <input
+                <InputMask
                   ref={handleInputRef}
-                  type="text"
+                  mask="ddd"
+                  replacement={{ d: /[0-9]/ }}
+                  showMask
                   inputMode="numeric"
                   autoComplete="off"
                   maxLength={3}

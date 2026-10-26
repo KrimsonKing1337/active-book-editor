@@ -6,6 +6,8 @@ import { StyleEditor } from '../../../StyleEditor';
 
 import { MediaSource } from '../MediaSource';
 
+import { Button } from '../../../EffectControls';
+
 import styles from '../../BackgroundSettings.module.scss';
 
 type BackgroundImages = NonNullable<BackgroundOptions['images']>;
@@ -101,16 +103,16 @@ export const Images = ({
               />
             </details>
 
-            <button type="button" onClick={handleDeleteImage}>
+            <Button variant="danger" onClick={handleDeleteImage}>
               Удалить изображение
-            </button>
+            </Button>
           </div>
         );
       })}
 
-      <button type="button" onClick={handleAdd}>
+      <Button variant="success" onClick={handleAdd}>
         Добавить изображение
-      </button>
+      </Button>
     </details>
   );
 };

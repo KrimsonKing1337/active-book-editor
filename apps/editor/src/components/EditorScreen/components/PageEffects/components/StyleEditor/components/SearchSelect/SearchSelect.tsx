@@ -104,6 +104,7 @@ export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSe
     <div className={styles.SearchSelect} onBlur={handleBlur}>
       <input
         type="search"
+        maxLength={120}
         role="combobox"
         aria-autocomplete="list"
         aria-controls={listId}

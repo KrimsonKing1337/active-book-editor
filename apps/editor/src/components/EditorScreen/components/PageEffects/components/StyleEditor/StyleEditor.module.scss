@@ -268,3 +268,26 @@
 .NumericControl {
   min-width: 0;
 }
+
+.Colors,
+.DisabledColors {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.DisabledColors {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.ColorNotice {
+  margin: 0;
+  padding: 10px;
+  color: #f1d69e;
+  background: #393126;
+  border: 1px solid #77613b;
+  border-radius: 6px;
+  font-size: 13px;
+}

@@ -9,6 +9,7 @@ import {
   VibrationSettings,
   FlashlightSettings,
   BackgroundSettings,
+  SideSettings,
 } from '../';
 
 import { EffectTile } from './components';
@@ -25,6 +26,7 @@ type ContentParams = Pick<
   | 'onAddVibration'
   | 'onAddFlashlight'
   | 'onAddBackground'
+  | 'onAddSide'
   | 'onSelectEffect'
   | 'onUpdateEffect'
   | 'onDuplicateEffect'
@@ -49,6 +51,7 @@ export const getModalContent = ({
   onAddVibration,
   onAddFlashlight,
   onAddBackground,
+  onAddSide,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
@@ -79,6 +82,11 @@ export const getModalContent = ({
       id: 'background',
       label: 'Добавить Background',
       onClick: onAddBackground,
+    },
+    {
+      id: 'side',
+      label: 'Добавить Side',
+      onClick: onAddSide,
     },
   ];
 
@@ -192,6 +200,22 @@ export const getModalContent = ({
         effects={backgrounds}
         project={project}
         onLoadingChange={onLoadingChange}
+        onUpdate={onUpdateEffect}
+        onDuplicate={onDuplicateEffect}
+        onDelete={onDeleteEffect}
+      />
+    );
+  }
+
+  if (selectedEffect?.type === 'side') {
+    modalTitle = 'Настройки Side';
+    modalDescription = 'Боковые тени, текст и кастомные компоненты';
+    notice = 'Расположение и анимации обновляются сразу на странице';
+
+    modalContent = (
+      <SideSettings
+        key={selectedEffect.id}
+        effect={selectedEffect}
         onUpdate={onUpdateEffect}
         onDuplicate={onDuplicateEffect}
         onDelete={onDeleteEffect}

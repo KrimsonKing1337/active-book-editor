@@ -3,6 +3,8 @@ import type {
   ProjectStorage,
 } from '@project/@types';
 
+import { BUILD_ENDPOINT } from './constants';
+
 type BuildSessionResponse = {
   ok: true;
   sessionId: string;
@@ -12,8 +14,6 @@ type BuildCompleteResponse = {
   ok: true;
   outDir: string;
 };
-
-const BUILD_ENDPOINT = '/__active-book/build';
 
 const getErrorMessage = async (response: Response): Promise<string> => {
   const body = await response.text();

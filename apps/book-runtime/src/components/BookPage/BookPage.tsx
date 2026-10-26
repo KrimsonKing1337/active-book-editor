@@ -1,20 +1,21 @@
 import { type ComponentType, createElement } from 'react';
 
-import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration, Flashlight, Background } from 'activeBook-core/components/ProxyHooks';
-
-import type { BookDocument, CustomComponentType } from '@types';
 import type { BookRuntime } from '@active-book/types';
+import type { BookDocument, CustomComponentType } from '@types';
+
+import { PageWrapper } from 'activeBook-core/components';
+import { Audio, Vibration, Flashlight, Background, Side } from 'activeBook-core/components/ProxyHooks';
+
+import { resolveBackgroundOptions, resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { renderNode } from '@utils/renderNode';
-
-import { resolveBackgroundOptions } from '@active-book/book-builder/effects';
 
 import {
   getAudioEffects,
   getVibrationEffects,
   getFlashlightEffects,
   getBackgroundEffects,
+  getSideEffects,
 } from './utils';
 
 type BookPageProps = {
@@ -30,6 +31,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
   const vibrationEffects = getVibrationEffects(document);
   const flashlightEffects = getFlashlightEffects(document);
   const backgroundEffects = getBackgroundEffects(document);
+  const sideEffects = getSideEffects(document);
 
   return (
     <PageWrapper>
@@ -64,6 +66,43 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
               id={effectCur.id}
               page={1}
               {...effectCur.options}
+            />
+          );
+        })}
+
+        {sideEffects.map((effectCur) => {
+          const { component, ...sideOptions } = effectCur.options;
+
+          const options = resolveSideOptions(sideOptions);
+
+          let componentId = null;
+
+          if (component) {
+            componentId = `${component.package}/${component.name}`;
+          }
+
+          let CustomComponent;
+
+          if (componentId) {
+            CustomComponent = customComponents[componentId] as CustomComponentType;
+          }
+
+          const componentProps = {
+            book: bookRuntime,
+          };
+
+          let componentElement = null;
+
+          if (CustomComponent) {
+            componentElement = createElement(CustomComponent, componentProps);
+          }
+
+          return (
+            <Side
+              key={effectCur.id}
+              id={effectCur.id}
+              {...options}
+              Component={componentElement}
             />
           );
         })}

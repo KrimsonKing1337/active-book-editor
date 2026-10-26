@@ -1,16 +1,21 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
 
+import classNames from 'classnames';
+
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import type { BackgroundPreviewLayer } from '../../PageEffectsContext';
+import { type BackgroundPreviewLayer, usePageEffects } from '../../PageEffectsContext';
 
-import { useStyleEditor } from './hooks';
 
-import { useBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
+
+import { type StyleEditorController, useStyleEditor } from './hooks';
 
 import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
 
 import styles from './StyleEditor.module.scss';
+
+type ColorProperty = 'color' | 'backgroundColor';
 
 export type StyleEditorProps = {
   value: CSSProperties;
@@ -18,6 +23,12 @@ export type StyleEditorProps = {
   styleFilters?: FilterOperation[];
   mediaId?: string;
   defaultZIndex?: number;
+  colorProperty?: ColorProperty;
+  additionalColorProperty?: ColorProperty;
+  colorLabel?: string;
+  colorDisabledReason?: string;
+  controller?: StyleEditorController;
+  isMediaOverride?: boolean;
 };
 
 const handleInputEnter = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -32,6 +43,12 @@ export const StyleEditor = ({
   styleFilters,
   mediaId,
   defaultZIndex = 0,
+  colorProperty = 'backgroundColor',
+  additionalColorProperty,
+  colorLabel,
+  colorDisabledReason,
+  controller,
+  isMediaOverride,
 }: StyleEditorProps) => {
   const {
     currentStyle,
@@ -42,16 +59,69 @@ export const StyleEditor = ({
     value,
     layer,
     mediaId,
+    controller,
   });
 
-  const { commitFilters } = useBackgroundStyle();
+  const backgroundStyle = useOptionalBackgroundStyle();
+  const { effects } = usePageEffects();
 
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
 
-  const handleColorChange = (val: string) => {
-    setProperty('backgroundColor', val);
-  };
+  const layerZIndexes: number[] = [];
+
+  for (const effectCur of effects) {
+    if (controller && effectCur.type === 'side') {
+      const shadows = effectCur.options.shadows ?? [];
+      const texts = effectCur.options.texts ?? [];
+
+      const items = [
+        ...shadows,
+        ...texts,
+      ];
+
+      for (const itemCur of items) {
+        const value = Number(itemCur.style?.zIndex);
+
+        if (itemCur.style?.zIndex !== undefined && Number.isFinite(value)) {
+          layerZIndexes.push(value);
+        }
+      }
+    } else if (!controller && effectCur.type === 'background') {
+      const options = effectCur.options;
+
+      const images = options.images ?? [];
+      const videos = options.videos ?? [];
+
+      const imagesStyles = images.map((cur) => cur.style);
+      const videosStyles = videos.map((cur) => cur.style);
+
+      const layerStyles = [
+        options.style,
+        options.shadow?.style,
+        ...imagesStyles,
+        ...videosStyles,
+      ];
+
+      for (const styleCur of layerStyles) {
+        const value = Number(styleCur?.zIndex);
+
+        if (styleCur?.zIndex !== undefined && Number.isFinite(value)) {
+          layerZIndexes.push(value);
+        }
+      }
+    }
+  }
+
+  const minimumZIndex = Math.min(zIndex, ...layerZIndexes);
+  const maximumZIndex = Math.max(zIndex, ...layerZIndexes);
+
+  const sameIndexes = layerZIndexes.filter((indexCur) => indexCur === zIndex);
+
+  const currentLayerIsRegistered = currentStyle.zIndex !== undefined;
+  const digit = currentLayerIsRegistered ? 1 : 0;
+
+  const otherLayersAtSameIndex = sameIndexes.length > digit;
 
   const handleLayerChange = (val: number) => {
     setProperty('zIndex', val);
@@ -62,22 +132,70 @@ export const StyleEditor = ({
 
     const normalizedMediaId = mediaId ?? null;
 
-    commitFilters(layer, normalizedMediaId, operations);
+    if (controller) {
+      controller.commitFilters(operations);
+    } else {
+      backgroundStyle?.commitFilters(layer, normalizedMediaId, operations);
+    }
   };
 
-  const backgroundColor = String(currentStyle.backgroundColor ?? '');
-  const isMedia = layer === 'image' || layer === 'video';
+  const colorProperties = [colorProperty];
+
+  if (additionalColorProperty) {
+    colorProperties.push(additionalColorProperty);
+  }
+
+  const isMediaLayer = layer === 'image' || layer === 'video';
+  const isMedia = isMediaOverride ?? isMediaLayer;
+
+  const colorFieldsetClassNames = classNames(styles.Colors, {
+    [styles.DisabledColors]: Boolean(colorDisabledReason),
+  });
 
   return (
     <div className={styles.StyleEditor} onKeyDown={handleInputEnter}>
-      <ColorSettings
-        color={backgroundColor}
-        onColorChange={handleColorChange}
-        onCommit={commitStyle}
-      />
+      {colorDisabledReason && (
+        <p className={styles.ColorNotice} role="note">
+          {colorDisabledReason}
+        </p>
+      )}
+
+      {colorProperties.map((propertyCur) => {
+        const value = String(currentStyle[propertyCur] ?? '');
+
+        let label = propertyCur === 'color' ? 'Цвет текста (color)' : 'Цвет фона (background-color)';
+
+        if (propertyCur === colorProperty && colorLabel) {
+          label = colorLabel;
+        }
+
+        const handleColorChange = (val: string) => {
+          if (!colorDisabledReason) {
+            setProperty(propertyCur, val);
+          }
+        };
+
+        return (
+          <fieldset
+            key={propertyCur}
+            className={colorFieldsetClassNames}
+            disabled={Boolean(colorDisabledReason)}
+          >
+            <ColorSettings
+              label={label}
+              color={value}
+              onColorChange={handleColorChange}
+              onCommit={commitStyle}
+            />
+          </fieldset>
+        );
+      })}
 
       <LayerSettings
         zIndex={zIndex}
+        minimumZIndex={minimumZIndex}
+        maximumZIndex={maximumZIndex}
+        otherLayersAtSameIndex={otherLayersAtSameIndex}
         onChange={handleLayerChange}
         onCommit={commitStyle}
       />

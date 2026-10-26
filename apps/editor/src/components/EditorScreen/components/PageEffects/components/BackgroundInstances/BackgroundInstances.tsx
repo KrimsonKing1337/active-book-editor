@@ -1,6 +1,4 @@
-import type { ComponentType, CSSProperties } from 'react';
-
-import { useEffect, useMemo, useState } from 'react';
+import { type ComponentType, type CSSProperties, useEffect, useMemo, useState } from 'react';
 
 import type {
   BackgroundEffect as CoreBackgroundEffect,
@@ -10,7 +8,7 @@ import type { BookComponentProps } from '@active-book/types';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
-import { createBookRuntime } from '@active-book/book-builder/customComponents/runtime';
+import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import { resolveStyle } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';

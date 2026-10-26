@@ -8,6 +8,8 @@ export type {
   FlashlightOptions,
   BackgroundEffect as BackgroundEffectDraft,
   BackgroundOptions,
+  SideEffect as SideEffectDraft,
+  SideOptions,
 } from '@active-book/book-builder/effects';
 
 export type OptionUpdater<T> = <K extends keyof T>(name: K, value: T[K]) => void;

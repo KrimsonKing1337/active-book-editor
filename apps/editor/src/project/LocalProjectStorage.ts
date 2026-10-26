@@ -13,14 +13,16 @@ import type {
 import { trackProjectWrite } from './pendingOperations';
 
 import {
+  BOOK_FILE_NAME,
+  PACKAGE_FILE_NAME,
+  ASSETS_DIRECTORY_NAME,
+  DEPENDENCIES_DIRECTORY_NAME,
+} from './constants';
+
+import {
   ExistingProjectError,
   InvalidProjectError,
 } from './errors';
-
-const BOOK_FILE_NAME = 'book.json';
-const PACKAGE_FILE_NAME = 'package.json';
-const ASSETS_DIRECTORY_NAME = 'assets';
-const DEPENDENCIES_DIRECTORY_NAME = 'dependencies';
 
 const getIsBookDocument = (value: unknown): value is JSONContent => {
   type Value = {

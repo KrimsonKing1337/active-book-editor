@@ -24,11 +24,30 @@ import type {
   EditorEffectDraft,
   FlashlightEffectDraft,
   VibrationEffectDraft,
+  SideEffectDraft,
 } from './@types';
 
 export type AudioPreviewStatus = {
   state: 'empty' | 'loading' | 'ready' | 'error';
   error?: string;
+};
+
+export type SideItemPreview = {
+  playState?: 'running' | 'paused' | 'stopped';
+  hidden?: boolean;
+};
+
+export type SideItemPreviews = Record<string, SideItemPreview>;
+
+export type SideStylePreviewUpdate = {
+  effectId: string;
+  kind: 'shadow' | 'text';
+  itemId: string;
+  style: CSSProperties;
+};
+
+export const getSidePreviewKey = (effectId: string, itemId: string): string => {
+  return JSON.stringify([effectId, itemId]);
 };
 
 type PageEffectsContextValue = {
@@ -40,11 +59,20 @@ type PageEffectsContextValue = {
   flushStylePreviews: () => boolean;
   hasUnsavedStyleChanges: () => boolean;
   markStylesSaved: () => void;
+  sideItemPreviews: SideItemPreviews;
+  sideStylePreviews: SideStylePreviews;
+  updateSideStylePreview: (update: SideStylePreviewUpdate) => void;
+  updateSideItemPreview: (effectId: string, itemId: string, changes: Partial<SideItemPreview>) => void;
 };
 
 export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
 
 export type BackgroundStylePreviews = Record<string, CSSProperties>;
+export type SideStylePreviews = Record<string, CSSProperties>;
+
+export const getSideStylePreviewKey = (effectId: string, kind: 'shadow' | 'text', itemId: string): string => {
+  return JSON.stringify([effectId, kind, itemId]);
+};
 
 type BackgroundStylePreviewUpdater = (
   effectId: string,
@@ -80,12 +108,14 @@ const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
   const groupedBackground = grouped.background ?? [];
+  const groupedSide = grouped.side ?? [];
 
   return [
     ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
     ...groupedBackground,
+    ...groupedSide,
   ];
 };
 
@@ -93,8 +123,12 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
   const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
   const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
+  const [sideStylePreviews, setSideStylePreviews] = useState<SideStylePreviews>({});
+  const [sideItemPreviews, setSideItemPreviews] = useState<SideItemPreviews>({});
 
   const previewStylesRef = useRef<BackgroundStylePreviews>({});
+  const sideStylesRef = useRef<SideStylePreviews>({});
+  const sideFrameRef = useRef<number | null>(null);
   const previewFrameRef = useRef<number | null>(null);
   const unsavedStylesRef = useRef(false);
 
@@ -122,8 +156,39 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       });
     }, []);
 
+  const updateSideStylePreview = useCallback((update: SideStylePreviewUpdate) => {
+    const {
+      effectId,
+      kind,
+      itemId,
+      style,
+    } = update;
+    const key = getSideStylePreviewKey(effectId, kind, itemId);
+
+    sideStylesRef.current = {
+      ...sideStylesRef.current,
+      [key]: style,
+    };
+
+    unsavedStylesRef.current = true;
+    setHasPendingStyles(true);
+
+    if (sideFrameRef.current !== null) {
+      cancelAnimationFrame(sideFrameRef.current);
+    }
+
+    sideFrameRef.current = requestAnimationFrame(() => {
+      setSideStylePreviews(sideStylesRef.current);
+      sideFrameRef.current = null;
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
+      if (sideFrameRef.current !== null) {
+        cancelAnimationFrame(sideFrameRef.current);
+      }
+
       if (previewFrameRef.current !== null) {
         cancelAnimationFrame(previewFrameRef.current);
       }
@@ -215,12 +280,17 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       return effectCur.type === 'background';
     });
 
+    const sideEffects = nextEffects.filter((effectCur): effectCur is SideEffectDraft => {
+      return effectCur.type === 'side';
+    });
+
     const groupedEffects: GroupedPageEffects = {
       ...currentPageEffects,
       audio: audioEffects,
       vibration: vibrationEffects,
       flashlight: flashlightEffects,
       background: backgroundEffects,
+      side: sideEffects,
     };
 
     const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
@@ -234,8 +304,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
   const flushStylePreviews = useCallback((): boolean => {
     const pending = previewStylesRef.current;
+    const pendingSide = sideStylesRef.current;
 
-    if (Object.keys(pending).length === 0) {
+    if (Object.keys(pending).length === 0 && Object.keys(pendingSide).length === 0) {
       return true;
     }
 
@@ -244,6 +315,49 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     }
 
     const nextEffects = getPageEffects(editor).map((effectCur) => {
+      if (effectCur.type === 'side') {
+        let hasUpdates = false;
+
+        const shadows = effectCur.options.shadows?.map((item) => {
+          const key = getSideStylePreviewKey(effectCur.id, 'shadow', item.id);
+          const style = pendingSide[key];
+
+          if (!style) {
+            return item;
+          }
+
+          hasUpdates = true;
+
+          return { ...item, style };
+        });
+
+        const texts = effectCur.options.texts?.map((item) => {
+          const key = getSideStylePreviewKey(effectCur.id, 'text', item.id);
+          const style = pendingSide[key];
+
+          if (!style) {
+            return item;
+          }
+
+          hasUpdates = true;
+
+          return { ...item, style };
+        });
+
+        if (!hasUpdates) {
+          return effectCur;
+        }
+
+        return {
+          ...effectCur,
+          options: {
+            ...effectCur.options,
+            shadows,
+            texts,
+          },
+        };
+      }
+
       if (effectCur.type !== 'background') {
         return effectCur;
       }
@@ -333,8 +447,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     }
 
     previewStylesRef.current = {};
+    sideStylesRef.current = {};
 
     setBackgroundStylePreviews({});
+    setSideStylePreviews({});
     markStylePreviewsCommitted();
 
     if (previewFrameRef.current !== null) {
@@ -343,11 +459,35 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
       previewFrameRef.current = null;
     }
 
+    if (sideFrameRef.current !== null) {
+      cancelAnimationFrame(sideFrameRef.current);
+
+      sideFrameRef.current = null;
+    }
+
     return true;
   }, [editor, writeEffects]);
 
   const hasUnsavedStyleChanges = useCallback(() => {
     return unsavedStylesRef.current;
+  }, []);
+
+  const updateSideItemPreview = useCallback((
+    effectId: string,
+    itemId: string,
+    changes: Partial<SideItemPreview>,
+  ) => {
+    const key = getSidePreviewKey(effectId, itemId);
+
+    setSideItemPreviews((current) => {
+      return {
+        ...current,
+        [key]: {
+          ...current[key],
+          ...changes,
+        },
+      };
+    });
   }, []);
 
   const markStylesSaved = useCallback(() => {
@@ -365,6 +505,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
+    sideItemPreviews,
+    sideStylePreviews,
+    updateSideItemPreview,
+    updateSideStylePreview,
   }), [
     effects,
     writeEffects,
@@ -374,6 +518,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
+    sideItemPreviews,
+    sideStylePreviews,
+    updateSideItemPreview,
+    updateSideStylePreview,
   ]);
 
   return (

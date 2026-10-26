@@ -35,8 +35,12 @@ export const BackgroundStyleProvider = ({
   );
 };
 
+export const useOptionalBackgroundStyle = (): BackgroundStyleContextValue | null => {
+  return useContext(BackgroundStyleContext);
+};
+
 export const useBackgroundStyle = (): BackgroundStyleContextValue => {
-  const context = useContext(BackgroundStyleContext);
+  const context = useOptionalBackgroundStyle();
 
   if (!context) {
     throw new Error('StyleEditor must be used within BackgroundStyleProvider');

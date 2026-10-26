@@ -1,0 +1,14 @@
+.Checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  cursor: pointer;
+
+  input {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+}

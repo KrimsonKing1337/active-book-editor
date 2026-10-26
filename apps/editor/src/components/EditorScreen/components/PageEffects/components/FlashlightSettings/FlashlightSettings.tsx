@@ -9,6 +9,9 @@ import { useFlashlight } from 'activeBook-core/hooks/effects';
 
 import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
 
+import { IntegerInput } from '../IntegerInput';
+import { TextInput, Checkbox, Button } from '../EffectControls';
+
 import styles from './FlashlightSettings.module.scss';
 
 type NumericFlashlightOptionName = keyof Pick<FlashlightOptions, 'duration' | 'delay' | 'speed'>;
@@ -120,16 +123,16 @@ export const FlashlightSettings = ({
     updateSlug(event.target.value);
   };
 
-  const handleDurationChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('duration', event.target.value);
+  const handleDurationChange = (value: number) => {
+    updateNumber('duration', String(value));
   };
 
-  const handleDelayChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('delay', event.target.value);
+  const handleDelayChange = (value: number) => {
+    updateNumber('delay', String(value));
   };
 
-  const handleSpeedChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateNumber('speed', event.target.value);
+  const handleSpeedChange = (value: number) => {
+    updateNumber('speed', String(value));
   };
 
   const handlePlayOnLoadChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -169,11 +172,12 @@ export const FlashlightSettings = ({
       <div className={styles.Fields}>
         <label className={styles.Field}>
           <span>
-            Метка (slug)
+            Название эффекта
           </span>
 
-          <input
+          <TextInput
             type="text"
+            maxLength={120}
             value={effect.slug}
             onChange={handleSlugChange}
             placeholder="Например, разряд молнии"
@@ -190,9 +194,10 @@ export const FlashlightSettings = ({
           </label>
 
           <div className={styles.IdRow}>
-            <input
+            <TextInput
               id="flashlight-effect-id"
               type="text"
+              maxLength={80}
               value={idDraft}
               onChange={handleIdChange}
               aria-invalid={Boolean(idError)}
@@ -200,9 +205,9 @@ export const FlashlightSettings = ({
               spellCheck={false}
             />
 
-            <button type="button" disabled={flashLightEffectIdButtonIsDisabled} onClick={updateId}>
+            <Button variant="success" disabled={flashLightEffectIdButtonIsDisabled} onClick={updateId}>
               Применить
-            </button>
+            </Button>
           </div>
 
           {idError && (
@@ -217,13 +222,11 @@ export const FlashlightSettings = ({
             Длительность вспышки (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
             max={10000}
-            step={100}
             value={options.duration}
-            onChange={handleDurationChange}
+            onValueChange={handleDurationChange}
           />
         </label>
 
@@ -232,12 +235,11 @@ export const FlashlightSettings = ({
             Задержка (мс)
           </span>
 
-          <input
-            type="number"
+          <IntegerInput
             min={0}
-            step={100}
+            max={999999}
             value={options.delay}
-            onChange={handleDelayChange}
+            onValueChange={handleDelayChange}
           />
 
           <small>
@@ -245,29 +247,13 @@ export const FlashlightSettings = ({
           </small>
         </label>
 
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.playOnLoad}
-            onChange={handlePlayOnLoadChange}
-          />
+        <Checkbox checked={options.playOnLoad} onChange={handlePlayOnLoadChange}>
+          Включать вспышку при открытии страницы
+        </Checkbox>
 
-          <span>
-            Включать вспышку при открытии страницы
-          </span>
-        </label>
-
-        <label className={styles.Checkbox}>
-          <input
-            type="checkbox"
-            checked={options.withSideShadow}
-            onChange={handleSideShadowChange}
-          />
-
-          <span>
-            Дублировать вспышку экранной подсветкой (sideShadow)
-          </span>
-        </label>
+        <Checkbox checked={options.withSideShadow} onChange={handleSideShadowChange}>
+          Дублировать вспышку экранной подсветкой (sideShadow)
+        </Checkbox>
 
         {options.withSideShadow && (
           <label className={styles.Field}>
@@ -275,20 +261,19 @@ export const FlashlightSettings = ({
               Период мерцания sideShadow (мс)
             </span>
 
-            <input
-              type="number"
+            <IntegerInput
               min={1}
-              step={10}
+              max={99999}
               value={options.speed}
-              onChange={handleSpeedChange}
+              onValueChange={handleSpeedChange}
             />
           </label>
         )}
 
         <div className={styles.Preview}>
-          <button type="button" disabled={!canPreview} onClick={handlePreview}>
+          <Button type="button" disabled={!canPreview} onClick={handlePreview}>
             Проверить вспышку
-          </button>
+          </Button>
 
           <small>
             {previewDescription}
@@ -297,13 +282,13 @@ export const FlashlightSettings = ({
       </div>
 
       <div className={styles.Actions}>
-        <button type="button" onClick={onDuplicate}>
+        <Button type="button" onClick={onDuplicate}>
           Дублировать
-        </button>
+        </Button>
 
-        <button type="button" className={styles.Delete} onClick={onDelete}>
+        <Button type="button" variant="danger" onClick={onDelete}>
           Удалить эффект
-        </button>
+        </Button>
       </div>
     </div>
   );

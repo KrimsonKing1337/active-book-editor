@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 
 import { buildBook } from '../build/build';
 
-const BUILD_ROOT_NAME = '.active-book-build';
+import { BUILD_ROOT_NAME } from './constants';
 
 const activeBuildSessions = new Set<string>();
 

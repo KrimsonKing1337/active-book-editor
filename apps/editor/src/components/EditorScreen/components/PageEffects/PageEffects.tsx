@@ -8,6 +8,7 @@ import type {
   EditorEffectDraft,
   VibrationEffectDraft,
   FlashlightEffectDraft,
+  SideEffectDraft,
 } from './@types';
 
 import { usePageEffects } from './PageEffectsContext';
@@ -19,6 +20,7 @@ import {
   createBackgroundEffect,
   createFlashlightEffect,
   createVibrationEffect,
+  createSideEffect,
 } from './utils';
 
 import styles from './PageEffects.module.scss';
@@ -42,6 +44,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   const [selectedEffectId, setSelectedEffectId] = useState<string | null>(null);
   const [isSavingStyles, setIsSavingStyles] = useState(false);
   const [styleSaveError, setStyleSaveError] = useState('');
+
   const savingStylesRef = useRef(false);
 
   const persistStyles = async (): Promise<boolean> => {
@@ -75,7 +78,11 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
       return true;
     } catch (error) {
-      setStyleSaveError(error instanceof Error ? error.message : 'Не удалось сохранить изменения');
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Не удалось сохранить изменения';
+
+      setStyleSaveError(errorMessage);
 
       return false;
     } finally {
@@ -134,6 +141,15 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
   const addBackground = () => {
     const effect = createBackgroundEffect();
+    const currentEffects = getCurrentEffects();
+
+    writeEffects([...currentEffects, effect]);
+
+    setSelectedEffectId(effect.id);
+  };
+
+  const addSide = () => {
+    const effect = createSideEffect();
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -262,6 +278,25 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         };
 
         writeEffects([...currentEffects, duplicate]);
+      } else if (selectedEffect.type === 'side') {
+        const options = structuredClone(selectedEffect.options);
+
+        options.shadows = options.shadows?.map((shadowCur) => {
+          return { ...shadowCur, id: crypto.randomUUID() };
+        });
+
+        options.texts = options.texts?.map((textCur) => {
+          return { ...textCur, id: crypto.randomUUID() };
+        });
+
+        const duplicate: SideEffectDraft = {
+          ...selectedEffect,
+          id,
+          slug,
+          options,
+        };
+
+        writeEffects([...currentEffects, duplicate]);
       } else {
         const options = {
           ...selectedEffect.options,
@@ -341,6 +376,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           onAddVibration={addVibration}
           onAddFlashlight={addFlashlight}
           onAddBackground={addBackground}
+          onAddSide={addSide}
           onSelectEffect={selectEffect}
           onUpdateEffect={updateEffect}
           onDuplicateEffect={duplicateEffect}
