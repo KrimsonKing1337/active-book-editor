@@ -59,10 +59,12 @@ export const EffectTile = ({ effect, path, onSelect }: EffectTileProps) => {
     onSelect(effect.id);
   };
 
+  const effectTypeLabel = path ?? effectType;
+
   return (
     <button className={styles.Tile} type="button" onClick={handleSelect}>
       <span className={styles.Kind}>
-        {path ?? effectType}
+        {effectTypeLabel}
       </span>
 
       <strong>

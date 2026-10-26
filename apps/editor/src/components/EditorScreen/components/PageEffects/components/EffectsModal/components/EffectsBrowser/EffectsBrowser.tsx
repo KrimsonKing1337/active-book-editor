@@ -100,29 +100,29 @@ export const EffectsBrowser = ({
   const showCategories = !category && !isSearching;
   const showEffects = !showCategories && !showGroups;
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(event.target.value);
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(e.target.value);
   };
 
-  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Escape') {
+  const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Escape') {
       return;
     }
 
     if (search) {
-      event.preventDefault();
-      event.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
 
       onSearchChange('');
 
       return;
     }
 
-    event.currentTarget.blur();
+    e.currentTarget.blur();
   };
 
-  const handleGroupingChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    onGroupingChange(event.target.value as GroupingMode);
+  const handleGroupingChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    onGroupingChange(e.target.value as GroupingMode);
   };
 
   const handleSelectEffect = (id: string) => {
