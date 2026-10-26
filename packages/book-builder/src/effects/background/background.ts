@@ -124,13 +124,15 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
       continue;
     }
 
-    const kind = backgroundEffectKinds.find((cur) => cur === effectCur.kind);
+    const kind = backgroundEffectKinds.find((kindCur) => {
+      return kindCur === effectCur.kind;
+    });
 
     if (!kind) {
       continue;
     }
 
-    const options = effectCur.options;
+    const options = effectCur.options as BackgroundOptions;
 
     if (kind === 'image' || kind === 'video') {
       const media = options[kind];
@@ -157,7 +159,7 @@ export const normalizeBackgroundEffects = (value: unknown): BackgroundEffect[] =
       type: 'background',
       kind,
       slug,
-      options: options as BackgroundOptions,
+      options,
     });
   }
 

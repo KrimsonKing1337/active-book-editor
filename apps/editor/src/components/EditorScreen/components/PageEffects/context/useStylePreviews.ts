@@ -1,4 +1,8 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import type { Editor } from '@tiptap/core';
+
+import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
 
 import type { EditorEffectDraft } from '../@types';
 
@@ -8,10 +12,6 @@ import type {
   SideStylePreviewUpdate,
   SideStylePreviews,
 } from './@types';
-
-import { useCallback, useEffect, useRef, useState } from 'react';
-
-import { markStylePreviewsCommitted, setHasPendingStyles } from '@project/pendingOperations';
 
 import {
   applyPendingStylePreviews,
@@ -39,12 +39,11 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
     const { style } = update;
     const key = getBackgroundPreviewKey(update);
 
-    const updatedStyles = {
+    backgroundStylesRef.current = {
       ...backgroundStylesRef.current,
       [key]: style,
     };
 
-    backgroundStylesRef.current = updatedStyles;
     hasUnsavedStylesRef.current = true;
 
     setHasPendingStyles(true);
@@ -64,12 +63,11 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
     const { style } = update;
     const key = getSideStylePreviewKey(update);
 
-    const updatedStyles = {
+    sideStylesRef.current = {
       ...sideStylesRef.current,
       [key]: style,
     };
 
-    sideStylesRef.current = updatedStyles;
     hasUnsavedStylesRef.current = true;
 
     setHasPendingStyles(true);

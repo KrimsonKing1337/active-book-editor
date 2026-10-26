@@ -1,11 +1,11 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import type { Editor } from '@tiptap/core';
+
+import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type { EditorEffectDraft } from '../@types';
 import type { AudioPreviewStatus } from './@types';
-
-import { useCallback, useEffect, useState } from 'react';
-
-import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import { getPageEffects, groupPageEffects } from './utils';
 

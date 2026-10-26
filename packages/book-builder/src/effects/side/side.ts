@@ -111,7 +111,7 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       continue;
     }
 
-    const options = effectCur.options;
+    const options = effectCur.options as SideOptions;
 
     if (kind === 'shadow') {
       const shadow = options.shadow;
@@ -157,7 +157,7 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       type: 'side',
       kind,
       slug,
-      options: options as SideOptions,
+      options,
     });
   }
 

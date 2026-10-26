@@ -1,8 +1,6 @@
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren, useMemo } from 'react';
 
 import type { Editor } from '@tiptap/core';
-
-import { useMemo } from 'react';
 
 import { usePageEffectsState } from './usePageEffectsState';
 import { useSideItemPreviews } from './useSideItemPreviews';
@@ -14,9 +12,9 @@ import {
   PageEffectsContext,
 } from './contexts';
 
-type PageEffectsProviderProps = PropsWithChildren<{
+type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
-}>;
+};
 
 export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
   const {
