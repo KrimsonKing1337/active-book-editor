@@ -1,11 +1,11 @@
+import type { EffectsModalProps } from './@types';
+import type { EffectCategory, GroupingMode } from './catalog';
+
 import { useCallback, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
 import { Rnd } from 'react-rnd';
-
-import type { EffectsModalProps } from './@types';
-import type { EffectCategory, GroupingMode } from './catalog';
 
 import { getCategoryDefinition } from './catalog';
 

@@ -1,7 +1,7 @@
+import type { EditorEffectDraft } from '../../@types';
+
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import type { EditorEffectDraft } from '../../@types';
 
 import {
   EFFECT_CATEGORIES,

@@ -2,13 +2,12 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
+import type { SideEffectDraft } from '../../@types';
+import type { StyleEditorController } from '../StyleEditor/hooks';
+
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
-
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../PageEffectsContext';
-
-import type { StyleEditorController } from '../StyleEditor/hooks';
 
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';

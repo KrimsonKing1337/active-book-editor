@@ -6,9 +6,11 @@ import type {
   SideEffectKind,
 } from '@active-book/book-builder/effects';
 
+import type { EffectsModalProps } from '../../@types';
 import type { EffectCategory, GroupingMode } from '../../catalog';
 
 import { Select, TextInput } from '../../../EffectControls';
+
 import {
   EFFECT_CATEGORIES,
   getCategoryDefinition,
@@ -16,8 +18,6 @@ import {
   getEffectPath,
   getFilteredEffects,
 } from '../../catalog';
-
-import type { EffectsModalProps } from '../../@types';
 
 import { EffectTile } from '../EffectTile';
 

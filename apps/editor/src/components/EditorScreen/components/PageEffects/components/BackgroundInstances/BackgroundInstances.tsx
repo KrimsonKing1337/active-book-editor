@@ -1,23 +1,20 @@
 import type { ComponentType, CSSProperties } from 'react';
 
-import { useEffect, useMemo, useState } from 'react';
-
 import type { BackgroundEffect as CoreBackgroundEffect } from 'activeBook-core/hooks/effects/background/@types';
-
 import type { BookComponentProps } from '@active-book/types';
+import type { BookProject } from '@project/@types';
+
+import type { BackgroundEffectDraft } from '../../@types';
+import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
+
+import { useEffect, useMemo, useState } from 'react';
 
 import { Background } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import { resolveStyle } from '@active-book/book-builder/effects';
 
-import type { BookProject } from '@project/@types';
-
 import { useCustomComponents } from '@project/customComponentRegistry';
-
-import type { BackgroundEffectDraft } from '../../@types';
-
-import type { BackgroundPreviewLayer, BackgroundStylePreviews } from '../../PageEffectsContext';
 
 import {
   getBackgroundPreviewKey,
