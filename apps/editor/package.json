@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader runner",
-    "build": "vite build --configLoader runner"
+    "build": "vite build --configLoader runner",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@active-book/book-builder": "^0.0.1",
