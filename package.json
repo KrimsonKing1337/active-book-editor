@@ -13,8 +13,8 @@
     "build:editor": "npm run build -w @active-book/editor",
     "build:book": "npm run build -w @active-book/book-builder",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --quiet",
-    "lint:fix": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
+    "lint:ts": "eslint \"./src/**/*.{ts,tsx}\" --fix --quiet",
+    "lint:css": "stylelint \"src/**/*.scss\" --fix",
     "check": "npm run typecheck && npm run lint",
     "core:package": "node scripts/packageCore.mjs"
   },
