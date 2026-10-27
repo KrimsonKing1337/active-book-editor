@@ -49,19 +49,21 @@
 
 .VolumeLabel {
   display: flex;
-  justify-content: space-between;
   gap: 12px;
+  justify-content: space-between;
 }
 
 .Advanced {
   padding: 12px;
+
   border: 1px solid #404040;
   border-radius: 8px;
 
   summary {
-    cursor: pointer;
     font-size: 13px;
     font-weight: 600;
+
+    cursor: pointer;
   }
 }
 
@@ -72,9 +74,10 @@
 .Actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 8px;
+  justify-content: flex-end;
   padding-top: 14px;
+
   border-top: 1px solid #404040;
 }
 

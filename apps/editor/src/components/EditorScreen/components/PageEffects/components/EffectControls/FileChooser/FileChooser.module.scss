@@ -1,7 +1,7 @@
 .FileChooser {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   min-width: 0;
 
   .FilePath {
@@ -11,6 +11,7 @@
 
   .ChooseButton {
     flex-shrink: 0;
+
     white-space: nowrap;
   }
 }

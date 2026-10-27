@@ -2,11 +2,13 @@
   position: sticky;
   top: 0;
   z-index: 20;
+
   display: flex;
-  justify-content: space-between;
   gap: 16px;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
+
   background: #101010;
   border-bottom: 1px solid #303030;
 }
@@ -19,6 +21,7 @@
 
   > span {
     font-size: 12px;
+
     opacity: 0.65;
   }
 }
@@ -32,7 +35,9 @@
 .SavedStatus {
   font-size: 12px;
   font-weight: 400;
+
   opacity: 0;
+
   transition: opacity 200ms ease;
 
   &.isVisible {
@@ -43,11 +48,12 @@
 .Actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   gap: 8px;
+  justify-content: flex-end;
 
   button {
     padding: 8px 12px;
+
     cursor: pointer;
 
     &:disabled {
@@ -58,8 +64,9 @@
 }
 
 .Separator {
-  width: 1px;
   align-self: stretch;
+  width: 1px;
   margin: 0 4px;
+
   background: #303030;
 }

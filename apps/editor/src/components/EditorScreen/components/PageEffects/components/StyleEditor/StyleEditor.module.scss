@@ -32,11 +32,13 @@
   min-width: 0;
   margin: 0;
   padding: 12px;
+
   border: 1px solid #555;
   border-radius: 8px;
 
   legend {
     padding: 0 5px;
+
     font-size: 13px;
     font-weight: 600;
   }
@@ -51,8 +53,9 @@
     min-width: 0;
 
     input {
-      min-width: 0;
       box-sizing: border-box;
+      min-width: 0;
+
       text-align: center;
     }
 
@@ -82,8 +85,8 @@
 .RangeFields,
 .LayerControls {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .RangeFields {
@@ -97,6 +100,7 @@
   input {
     flex: 1;
     min-width: 0;
+
     text-align: center;
   }
 
@@ -123,8 +127,8 @@
   margin-top: 8px;
 
   input {
-    width: 0;
     flex: 1;
+    width: 0;
   }
 
   button {
@@ -135,6 +139,7 @@
 .Error {
   display: block;
   margin-top: 4px;
+
   color: #f5a4a4;
   font-size: 12px;
 }
@@ -151,6 +156,7 @@
 
 .SearchSelect {
   position: relative;
+
   flex: 1;
   min-width: 0;
 
@@ -161,12 +167,14 @@
 
 .SearchOptions {
   position: absolute;
-  z-index: 10;
   top: 100%;
-  left: 0;
   right: 0;
+  left: 0;
+  z-index: 10;
+
   max-height: 180px;
   overflow-y: auto;
+
   background: var(--background, #222);
   border: 1px solid #777;
   border-radius: 4px;
@@ -176,10 +184,12 @@
     width: 100%;
     min-height: 0;
     padding: 7px;
-    border: 0;
-    background: transparent;
+
     color: inherit;
     text-align: left;
+
+    background: transparent;
+    border: 0;
     cursor: pointer;
 
     &:hover,
@@ -192,22 +202,25 @@
 .EmptyOptions {
   display: block;
   padding: 8px;
+
   font-size: 12px;
 }
 
 .FilterRow,
 .AdvancedRow {
   margin-top: 8px;
+
   border: 1px solid #777;
   border-radius: 4px;
 }
 
 .FilterSummary {
   display: flex;
-  justify-content: space-between;
   gap: 8px;
+  justify-content: space-between;
   width: 100%;
   padding: 8px;
+
   text-align: left;
   overflow-wrap: anywhere;
 }
@@ -231,8 +244,8 @@
 .PositionRow,
 .NumericFields {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .PositionRow > * {
@@ -259,20 +272,24 @@
   min-width: 0;
   margin: 0;
   padding: 0;
+
   border: 0;
 }
 
 .DisabledColors {
   opacity: 0.45;
+
   pointer-events: none;
 }
 
 .ColorNotice {
   margin: 0;
   padding: 10px;
+
   color: #f1d69e;
+  font-size: 13px;
+
   background: #393126;
   border: 1px solid #77613b;
   border-radius: 6px;
-  font-size: 13px;
 }

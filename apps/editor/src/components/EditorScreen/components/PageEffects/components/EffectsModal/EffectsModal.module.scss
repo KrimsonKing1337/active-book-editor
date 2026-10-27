@@ -2,11 +2,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
   color: #f5f5f5;
+
   background: #202020;
   border: 1px solid #555;
   border-radius: 12px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 55%);
 }
 
 .PanelBody {
@@ -17,14 +19,16 @@
 }
 
 .Header {
-  flex: 0 0 auto;
   position: sticky;
   top: 0;
   z-index: 1;
+
   display: flex;
-  align-items: flex-start;
+  flex: 0 0 auto;
   gap: 16px;
+  align-items: flex-start;
   padding: 20px 24px;
+
   background: #202020;
   border-bottom: 1px solid #3d3d3d;
 }
@@ -35,11 +39,13 @@
 
   h2 {
     margin: 0;
+
     font-size: 19px;
   }
 
   p {
     margin: 8px 0 0;
+
     color: #b5b5b5;
     font-size: 12px;
     line-height: 1.5;
@@ -64,11 +70,13 @@
 .Empty {
   margin-bottom: 18px;
   padding: 20px;
+
   color: #bdbdbd;
+  font-size: 13px;
+
   background: #272727;
   border: 1px dashed #555;
   border-radius: 8px;
-  font-size: 13px;
 }
 
 .Tiles {
@@ -82,10 +90,11 @@
 .AddTile {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 10px;
+  align-items: flex-start;
   min-height: 155px;
   padding: 16px;
+
   border: 1px solid #555;
   border-radius: 8px;
   cursor: pointer;
@@ -94,8 +103,9 @@
 .Tile,
 .FolderTile {
   color: #f5f5f5;
-  background: #2b2b2b;
   text-align: left;
+
+  background: #2b2b2b;
 
   &:hover {
     background: #363636;
@@ -131,6 +141,7 @@
 
 .FolderCount {
   margin-top: auto;
+
   color: #d0d0d0;
   font-size: 12px;
 }
@@ -149,9 +160,10 @@
 
 .GroupingControl {
   display: flex;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+
   font-size: 13px;
 
   select {
@@ -161,6 +173,7 @@
 
 .ResultCount {
   margin: 0;
+
   color: #a8a8a8;
   font-size: 12px;
 }
@@ -168,11 +181,13 @@
 .AddTile {
   align-items: center;
   justify-content: center;
+
   color: #d5d5d5;
-  background: transparent;
-  border-style: dashed;
   font-size: 13px;
   text-align: center;
+
+  background: transparent;
+  border-style: dashed;
 
   &:hover {
     background: #303030;
@@ -187,10 +202,12 @@
 .Notice {
   margin: 0;
   padding: 12px 24px;
+
   color: #a8a8a8;
+  font-size: 12px;
+
   background: #191919;
   border-top: 1px solid #3d3d3d;
-  font-size: 12px;
 }
 
 .SaveError {
@@ -199,26 +216,32 @@
   bottom: 12px;
   left: 12px;
   z-index: 8;
+
   margin: 0;
   padding: 10px;
+
   color: #fff;
+  font-size: 13px;
+
   background: #8d3434;
   border-radius: 6px;
-  font-size: 13px;
 }
 
 .LoadingOverlay {
   position: absolute;
-  inset: 0;
   z-index: 10;
+
   display: flex;
   flex-direction: column;
+  gap: 14px;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+
   color: #f5f5f5;
-  background: rgba(20, 20, 20, 0.9);
   font-size: 14px;
+
+  background: rgb(20 20 20 / 90%);
+  inset: 0;
 }
 
 @keyframes AudioLoadingSpin {
@@ -230,8 +253,10 @@
 .LoadingSpinner {
   width: 28px;
   height: 28px;
+
   border: 3px solid #777;
   border-top-color: #fff;
   border-radius: 50%;
+
   animation: AudioLoadingSpin 0.7s linear infinite;
 }

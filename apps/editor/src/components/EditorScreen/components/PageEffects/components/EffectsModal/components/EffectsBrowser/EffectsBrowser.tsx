@@ -95,7 +95,7 @@ export const EffectsBrowser = ({
   const hasAvailableGroups = availableGroups.length > 1;
 
   const showGroupsRaw =
-      category
+    category
       && !group
       && grouping === 'type'
       && hasAvailableGroups

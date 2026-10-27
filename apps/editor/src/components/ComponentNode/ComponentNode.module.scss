@@ -1,6 +1,7 @@
 .ComponentNode {
   margin: 16px 0;
   padding: 12px;
+
   border: 1px dashed #777;
   border-radius: 8px;
 
@@ -8,14 +9,16 @@
     display: block;
     margin-bottom: 8px;
     padding: 0;
+
     color: inherit;
-    background: transparent;
-    border: none;
     font-size: 12px;
     text-align: left;
-    opacity: 0.7;
     text-transform: uppercase;
+
+    background: transparent;
+    border: none;
     cursor: pointer;
+    opacity: 0.7;
 
     &:hover,
     &:focus-visible {

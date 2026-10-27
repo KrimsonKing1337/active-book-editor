@@ -1,8 +1,8 @@
 .Preview {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 10px;
+  align-items: flex-start;
 }
 
 .Player {
@@ -12,7 +12,9 @@
 .PlayButton {
   min-height: 36px;
   padding: 7px 14px;
+
   color: #f5f5f5;
+
   background: #333;
   border: 1px solid #555;
   border-radius: 6px;
@@ -23,22 +25,25 @@
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: default;
+    opacity: 0.5;
   }
 }
 
 .LoopCheckbox {
   display: flex;
-  align-items: center;
   gap: 9px;
+  align-items: center;
+
   font-size: 13px;
+
   cursor: pointer;
 
   input {
     width: 16px;
     height: 16px;
     margin: 0;
+
     cursor: pointer;
   }
 }

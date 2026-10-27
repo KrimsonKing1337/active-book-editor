@@ -2,10 +2,11 @@
   display: block;
   width: 100%;
   padding: 0;
-  border: 0;
+
+  font: inherit;
 
   background: transparent;
-  font: inherit;
+  border: 0;
 
   cursor: pointer;
 }
