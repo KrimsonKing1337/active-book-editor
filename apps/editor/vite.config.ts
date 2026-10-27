@@ -60,10 +60,6 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       dedupe: ['react', 'react-dom'],
-      alias: {
-        assets: path.resolve(repoRoot, 'node_modules/activeBook-core/assets'),
-        styles: path.resolve(repoRoot, 'node_modules/activeBook-core/styles'),
-      },
     },
   };
 });

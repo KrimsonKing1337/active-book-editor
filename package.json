@@ -17,7 +17,7 @@
     "core:package": "node scripts/packageCore.mjs"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.19.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.21.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
