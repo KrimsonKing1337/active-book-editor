@@ -13,8 +13,12 @@
     "build:editor": "npm run build -w @active-book/editor",
     "build:book": "npm run build -w @active-book/book-builder",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint:ts": "eslint \"./src/**/*.{ts,tsx}\" --fix --quiet",
-    "lint:css": "stylelint \"src/**/*.scss\" --fix",
+    "lint": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --quiet && stylelint \"{apps,packages}/**/*.scss\"",
+    "lint:ts": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
+    "lint:css": "stylelint \"{apps,packages}/**/*.scss\" --fix",
+    "lint-staged": "lint-staged",
+    "pre-commit": "lint-staged",
+    "prepare": "husky",
     "check": "npm run typecheck && npm run lint",
     "core:package": "node scripts/packageCore.mjs"
   },
@@ -35,6 +39,23 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.0"
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1",
+    "stylelint-config-standard-scss": "^16.0.0",
+    "stylelint-declaration-block-no-ignored-properties": "^2.8.0",
+    "stylelint-order": "^7.0.0",
+    "stylelint-scss": "^6.13.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix",
+    "*.scss": "stylelint --fix"
   }
 }
