@@ -13,5 +13,10 @@ export const TextInput = ({
 }: ComponentPropsWithRef<'input'>) => {
   const inputClassNames = classNames(sharedStyles.Control, styles.Input, className);
 
-  return <input {...props} ref={ref} type={type} className={inputClassNames} />;
+  return <input
+    {...props}
+    ref={ref}
+    type={type}
+    className={inputClassNames}
+  />;
 };

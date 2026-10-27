@@ -2,15 +2,17 @@ import ReactDOM from 'react-dom/client';
 
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
-import { StoreProvider } from 'activeBook-core/store';
 import { Page0 } from 'activeBook-core/pages/Page0';
+
+import { StoreProvider } from 'activeBook-core/store';
+
 import { AppWrapper } from 'activeBook-core/components';
+
+import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
 import 'activeBook-core/styles/styles.scss';
 
 import type { BookDocument } from '@types';
-
-import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
 import { BookPage, StartReading } from '@components';
 

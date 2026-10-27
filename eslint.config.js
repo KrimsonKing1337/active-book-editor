@@ -98,7 +98,11 @@ export default defineConfig([
             { pattern: 'activeBook-core/utils{,/**}', group: 'internal', position: 'before' },
             { pattern: 'activeBook-core{,/**}', group: 'internal', position: 'before' },
 
+            { pattern: '@active-book/editor{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@active-book/book-builder{,/**}', group: 'internal', position: 'after' },
+
             { pattern: '@root{,/**}', group: 'internal', position: 'after' },
+            { pattern: '@types{,/**}', group: 'internal', position: 'after' },
             { pattern: '@build{,/**}', group: 'internal', position: 'after' },
             { pattern: '@project{,/**}', group: 'internal', position: 'after' },
             { pattern: '@hooks{,/**}', group: 'internal', position: 'after' },

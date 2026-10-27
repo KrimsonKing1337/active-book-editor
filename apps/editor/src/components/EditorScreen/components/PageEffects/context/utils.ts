@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react';
-
 import type { Editor } from '@tiptap/core';
 
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';

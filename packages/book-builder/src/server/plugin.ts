@@ -165,7 +165,7 @@ const handleCompleteRequest = async (
 };
 
 const withErrorHandling = (
-  handler: (req: IncomingMessage, res: ServerResponse) => Promise<void>
+  handler: (req: IncomingMessage, res: ServerResponse) => Promise<void>,
 ) => {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     try {

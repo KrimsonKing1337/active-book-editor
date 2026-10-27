@@ -1,7 +1,8 @@
+import { resolveSideOptions } from '@active-book/book-builder/effects';
+
 import type { SideEffectDraft } from '../../@types';
 import type { SideItemPreviews, SideStylePreviews } from '../../context';
 
-import { resolveSideOptions } from '@active-book/book-builder/effects';
 
 import { getSidePreviewKey, getSideStylePreviewKey } from '../../context';
 

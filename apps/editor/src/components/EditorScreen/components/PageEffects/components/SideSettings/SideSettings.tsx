@@ -2,10 +2,11 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
+import { useCustomComponents } from '@project/customComponentRegistry';
+
 import type { SideEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
 
-import { useCustomComponents } from '@project/customComponentRegistry';
 
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
 

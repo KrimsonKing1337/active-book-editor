@@ -4,8 +4,10 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 
-import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import type { BookComponentProps } from '@active-book/types';
+
+import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
+
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 

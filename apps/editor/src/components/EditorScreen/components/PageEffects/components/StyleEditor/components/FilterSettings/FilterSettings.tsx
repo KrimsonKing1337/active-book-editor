@@ -1,10 +1,11 @@
+import { useEffect, useState } from 'react';
+
 import type {
   FilterFunction,
   FilterOperation,
   FilterProperty,
 } from '@active-book/book-builder/effects';
 
-import { useEffect, useState } from 'react';
 
 import { resolveStyle } from '@active-book/book-builder/effects';
 
