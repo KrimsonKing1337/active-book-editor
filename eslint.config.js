@@ -67,7 +67,7 @@ export default defineConfig([
         version: 'detect',
       },
       'import/internal-regex':
-        '^(@root|@build|@project|@hooks|@components|@utils|assets|styles|activeBook-core)(/.*)?$',
+        '^(@root|@build|@project|@hooks|@components|@utils|activeBook-core)(/.*)?$',
     },
 
     rules: {
@@ -104,8 +104,6 @@ export default defineConfig([
             { pattern: '@hooks{,/**}', group: 'internal', position: 'after' },
             { pattern: '@components{,/**}', group: 'internal', position: 'after' },
             { pattern: '@utils{,/**}', group: 'internal', position: 'after' },
-            { pattern: 'assets{,/**}', group: 'internal', position: 'after' },
-            { pattern: 'styles{,/**}', group: 'internal', position: 'after' },
           ],
 
           pathGroupsExcludedImportTypes: ['builtin'],
