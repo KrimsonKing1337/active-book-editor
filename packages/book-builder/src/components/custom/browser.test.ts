@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { gzipSync } from 'node:zlib';
-import { describe, it } from 'node:test';
+
+import { describe, it } from 'vitest';
 
 import { inspectBrowserArchive } from './browser';
 
