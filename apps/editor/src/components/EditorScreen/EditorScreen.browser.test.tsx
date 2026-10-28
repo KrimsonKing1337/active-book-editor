@@ -154,12 +154,12 @@ test('deletes only the selected effect and supports undo and redo through the ed
   expect(deleted.background).toEqual(composed.background);
   expect(document.querySelector<HTMLElement>(deletedSideSelector)).toBeNull();
 
-  await historyShortcut(false);
+  await historyShortcut('undo');
   const undone = await project.save();
 
   expect(undone).toEqual(composed);
   await checkComposition();
-  await historyShortcut(true);
+  await historyShortcut('redo');
   const redone = await project.save();
 
   expect(redone).toEqual(deleted);
