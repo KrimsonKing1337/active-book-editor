@@ -67,6 +67,7 @@ export const createViteConfig = ({
 
     build: {
       outDir,
+      assetsDir: 'app',
       emptyOutDir: true,
     },
   };
