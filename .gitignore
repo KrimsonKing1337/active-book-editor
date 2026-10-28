@@ -5,3 +5,9 @@ dist-book/
 .active-book-temp/
 .DS_Store
 .idea
+
+coverage/
+test-results/
+**/__screenshots__/
+
+.vitest-attachments/
