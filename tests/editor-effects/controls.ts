@@ -89,8 +89,6 @@ export const configureShadow = async () => {
 export const historyShortcut = async (action: 'undo' | 'redo') => {
   const editorElement = document.querySelector('.tiptap');
 
-  expect(editorElement).not.toBeNull();
-
   if (!editorElement) {
     throw new Error('Элемент редактора TipTap не найден');
   }
