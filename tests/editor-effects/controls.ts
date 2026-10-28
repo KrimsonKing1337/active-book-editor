@@ -86,7 +86,7 @@ export const configureShadow = async () => {
   await addOpacity('0.75');
 };
 
-export const historyShortcut = async (shouldRedo: boolean) => {
+export const historyShortcut = async (action: 'undo' | 'redo') => {
   const editorElement = document.querySelector('.tiptap');
 
   expect(editorElement).not.toBeNull();
@@ -97,7 +97,7 @@ export const historyShortcut = async (shouldRedo: boolean) => {
 
   await page.elementLocator(editorElement).click();
 
-  const keyboardShortcut = shouldRedo
+  const keyboardShortcut = action === 'redo'
     ? '{Control>}{Shift>}z{/Shift}{/Control}'
     : '{Control>}z{/Control}';
 
