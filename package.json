@@ -11,7 +11,7 @@
     "dev": "npm run dev -w @active-book/editor",
     "preview": "vite preview --outDir dist-book",
     "build:editor": "npm run build -w @active-book/editor",
-    "build:book": "npm run build -w @active-book/book-builder",
+    "build:book": "npm run build -w @active-book/book-builder -- \"../../../books_editor/new\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint:ts": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
     "lint:css": "stylelint \"{apps,packages}/**/*.scss\" --fix",
@@ -22,7 +22,7 @@
     "core:package": "node scripts/packageCore.mjs"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.23.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.24.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
