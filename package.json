@@ -13,6 +13,7 @@
     "build:editor": "npm run build -w @active-book/editor",
     "build:book": "npm run build -w @active-book/book-builder -- \"../../../books_editor/new\"",
     "typecheck": "npm run typecheck --workspaces --if-present && npm run typecheck:test",
+    "typecheck:test": "tsc -p tsconfig.test.json",
     "lint:ts": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
     "lint:css": "stylelint \"{apps,packages}/**/*.scss\" --fix",
     "lint-staged": "lint-staged",
@@ -25,11 +26,10 @@
     "test:component": "vitest run --configLoader runner --project component",
     "test:browser": "vitest run --configLoader runner --project browser",
     "test:coverage": "vitest run --configLoader runner --coverage",
-    "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
-    "typecheck:test": "tsc -p tsconfig.test.json"
+    "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.25.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.26.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
