@@ -69,6 +69,18 @@ export const createViteConfig = ({
       outDir,
       assetsDir: 'app',
       emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          assetFileNames: ({ names }) => {
+            const [name = ''] = names;
+            const isFont = /\.(eot|otf|ttf|woff2?)$/i.test(name);
+
+            return isFont
+              ? 'app/fonts/[name]-[hash][extname]'
+              : 'app/[name]-[hash][extname]';
+          },
+        },
+      },
     },
   };
 };
