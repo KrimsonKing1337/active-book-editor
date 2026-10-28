@@ -1,4 +1,4 @@
-import { type ChangeEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, useState } from 'react';
 
 import { useSelector } from 'activeBook-core/store';
 import { configSelectors } from 'activeBook-core/store/config';
@@ -53,16 +53,7 @@ export const VibrationSettings = ({
   } else if (idAlreadyExists) {
     idError = 'Такой ID уже существует';
   }
-  const canPreview = Boolean(isVibrationAvailable && vibrationIsEnabled && options.duration > 0);
-
-  // A vibration started in the preview should stop when the settings dialog is closed.
-  useEffect(() => {
-    return () => {
-      if (typeof navigator.vibrate === 'function') {
-        navigator.vibrate(0);
-      }
-    };
-  }, []);
+  const canPreview = options.duration > 0;
 
   const updateId = () => {
     if (idError || idDraft === effect.id) {
@@ -142,14 +133,14 @@ export const VibrationSettings = ({
     vibrationOn(options.duration);
   };
 
-  let previewDescription = 'Вибрация недоступна в этом браузере или на этом устройстве.';
+  let previewDescription = 'Проверка запускается сразу, без задержки.';
 
-  if (isVibrationAvailable && !vibrationIsEnabled) {
-    previewDescription = 'Вибрация отключена в настройках читателя.';
-  } else if (canPreview) {
-    previewDescription = 'Проверка запускается сразу, без задержки.';
-  } else if (isVibrationAvailable) {
+  if (!canPreview) {
     previewDescription = 'Установите длительность больше нуля для проверки.';
+  } else if (!vibrationIsEnabled) {
+    previewDescription = 'Аппаратная вибрация отключена. Будет показана экранная имитация.';
+  } else if (!isVibrationAvailable) {
+    previewDescription = 'Устройство не поддерживает вибрацию. Будет показана экранная имитация.';
   }
 
   const vibrationEffectIdAriaDescribedBy = idError ? 'vibration-effect-id-error' : undefined;
