@@ -11,35 +11,35 @@ import book from '../fixtures/effects-book/book.json?raw';
 import herb from '../fixtures/effects-book/assets/herb.svg?raw';
 
 const writeFile = async (directory: FileSystemDirectoryHandle, name: string, content: string) => {
-  const handle = await directory.getFileHandle(name, { create: true });
-  const stream = await handle.createWritable();
+  const fileHandle = await directory.getFileHandle(name, { create: true });
+  const writableStream = await fileHandle.createWritable();
 
-  await stream.write(content);
-  await stream.close();
+  await writableStream.write(content);
+  await writableStream.close();
 };
 
 export const createProject = async () => {
   await clearLastProjectHandle();
   localStorage.clear();
 
-  const root = await navigator.storage.getDirectory();
-  const name = `effects-${crypto.randomUUID()}`;
-  const directory = await root.getDirectoryHandle(name, { create: true });
-  const assets = await directory.getDirectoryHandle('assets', { create: true });
+  const storageRoot = await navigator.storage.getDirectory();
+  const projectName = `effects-${crypto.randomUUID()}`;
+  const projectDirectory = await storageRoot.getDirectoryHandle(projectName, { create: true });
+  const assetsDirectory = await projectDirectory.getDirectoryHandle('assets', { create: true });
 
-  await writeFile(directory, 'book.json', book);
-  await writeFile(directory, 'package.json', '{"private":true,"dependencies":{}}');
-  await writeFile(assets, 'herb.svg', herb);
+  await writeFile(projectDirectory, 'book.json', book);
+  await writeFile(projectDirectory, 'package.json', '{"private":true,"dependencies":{}}');
+  await writeFile(assetsDirectory, 'herb.svg', herb);
 
   // Only the OS folder picker/confirmation are replaced. Storage and IndexedDB are real.
-  const pickDirectory = vi.fn(async () => directory);
+  const pickDirectory = vi.fn(async () => projectDirectory);
 
   vi.stubGlobal('showDirectoryPicker', pickDirectory);
   vi.spyOn(window, 'confirm').mockReturnValue(true);
 
   const readDocument = async (): Promise<JSONContent> => {
-    const handle = await directory.getFileHandle('book.json');
-    const file = await handle.getFile();
+    const fileHandle = await projectDirectory.getFileHandle('book.json');
+    const file = await fileHandle.getFile();
 
     return JSON.parse(await file.text());
   };
@@ -58,8 +58,10 @@ export const createProject = async () => {
       await expect.element(page.getByRole('dialog', { name: 'Эффекты страницы' })).not.toBeInTheDocument();
     }
 
-    await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
-    await expect.element(page.getByRole('button', { name: 'Сохранить', exact: true })).toBeEnabled();
+    const saveButton = page.getByRole('button', { name: 'Сохранить', exact: true });
+
+    await saveButton.click();
+    await expect.element(saveButton).toBeEnabled();
     await expect.element(page.getByText('Сохранено', { exact: true })).toBeVisible();
 
     return readEffects();
@@ -67,8 +69,16 @@ export const createProject = async () => {
 
   const dispose = async () => {
     await clearLastProjectHandle();
-    await root.removeEntry(name, { recursive: true });
+    await storageRoot.removeEntry(projectName, { recursive: true });
   };
 
-  return { name, directory, pickDirectory, readDocument, readEffects, save, dispose };
+  return {
+    name: projectName,
+    directory: projectDirectory,
+    pickDirectory,
+    readDocument,
+    readEffects,
+    save,
+    dispose,
+  };
 };
