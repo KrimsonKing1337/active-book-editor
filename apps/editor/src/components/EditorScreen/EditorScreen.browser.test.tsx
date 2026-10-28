@@ -46,8 +46,18 @@ const addComposition = async () => {
 
   expect(withBackground.background?.[0]).toEqual(original.background?.[0]);
   expect(withBackground.background?.[1].options).toMatchObject({
-    style: { backgroundColor: '#204060ff', zIndex: 1, opacity: '0.6' },
-    styleFilters: [{ property: 'filter', function: 'brightness', value: '120%' }],
+    style: {
+      backgroundColor: '#204060ff',
+      zIndex: 1,
+      opacity: '0.6',
+    },
+    styleFilters: [
+      {
+        property: 'filter',
+        function: 'brightness',
+        value: '120%',
+      },
+    ],
   });
 
   await addEffect('Side');
@@ -57,7 +67,11 @@ const addComposition = async () => {
   expect(composed.background).toEqual(withBackground.background);
   expect(composed.side?.[0].options.shadow).toMatchObject({
     thickness: 70,
-    style: { color: '#e08020ff', zIndex: 2, opacity: '0.75' },
+    style: {
+      color: '#e08020ff',
+      zIndex: 2,
+      opacity: '0.75',
+    },
   });
 
   return composed;
@@ -74,34 +88,49 @@ const checkComposition = async (backgroundColor = 'rgb(32, 64, 96)') => {
   const side = document.querySelector<HTMLElement>(sideSelector);
 
   await expect.element(background).toHaveStyle({
-    backgroundColor, opacity: '0.6', zIndex: '1', filter: 'brightness(1.2)',
+    backgroundColor,
+    opacity: '0.6',
+    zIndex: '1',
+    filter: 'brightness(1.2)',
   });
   await expect.element(side).toHaveStyle({ zIndex: '2' });
   const shadow = side?.querySelector<HTMLElement>('[class*="SideShadow-module__SideShadow"]') ?? null;
 
-  await expect.element(shadow).toHaveStyle({ color: 'rgb(224, 128, 32)', opacity: '0.75' });
-  expect(getComputedStyle(shadow!).boxShadow).toContain('70px');
-  const getImage = () => document.querySelector<HTMLImageElement>('[data-effect-id="fixture-image"] img');
+  if (!shadow) {
+    throw new Error('Элемент боковой тени не найден');
+  }
 
-  await expect.poll(() => getImage()?.naturalWidth).toBeGreaterThan(0);
-  const image = getImage();
-  await expect.element(image).toHaveStyle({ opacity: '0.4' });
+  await expect.element(shadow).toHaveStyle({
+    color: 'rgb(224, 128, 32)',
+    opacity: '0.75',
+  });
+  expect(getComputedStyle(shadow).boxShadow).toContain('70px');
+
+  const getFixtureImage = () => {
+    return document.querySelector<HTMLImageElement>('[data-effect-id="fixture-image"] img');
+  };
+
+  await expect.poll(() => getFixtureImage()?.naturalWidth).toBeGreaterThan(0);
+
+  const fixtureImage = getFixtureImage();
+
+  await expect.element(fixtureImage).toHaveStyle({ opacity: '0.4' });
 };
 
 test('edits independent effects and restores their data and rendered composition', async () => {
-  const original = await addComposition();
+  const originalComposition = await addComposition();
 
   await selectEffect('Тестовый фон');
   await page.getByText('Фон', { exact: true }).click();
   await setColor('#305070ff');
   const composed = await project.save();
 
-  expect(composed.side).toEqual(original.side);
-  expect(composed.background?.[0]).toEqual(original.background?.[0]);
+  expect(composed.side).toEqual(originalComposition.side);
+  expect(composed.background?.[0]).toEqual(originalComposition.background?.[0]);
   await checkComposition('rgb(48, 80, 112)');
-  const canvas = document.querySelector<HTMLElement>('#page-wrapper')!;
+  const pageWrapper = document.querySelector<HTMLElement>('#page-wrapper');
 
-  await expect.element(canvas).toMatchScreenshot('effects-composition');
+  await expect.element(pageWrapper).toMatchScreenshot('effects-composition');
   cleanup();
   render(<EditorScreen />);
 
@@ -114,6 +143,7 @@ test('edits independent effects and restores their data and rendered composition
 
 test('deletes only the selected effect and supports undo and redo through the editor', async () => {
   const composed = await addComposition();
+  const deletedSideSelector = `[data-effect-id="${composed.side?.[0].id}"]`;
 
   await selectEffect('Тестовая тень');
   await page.getByRole('button', { name: 'Удалить эффект', exact: true }).click();
@@ -122,7 +152,7 @@ test('deletes only the selected effect and supports undo and redo through the ed
   expect(window.confirm).toHaveBeenCalledWith('Удалить эффект «Тестовая тень»?');
   expect(deleted.side).toEqual([]);
   expect(deleted.background).toEqual(composed.background);
-  expect(document.querySelector<HTMLElement>(`[data-effect-id="${composed.side?.[0].id}"]`)).toBeNull();
+  expect(document.querySelector<HTMLElement>(deletedSideSelector)).toBeNull();
 
   await historyShortcut(false);
   const undone = await project.save();
@@ -133,5 +163,5 @@ test('deletes only the selected effect and supports undo and redo through the ed
   const redone = await project.save();
 
   expect(redone).toEqual(deleted);
-  expect(document.querySelector<HTMLElement>(`[data-effect-id="${composed.side?.[0].id}"]`)).toBeNull();
+  expect(document.querySelector<HTMLElement>(deletedSideSelector)).toBeNull();
 }, 60_000);
