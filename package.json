@@ -25,6 +25,7 @@
     "test:unit": "vitest run --configLoader runner --project unit",
     "test:component": "vitest run --configLoader runner --project component",
     "test:browser": "vitest run --configLoader runner --project browser",
+    "test:browser:preview": "vitest run --configLoader runner --mode preview --browser.ui=false --browser.headless=false",
     "test:coverage": "vitest run --configLoader runner --coverage",
     "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml"
   },
