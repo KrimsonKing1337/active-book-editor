@@ -3,7 +3,7 @@ import type { Locator } from 'vitest/browser';
 import { expect } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 
-const fillMasked = async (input: Locator, value: string) => {
+const fillMaskedInput = async (input: Locator, value: string) => {
   await input.click();
   await userEvent.keyboard('{Control>}a{/Control}{Backspace}');
   // The mask updates its selection on the next frame, like a human typing.
@@ -20,9 +20,9 @@ export const openEffects = async () => {
 export const addEffect = async (category: 'Background' | 'Side') => {
   await openEffects();
   await page.getByRole('button', { name: new RegExp(`Категория ${category} `) }).click();
-  const label = category === 'Background' ? 'Добавить фон' : 'Добавить боковую тень';
+  const effectLabel = category === 'Background' ? 'Добавить фон' : 'Добавить боковую тень';
 
-  await page.getByRole('button', { name: label, exact: true }).click();
+  await page.getByRole('button', { name: effectLabel, exact: true }).click();
 };
 
 export const selectEffect = async (name: string) => {
@@ -32,9 +32,10 @@ export const selectEffect = async (name: string) => {
 };
 
 export const setColor = async (value: string) => {
-  await fillMasked(page.getByRole('textbox', { name: 'HEX', exact: true }), value.replace('#', ''));
-  await page.getByRole('group', { name: 'Ручной ввод' })
-    .getByRole('button', { name: 'Применить', exact: true }).click();
+  await fillMaskedInput(page.getByRole('textbox', { name: 'HEX', exact: true }), value.replace('#', ''));
+  const manualColorControls = page.getByRole('group', { name: 'Ручной ввод' });
+
+  await manualColorControls.getByRole('button', { name: 'Применить', exact: true }).click();
 };
 
 export const addOpacity = async (value: string) => {
@@ -42,7 +43,7 @@ export const addOpacity = async (value: string) => {
   await page.getByRole('button', { name: '+ Добавить свойство', exact: true }).click();
   await page.getByRole('combobox', { name: 'CSS-свойство' }).click();
   await page.getByRole('option', { name: 'opacity', exact: true }).click();
-  await fillMasked(page.getByRole('textbox', { name: 'opacity', exact: true }), value);
+  await fillMaskedInput(page.getByRole('textbox', { name: 'opacity', exact: true }), value);
   await page.getByRole('button', { name: 'Применить свойства', exact: true }).click();
 };
 
@@ -53,14 +54,16 @@ export const addFilter = async () => {
   await page.getByRole('option', { name: 'filter', exact: true }).click();
   await page.getByRole('combobox', { name: 'Функция', exact: true }).click();
   await page.getByRole('option', { name: 'brightness', exact: true }).click();
-  await fillMasked(page.getByRole('textbox', { name: 'Значение brightness', exact: true }), '80');
+  const brightnessInput = page.getByRole('textbox', { name: 'Значение brightness', exact: true });
+
+  await fillMaskedInput(brightnessInput, '80');
   await page.getByRole('button', { name: 'Применить фильтры', exact: true }).click();
-  const background = document.querySelector<HTMLElement>(
+  const backgroundEffect = document.querySelector<HTMLElement>(
     '#background-effects [data-effect-id]:not([data-effect-id="fixture-image"])',
   );
 
-  await expect.element(background).toHaveStyle({ filter: 'brightness(0.8)' });
-  await fillMasked(page.getByRole('textbox', { name: 'Значение brightness', exact: true }), '120');
+  await expect.element(backgroundEffect).toHaveStyle({ filter: 'brightness(0.8)' });
+  await fillMaskedInput(brightnessInput, '120');
   await page.getByRole('button', { name: 'Применить фильтры', exact: true }).click();
   await page.getByText('Фильтры', { exact: true }).click();
 };
@@ -76,19 +79,27 @@ export const configureBackground = async () => {
 
 export const configureShadow = async () => {
   await page.getByRole('textbox', { name: 'Название эффекта', exact: true }).fill('Тестовая тень');
-  await fillMasked(page.getByRole('textbox', { name: 'Толщина тени (px)', exact: true }), '70');
+  await fillMaskedInput(page.getByRole('textbox', { name: 'Толщина тени (px)', exact: true }), '70');
   await page.getByText('Стили тени', { exact: true }).click();
   await setColor('#e08020ff');
   await page.getByRole('button', { name: 'На слой вперёд', exact: true }).click();
   await addOpacity('0.75');
 };
 
-export const historyShortcut = async (redo: boolean) => {
-  const editor = document.querySelector('.tiptap');
+export const historyShortcut = async (shouldRedo: boolean) => {
+  const editorElement = document.querySelector('.tiptap');
 
-  expect(editor).not.toBeNull();
-  await page.elementLocator(editor!).click();
-  const key = redo ? '{Control>}{Shift>}z{/Shift}{/Control}' : '{Control>}z{/Control}';
+  expect(editorElement).not.toBeNull();
 
-  await userEvent.keyboard(key);
+  if (!editorElement) {
+    throw new Error('Элемент редактора TipTap не найден');
+  }
+
+  await page.elementLocator(editorElement).click();
+
+  const keyboardShortcut = shouldRedo
+    ? '{Control>}{Shift>}z{/Shift}{/Control}'
+    : '{Control>}z{/Control}';
+
+  await userEvent.keyboard(keyboardShortcut);
 };
