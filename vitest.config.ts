@@ -1,4 +1,3 @@
-
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -64,9 +63,9 @@ export default defineConfig((env) => {
               expect: {
                 toMatchScreenshot: {
                   resolveScreenshotPath: ({ root, testFileName, arg, browserName, platform, ext }) => {
-                    const lastPart = `${arg}-${browserName}-${platform}${ext}`;
+                    const screenshotFileName = `${arg}-${browserName}-${platform}${ext}`;
 
-                    return path.join(root, 'tests/screenshots', testFileName, lastPart);
+                    return path.join(root, 'tests/screenshots', testFileName, screenshotFileName);
                   },
                 },
               },
