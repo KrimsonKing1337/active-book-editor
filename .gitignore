@@ -9,3 +9,5 @@ dist-book/
 coverage/
 test-results/
 **/__screenshots__/
+
+.vitest-attachments/

@@ -1,4 +1,8 @@
+
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import type { BrowserConfigOptions } from 'vitest/node';
 
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig, mergeConfig } from 'vitest/config';
@@ -49,7 +53,14 @@ export default defineConfig((env) => mergeConfig(editorConfig(env), {
               },
             }),
             instances: [{ browser: 'chromium' }],
-          },
+            expect: {
+              toMatchScreenshot: {
+                resolveScreenshotPath: ({ root, testFileName, arg, browserName, platform, ext }) => {
+                  return path.join(root, 'tests/screenshots', testFileName, `${arg}-${browserName}-${platform}${ext}`);
+                },
+              },
+            },
+          } satisfies BrowserConfigOptions,
         },
       },
     ],

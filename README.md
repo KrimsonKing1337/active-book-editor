@@ -155,3 +155,12 @@ Button behavior/layout (browser). Verified on Linux with Node 24.19.0:
 42 unit tests, 2 component tests and 2 browser tests passed in separate runs.
 Windows commands are provided for reproduction; Windows execution was not
 available in this environment.
+
+### Editor effects integration
+
+The browser suite now covers effect editing, saved data and computed styles,
+project restoration, deletion/undo/redo and screenshot comparison in the real
+editor. See [the integration test guide](tests/editor-effects/README.md) for
+scenarios, OS-dialog boundaries, local-core installation and Windows screenshot
+reference commands. The local test book and 1.8 KB graphic live in
+`tests/fixtures/effects-book/`.
