@@ -46,3 +46,8 @@ test('clamps overflowing RGB and alpha values after editing', () => {
   assert.equal(normalizeRgbaChannel('', 0), '0');
   assert.equal(normalizeRgbaChannel('', 3), '0');
 });
+
+test('normalizes CSS RGBA values for the picker with rounding and channel limits', () => {
+  assert.equal(getHexColor('rgba(300, 12.6, 0, 0.5)'), '#ff0d0080');
+  assert.deepEqual(getRgbaChannels('rgba(300, 12.6, 0, 0.5)'), ['255', '13', '0', '50']);
+});

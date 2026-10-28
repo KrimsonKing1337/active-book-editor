@@ -43,6 +43,7 @@ export default defineConfig((env) => mergeConfig(editorConfig(env), {
             enabled: true,
             headless: true,
             provider: playwright({
+              actionTimeout: 10_000,
               launchOptions: {
                 executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
               },

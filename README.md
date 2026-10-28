@@ -106,3 +106,52 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:browser
 The optional variable selects an existing Chromium executable; omit it to use
 Playwright's installed browser. The same variable works with `test`,
 `test:coverage` and `test:ci`. No browser path is hardcoded in the configuration.
+
+### Windows (PowerShell)
+
+Use Node.js 24.19.0 (the verified version; jsdom requires Node 24.15+ on the
+24.x line). Keep `activeBook-types`, `activeBook-react-core-next` and this
+repository in sibling directories. The editor still depends on a local core
+archive; it is not downloaded from npm. For an unchanged lockfile, provide the
+exact `activebook-react-core-next-0.0.25.tgz` at the path in `package.json`.
+
+If that exact archive is unavailable, first run `npm ci` in the types and core
+repositories, then run the existing `npm run core:package` from the editor root.
+That command builds a new core archive, increments its version, updates the
+editor dependency and installs it with a new lockfile integrity. This is a
+local dependency refresh, so expect manifest/lockfile changes in both repos;
+do not disable integrity checks or rename a different archive to version 0.0.25.
+
+Once the local core dependency is available, run from the editor root:
+
+```powershell
+npm ci
+npx playwright install chromium
+npm run test:unit
+npm run test:component
+npm run test:browser
+npm run typecheck
+```
+
+Playwright installs its own Chromium on Windows; no executable path override is
+normally needed. If using an existing Chromium, set the optional variable in
+PowerShell syntax (replace the example path with your actual executable):
+
+```powershell
+$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = 'C:\path\to\chrome.exe'
+npm run test:browser
+Remove-Item Env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+```
+
+To verify the real process launch, temporarily set `$env:DEBUG = 'pw:browser'`,
+run `npm run test:browser`, then `Remove-Item Env:DEBUG`. Playwright logs the
+executable and launched PID. The Button browser test also asserts Chromium's
+user agent, actual CSS layout and a trusted native click that does not submit
+its parent form. These checks intentionally fail in an emulated DOM.
+
+Infrastructure verification added just three scenarios: CSS RGBA conversion and
+clamping (unit), disabled/enabled Button interactions (component), and native
+Button behavior/layout (browser). Verified on Linux with Node 24.19.0:
+42 unit tests, 2 component tests and 2 browser tests passed in separate runs.
+Windows commands are provided for reproduction; Windows execution was not
+available in this environment.
