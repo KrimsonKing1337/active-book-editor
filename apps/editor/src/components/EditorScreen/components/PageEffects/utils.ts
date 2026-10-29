@@ -188,6 +188,9 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
     type: 'side',
     kind,
     slug,
-    options,
+    options: {
+      ...options,
+      layer: 'behind',
+    },
   };
 };

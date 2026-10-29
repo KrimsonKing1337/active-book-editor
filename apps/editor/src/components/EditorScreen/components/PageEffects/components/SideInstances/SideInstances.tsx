@@ -51,6 +51,7 @@ const SideInstance = ({
     <Side
       id={effect.id}
       kind={effect.kind}
+      layer={options.layer}
       shadow={options.shadow}
       text={options.text}
       frameMask={options.frameMask}

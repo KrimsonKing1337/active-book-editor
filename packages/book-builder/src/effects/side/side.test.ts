@@ -13,6 +13,7 @@ test('normalizes independent shadow, text and component effects', () => {
       type: 'side',
       kind: 'shadow',
       options: {
+        layer: 'above',
         shadow: {
           id: 'shadow-1',
           sides: ['left', 'right'],
@@ -48,6 +49,7 @@ test('normalizes independent shadow, text and component effects', () => {
   const result = normalizeSideEffects({ side });
 
   assert.equal(result.length, 3);
+  assert.equal(result[0].options.layer, 'above');
   assert.equal(result[0].options.shadow?.id, 'shadow-1');
   assert.deepEqual(result[0].options.shadow?.sides, ['left', 'right']);
   assert.equal(result[1].options.text?.id, 'text-1');
@@ -86,6 +88,7 @@ test('rejects legacy side groups and invalid independent text', () => {
 
 test('resolves custom side layer styles on the wrapper', () => {
   const result = resolveSideOptions({
+    layer: 'above',
     frameMask: {
       enabled: false,
       sides: ['right'],
@@ -102,6 +105,7 @@ test('resolves custom side layer styles on the wrapper', () => {
     }],
   });
 
+  assert.equal(result.layer, 'above');
   assert.deepEqual(result.frameMask, {
     enabled: false,
     sides: ['right'],

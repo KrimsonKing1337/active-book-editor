@@ -295,6 +295,16 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     onUpdate(effect.id, updatedEffect);
   };
 
+  const handleLayerChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const layer = e.target.value;
+
+    if (layer !== 'above' && layer !== 'behind') {
+      return;
+    }
+
+    updateOptions({ layer });
+  };
+
   const handleComponentMaskEnabledChange = (e: ChangeEvent<HTMLInputElement>) => {
     updateOptions({
       frameMask: {
@@ -447,6 +457,22 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           defaultValue={effect.id}
           onBlur={handleIdChange}
         />
+      </label>
+
+      <label className={styles.Field}>
+        <span>
+          Расположение относительно текста
+        </span>
+
+        <Select value={effect.options.layer ?? 'behind'} onChange={handleLayerChange}>
+          <option value="behind">
+            Под текстом
+          </option>
+
+          <option value="above">
+            Поверх текста
+          </option>
+        </Select>
       </label>
 
       {effect.kind === 'shadow' && shadow && (
