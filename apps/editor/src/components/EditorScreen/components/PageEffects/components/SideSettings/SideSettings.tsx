@@ -429,7 +429,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           Название эффекта
         </span>
 
-        <TextInput maxLength={120} value={effect.slug} onChange={handleNameChange} />
+        <TextInput
+          maxLength={120}
+          value={effect.slug}
+          onChange={handleNameChange}
+        />
       </label>
 
       <label className={styles.Field}>
@@ -459,7 +463,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               Стороны
             </span>
 
-            <FrameSideCheckboxes selectedSides={shadow.sides} onChange={handleSideChange} />
+            <FrameSideCheckboxes
+              selectedSides={shadow.sides}
+              onChange={handleSideChange}
+            />
           </div>
 
           <label className={styles.Field}>
@@ -604,7 +611,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               Область отображения
             </span>
 
-            <Checkbox checked={componentMask.enabled} onChange={handleComponentMaskEnabledChange}>
+            <Checkbox
+              checked={componentMask.enabled}
+              onChange={handleComponentMaskEnabledChange}
+            >
               Ограничить рамкой
             </Checkbox>
 
