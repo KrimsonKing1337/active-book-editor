@@ -1,4 +1,3 @@
-
 import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
 import type { SideShadowPreset } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
