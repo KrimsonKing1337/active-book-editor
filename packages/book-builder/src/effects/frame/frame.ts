@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { FrameMask, SideLayer, SideShadowItem, SideTextItem } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameMask, FrameLayer, FrameShadowItem, FrameTextItem } from 'activeBook-core/hooks/effects/frame/@types';
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
@@ -12,32 +12,32 @@ type StyleFilters = {
   styleFilters?: FilterOperation[];
 };
 
-export type StyledSideShadow = SideShadowItem & StyleFilters;
-export type StyledSideText = SideTextItem & StyleFilters;
+export type StyledFrameShadow = FrameShadowItem & StyleFilters;
+export type StyledFrameText = FrameTextItem & StyleFilters;
 
-export const sideEffectKinds = ['shadow', 'text', 'component'] as const;
+export const frameEffectKinds = ['shadow', 'text', 'component'] as const;
 
-export type SideEffectKind = (typeof sideEffectKinds)[number];
+export type FrameEffectKind = (typeof frameEffectKinds)[number];
 
-export type SideOptions = {
-  layer?: SideLayer;
+export type FrameOptions = {
+  layer?: FrameLayer;
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
-  shadow?: StyledSideShadow;
-  text?: StyledSideText;
+  shadow?: StyledFrameShadow;
+  text?: StyledFrameText;
   component?: BackgroundComponentReference;
   frameMask?: FrameMask;
 };
 
-export type SideEffect = {
+export type FrameEffect = {
   id: string;
-  type: 'side';
-  kind: SideEffectKind;
+  type: 'frame';
+  kind: FrameEffectKind;
   slug: string;
-  options: SideOptions;
+  options: FrameOptions;
 };
 
-export type BuiltSideEffect = Omit<SideEffect, 'slug'>;
+export type BuiltFrameEffect = Omit<FrameEffect, 'slug'>;
 
 type StyledItem = {
   style?: CSSProperties;
@@ -59,7 +59,7 @@ const resolveItemStyle = <T extends StyledItem>(item: T) => {
   };
 };
 
-export const resolveSideOptions = (options: SideOptions) => {
+export const resolveFrameOptions = (options: FrameOptions) => {
   const {
     layer,
     shadow,
@@ -82,23 +82,23 @@ export const resolveSideOptions = (options: SideOptions) => {
   };
 };
 
-export const normalizeSideEffects = (value: unknown): SideEffect[] => {
+export const normalizeFrameEffects = (value: unknown): FrameEffect[] => {
   if (!isRecord(value)) {
     return [];
   }
 
-  if (!Array.isArray(value.side)) {
+  if (!Array.isArray(value.frame)) {
     return [];
   }
 
-  const result: SideEffect[] = [];
+  const result: FrameEffect[] = [];
 
-  for (const effectCur of value.side) {
+  for (const effectCur of value.frame) {
     if (!isRecord(effectCur)) {
       continue;
     }
 
-    const hasCorrectType = effectCur.type === 'side';
+    const hasCorrectType = effectCur.type === 'frame';
 
     if (!hasCorrectType) {
       continue;
@@ -116,7 +116,7 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
       continue;
     }
 
-    const kind = sideEffectKinds.find((cur) => cur === effectCur.kind);
+    const kind = frameEffectKinds.find((cur) => cur === effectCur.kind);
 
     if (!kind) {
       continue;
@@ -163,10 +163,10 @@ export const normalizeSideEffects = (value: unknown): SideEffect[] => {
 
     result.push({
       id,
-      type: 'side',
+      type: 'frame',
       kind,
       slug,
-      options: options as SideOptions,
+      options: options as FrameOptions,
     });
   }
 

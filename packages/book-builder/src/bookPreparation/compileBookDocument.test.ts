@@ -26,7 +26,7 @@ const flashlightOptions = {
   duration: 200,
   delay: 0,
   playOnLoad: true,
-  withSideShadow: true,
+  withFrameShadow: true,
   speed: 150,
 };
 
@@ -44,14 +44,14 @@ const backgroundOptions = {
   image: backgroundImage,
 };
 
-const sideText = {
+const frameText = {
   id: 'text-1',
   leftText: 'Лево',
   rightText: 'Право',
 };
 
-const sideOptions = {
-  text: sideText,
+const frameOptions = {
+  text: frameText,
 };
 
 test('compiles independent effects with kind and strips editor-only slug', () => {
@@ -63,7 +63,7 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
         vibration: [{ id: 'v', type: 'vibration', slug: 'Толчок', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', slug: 'Вспышка', options: flashlightOptions }],
         background: [{ id: 'b', type: 'background', kind: 'image', slug: 'Лес', options: backgroundOptions }],
-        side: [{ id: 's', type: 'side', kind: 'text', slug: 'Боковые', options: sideOptions }],
+        frame: [{ id: 's', type: 'frame', kind: 'text', slug: 'Рамочные', options: frameOptions }],
       },
     },
     content: [{ type: 'P' }],
@@ -79,7 +79,7 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
         vibration: [{ id: 'v', type: 'vibration', options: vibrationOptions }],
         flashlight: [{ id: 'f', type: 'flashlight', options: flashlightOptions }],
         background: [{ id: 'b', type: 'background', kind: 'image', options: backgroundOptions }],
-        side: [{ id: 's', type: 'side', kind: 'text', options: sideOptions }],
+        frame: [{ id: 's', type: 'frame', kind: 'text', options: frameOptions }],
       },
     },
     content: [{ type: 'P' }],
@@ -90,7 +90,7 @@ test('an empty document compiles with empty effect groups', () => {
   assert.deepEqual(compileBookDocument({ type: 'doc', content: [] }), {
     type: 'doc',
     attrs: {
-      pageEffects: { audio: [], vibration: [], flashlight: [], background: [], side: [] },
+      pageEffects: { audio: [], vibration: [], flashlight: [], background: [], frame: [] },
     },
     content: [],
   });

@@ -5,9 +5,9 @@ import { type ComponentType, createElement } from 'react';
 import type { BookRuntime } from '@active-book/types';
 
 import { PageWrapper } from 'activeBook-core/components';
-import { Audio, Vibration, Flashlight, Background, Side } from 'activeBook-core/components/ProxyHooks';
+import { Audio, Vibration, Flashlight, Background, Frame } from 'activeBook-core/components/ProxyHooks';
 
-import { resolveBackgroundOptions, resolveSideOptions } from '@active-book/book-builder/effects';
+import { resolveBackgroundOptions, resolveFrameOptions } from '@active-book/book-builder/effects';
 
 import type { BookDocument, CustomComponentType } from '@types';
 
@@ -19,7 +19,7 @@ import {
   getVibrationEffects,
   getFlashlightEffects,
   getBackgroundEffects,
-  getSideEffects,
+  getFrameEffects,
 } from './utils';
 
 type BookPageProps = {
@@ -35,7 +35,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
   const vibrationEffects = getVibrationEffects(document);
   const flashlightEffects = getFlashlightEffects(document);
   const backgroundEffects = getBackgroundEffects(document);
-  const sideEffects = getSideEffects(document);
+  const frameEffects = getFrameEffects(document);
 
   return (
     <PageWrapper>
@@ -74,10 +74,10 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
           );
         })}
 
-        {sideEffects.map((effectCur) => {
-          const { component, ...sideOptions } = effectCur.options;
+        {frameEffects.map((effectCur) => {
+          const { component, ...frameOptions } = effectCur.options;
 
-          const options = resolveSideOptions(sideOptions);
+          const options = resolveFrameOptions(frameOptions);
 
           let componentId = null;
 
@@ -102,7 +102,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
           }
 
           return (
-            <Side
+            <Frame
               key={effectCur.id}
               id={effectCur.id}
               kind={effectCur.kind}
