@@ -9,7 +9,6 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 import type { SideEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
 
-
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
 
 import { StyleEditor } from '../StyleEditor';
@@ -290,9 +289,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       return;
     }
 
-    const sides = isEnabled
-      ? [...shadow.sides, side]
-      : shadow.sides.filter((sideCur) => sideCur !== side);
+    let sides = [...shadow.sides, side];
+
+    if (!isEnabled) {
+      sides = shadow.sides.filter((cur) => cur !== side);
+    }
 
     updateShadow({ sides });
   };
@@ -351,8 +352,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   let colorDisabledReason: string | undefined;
 
   if (shadow) {
-    const selectedPreset = shadowPresets.find((current) => {
-      return current.value === (shadow.animation?.preset ?? 'none');
+    const selectedPreset = shadowPresets.find((presetCur) => {
+      const animationPreset = shadow.animation?.preset ?? 'none';
+
+      return presetCur.value === animationPreset;
     });
 
     const canChangeColor = selectedPreset?.canChangeColor ?? false;

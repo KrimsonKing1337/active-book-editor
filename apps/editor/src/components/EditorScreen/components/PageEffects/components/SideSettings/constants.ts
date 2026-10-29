@@ -1,7 +1,9 @@
 import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
-import type { SideShadowPreset } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
-import { SIDE_SHADOW_PRESETS } from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
+import {
+  type SideShadowPreset,
+  SIDE_SHADOW_PRESETS,
+} from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
 
 import type { SideOptions } from '@active-book/book-builder/effects';
 
@@ -24,7 +26,12 @@ export const positions: PositionOption[] = [
   { value: 'bottom-right', label: 'Снизу справа' },
 ];
 
-export const frameSides: { value: FrameSide; label: string }[] = [
+type FrameSides = {
+  value: FrameSide;
+  label: string;
+};
+
+export const frameSides: FrameSides[] = [
   { value: 'top', label: 'Сверху' },
   { value: 'right', label: 'Справа' },
   { value: 'bottom', label: 'Снизу' },
