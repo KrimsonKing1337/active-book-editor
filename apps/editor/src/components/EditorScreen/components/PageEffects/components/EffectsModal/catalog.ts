@@ -72,9 +72,9 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
     ],
   },
   {
-    value: 'side',
-    label: 'Side',
-    description: 'Боковые тени, текст и компоненты',
+    value: 'frame',
+    label: 'Frame',
+    description: 'Рамочные тени, текст и компоненты',
     groups: [
       {
         value: 'shadow',
@@ -112,7 +112,7 @@ export const getEffectGroup = (effect: EditorEffectDraft): string => {
     return effect.options.type;
   }
 
-  if (effect.type === 'background' || effect.type === 'side') {
+  if (effect.type === 'background' || effect.type === 'frame') {
     return effect.kind;
   }
 
@@ -195,7 +195,7 @@ export const getFilteredEffects = ({
       searchable.push(effectCur.options.image?.src);
       searchable.push(effectCur.options.video?.src);
       searchable.push(effectCur.options.component?.name);
-    } else if (effectCur.type === 'side') {
+    } else if (effectCur.type === 'frame') {
       searchable.push(effectCur.options.text?.leftText);
       searchable.push(effectCur.options.text?.rightText);
       searchable.push(effectCur.options.component?.name);

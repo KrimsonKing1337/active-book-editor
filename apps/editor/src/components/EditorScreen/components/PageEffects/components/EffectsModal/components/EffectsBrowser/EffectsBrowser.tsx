@@ -3,7 +3,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react';
 import type {
   AudioOptions,
   BackgroundEffectKind,
-  SideEffectKind,
+  FrameEffectKind,
 } from '@active-book/book-builder/effects';
 
 import type { EffectsModalProps } from '../../@types';
@@ -141,8 +141,8 @@ export const EffectsBrowser = ({
       onAddAudio(effectGroup as AudioOptions['type']);
     } else if (effectCategory === 'background') {
       onAddBackground(effectGroup as BackgroundEffectKind);
-    } else if (effectCategory === 'side') {
-      onAddSide(effectGroup as SideEffectKind);
+    } else if (effectCategory === 'frame') {
+      onAddSide(effectGroup as FrameEffectKind);
     } else if (effectCategory === 'vibration') {
       onAddVibration();
     } else if (effectCategory === 'flashlight') {

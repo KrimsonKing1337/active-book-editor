@@ -1,7 +1,7 @@
 import type {
   BackgroundEffectDraft,
   EditorEffectDraft,
-  SideEffectDraft,
+  FrameEffectDraft,
 } from '@components/EditorScreen/components/PageEffects/@types';
 
 type EffectTileContent = {
@@ -45,7 +45,7 @@ const getBackgroundEffectContent = (effect: BackgroundEffectDraft): EffectTileCo
   }
 };
 
-const getSideEffectContent = (effect: SideEffectDraft): EffectTileContent => {
+const getFrameEffectContent = (effect: FrameEffectDraft): EffectTileContent => {
   const { kind, options } = effect;
 
   switch (kind) {
@@ -86,15 +86,15 @@ export const getEffectTileContent = (effect: EditorEffectDraft): EffectTileConte
     case 'background':
       return getBackgroundEffectContent(effect);
 
-    case 'side':
-      return getSideEffectContent(effect);
+    case 'frame':
+      return getFrameEffectContent(effect);
 
     case 'flashlight': {
-      const sideShadowLabel = effect.options.withSideShadow ? 'да' : 'нет';
+      const frameShadowLabel = effect.options.withFrameShadow ? 'да' : 'нет';
 
       return {
         effectType: 'Flashlight',
-        effectDetails: `${effect.options.duration} мс · sideShadow: ${sideShadowLabel}`,
+        effectDetails: `${effect.options.duration} мс · frameShadow: ${frameShadowLabel}`,
       };
     }
   }
