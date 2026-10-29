@@ -1,3 +1,5 @@
+import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+
 import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
@@ -13,6 +15,7 @@ test('normalizes independent shadow, text and component effects', () => {
       options: {
         shadow: {
           id: 'shadow-1',
+          sides: ['left', 'right'],
           thickness: 40,
         },
       },
@@ -41,6 +44,7 @@ test('normalizes independent shadow, text and component effects', () => {
 
   assert.equal(result.length, 3);
   assert.equal(result[0].options.shadow?.id, 'shadow-1');
+  assert.deepEqual(result[0].options.shadow?.sides, ['left', 'right']);
   assert.equal(result[1].options.text?.id, 'text-1');
 });
 
@@ -93,6 +97,7 @@ test('resolves custom side layer styles on the wrapper', () => {
 test('resolves filters on one side effect at a time', () => {
   const shadow = {
     id: 'shadow',
+    sides: ['top', 'bottom'] as FrameSide[],
     style: {
       color: '#ff0000',
       zIndex: 4,
@@ -125,6 +130,7 @@ test('resolves filters on one side effect at a time', () => {
 
   assert.deepEqual(result.shadow, {
     id: 'shadow',
+    sides: ['top', 'bottom'],
     style: {
       color: '#ff0000',
       zIndex: 4,

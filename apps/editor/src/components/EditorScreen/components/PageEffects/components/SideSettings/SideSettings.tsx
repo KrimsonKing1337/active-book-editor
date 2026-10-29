@@ -1,5 +1,7 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
+import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
@@ -17,7 +19,7 @@ import { TextInput, Select, Checkbox, Button } from '../EffectControls';
 
 import { AnimationSettings } from './components/AnimationSettings';
 
-import { positions, shadowPresets, textPresets } from './constants';
+import { frameSides, positions, shadowPresets, textPresets } from './constants';
 
 import styles from './SideSettings.module.scss';
 
@@ -283,6 +285,18 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     updateShadow({ thickness: val });
   };
 
+  const handleSideChange = (side: FrameSide, isEnabled: boolean) => {
+    if (!shadow) {
+      return;
+    }
+
+    const sides = isEnabled
+      ? [...shadow.sides, side]
+      : shadow.sides.filter((sideCur) => sideCur !== side);
+
+    updateShadow({ sides });
+  };
+
   const handleShadowAnimationChange = (val: SideAnimation) => {
     updateShadow({ animation: val });
   };
@@ -379,6 +393,30 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             onHiddenChange={handleHiddenChange}
             onChange={updateShadow}
           />
+
+          <div className={styles.Field}>
+            <span>
+              Стороны
+            </span>
+
+            <div className={styles.Sides}>
+              {frameSides.map((sideCur) => {
+                const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+                  handleSideChange(sideCur.value, e.target.checked);
+                };
+
+                return (
+                  <Checkbox
+                    key={sideCur.value}
+                    checked={shadow.sides.includes(sideCur.value)}
+                    onChange={handleChange}
+                  >
+                    {sideCur.label}
+                  </Checkbox>
+                );
+              })}
+            </div>
+          </div>
 
           <label className={styles.Field}>
             <span>
