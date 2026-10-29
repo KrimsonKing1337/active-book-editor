@@ -26,6 +26,7 @@ type ShadowItem = NonNullable<SideOptions['shadow']>;
 type TextItem = NonNullable<SideOptions['text']>;
 type SideAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
+type Kind = 'shadow' | 'text' | 'component';
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
@@ -46,7 +47,6 @@ type LayoutSettingsProps = {
 const LayoutSettings = ({
   item,
   hidden,
-
   onChange,
   onHiddenChange,
 }: LayoutSettingsProps) => {
@@ -179,7 +179,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     }
   };
 
-  const getItemStyle = (kind: 'shadow' | 'text' | 'component', id: string, style?: CSSProperties) => {
+  const getItemStyle = (kind: Kind, id: string, style?: CSSProperties) => {
     const key = getSideStylePreviewKey({
       effectId: effect.id,
       kind,
@@ -189,7 +189,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     return sideStylePreviews[key] ?? style ?? {};
   };
 
-  const handleStylePreview = (kind: 'shadow' | 'text' | 'component', itemId: string, style: CSSProperties) => {
+  const handleStylePreview = (kind: Kind, itemId: string, style: CSSProperties) => {
     updateSideStylePreview({
       effectId: effect.id,
       kind,
@@ -198,7 +198,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     });
   };
 
-  const commitItemFilters = (kind: 'shadow' | 'text' | 'component', styleFilters: FilterOperation[]) => {
+  const commitItemFilters = (kind: Kind, styleFilters: FilterOperation[]) => {
     if (!flushStylePreviews()) {
       return;
     }

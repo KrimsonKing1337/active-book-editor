@@ -2,7 +2,6 @@ import type { ComponentType } from 'react';
 
 import { useMemo } from 'react';
 
-
 import type { BookComponentProps } from '@active-book/types';
 
 import { Side } from 'activeBook-core/components/ProxyHooks';
@@ -13,10 +12,6 @@ import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { SideEffectDraft } from '../../@types';
 import type { SideItemPreviews, SideStylePreviews } from '../../context';
-
-
-
-
 
 import { usePageEffects } from '../../context';
 
