@@ -30,7 +30,7 @@
     "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.28.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.29.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
-import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
@@ -26,6 +26,7 @@ type ShadowItem = NonNullable<SideOptions['shadow']>;
 type TextItem = NonNullable<SideOptions['text']>;
 type SideAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
+type Kind = 'shadow' | 'text' | 'component';
 
 type SideSettingsProps = {
   effect: SideEffectDraft;
@@ -46,7 +47,6 @@ type LayoutSettingsProps = {
 const LayoutSettings = ({
   item,
   hidden,
-
   onChange,
   onHiddenChange,
 }: LayoutSettingsProps) => {
@@ -121,6 +121,35 @@ const LayoutSettings = ({
   );
 };
 
+type FrameSideCheckboxesProps = {
+  selectedSides: FrameSide[];
+  onChange: (side: FrameSide, isEnabled: boolean) => void;
+};
+
+const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesProps) => {
+  const checkboxes = frameSides.map((sideCur) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      onChange(sideCur.value, e.target.checked);
+    };
+
+    return (
+      <Checkbox
+        key={sideCur.value}
+        checked={selectedSides.includes(sideCur.value)}
+        onChange={handleChange}
+      >
+        {sideCur.label}
+      </Checkbox>
+    );
+  });
+
+  return (
+    <div className={styles.Sides}>
+      {checkboxes}
+    </div>
+  );
+};
+
 export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
   const { definitions } = useCustomComponents();
 
@@ -134,6 +163,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   } = usePageEffects();
 
   const { shadow, text, component } = effect.options;
+  const componentMask: FrameMask = effect.options.frameMask ?? {
+    enabled: false,
+    sides: ['top', 'right', 'bottom', 'left'],
+  };
   const item = effect.kind === 'shadow' ? shadow : text;
   const previewKey = item ? getSidePreviewKey(effect.id, item.id) : '';
   const preview = sideItemPreviews[previewKey] ?? {};
@@ -175,7 +208,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     }
   };
 
-  const getItemStyle = (kind: 'shadow' | 'text' | 'component', id: string, style?: CSSProperties) => {
+  const getItemStyle = (kind: Kind, id: string, style?: CSSProperties) => {
     const key = getSideStylePreviewKey({
       effectId: effect.id,
       kind,
@@ -185,7 +218,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     return sideStylePreviews[key] ?? style ?? {};
   };
 
-  const handleStylePreview = (kind: 'shadow' | 'text' | 'component', itemId: string, style: CSSProperties) => {
+  const handleStylePreview = (kind: Kind, itemId: string, style: CSSProperties) => {
     updateSideStylePreview({
       effectId: effect.id,
       kind,
@@ -194,7 +227,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     });
   };
 
-  const commitItemFilters = (kind: 'shadow' | 'text' | 'component', styleFilters: FilterOperation[]) => {
+  const commitItemFilters = (kind: Kind, styleFilters: FilterOperation[]) => {
     if (!flushStylePreviews()) {
       return;
     }
@@ -260,6 +293,30 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     };
 
     onUpdate(effect.id, updatedEffect);
+  };
+
+  const handleComponentMaskEnabledChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateOptions({
+      frameMask: {
+        ...componentMask,
+        enabled: e.target.checked,
+      },
+    });
+  };
+
+  const handleComponentMaskSideChange = (side: FrameSide, isEnabled: boolean) => {
+    let sides = [...componentMask.sides, side];
+
+    if (!isEnabled) {
+      sides = componentMask.sides.filter((cur) => cur !== side);
+    }
+
+    updateOptions({
+      frameMask: {
+        ...componentMask,
+        sides,
+      },
+    });
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -372,7 +429,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
           Название эффекта
         </span>
 
-        <TextInput maxLength={120} value={effect.slug} onChange={handleNameChange} />
+        <TextInput
+          maxLength={120}
+          value={effect.slug}
+          onChange={handleNameChange}
+        />
       </label>
 
       <label className={styles.Field}>
@@ -402,23 +463,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               Стороны
             </span>
 
-            <div className={styles.Sides}>
-              {frameSides.map((sideCur) => {
-                const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-                  handleSideChange(sideCur.value, e.target.checked);
-                };
-
-                return (
-                  <Checkbox
-                    key={sideCur.value}
-                    checked={shadow.sides.includes(sideCur.value)}
-                    onChange={handleChange}
-                  >
-                    {sideCur.label}
-                  </Checkbox>
-                );
-              })}
-            </div>
+            <FrameSideCheckboxes
+              selectedSides={shadow.sides}
+              onChange={handleSideChange}
+            />
           </div>
 
           <label className={styles.Field}>
@@ -557,6 +605,26 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               );
             })}
           </Select>
+
+          <div className={styles.Field}>
+            <span>
+              Область отображения
+            </span>
+
+            <Checkbox
+              checked={componentMask.enabled}
+              onChange={handleComponentMaskEnabledChange}
+            >
+              Ограничить рамкой
+            </Checkbox>
+
+            {componentMask.enabled && (
+              <FrameSideCheckboxes
+                selectedSides={componentMask.sides}
+                onChange={handleComponentMaskSideChange}
+              />
+            )}
+          </div>
 
           <details>
             <summary>
