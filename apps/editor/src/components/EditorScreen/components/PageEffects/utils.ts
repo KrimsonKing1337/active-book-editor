@@ -1,7 +1,7 @@
 import type {
   BackgroundEffectKind,
   FilterOperation,
-  SideEffectKind,
+  FrameEffectKind,
 } from '@active-book/book-builder/effects';
 
 import type {
@@ -9,7 +9,7 @@ import type {
   VibrationEffectDraft,
   FlashlightEffectDraft,
   BackgroundEffectDraft,
-  SideEffectDraft,
+  FrameEffectDraft,
 } from './@types';
 
 export const createDefaultShadowFilters = (): FilterOperation[] => {
@@ -64,7 +64,7 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
     duration: 200,
     delay: 0,
     playOnLoad: true,
-    withSideShadow: true,
+    withFrameShadow: true,
     speed: 150,
   };
 
@@ -127,16 +127,16 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
   };
 };
 
-export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
+export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
   const id = crypto.randomUUID();
 
-  let slug = 'Новый боковой компонент';
-  let options: SideEffectDraft['options'] = {
+  let slug = 'Новый рамочный компонент';
+  let options: FrameEffectDraft['options'] = {
     style: { zIndex: 1 },
   };
 
   if (kind === 'shadow') {
-    slug = 'Новая боковая тень';
+    slug = 'Новая рамочная тень';
     options = {
       shadow: {
         id: crypto.randomUUID(),
@@ -163,7 +163,7 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
       },
     };
   } else if (kind === 'text') {
-    slug = 'Новый боковой текст';
+    slug = 'Новый рамочный текст';
     options = {
       text: {
         id: crypto.randomUUID(),
@@ -185,7 +185,7 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
 
   return {
     id,
-    type: 'side',
+    type: 'frame',
     kind,
     slug,
     options: {

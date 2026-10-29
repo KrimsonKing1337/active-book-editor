@@ -7,15 +7,15 @@ import type {
   BackgroundEffectDraft,
   EditorEffectDraft,
   FlashlightEffectDraft,
-  SideEffectDraft,
+  FrameEffectDraft,
   VibrationEffectDraft,
 } from '../@types';
 
 import type {
   BackgroundPreviewKeyParams,
   BackgroundStylePreviews,
-  SideStylePreviewKeyParams,
-  SideStylePreviews,
+  FrameStylePreviewKeyParams,
+  FrameStylePreviews,
 } from './@types';
 
 type GroupPageEffectsParams = {
@@ -26,18 +26,18 @@ type GroupPageEffectsParams = {
 type ApplyPendingStylePreviewsParams = {
   effects: EditorEffectDraft[];
   backgroundPreviews: BackgroundStylePreviews;
-  sidePreviews: SideStylePreviews;
+  framePreviews: FrameStylePreviews;
 };
 
-export const getSidePreviewKey = (effectId: string, itemId: string): string => {
+export const getFramePreviewKey = (effectId: string, itemId: string): string => {
   return JSON.stringify([effectId, itemId]);
 };
 
-export const getSideStylePreviewKey = ({
+export const getFrameStylePreviewKey = ({
   effectId,
   kind,
   itemId,
-}: SideStylePreviewKeyParams): string => {
+}: FrameStylePreviewKeyParams): string => {
   return JSON.stringify([effectId, kind, itemId]);
 };
 
@@ -60,14 +60,14 @@ export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
   const groupedBackground = grouped.background?.filter((cur) => Boolean(cur.kind)) ?? [];
-  const groupedSide = grouped.side?.filter((cur) => Boolean(cur.kind)) ?? [];
+  const groupedFrame = grouped.frame?.filter((cur) => Boolean(cur.kind)) ?? [];
 
   return [
     ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
     ...groupedBackground,
-    ...groupedSide,
+    ...groupedFrame,
   ];
 };
 
@@ -88,8 +88,8 @@ export const groupPageEffects = ({ effects, previous }: GroupPageEffectsParams):
     return effectCur.type === 'background';
   });
 
-  const side = effects.filter((effectCur): effectCur is SideEffectDraft => {
-    return effectCur.type === 'side';
+  const frame = effects.filter((effectCur): effectCur is FrameEffectDraft => {
+    return effectCur.type === 'frame';
   });
 
   return {
@@ -98,29 +98,29 @@ export const groupPageEffects = ({ effects, previous }: GroupPageEffectsParams):
     vibration,
     flashlight,
     background,
-    side,
+    frame,
   };
 };
 
-const applySideStylePreviews = (
-  effect: SideEffectDraft,
-  previews: SideStylePreviews,
-): SideEffectDraft => {
+const applyFrameStylePreviews = (
+  effect: FrameEffectDraft,
+  previews: FrameStylePreviews,
+): FrameEffectDraft => {
   const { shadow, text } = effect.options;
 
-  const shadowKey = shadow && getSideStylePreviewKey({
+  const shadowKey = shadow && getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'shadow',
     itemId: shadow.id,
   });
 
-  const textKey = text && getSideStylePreviewKey({
+  const textKey = text && getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'text',
     itemId: text.id,
   });
 
-  const componentKey = getSideStylePreviewKey({
+  const componentKey = getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'component',
     itemId: effect.id,
@@ -254,11 +254,11 @@ const applyBackgroundStylePreviews = (
 export const applyPendingStylePreviews = ({
   effects,
   backgroundPreviews,
-  sidePreviews,
+  framePreviews,
 }: ApplyPendingStylePreviewsParams): EditorEffectDraft[] => {
   return effects.map((effectCur) => {
-    if (effectCur.type === 'side') {
-      return applySideStylePreviews(effectCur, sidePreviews);
+    if (effectCur.type === 'frame') {
+      return applyFrameStylePreviews(effectCur, framePreviews);
     }
 
     if (effectCur.type === 'background') {

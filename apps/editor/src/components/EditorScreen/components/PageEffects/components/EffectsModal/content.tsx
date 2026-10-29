@@ -9,7 +9,7 @@ import {
   VibrationSettings,
   FlashlightSettings,
   BackgroundSettings,
-  SideSettings,
+  FrameSettings,
 } from '../';
 
 type ContentParamsEffectsModalPicked = Pick<
@@ -86,7 +86,7 @@ export const getModalContent = ({
     );
   } else if (selectedEffect?.type === 'flashlight') {
     modalTitle = 'Настройки Flashlight';
-    modalDescription = 'Вспышка доступна на поддерживаемых устройствах; sideShadow имитирует её на экране';
+    modalDescription = 'Вспышка доступна на поддерживаемых устройствах; frameShadow имитирует её на экране';
     notice = 'Для тестирования вспышки в редакторе нажмите «Проверить»';
 
     modalContent = (
@@ -132,19 +132,19 @@ export const getModalContent = ({
     );
   }
 
-  if (selectedEffect?.type === 'side') {
+  if (selectedEffect?.type === 'frame') {
     const kindLabel = {
-      shadow: 'боковой тени',
-      text: 'бокового текста',
-      component: 'бокового компонента',
+      shadow: 'рамочной тени',
+      text: 'рамочного текста',
+      component: 'рамочного компонента',
     }[selectedEffect.kind ?? 'shadow'];
 
     modalTitle = `Настройки ${kindLabel}`;
-    modalDescription = 'Боковые тени, текст и кастомные компоненты';
+    modalDescription = 'Рамочные тени, текст и кастомные компоненты';
     notice = 'Расположение и анимации обновляются сразу на странице';
 
     modalContent = (
-      <SideSettings
+      <FrameSettings
         key={selectedEffect.id}
         effect={selectedEffect}
         onUpdate={onUpdateEffect}

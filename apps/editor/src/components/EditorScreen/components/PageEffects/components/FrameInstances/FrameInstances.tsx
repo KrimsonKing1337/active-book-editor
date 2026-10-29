@@ -4,34 +4,34 @@ import { useMemo } from 'react';
 
 import type { BookComponentProps } from '@active-book/types';
 
-import { Side } from 'activeBook-core/components/ProxyHooks';
+import { Frame } from 'activeBook-core/components/ProxyHooks';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
-import type { SideItemPreviews, SideStylePreviews } from '../../context';
+import type { FrameEffectDraft } from '../../@types';
+import type { FrameItemPreviews, FrameStylePreviews } from '../../context';
 
 import { usePageEffects } from '../../context';
 
-import { resolveSideInstanceOptions } from './utils';
+import { resolveFrameInstanceOptions } from './utils';
 
 const bookRuntime = createBookRuntime('editor');
 
-type SideInstanceProps = {
-  effect: SideEffectDraft;
+type FrameInstanceProps = {
+  effect: FrameEffectDraft;
   components: Record<string, ComponentType>;
-  previews: SideItemPreviews;
-  stylePreviews: SideStylePreviews;
+  previews: FrameItemPreviews;
+  stylePreviews: FrameStylePreviews;
 };
 
-const SideInstance = ({
+const FrameInstance = ({
   effect,
   components,
   previews,
   stylePreviews,
-}: SideInstanceProps) => {
+}: FrameInstanceProps) => {
   const { component } = effect.options;
 
   const componentId = component ? `${component.package}/${component.name}` : '';
@@ -41,14 +41,14 @@ const SideInstance = ({
     return CustomComponent ? <CustomComponent book={bookRuntime} /> : null;
   }, [CustomComponent]);
 
-  const options = resolveSideInstanceOptions({
+  const options = resolveFrameInstanceOptions({
     effect,
     previews,
     stylePreviews,
   });
 
   return (
-    <Side
+    <Frame
       id={effect.id}
       kind={effect.kind}
       layer={options.layer}
@@ -61,24 +61,24 @@ const SideInstance = ({
   );
 };
 
-export const SideInstances = () => {
-  const { effects, sideItemPreviews, sideStylePreviews } = usePageEffects();
+export const FrameInstances = () => {
+  const { effects, frameItemPreviews, frameStylePreviews } = usePageEffects();
   const { components } = useCustomComponents();
 
-  const sideEffects = effects.filter((effectCur): effectCur is SideEffectDraft => {
-    return effectCur.type === 'side';
+  const frameEffects = effects.filter((effectCur): effectCur is FrameEffectDraft => {
+    return effectCur.type === 'frame';
   });
 
   return (
     <>
-      {sideEffects.map((effectCur) => {
+      {frameEffects.map((effectCur) => {
         return (
-          <SideInstance
+          <FrameInstance
             key={effectCur.id}
             effect={effectCur}
             components={components}
-            previews={sideItemPreviews}
-            stylePreviews={sideStylePreviews}
+            previews={frameItemPreviews}
+            stylePreviews={frameStylePreviews}
           />
         );
       })}

@@ -2,17 +2,17 @@ export type {
   AudioPreviewStatus,
   BackgroundPreviewLayer,
   BackgroundStylePreviews,
-  SideItemPreview,
-  SideItemPreviews,
-  SideItemPreviewUpdate,
-  SideStylePreviewUpdate,
-  SideStylePreviews,
+  FrameItemPreview,
+  FrameItemPreviews,
+  FrameItemPreviewUpdate,
+  FrameStylePreviewUpdate,
+  FrameStylePreviews,
 } from './@types';
 
 export {
   getBackgroundPreviewKey,
-  getSidePreviewKey,
-  getSideStylePreviewKey,
+  getFramePreviewKey,
+  getFrameStylePreviewKey,
 } from './utils';
 
 export { PageEffectsProvider } from './PageEffectsProvider';

@@ -1,16 +1,16 @@
-import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
 
-import { normalizeSideEffects, resolveSideOptions } from './side';
+import { normalizeFrameEffects, resolveFrameOptions } from './frame';
 
 test('normalizes independent shadow, text and component effects', () => {
-  const side = [
+  const frame = [
     {
       id: 'shadow',
-      type: 'side',
+      type: 'frame',
       kind: 'shadow',
       options: {
         layer: 'above',
@@ -23,7 +23,7 @@ test('normalizes independent shadow, text and component effects', () => {
     },
     {
       id: 'text',
-      type: 'side',
+      type: 'frame',
       kind: 'text',
       options: {
         text: {
@@ -35,7 +35,7 @@ test('normalizes independent shadow, text and component effects', () => {
     },
     {
       id: 'component',
-      type: 'side',
+      type: 'frame',
       kind: 'component',
       options: {
         frameMask: {
@@ -46,7 +46,7 @@ test('normalizes independent shadow, text and component effects', () => {
     },
   ];
 
-  const result = normalizeSideEffects({ side });
+  const result = normalizeFrameEffects({ frame });
 
   assert.equal(result.length, 3);
   assert.equal(result[0].options.layer, 'above');
@@ -59,10 +59,10 @@ test('normalizes independent shadow, text and component effects', () => {
   });
 });
 
-test('rejects legacy side groups and invalid independent text', () => {
-  const legacy = {
+test('rejects malformed frame groups and invalid independent text', () => {
+  const invalidKind = {
     id: 'legacy',
-    type: 'side',
+    type: 'frame',
     options: {
       shadows: [{
         id: 'shadow-1',
@@ -72,7 +72,7 @@ test('rejects legacy side groups and invalid independent text', () => {
 
   const invalid = {
     id: 'invalid',
-    type: 'side',
+    type: 'frame',
     kind: 'text',
     options: {
       text: {
@@ -83,11 +83,11 @@ test('rejects legacy side groups and invalid independent text', () => {
     },
   };
 
-  assert.deepEqual(normalizeSideEffects({ side: [legacy, invalid] }), []);
+  assert.deepEqual(normalizeFrameEffects({ frame: [invalidKind, invalid] }), []);
 });
 
-test('resolves custom side layer styles on the wrapper', () => {
-  const result = resolveSideOptions({
+test('resolves custom frame layer styles on the wrapper', () => {
+  const result = resolveFrameOptions({
     layer: 'above',
     frameMask: {
       enabled: false,
@@ -115,7 +115,7 @@ test('resolves custom side layer styles on the wrapper', () => {
   assert.equal(result.style.backdropFilter, 'blur(3px)');
 });
 
-test('resolves filters on one side effect at a time', () => {
+test('resolves filters on one frame effect at a time', () => {
   const shadow = {
     id: 'shadow',
     sides: ['top', 'bottom'] as FrameSide[],
@@ -147,7 +147,7 @@ test('resolves filters on one side effect at a time', () => {
     }],
   };
 
-  const result = resolveSideOptions({ shadow, text });
+  const result = resolveFrameOptions({ shadow, text });
 
   assert.deepEqual(result.shadow, {
     id: 'shadow',
@@ -163,11 +163,11 @@ test('resolves filters on one side effect at a time', () => {
   assert.deepEqual(shadow.style, { color: '#ff0000', zIndex: 4 });
 });
 
-test('rejects missing side text fields and invalid shadow IDs', () => {
+test('rejects missing frame text fields and invalid shadow IDs', () => {
   const malformed = [
     {
       id: 'shadow',
-      type: 'side',
+      type: 'frame',
       kind: 'shadow',
       options: {
         shadow: {
@@ -177,7 +177,7 @@ test('rejects missing side text fields and invalid shadow IDs', () => {
     },
     {
       id: 'text',
-      type: 'side',
+      type: 'frame',
       kind: 'text',
       options: {
         text: {
@@ -188,7 +188,7 @@ test('rejects missing side text fields and invalid shadow IDs', () => {
     },
     {
       id: 'not-an-object',
-      type: 'side',
+      type: 'frame',
       kind: 'text',
       options: {
         text: null,
@@ -196,5 +196,5 @@ test('rejects missing side text fields and invalid shadow IDs', () => {
     },
   ];
 
-  assert.deepEqual(normalizeSideEffects({ side: malformed }), []);
+  assert.deepEqual(normalizeFrameEffects({ frame: malformed }), []);
 });

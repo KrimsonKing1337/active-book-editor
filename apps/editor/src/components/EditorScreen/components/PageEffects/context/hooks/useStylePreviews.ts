@@ -9,15 +9,15 @@ import type { EditorEffectDraft } from '../../@types';
 import type {
   BackgroundStylePreviewUpdater,
   BackgroundStylePreviews,
-  SideStylePreviewUpdate,
-  SideStylePreviews,
+  FrameStylePreviewUpdate,
+  FrameStylePreviews,
 } from '../@types';
 
 import {
   applyPendingStylePreviews,
   getBackgroundPreviewKey,
   getPageEffects,
-  getSideStylePreviewKey,
+  getFrameStylePreviewKey,
 } from '../utils';
 
 type UseStylePreviewsParams = {
@@ -27,11 +27,11 @@ type UseStylePreviewsParams = {
 
 export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParams) => {
   const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
-  const [sideStylePreviews, setSideStylePreviews] = useState<SideStylePreviews>({});
+  const [frameStylePreviews, setFrameStylePreviews] = useState<FrameStylePreviews>({});
 
   const backgroundStylesRef = useRef<BackgroundStylePreviews>({});
-  const sideStylesRef = useRef<SideStylePreviews>({});
-  const sideFrameRef = useRef<number | null>(null);
+  const frameStylesRef = useRef<FrameStylePreviews>({});
+  const framePreviewRafRef = useRef<number | null>(null);
   const backgroundFrameRef = useRef<number | null>(null);
   const hasUnsavedStylesRef = useRef(false);
 
@@ -59,12 +59,12 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
     });
   }, []);
 
-  const updateSideStylePreview = useCallback((update: SideStylePreviewUpdate) => {
+  const updateFrameStylePreview = useCallback((update: FrameStylePreviewUpdate) => {
     const { style } = update;
-    const key = getSideStylePreviewKey(update);
+    const key = getFrameStylePreviewKey(update);
 
-    sideStylesRef.current = {
-      ...sideStylesRef.current,
+    frameStylesRef.current = {
+      ...frameStylesRef.current,
       [key]: style,
     };
 
@@ -72,21 +72,21 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
 
     setHasPendingStyles(true);
 
-    if (sideFrameRef.current !== null) {
-      cancelAnimationFrame(sideFrameRef.current);
+    if (framePreviewRafRef.current !== null) {
+      cancelAnimationFrame(framePreviewRafRef.current);
     }
 
-    sideFrameRef.current = requestAnimationFrame(() => {
-      setSideStylePreviews(sideStylesRef.current);
+    framePreviewRafRef.current = requestAnimationFrame(() => {
+      setFrameStylePreviews(frameStylesRef.current);
 
-      sideFrameRef.current = null;
+      framePreviewRafRef.current = null;
     });
   }, []);
 
   useEffect(() => {
     return () => {
-      if (sideFrameRef.current !== null) {
-        cancelAnimationFrame(sideFrameRef.current);
+      if (framePreviewRafRef.current !== null) {
+        cancelAnimationFrame(framePreviewRafRef.current);
       }
 
       if (backgroundFrameRef.current !== null) {
@@ -103,9 +103,9 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
 
   const flushStylePreviews = useCallback((): boolean => {
     const pending = backgroundStylesRef.current;
-    const pendingSide = sideStylesRef.current;
+    const pendingFrame = frameStylesRef.current;
 
-    if (Object.keys(pending).length === 0 && Object.keys(pendingSide).length === 0) {
+    if (Object.keys(pending).length === 0 && Object.keys(pendingFrame).length === 0) {
       return true;
     }
 
@@ -116,7 +116,7 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
     const nextEffects = applyPendingStylePreviews({
       effects: getPageEffects(editor),
       backgroundPreviews: pending,
-      sidePreviews: pendingSide,
+      framePreviews: pendingFrame,
     });
 
     try {
@@ -128,10 +128,10 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
     }
 
     backgroundStylesRef.current = {};
-    sideStylesRef.current = {};
+    frameStylesRef.current = {};
 
     setBackgroundStylePreviews({});
-    setSideStylePreviews({});
+    setFrameStylePreviews({});
     markStylePreviewsCommitted();
 
     if (backgroundFrameRef.current !== null) {
@@ -140,10 +140,10 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
       backgroundFrameRef.current = null;
     }
 
-    if (sideFrameRef.current !== null) {
-      cancelAnimationFrame(sideFrameRef.current);
+    if (framePreviewRafRef.current !== null) {
+      cancelAnimationFrame(framePreviewRafRef.current);
 
-      sideFrameRef.current = null;
+      framePreviewRafRef.current = null;
     }
 
     return true;
@@ -161,9 +161,9 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
 
   return {
     backgroundStylePreviews,
-    sideStylePreviews,
+    frameStylePreviews,
     updateBackgroundStylePreview,
-    updateSideStylePreview,
+    updateFrameStylePreview,
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,

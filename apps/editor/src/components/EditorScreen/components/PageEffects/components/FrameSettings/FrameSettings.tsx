@@ -1,15 +1,15 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
-import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
-import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
+import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
-import type { SideEffectDraft } from '../../@types';
+import type { FrameEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
 
-import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
+import { getFramePreviewKey, getFrameStylePreviewKey, usePageEffects } from '../../context';
 
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
@@ -20,18 +20,18 @@ import { AnimationSettings } from './components/AnimationSettings';
 
 import { frameSides, positions, shadowPresets, textPresets } from './constants';
 
-import styles from './SideSettings.module.scss';
+import styles from './FrameSettings.module.scss';
 
-type ShadowItem = NonNullable<SideOptions['shadow']>;
-type TextItem = NonNullable<SideOptions['text']>;
-type SideAnimation = NonNullable<ShadowItem['animation']>;
+type ShadowItem = NonNullable<FrameOptions['shadow']>;
+type TextItem = NonNullable<FrameOptions['text']>;
+type FrameAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 type Kind = 'shadow' | 'text' | 'component';
 
-type SideSettingsProps = {
-  effect: SideEffectDraft;
+type FrameSettingsProps = {
+  effect: FrameEffectDraft;
 
-  onUpdate: (previousId: string, effect: SideEffectDraft) => void;
+  onUpdate: (previousId: string, effect: FrameEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
@@ -150,14 +150,14 @@ const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesPro
   );
 };
 
-export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
+export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: FrameSettingsProps) => {
   const { definitions } = useCustomComponents();
 
   const {
-    sideItemPreviews,
-    sideStylePreviews,
-    updateSideItemPreview,
-    updateSideStylePreview,
+    frameItemPreviews,
+    frameStylePreviews,
+    updateFrameItemPreview,
+    updateFrameStylePreview,
     flushStylePreviews,
     getCurrentEffects,
   } = usePageEffects();
@@ -168,11 +168,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     sides: ['top', 'right', 'bottom', 'left'],
   };
   const item = effect.kind === 'shadow' ? shadow : text;
-  const previewKey = item ? getSidePreviewKey(effect.id, item.id) : '';
-  const preview = sideItemPreviews[previewKey] ?? {};
+  const previewKey = item ? getFramePreviewKey(effect.id, item.id) : '';
+  const preview = frameItemPreviews[previewKey] ?? {};
   const previewIsHidden = preview.hidden ?? item?.hidden ?? false;
 
-  const updateOptions = (updates: Partial<SideOptions>) => {
+  const updateOptions = (updates: Partial<FrameOptions>) => {
     const options = {
       ...effect.options,
       ...updates,
@@ -209,17 +209,17 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   };
 
   const getItemStyle = (kind: Kind, id: string, style?: CSSProperties) => {
-    const key = getSideStylePreviewKey({
+    const key = getFrameStylePreviewKey({
       effectId: effect.id,
       kind,
       itemId: id,
     });
 
-    return sideStylePreviews[key] ?? style ?? {};
+    return frameStylePreviews[key] ?? style ?? {};
   };
 
   const handleStylePreview = (kind: Kind, itemId: string, style: CSSProperties) => {
-    updateSideStylePreview({
+    updateFrameStylePreview({
       effectId: effect.id,
       kind,
       itemId,
@@ -232,8 +232,8 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((current): current is SideEffectDraft => {
-      return current.type === 'side' && current.id === effect.id;
+    const currentEffect = getCurrentEffects().find((current): current is FrameEffectDraft => {
+      return current.type === 'frame' && current.id === effect.id;
     });
 
     if (!currentEffect) {
@@ -253,7 +253,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     onUpdate(effect.id, { ...currentEffect, options });
   };
 
-  const handlePlaybackChange = (state: NonNullable<SideAnimation['playState']>) => {
+  const handlePlaybackChange = (state: NonNullable<FrameAnimation['playState']>) => {
     if (item) {
       const update = {
         effectId: effect.id,
@@ -261,7 +261,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         changes: { playState: state },
       };
 
-      updateSideItemPreview(update);
+      updateFrameItemPreview(update);
     }
   };
 
@@ -273,7 +273,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
         changes: { hidden },
       };
 
-      updateSideItemPreview(update);
+      updateFrameItemPreview(update);
     }
   };
 
@@ -365,11 +365,11 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     updateShadow({ sides });
   };
 
-  const handleShadowAnimationChange = (val: SideAnimation) => {
+  const handleShadowAnimationChange = (val: FrameAnimation) => {
     updateShadow({ animation: val });
   };
 
-  const handleTextAnimationChange = (val: SideAnimation) => {
+  const handleTextAnimationChange = (val: FrameAnimation) => {
     updateText({ animation: val });
   };
 

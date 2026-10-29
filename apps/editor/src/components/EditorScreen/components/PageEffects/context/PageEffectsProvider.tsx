@@ -4,7 +4,7 @@ import type { Editor } from '@tiptap/core';
 
 import {
   usePageEffectsState,
-  useSideItemPreviews,
+  useFrameItemPreviews,
   useStylePreviews,
 } from './hooks';
 
@@ -29,9 +29,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
 
   const {
     backgroundStylePreviews,
-    sideStylePreviews,
+    frameStylePreviews,
     updateBackgroundStylePreview,
-    updateSideStylePreview,
+    updateFrameStylePreview,
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
@@ -41,9 +41,9 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
   });
 
   const {
-    sideItemPreviews,
-    updateSideItemPreview,
-  } = useSideItemPreviews();
+    frameItemPreviews,
+    updateFrameItemPreview,
+  } = useFrameItemPreviews();
 
   const value = useMemo(() => ({
     effects,
@@ -54,10 +54,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
-    sideItemPreviews,
-    sideStylePreviews,
-    updateSideItemPreview,
-    updateSideStylePreview,
+    frameItemPreviews,
+    frameStylePreviews,
+    updateFrameItemPreview,
+    updateFrameStylePreview,
   }), [
     effects,
     writeEffects,
@@ -67,10 +67,10 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
-    sideItemPreviews,
-    sideStylePreviews,
-    updateSideItemPreview,
-    updateSideStylePreview,
+    frameItemPreviews,
+    frameStylePreviews,
+    updateFrameItemPreview,
+    updateFrameStylePreview,
   ]);
 
   return (

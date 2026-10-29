@@ -1,13 +1,13 @@
-import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import {
-  type SideShadowPreset,
-  SIDE_SHADOW_PRESETS,
-} from 'activeBook-core/components/SideEffects/components/SideShadow/presets';
+  type FrameShadowPreset,
+  FRAME_SHADOW_PRESETS,
+} from 'activeBook-core/components/FrameEffects/components/FrameShadow/presets';
 
-import type { SideOptions } from '@active-book/book-builder/effects';
+import type { FrameOptions } from '@active-book/book-builder/effects';
 
-type ShadowItem = NonNullable<SideOptions['shadow']>;
+type ShadowItem = NonNullable<FrameOptions['shadow']>;
 
 type PositionOption = {
   value: NonNullable<ShadowItem['position']>;
@@ -38,7 +38,7 @@ export const frameSides: FrameSides[] = [
   { value: 'left', label: 'Слева' },
 ];
 
-export const shadowPresets: SideShadowPreset[] = [...SIDE_SHADOW_PRESETS];
+export const shadowPresets: FrameShadowPreset[] = [...FRAME_SHADOW_PRESETS];
 
 export const textPresets = [
   { value: 'scroll' as const, label: 'Прокрутка' },

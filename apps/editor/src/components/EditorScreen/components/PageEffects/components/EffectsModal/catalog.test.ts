@@ -44,7 +44,7 @@ const effects = [
   },
   {
     id: 'shadow',
-    type: 'side',
+    type: 'frame',
     kind: 'shadow',
     slug: 'Затемнение',
     options: {
@@ -57,7 +57,7 @@ const effects = [
 
 test('lists every top-level effect category with its supported subtypes', () => {
   assert.deepEqual(EFFECT_CATEGORIES.map((cur) => cur.value), [
-    'audio', 'background', 'side', 'vibration', 'flashlight',
+    'audio', 'background', 'frame', 'vibration', 'flashlight',
   ]);
 
   const audio = EFFECT_CATEGORIES[0];
@@ -134,7 +134,7 @@ test('searches names, IDs and media paths without case sensitivity', () => {
   })[0].id, 'soundtrack');
   assert.equal(getFilteredEffects({
     effects,
-    category: 'side',
+    category: 'frame',
     group: null,
     query: 'SHADOW',
   })[0].id, 'shadow');
@@ -143,5 +143,5 @@ test('searches names, IDs and media paths without case sensitivity', () => {
 test('keeps subtype and breadcrumb information independent of search', () => {
   assert.equal(getEffectGroup(effects[0]), 'sfx');
   assert.equal(getEffectPath(effects[2]), 'Background / Image');
-  assert.equal(getEffectPath(effects[3]), 'Side / Shadow');
+  assert.equal(getEffectPath(effects[3]), 'Frame / Shadow');
 });

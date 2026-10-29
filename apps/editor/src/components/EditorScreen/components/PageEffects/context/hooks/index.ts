@@ -5,5 +5,5 @@ export {
 } from './contextHooks';
 
 export { usePageEffectsState } from './usePageEffectsState';
-export { useSideItemPreviews } from './useSideItemPreviews';
+export { useFrameItemPreviews } from './useFrameItemPreviews';
 export { useStylePreviews } from './useStylePreviews';

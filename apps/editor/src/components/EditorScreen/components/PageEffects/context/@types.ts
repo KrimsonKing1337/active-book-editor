@@ -7,32 +7,32 @@ export type AudioPreviewStatus = {
   error?: string;
 };
 
-export type SideItemPreview = {
+export type FrameItemPreview = {
   playState?: 'running' | 'paused' | 'stopped';
   hidden?: boolean;
 };
 
-export type SideItemPreviews = Record<string, SideItemPreview>;
-export type SideStylePreviews = Record<string, CSSProperties>;
+export type FrameItemPreviews = Record<string, FrameItemPreview>;
+export type FrameStylePreviews = Record<string, CSSProperties>;
 export type BackgroundStylePreviews = Record<string, CSSProperties>;
 
 export type BackgroundPreviewLayer = 'background' | 'shadow' | 'image' | 'video';
-export type SidePreviewKind = 'shadow' | 'text' | 'component';
+export type FramePreviewKind = 'shadow' | 'text' | 'component';
 
-export type SideStylePreviewKeyParams = {
+export type FrameStylePreviewKeyParams = {
   effectId: string;
-  kind: SidePreviewKind;
+  kind: FramePreviewKind;
   itemId: string;
 };
 
-export type SideStylePreviewUpdate = SideStylePreviewKeyParams & {
+export type FrameStylePreviewUpdate = FrameStylePreviewKeyParams & {
   style: CSSProperties;
 };
 
-export type SideItemPreviewUpdate = {
+export type FrameItemPreviewUpdate = {
   effectId: string;
   itemId: string;
-  changes: Partial<SideItemPreview>;
+  changes: Partial<FrameItemPreview>;
 };
 
 export type BackgroundPreviewKeyParams = {
@@ -56,8 +56,8 @@ export type PageEffectsContextValue = {
   flushStylePreviews: () => boolean;
   hasUnsavedStyleChanges: () => boolean;
   markStylesSaved: () => void;
-  sideItemPreviews: SideItemPreviews;
-  sideStylePreviews: SideStylePreviews;
-  updateSideStylePreview: (update: SideStylePreviewUpdate) => void;
-  updateSideItemPreview: (update: SideItemPreviewUpdate) => void;
+  frameItemPreviews: FrameItemPreviews;
+  frameStylePreviews: FrameStylePreviews;
+  updateFrameStylePreview: (update: FrameStylePreviewUpdate) => void;
+  updateFrameItemPreview: (update: FrameItemPreviewUpdate) => void;
 };

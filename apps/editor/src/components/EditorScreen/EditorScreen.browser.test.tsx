@@ -60,12 +60,12 @@ const addComposition = async () => {
     ],
   });
 
-  await addEffect('Side');
+  await addEffect('Frame');
   await configureShadow();
   const composed = await project.save();
 
   expect(composed.background).toEqual(withBackground.background);
-  expect(composed.side?.[0].options.shadow).toMatchObject({
+  expect(composed.frame?.[0].options.shadow).toMatchObject({
     thickness: 70,
     style: {
       color: '#e08020ff',
@@ -80,12 +80,12 @@ const addComposition = async () => {
 const checkComposition = async (backgroundColor = 'rgb(32, 64, 96)') => {
   const effects = await project.readEffects();
   const backgroundSelector = `[data-effect-id="${effects.background?.[1].id}"]`;
-  const sideSelector = `[data-effect-id="${effects.side?.[0].id}"]`;
+  const frameSelector = `[data-effect-id="${effects.frame?.[0].id}"]`;
 
   await expect.poll(() => document.querySelector(backgroundSelector)).not.toBeNull();
-  await expect.poll(() => document.querySelector(sideSelector)).not.toBeNull();
+  await expect.poll(() => document.querySelector(frameSelector)).not.toBeNull();
   const background = document.querySelector<HTMLElement>(backgroundSelector);
-  const side = document.querySelector<HTMLElement>(sideSelector);
+  const frame = document.querySelector<HTMLElement>(frameSelector);
 
   await expect.element(background).toHaveStyle({
     backgroundColor,
@@ -93,11 +93,11 @@ const checkComposition = async (backgroundColor = 'rgb(32, 64, 96)') => {
     zIndex: '1',
     filter: 'brightness(1.2)',
   });
-  await expect.element(side).toHaveStyle({ zIndex: '2' });
-  const shadow = side?.querySelector<HTMLElement>('[class*="SideShadow-module__SideShadow"]') ?? null;
+  await expect.element(frame).toHaveStyle({ zIndex: '2' });
+  const shadow = frame?.querySelector<HTMLElement>('[class*="FrameShadow-module__FrameShadow"]') ?? null;
 
   if (!shadow) {
-    throw new Error('Элемент боковой тени не найден');
+    throw new Error('Элемент рамочной тени не найден');
   }
 
   await expect.element(shadow).toHaveStyle({
@@ -125,7 +125,7 @@ test('edits independent effects and restores their data and rendered composition
   await setColor('#305070ff');
   const composed = await project.save();
 
-  expect(composed.side).toEqual(originalComposition.side);
+  expect(composed.frame).toEqual(originalComposition.frame);
   expect(composed.background?.[0]).toEqual(originalComposition.background?.[0]);
   await checkComposition('rgb(48, 80, 112)');
   const pageWrapper = document.querySelector<HTMLElement>('#page-wrapper');
@@ -143,16 +143,16 @@ test('edits independent effects and restores their data and rendered composition
 
 test('deletes only the selected effect and supports undo and redo through the editor', async () => {
   const composed = await addComposition();
-  const deletedSideSelector = `[data-effect-id="${composed.side?.[0].id}"]`;
+  const deletedFrameSelector = `[data-effect-id="${composed.frame?.[0].id}"]`;
 
   await selectEffect('Тестовая тень');
   await page.getByRole('button', { name: 'Удалить эффект', exact: true }).click();
   const deleted = await project.save();
 
   expect(window.confirm).toHaveBeenCalledWith('Удалить эффект «Тестовая тень»?');
-  expect(deleted.side).toEqual([]);
+  expect(deleted.frame).toEqual([]);
   expect(deleted.background).toEqual(composed.background);
-  expect(document.querySelector<HTMLElement>(deletedSideSelector)).toBeNull();
+  expect(document.querySelector<HTMLElement>(deletedFrameSelector)).toBeNull();
 
   await historyShortcut('undo');
   const undone = await project.save();
@@ -163,5 +163,5 @@ test('deletes only the selected effect and supports undo and redo through the ed
   const redone = await project.save();
 
   expect(redone).toEqual(deleted);
-  expect(document.querySelector<HTMLElement>(deletedSideSelector)).toBeNull();
+  expect(document.querySelector<HTMLElement>(deletedFrameSelector)).toBeNull();
 }, 60_000);
