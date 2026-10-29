@@ -30,7 +30,7 @@ export const EffectsModal = ({
   onAddVibration,
   onAddFlashlight,
   onAddBackground,
-  onAddSide,
+  onAddFrame,
   onSelectEffect,
   onUpdateEffect,
   onDuplicateEffect,
@@ -109,7 +109,7 @@ export const EffectsModal = ({
       onAddVibration={onAddVibration}
       onAddFlashlight={onAddFlashlight}
       onAddBackground={onAddBackground}
-      onAddSide={onAddSide}
+      onAddFrame={onAddFrame}
       onSelectEffect={onSelectEffect}
       onCategoryChange={handleCategoryChange}
       onGroupChange={handleGroupChange}
