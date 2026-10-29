@@ -140,6 +140,7 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
     options = {
       shadow: {
         id: crypto.randomUUID(),
+        sides: ['left', 'right'],
         position: 'top-left',
         style: {
           color: '#ff0000',

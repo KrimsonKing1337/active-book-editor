@@ -1,12 +1,13 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
+import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { SideEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
-
 
 import { getSidePreviewKey, getSideStylePreviewKey, usePageEffects } from '../../context';
 
@@ -17,7 +18,7 @@ import { TextInput, Select, Checkbox, Button } from '../EffectControls';
 
 import { AnimationSettings } from './components/AnimationSettings';
 
-import { positions, shadowPresets, textPresets } from './constants';
+import { frameSides, positions, shadowPresets, textPresets } from './constants';
 
 import styles from './SideSettings.module.scss';
 
@@ -283,6 +284,20 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     updateShadow({ thickness: val });
   };
 
+  const handleSideChange = (side: FrameSide, isEnabled: boolean) => {
+    if (!shadow) {
+      return;
+    }
+
+    let sides = [...shadow.sides, side];
+
+    if (!isEnabled) {
+      sides = shadow.sides.filter((cur) => cur !== side);
+    }
+
+    updateShadow({ sides });
+  };
+
   const handleShadowAnimationChange = (val: SideAnimation) => {
     updateShadow({ animation: val });
   };
@@ -337,8 +352,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   let colorDisabledReason: string | undefined;
 
   if (shadow) {
-    const selectedPreset = shadowPresets.find((current) => {
-      return current.value === (shadow.animation?.preset ?? 'none');
+    const selectedPreset = shadowPresets.find((presetCur) => {
+      const animationPreset = shadow.animation?.preset ?? 'none';
+
+      return presetCur.value === animationPreset;
     });
 
     const canChangeColor = selectedPreset?.canChangeColor ?? false;
@@ -379,6 +396,30 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             onHiddenChange={handleHiddenChange}
             onChange={updateShadow}
           />
+
+          <div className={styles.Field}>
+            <span>
+              Стороны
+            </span>
+
+            <div className={styles.Sides}>
+              {frameSides.map((sideCur) => {
+                const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+                  handleSideChange(sideCur.value, e.target.checked);
+                };
+
+                return (
+                  <Checkbox
+                    key={sideCur.value}
+                    checked={shadow.sides.includes(sideCur.value)}
+                    onChange={handleChange}
+                  >
+                    {sideCur.label}
+                  </Checkbox>
+                );
+              })}
+            </div>
+          </div>
 
           <label className={styles.Field}>
             <span>
