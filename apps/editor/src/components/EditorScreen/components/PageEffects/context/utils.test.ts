@@ -7,8 +7,8 @@ import { test } from 'vitest';
 import {
   applyPendingStylePreviews,
   getBackgroundPreviewKey,
-  getSidePreviewKey,
-  getSideStylePreviewKey,
+  getFramePreviewKey,
+  getFrameStylePreviewKey,
   groupPageEffects,
 } from './utils';
 
@@ -36,11 +36,11 @@ const background = {
   },
 } as EditorEffectDraft;
 
-const side = {
+const frame = {
   id: 'side-1',
-  type: 'side',
+  type: 'frame',
   kind: 'shadow',
-  slug: 'Side',
+  slug: 'Frame',
   options: {
     shadow: {
       id: 'shadow-1',
@@ -71,7 +71,7 @@ test('preserves existing preview key formats', () => {
     layer: 'shadow',
   });
 
-  const sideKey = getSideStylePreviewKey({
+  const frameKey = getFrameStylePreviewKey({
     effectId: 'side-1',
     kind: 'text',
     itemId: 'text-1',
@@ -79,8 +79,8 @@ test('preserves existing preview key formats', () => {
 
   assert.equal(backgroundKey, JSON.stringify(['background-1', 'image', 'image-1']));
   assert.equal(defaultMediaKey, JSON.stringify(['background-1', 'shadow', null]));
-  assert.equal(sideKey, JSON.stringify(['side-1', 'text', 'text-1']));
-  assert.equal(getSidePreviewKey('side-1', 'text-1'), JSON.stringify(['side-1', 'text-1']));
+  assert.equal(frameKey, JSON.stringify(['side-1', 'text', 'text-1']));
+  assert.equal(getFramePreviewKey('side-1', 'text-1'), JSON.stringify(['side-1', 'text-1']));
 });
 
 test('commits pending background and side styles without mutating existing effects', () => {
@@ -90,49 +90,49 @@ test('commits pending background and side styles without mutating existing effec
     mediaId: 'image-1',
   });
 
-  const sideKey = getSideStylePreviewKey({
+  const frameKey = getFrameStylePreviewKey({
     effectId: 'side-1',
     kind: 'shadow',
     itemId: 'shadow-1',
   });
 
   const updatedEffects = applyPendingStylePreviews({
-    effects: [background, side],
+    effects: [background, frame],
     backgroundPreviews: {
       [backgroundKey]: { opacity: 0.25 },
     },
-    sidePreviews: {
-      [sideKey]: { zIndex: 10 },
+    framePreviews: {
+      [frameKey]: { zIndex: 10 },
     },
   });
 
   const updatedBackground = updatedEffects[0];
-  const updatedSide = updatedEffects[1];
+  const updatedFrame = updatedEffects[1];
 
-  if (updatedBackground.type !== 'background' || updatedSide.type !== 'side') {
+  if (updatedBackground.type !== 'background' || updatedFrame.type !== 'frame') {
     throw new Error('Unexpected effect types');
   }
 
   assert.deepEqual(updatedBackground.options.image?.style, { opacity: 0.25 });
   assert.deepEqual(updatedBackground.options.shadow?.style, { opacity: 0.5 });
-  assert.deepEqual(updatedSide.options.shadow?.style, { zIndex: 10 });
-  assert.deepEqual(updatedSide.options.text?.style, { zIndex: 3 });
+  assert.deepEqual(updatedFrame.options.shadow?.style, { zIndex: 10 });
+  assert.deepEqual(updatedFrame.options.text?.style, { zIndex: 3 });
 
   assert.notEqual(updatedBackground, background);
-  assert.notEqual(updatedSide, side);
+  assert.notEqual(updatedFrame, frame);
 });
 
 test('keeps effect references unchanged when there are no relevant previews', () => {
-  const effects = [background, side];
+  const effects = [background, frame];
 
   const updatedEffects = applyPendingStylePreviews({
     effects,
     backgroundPreviews: {},
-    sidePreviews: {},
+    framePreviews: {},
   });
 
   assert.equal(updatedEffects[0], background);
-  assert.equal(updatedEffects[1], side);
+  assert.equal(updatedEffects[1], frame);
 });
 
 test('groups independent background and side effects', () => {
@@ -141,15 +141,15 @@ test('groups independent background and side effects', () => {
     vibration: [],
     flashlight: [],
     background: [],
-    side: [],
+    frame: [],
   };
 
   const grouped = groupPageEffects({
-    effects: [background, side],
+    effects: [background, frame],
     previous,
   });
 
   assert.equal(grouped.background?.[0], background);
-  assert.equal(grouped.side?.[0], side);
+  assert.equal(grouped.frame?.[0], frame);
   assert.deepEqual(grouped.audio, []);
 });

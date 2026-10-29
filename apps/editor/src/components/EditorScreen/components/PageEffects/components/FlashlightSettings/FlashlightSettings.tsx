@@ -37,7 +37,7 @@ export const FlashlightSettings = ({
   const [idDraft, setIdDraft] = useState(effect.id);
 
   const { flashlightOn } = useFlashlight({
-    withSideShadow: options.withSideShadow,
+    withFrameShadow: options.withFrameShadow,
     speed: options.speed,
   });
 
@@ -60,7 +60,7 @@ export const FlashlightSettings = ({
   }
 
   const canUseTorch = flashlightEnabled && isFlashlightAvailable !== false;
-  const canPreview = options.duration > 0 && (canUseTorch || options.withSideShadow);
+  const canPreview = options.duration > 0 && (canUseTorch || options.withFrameShadow);
 
   const updateId = () => {
     if (idError || idDraft === effect.id) {
@@ -139,8 +139,8 @@ export const FlashlightSettings = ({
     updateOption('playOnLoad', event.target.checked);
   };
 
-  const handleSideShadowChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateOption('withSideShadow', event.target.checked);
+  const handleFrameShadowChange = (event: ChangeEvent<HTMLInputElement>) => {
+    updateOption('withFrameShadow', event.target.checked);
   };
 
   const handlePreview = () => {
@@ -152,7 +152,7 @@ export const FlashlightSettings = ({
     void flashlightOn(options.duration);
   };
 
-  let previewDescription = 'Фонарик недоступен. Включите sideShadow для экранной имитации';
+  let previewDescription = 'Фонарик недоступен. Включите frameShadow для экранной имитации';
 
   if (!options.duration) {
     previewDescription = 'Установите длительность больше нуля для проверки';
@@ -161,7 +161,7 @@ export const FlashlightSettings = ({
   } else if (canPreview) {
     previewDescription = 'Проверка запускается сразу, без задержки';
   } else if (!flashlightEnabled) {
-    previewDescription = 'Фонарик отключён в настройках. Можно использовать sideShadow';
+    previewDescription = 'Фонарик отключён в настройках. Можно использовать frameShadow';
   }
 
   const flashLightEffectIdAriaDescribedBy = idError ? 'flashlight-effect-id-error' : undefined;
@@ -251,14 +251,14 @@ export const FlashlightSettings = ({
           Включать вспышку при открытии страницы
         </Checkbox>
 
-        <Checkbox checked={options.withSideShadow} onChange={handleSideShadowChange}>
-          Дублировать вспышку экранной подсветкой (sideShadow)
+        <Checkbox checked={options.withFrameShadow} onChange={handleFrameShadowChange}>
+          Дублировать вспышку экранной подсветкой (frameShadow)
         </Checkbox>
 
-        {options.withSideShadow && (
+        {options.withFrameShadow && (
           <label className={styles.Field}>
             <span>
-              Период мерцания sideShadow (мс)
+              Период мерцания frameShadow (мс)
             </span>
 
             <IntegerInput
