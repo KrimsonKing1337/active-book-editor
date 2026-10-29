@@ -134,9 +134,9 @@ export const getModalContent = ({
 
   if (selectedEffect?.type === 'frame') {
     const kindLabel = {
-      shadow: 'боковой тени',
-      text: 'бокового текста',
-      component: 'бокового компонента',
+      shadow: 'рамочной тени',
+      text: 'рамочного текста',
+      component: 'рамочного компонента',
     }[selectedEffect.kind ?? 'shadow'];
 
     modalTitle = `Настройки ${kindLabel}`;

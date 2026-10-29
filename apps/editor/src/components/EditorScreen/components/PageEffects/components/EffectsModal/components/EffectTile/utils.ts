@@ -51,19 +51,19 @@ const getFrameEffectContent = (effect: FrameEffectDraft): EffectTileContent => {
   switch (kind) {
     case 'shadow':
       return {
-        effectType: 'Боковая тень',
+        effectType: 'Рамочная тень',
         effectDetails: options.shadow?.animation?.preset ?? 'Без анимации',
       };
 
     case 'text':
       return {
-        effectType: 'Боковой текст',
+        effectType: 'Рамочный текст',
         effectDetails: options.text?.leftText ?? '',
       };
 
     case 'component':
       return {
-        effectType: 'Боковой компонент',
+        effectType: 'Рамочный компонент',
         effectDetails: options.component?.name ?? 'Компонент не выбран',
       };
   }

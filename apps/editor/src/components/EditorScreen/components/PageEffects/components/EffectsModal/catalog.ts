@@ -79,17 +79,17 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
       {
         value: 'shadow',
         label: 'Shadow',
-        addLabel: 'Добавить боковую тень',
+        addLabel: 'Добавить рамочную тень',
       },
       {
         value: 'text',
         label: 'Text',
-        addLabel: 'Добавить боковой текст',
+        addLabel: 'Добавить рамочный текст',
       },
       {
         value: 'component',
         label: 'Component',
-        addLabel: 'Добавить боковой компонент',
+        addLabel: 'Добавить рамочный компонент',
       },
     ],
   },

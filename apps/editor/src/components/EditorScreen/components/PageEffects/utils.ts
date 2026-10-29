@@ -130,13 +130,13 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
 export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
   const id = crypto.randomUUID();
 
-  let slug = 'Новый боковой компонент';
+  let slug = 'Новый рамочный компонент';
   let options: FrameEffectDraft['options'] = {
     style: { zIndex: 1 },
   };
 
   if (kind === 'shadow') {
-    slug = 'Новая боковая тень';
+    slug = 'Новая рамочная тень';
     options = {
       shadow: {
         id: crypto.randomUUID(),
@@ -163,7 +163,7 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
       },
     };
   } else if (kind === 'text') {
-    slug = 'Новый боковой текст';
+    slug = 'Новый рамочный текст';
     options = {
       text: {
         id: crypto.randomUUID(),

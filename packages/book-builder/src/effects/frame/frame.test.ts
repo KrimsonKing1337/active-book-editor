@@ -59,8 +59,8 @@ test('normalizes independent shadow, text and component effects', () => {
   });
 });
 
-test('rejects legacy side groups and invalid independent text', () => {
-  const legacy = {
+test('rejects malformed frame groups and invalid independent text', () => {
+  const invalidKind = {
     id: 'legacy',
     type: 'frame',
     options: {
@@ -83,10 +83,10 @@ test('rejects legacy side groups and invalid independent text', () => {
     },
   };
 
-  assert.deepEqual(normalizeFrameEffects({ frame: [legacy, invalid] }), []);
+  assert.deepEqual(normalizeFrameEffects({ frame: [invalidKind, invalid] }), []);
 });
 
-test('resolves custom side layer styles on the wrapper', () => {
+test('resolves custom frame layer styles on the wrapper', () => {
   const result = resolveFrameOptions({
     layer: 'above',
     frameMask: {
@@ -115,7 +115,7 @@ test('resolves custom side layer styles on the wrapper', () => {
   assert.equal(result.style.backdropFilter, 'blur(3px)');
 });
 
-test('resolves filters on one side effect at a time', () => {
+test('resolves filters on one frame effect at a time', () => {
   const shadow = {
     id: 'shadow',
     sides: ['top', 'bottom'] as FrameSide[],
@@ -163,7 +163,7 @@ test('resolves filters on one side effect at a time', () => {
   assert.deepEqual(shadow.style, { color: '#ff0000', zIndex: 4 });
 });
 
-test('rejects missing side text fields and invalid shadow IDs', () => {
+test('rejects missing frame text fields and invalid shadow IDs', () => {
   const malformed = [
     {
       id: 'shadow',
