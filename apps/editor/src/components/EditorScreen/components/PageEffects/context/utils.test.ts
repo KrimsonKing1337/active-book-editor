@@ -37,7 +37,7 @@ const background = {
 } as EditorEffectDraft;
 
 const frame = {
-  id: 'side-1',
+  id: 'frame-1',
   type: 'frame',
   kind: 'shadow',
   slug: 'Frame',
@@ -72,18 +72,18 @@ test('preserves existing preview key formats', () => {
   });
 
   const frameKey = getFrameStylePreviewKey({
-    effectId: 'side-1',
+    effectId: 'frame-1',
     kind: 'text',
     itemId: 'text-1',
   });
 
   assert.equal(backgroundKey, JSON.stringify(['background-1', 'image', 'image-1']));
   assert.equal(defaultMediaKey, JSON.stringify(['background-1', 'shadow', null]));
-  assert.equal(frameKey, JSON.stringify(['side-1', 'text', 'text-1']));
-  assert.equal(getFramePreviewKey('side-1', 'text-1'), JSON.stringify(['side-1', 'text-1']));
+  assert.equal(frameKey, JSON.stringify(['frame-1', 'text', 'text-1']));
+  assert.equal(getFramePreviewKey('frame-1', 'text-1'), JSON.stringify(['frame-1', 'text-1']));
 });
 
-test('commits pending background and side styles without mutating existing effects', () => {
+test('commits pending background and frame styles without mutating existing effects', () => {
   const backgroundKey = getBackgroundPreviewKey({
     effectId: 'background-1',
     layer: 'image',
@@ -91,7 +91,7 @@ test('commits pending background and side styles without mutating existing effec
   });
 
   const frameKey = getFrameStylePreviewKey({
-    effectId: 'side-1',
+    effectId: 'frame-1',
     kind: 'shadow',
     itemId: 'shadow-1',
   });
@@ -135,7 +135,7 @@ test('keeps effect references unchanged when there are no relevant previews', ()
   assert.equal(updatedEffects[1], frame);
 });
 
-test('groups independent background and side effects', () => {
+test('groups independent background and frame effects', () => {
   const previous = {
     audio: [],
     vibration: [],

@@ -30,7 +30,7 @@ type EffectsBrowserPicked = Pick<
   | 'onAddVibration'
   | 'onAddFlashlight'
   | 'onAddBackground'
-  | 'onAddSide'
+  | 'onAddFrame'
   | 'onSelectEffect'
 >;
 
@@ -74,7 +74,7 @@ export const EffectsBrowser = ({
   onAddVibration,
   onAddFlashlight,
   onAddBackground,
-  onAddSide,
+  onAddFrame,
   onSelectEffect,
   onCategoryChange,
   onGroupChange,
@@ -142,7 +142,7 @@ export const EffectsBrowser = ({
     } else if (effectCategory === 'background') {
       onAddBackground(effectGroup as BackgroundEffectKind);
     } else if (effectCategory === 'frame') {
-      onAddSide(effectGroup as FrameEffectKind);
+      onAddFrame(effectGroup as FrameEffectKind);
     } else if (effectCategory === 'vibration') {
       onAddVibration();
     } else if (effectCategory === 'flashlight') {

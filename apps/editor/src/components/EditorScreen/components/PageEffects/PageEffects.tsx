@@ -150,7 +150,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addSide = (kind: FrameEffectKind) => {
+  const addFrame = (kind: FrameEffectKind) => {
     const effect = createFrameEffect(kind);
     const currentEffects = getCurrentEffects();
 
@@ -373,7 +373,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           onAddVibration={addVibration}
           onAddFlashlight={addFlashlight}
           onAddBackground={addBackground}
-          onAddSide={addSide}
+          onAddFrame={addFrame}
           onSelectEffect={selectEffect}
           onUpdateEffect={updateEffect}
           onDuplicateEffect={duplicateEffect}

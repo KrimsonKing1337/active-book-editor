@@ -123,7 +123,7 @@ const LayoutSettings = ({
 
 type FrameSideCheckboxesProps = {
   selectedSides: FrameSide[];
-  onChange: (frame: FrameSide, isEnabled: boolean) => void;
+  onChange: (side: FrameSide, isEnabled: boolean) => void;
 };
 
 const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesProps) => {
@@ -314,7 +314,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     });
   };
 
-  const handleComponentMaskSideChange = (frame: FrameSide, isEnabled: boolean) => {
+  const handleComponentMaskSideChange = (side: FrameSide, isEnabled: boolean) => {
     let sides = [...componentMask.sides, side];
 
     if (!isEnabled) {
@@ -351,7 +351,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     updateShadow({ thickness: val });
   };
 
-  const handleSideChange = (frame: FrameSide, isEnabled: boolean) => {
+  const handleSideChange = (side: FrameSide, isEnabled: boolean) => {
     if (!shadow) {
       return;
     }

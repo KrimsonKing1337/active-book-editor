@@ -94,7 +94,7 @@ const checkComposition = async (backgroundColor = 'rgb(32, 64, 96)') => {
     filter: 'brightness(1.2)',
   });
   await expect.element(frame).toHaveStyle({ zIndex: '2' });
-  const shadow = side?.querySelector<HTMLElement>('[class*="FrameShadow-module__FrameShadow"]') ?? null;
+  const shadow = frame?.querySelector<HTMLElement>('[class*="FrameShadow-module__FrameShadow"]') ?? null;
 
   if (!shadow) {
     throw new Error('Элемент боковой тени не найден');
