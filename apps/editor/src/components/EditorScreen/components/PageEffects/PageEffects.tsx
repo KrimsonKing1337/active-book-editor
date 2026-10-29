@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import type { BackgroundEffectKind, SideEffectKind } from '@active-book/book-builder/effects';
+import type { BackgroundEffectKind, FrameEffectKind } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 
@@ -10,7 +10,7 @@ import type {
   EditorEffectDraft,
   VibrationEffectDraft,
   FlashlightEffectDraft,
-  SideEffectDraft,
+  FrameEffectDraft,
 } from './@types';
 
 import { usePageEffects } from './context';
@@ -22,7 +22,7 @@ import {
   createBackgroundEffect,
   createFlashlightEffect,
   createVibrationEffect,
-  createSideEffect,
+  createFrameEffect,
 } from './utils';
 
 import styles from './PageEffects.module.scss';
@@ -150,8 +150,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedEffectId(effect.id);
   };
 
-  const addSide = (kind: SideEffectKind) => {
-    const effect = createSideEffect(kind);
+  const addSide = (kind: FrameEffectKind) => {
+    const effect = createFrameEffect(kind);
     const currentEffects = getCurrentEffects();
 
     writeEffects([...currentEffects, effect]);
@@ -274,7 +274,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
         };
 
         writeEffects([...currentEffects, duplicate]);
-      } else if (selectedEffect.type === 'side') {
+      } else if (selectedEffect.type === 'frame') {
         const options = structuredClone(selectedEffect.options);
 
         if (options.shadow) {
@@ -285,7 +285,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
           options.text.id = crypto.randomUUID();
         }
 
-        const duplicate: SideEffectDraft = {
+        const duplicate: FrameEffectDraft = {
           ...selectedEffect,
           id,
           slug,

@@ -1,28 +1,28 @@
 import type { ChangeEvent } from 'react';
 
-import type { SideOptions } from '@active-book/book-builder/effects';
+import type { FrameOptions } from '@active-book/book-builder/effects';
 
 import { IntegerInput } from '../../../IntegerInput';
 import { Select, Button } from '../../../EffectControls';
 
-type ShadowItem = NonNullable<SideOptions['shadow']>;
-type SideAnimation = NonNullable<ShadowItem['animation']>;
-type AnimationPreset = NonNullable<SideAnimation['preset']>;
+type ShadowItem = NonNullable<FrameOptions['shadow']>;
+type FrameAnimation = NonNullable<ShadowItem['animation']>;
+type AnimationPreset = NonNullable<FrameAnimation['preset']>;
 
 type Preset = {
   value: AnimationPreset;
   label: string;
 };
 
-type PlaybackState = NonNullable<SideAnimation['playState']>;
+type PlaybackState = NonNullable<FrameAnimation['playState']>;
 
 type AnimationSettingsProps = {
-  animation?: SideAnimation;
+  animation?: FrameAnimation;
   presets: Preset[];
   defaultDuration: number;
-  playState?: SideAnimation['playState'];
+  playState?: FrameAnimation['playState'];
   onPlaybackChange: (state: PlaybackState) => void;
-  onChange: (animation: SideAnimation) => void;
+  onChange: (animation: FrameAnimation) => void;
 };
 
 export const AnimationSettings = ({
@@ -33,7 +33,7 @@ export const AnimationSettings = ({
   onChange,
   onPlaybackChange,
 }: AnimationSettingsProps) => {
-  const updateAnimation = (changes: Partial<SideAnimation>) => {
+  const updateAnimation = (changes: Partial<FrameAnimation>) => {
     onChange({
       ...animation,
       ...changes,

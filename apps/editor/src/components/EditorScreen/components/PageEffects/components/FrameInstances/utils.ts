@@ -1,32 +1,32 @@
-import { resolveSideOptions } from '@active-book/book-builder/effects';
+import { resolveFrameOptions } from '@active-book/book-builder/effects';
 
-import type { SideEffectDraft } from '../../@types';
-import type { SideItemPreviews, SideStylePreviews } from '../../context';
+import type { FrameEffectDraft } from '../../@types';
+import type { FrameItemPreviews, FrameStylePreviews } from '../../context';
 
 
-import { getSidePreviewKey, getSideStylePreviewKey } from '../../context';
+import { getFramePreviewKey, getFrameStylePreviewKey } from '../../context';
 
-type ResolveSideInstanceOptionsParams = {
-  effect: SideEffectDraft;
-  previews: SideItemPreviews;
-  stylePreviews: SideStylePreviews;
+type ResolveFrameInstanceOptionsParams = {
+  effect: FrameEffectDraft;
+  previews: FrameItemPreviews;
+  stylePreviews: FrameStylePreviews;
 };
 
-export const resolveSideInstanceOptions = ({
+export const resolveFrameInstanceOptions = ({
   effect,
   previews,
   stylePreviews,
-}: ResolveSideInstanceOptionsParams) => {
+}: ResolveFrameInstanceOptionsParams) => {
   const { shadow, text } = effect.options;
 
-  const shadowPreviewKey = shadow ? getSidePreviewKey(effect.id, shadow.id) : undefined;
-  const textPreviewKey = text ? getSidePreviewKey(effect.id, text.id) : undefined;
+  const shadowPreviewKey = shadow ? getFramePreviewKey(effect.id, shadow.id) : undefined;
+  const textPreviewKey = text ? getFramePreviewKey(effect.id, text.id) : undefined;
 
   const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
   const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
 
   const shadowStyleKey = shadow
-    ? getSideStylePreviewKey({
+    ? getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'shadow',
       itemId: shadow.id,
@@ -34,13 +34,13 @@ export const resolveSideInstanceOptions = ({
     : undefined;
 
   const textStyleKey = text
-    ? getSideStylePreviewKey({
+    ? getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'text',
       itemId: text.id,
     })
     : undefined;
-  const componentStyleKey = getSideStylePreviewKey({
+  const componentStyleKey = getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'component',
     itemId: effect.id,
@@ -86,7 +86,7 @@ export const resolveSideInstanceOptions = ({
   const resolvedText = previewText ?? undefined;
   const previewComponentStyle = componentStyle ?? effect.options.style;
 
-  return resolveSideOptions({
+  return resolveFrameOptions({
     ...effect.options,
     shadow: resolvedShadow,
     text: resolvedText,

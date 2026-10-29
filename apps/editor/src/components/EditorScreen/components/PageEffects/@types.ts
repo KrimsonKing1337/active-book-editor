@@ -9,9 +9,9 @@ export type {
   BackgroundEffect as BackgroundEffectDraft,
   BackgroundOptions,
   BackgroundEffectKind,
-  SideEffect as SideEffectDraft,
-  SideOptions,
-  SideEffectKind,
+  FrameEffect as FrameEffectDraft,
+  FrameOptions,
+  FrameEffectKind,
 } from '@active-book/book-builder/effects';
 
 export type OptionUpdater<T> = <K extends keyof T>(name: K, value: T[K]) => void;
