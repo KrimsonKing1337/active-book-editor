@@ -121,6 +121,35 @@ const LayoutSettings = ({
   );
 };
 
+type FrameSideCheckboxesProps = {
+  selectedSides: FrameSide[];
+  onChange: (side: FrameSide, isEnabled: boolean) => void;
+};
+
+const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesProps) => {
+  const checkboxes = frameSides.map((sideCur) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      onChange(sideCur.value, e.target.checked);
+    };
+
+    return (
+      <Checkbox
+        key={sideCur.value}
+        checked={selectedSides.includes(sideCur.value)}
+        onChange={handleChange}
+      >
+        {sideCur.label}
+      </Checkbox>
+    );
+  });
+
+  return (
+    <div className={styles.Sides}>
+      {checkboxes}
+    </div>
+  );
+};
+
 export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSettingsProps) => {
   const { definitions } = useCustomComponents();
 
@@ -430,23 +459,7 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               Стороны
             </span>
 
-            <div className={styles.Sides}>
-              {frameSides.map((sideCur) => {
-                const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-                  handleSideChange(sideCur.value, e.target.checked);
-                };
-
-                return (
-                  <Checkbox
-                    key={sideCur.value}
-                    checked={shadow.sides.includes(sideCur.value)}
-                    onChange={handleChange}
-                  >
-                    {sideCur.label}
-                  </Checkbox>
-                );
-              })}
-            </div>
+            <FrameSideCheckboxes selectedSides={shadow.sides} onChange={handleSideChange} />
           </div>
 
           <label className={styles.Field}>
@@ -596,23 +609,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
             </Checkbox>
 
             {componentMask.enabled && (
-              <div className={styles.Sides}>
-                {frameSides.map((sideCur) => {
-                  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-                    handleComponentMaskSideChange(sideCur.value, e.target.checked);
-                  };
-
-                  return (
-                    <Checkbox
-                      key={sideCur.value}
-                      checked={componentMask.sides.includes(sideCur.value)}
-                      onChange={handleChange}
-                    >
-                      {sideCur.label}
-                    </Checkbox>
-                  );
-                })}
-              </div>
+              <FrameSideCheckboxes
+                selectedSides={componentMask.sides}
+                onChange={handleComponentMaskSideChange}
+              />
             )}
           </div>
 
