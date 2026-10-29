@@ -15,7 +15,7 @@ type HeaderProps = {
   showStructure: boolean;
   showNarrative: boolean;
   showBackgrounds: boolean;
-  showSideEffects: boolean;
+  showFrameEffects: boolean;
   buildState: BuildState;
   buttonIsDisabled: boolean;
   structureButtonIsDisabled: boolean;
@@ -26,7 +26,7 @@ type HeaderProps = {
   onToggleStructure: () => void;
   onToggleNarrative: () => void;
   onToggleBackgrounds: () => void;
-  onToggleSideEffects: () => void;
+  onToggleFrameEffects: () => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextComponent: (name: TextComponentName) => void;
@@ -43,7 +43,7 @@ export const Header = ({
   showStructure,
   showNarrative,
   showBackgrounds,
-  showSideEffects,
+  showFrameEffects,
   buildState,
   buttonIsDisabled,
   structureButtonIsDisabled,
@@ -54,7 +54,7 @@ export const Header = ({
   onToggleStructure,
   onToggleNarrative,
   onToggleBackgrounds,
-  onToggleSideEffects,
+  onToggleFrameEffects,
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextComponent,
@@ -73,7 +73,7 @@ export const Header = ({
 
   const narrativeControlButtonLabel = showNarrative ? 'Скрыть нарратив' : 'Показать нарратив';
   const backgroundControlButtonLabel = showBackgrounds ? 'Скрыть фон' : 'Показать фон';
-  const sideEffectsButtonLabel = showSideEffects ? 'Скрыть боковые эффекты' : 'Показать боковые эффекты';
+  const frameEffectsButtonLabel = showFrameEffects ? 'Скрыть рамочные эффекты' : 'Показать рамочные эффекты';
 
   return (
     <header className={styles.Header}>
@@ -126,8 +126,8 @@ export const Header = ({
           {backgroundControlButtonLabel}
         </button>
 
-        <button type="button" aria-pressed={showSideEffects} onClick={onToggleSideEffects}>
-          {sideEffectsButtonLabel}
+        <button type="button" aria-pressed={showFrameEffects} onClick={onToggleFrameEffects}>
+          {frameEffectsButtonLabel}
         </button>
 
         <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>

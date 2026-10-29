@@ -4,7 +4,7 @@ import { isRecord } from '../utils';
 
 export type FlashlightOptions = Required<Pick<
   FlashlightProps,
-  'duration' | 'delay' | 'playOnLoad' | 'withSideShadow' | 'speed'
+  'duration' | 'delay' | 'playOnLoad' | 'withFrameShadow' | 'speed'
 >>;
 
 export type FlashlightEffect = {
@@ -32,7 +32,7 @@ export const normalizeFlashlightEffects = (value: unknown): FlashlightEffect[] =
       continue;
     }
 
-    const { duration, delay, playOnLoad, withSideShadow, speed } = effect.options;
+    const { duration, delay, playOnLoad, withFrameShadow, speed } = effect.options;
 
     if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 0) {
       continue;
@@ -42,7 +42,7 @@ export const normalizeFlashlightEffects = (value: unknown): FlashlightEffect[] =
       continue;
     }
 
-    if (typeof playOnLoad !== 'boolean' || typeof withSideShadow !== 'boolean') {
+    if (typeof playOnLoad !== 'boolean' || typeof withFrameShadow !== 'boolean') {
       continue;
     }
 
@@ -54,7 +54,7 @@ export const normalizeFlashlightEffects = (value: unknown): FlashlightEffect[] =
       id: effect.id,
       type: 'flashlight',
       slug: typeof effect.slug === 'string' ? effect.slug : 'Новая вспышка',
-      options: { duration, delay, playOnLoad, withSideShadow, speed },
+      options: { duration, delay, playOnLoad, withFrameShadow, speed },
     });
   }
 
