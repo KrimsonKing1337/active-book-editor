@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
-import type { FrameSide } from 'activeBook-core/hooks/effects/side/@types';
+import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/side/@types';
 
 import type { FilterOperation, SideOptions } from '@active-book/book-builder/effects';
 
@@ -134,6 +134,10 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
   } = usePageEffects();
 
   const { shadow, text, component } = effect.options;
+  const componentMask: FrameMask = effect.options.frameMask ?? {
+    enabled: false,
+    sides: ['top', 'right', 'bottom', 'left'],
+  };
   const item = effect.kind === 'shadow' ? shadow : text;
   const previewKey = item ? getSidePreviewKey(effect.id, item.id) : '';
   const preview = sideItemPreviews[previewKey] ?? {};
@@ -260,6 +264,30 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
     };
 
     onUpdate(effect.id, updatedEffect);
+  };
+
+  const handleComponentMaskEnabledChange = (e: ChangeEvent<HTMLInputElement>) => {
+    updateOptions({
+      frameMask: {
+        ...componentMask,
+        enabled: e.target.checked,
+      },
+    });
+  };
+
+  const handleComponentMaskSideChange = (side: FrameSide, isEnabled: boolean) => {
+    let sides = [...componentMask.sides, side];
+
+    if (!isEnabled) {
+      sides = componentMask.sides.filter((cur) => cur !== side);
+    }
+
+    updateOptions({
+      frameMask: {
+        ...componentMask,
+        sides,
+      },
+    });
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -557,6 +585,36 @@ export const SideSettings = ({ effect, onUpdate, onDuplicate, onDelete }: SideSe
               );
             })}
           </Select>
+
+          <div className={styles.Field}>
+            <span>
+              Область отображения
+            </span>
+
+            <Checkbox checked={componentMask.enabled} onChange={handleComponentMaskEnabledChange}>
+              Ограничить рамкой
+            </Checkbox>
+
+            {componentMask.enabled && (
+              <div className={styles.Sides}>
+                {frameSides.map((sideCur) => {
+                  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+                    handleComponentMaskSideChange(sideCur.value, e.target.checked);
+                  };
+
+                  return (
+                    <Checkbox
+                      key={sideCur.value}
+                      checked={componentMask.sides.includes(sideCur.value)}
+                      onChange={handleChange}
+                    >
+                      {sideCur.label}
+                    </Checkbox>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <details>
             <summary>

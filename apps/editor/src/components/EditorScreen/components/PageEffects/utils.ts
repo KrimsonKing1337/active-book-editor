@@ -154,6 +154,14 @@ export const createSideEffect = (kind: SideEffectKind): SideEffectDraft => {
         },
       },
     };
+  } else if (kind === 'component') {
+    options = {
+      style: { zIndex: 1 },
+      frameMask: {
+        enabled: false,
+        sides: ['top', 'right', 'bottom', 'left'],
+      },
+    };
   } else if (kind === 'text') {
     slug = 'Новый боковой текст';
     options = {
