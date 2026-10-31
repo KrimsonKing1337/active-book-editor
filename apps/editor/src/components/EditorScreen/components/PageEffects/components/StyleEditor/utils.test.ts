@@ -1,12 +1,12 @@
-import type { EditorEffectDraft } from '../../@types';
-
 import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
 
+import type { EditorEffectDraft } from '../../@types';
+
 import { getLayerZIndexData } from './utils';
 
-const effects = [
+const effects: EditorEffectDraft[] = [
   {
     id: 'background',
     type: 'background',
@@ -15,29 +15,45 @@ const effects = [
     options: {
       style: { zIndex: 2 },
       shadow: { style: { zIndex: 10 } },
-      image: { style: { zIndex: 5 } },
-      video: { style: { zIndex: 5 } },
+      image: { id: 'image', src: '', style: { zIndex: 5 } },
+      video: { id: 'video', src: '', style: { zIndex: 5 } },
     },
   },
   {
-    id: 'side',
-    type: 'side',
+    id: 'frame-shadow',
+    type: 'frame',
     kind: 'shadow',
-    slug: 'Side',
+    slug: 'Frame shadow',
     options: {
-      style: { zIndex: 9 },
-      shadow: { style: { zIndex: 3 } },
-      text: { style: { zIndex: 9 } },
+      shadow: { id: 'shadow', sides: ['left', 'right'], style: { zIndex: 3 } },
     },
   },
-] as EditorEffectDraft[];
+  {
+    id: 'frame-text',
+    type: 'frame',
+    kind: 'text',
+    slug: 'Frame text',
+    options: {
+      text: { id: 'text', leftText: 'Left', rightText: 'Right', style: { zIndex: 9 } },
+    },
+  },
+  {
+    id: 'frame-component',
+    type: 'frame',
+    kind: 'component',
+    slug: 'Frame component',
+    options: {
+      style: { zIndex: 9 },
+    },
+  },
+];
 
 test('calculates layer bounds from background effects only', () => {
   const data = getLayerZIndexData({
     effects,
     currentStyle: { zIndex: 5 },
     defaultZIndex: 0,
-    isSide: false,
+    isFrame: false,
   });
 
   assert.deepEqual(data, {
@@ -48,12 +64,12 @@ test('calculates layer bounds from background effects only', () => {
   });
 });
 
-test('calculates layer bounds from side effects only', () => {
+test('calculates bounds and equal indexes from frame shadows, text and components only', () => {
   const data = getLayerZIndexData({
     effects,
     currentStyle: { zIndex: 9 },
     defaultZIndex: 0,
-    isSide: true,
+    isFrame: true,
   });
 
   assert.deepEqual(data, {
@@ -65,7 +81,7 @@ test('calculates layer bounds from side effects only', () => {
 });
 
 test('does not count the registered current layer as another layer', () => {
-  const singleLayer = [
+  const singleLayer: EditorEffectDraft[] = [
     {
       id: 'background',
       type: 'background',
@@ -75,20 +91,20 @@ test('does not count the registered current layer as another layer', () => {
         style: { zIndex: 5 },
       },
     },
-  ] as EditorEffectDraft[];
+  ];
 
   const registered = getLayerZIndexData({
     effects: singleLayer,
     currentStyle: { zIndex: 5 },
     defaultZIndex: 0,
-    isSide: false,
+    isFrame: false,
   });
 
   const unregistered = getLayerZIndexData({
     effects: singleLayer,
     currentStyle: {},
     defaultZIndex: 5,
-    isSide: false,
+    isFrame: false,
   });
 
   assert.equal(registered.otherLayersAtSameIndex, false);
@@ -96,7 +112,7 @@ test('does not count the registered current layer as another layer', () => {
 });
 
 test('uses zero for non-finite values and excludes invalid layer indexes', () => {
-  const invalidLayer = [
+  const invalidLayer: EditorEffectDraft[] = [
     {
       id: 'background',
       type: 'background',
@@ -106,13 +122,13 @@ test('uses zero for non-finite values and excludes invalid layer indexes', () =>
         style: { zIndex: 'auto' },
       },
     },
-  ] as EditorEffectDraft[];
+  ];
 
   const data = getLayerZIndexData({
     effects: invalidLayer,
     currentStyle: { zIndex: 'auto' },
     defaultZIndex: 5,
-    isSide: false,
+    isFrame: false,
   });
 
   assert.deepEqual(data, {

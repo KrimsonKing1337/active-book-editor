@@ -4,7 +4,7 @@ import { normalizeAudioEffects } from './audio';
 import { normalizeVibrationEffects } from './vibration';
 import { normalizeFlashlightEffects } from './flashlight';
 import { normalizeBackgroundEffects } from './background';
-import { normalizeSideEffects } from './side';
+import { normalizeFrameEffects } from './frame';
 
 export const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -15,13 +15,13 @@ export const normalizePageEffects = (value: unknown): PageEffects => {
   const vibration = normalizeVibrationEffects(value);
   const flashlight = normalizeFlashlightEffects(value);
   const background = normalizeBackgroundEffects(value);
-  const side = normalizeSideEffects(value);
+  const frame = normalizeFrameEffects(value);
 
   return {
     audio,
     vibration,
     flashlight,
     background,
-    side,
+    frame,
   };
 };

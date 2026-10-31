@@ -7,7 +7,7 @@ with `@vitest/browser-playwright`; it does not use jsdom or mock application log
 
 Two independent tests each start with a fresh, small OPFS project:
 
-1. Add a background and a side shadow via the UI. Set both colors, opacity and
+1. Add a background and a frame shadow via the UI. Set both colors, opacity and
    z-index, and change shadow thickness. Add brightness at 80%, assert its actual
    CSS, then edit it to 120%. Assert saved JSON and computed styles, preserving
    the fixture image while changing the background, preserving the background
@@ -56,7 +56,7 @@ Vitest 4's native `toMatchScreenshot` is supported and enabled. References are
 tracked under `tests/screenshots/EditorScreen.browser.test.tsx/`; failures and
 diffs remain ignored generated artifacts. The viewport is fixed at 1280x900.
 The reference contains the real core composition, including the local image,
-background, side shadow and book text; it is not a synthetic image fixture.
+background, frame shadow and book text; it is not a synthetic image fixture.
 Verified here with Node 24.19.0, Vitest 4.1.12 and system Chromium
 154.0.8037.57 (the Playwright download is blocked by this cloud network policy).
 The complete CI run passed 48 tests in 17 files, including these two integration

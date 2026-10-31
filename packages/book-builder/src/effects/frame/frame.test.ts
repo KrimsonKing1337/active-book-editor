@@ -1,8 +1,8 @@
-import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
-
 import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
+
+import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import { normalizeFrameEffects, resolveFrameOptions } from './frame';
 
@@ -49,6 +49,7 @@ test('normalizes independent shadow, text and component effects', () => {
   const result = normalizeFrameEffects({ frame });
 
   assert.equal(result.length, 3);
+  assert.equal(result[0].slug, 'Новый рамочный эффект');
   assert.equal(result[0].options.layer, 'above');
   assert.equal(result[0].options.shadow?.id, 'shadow-1');
   assert.deepEqual(result[0].options.shadow?.sides, ['left', 'right']);
