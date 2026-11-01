@@ -9,7 +9,7 @@ import { Audio, Vibration, Flashlight, Background, Frame } from 'activeBook-core
 
 import { resolveBackgroundOptions, resolveFrameOptions } from '@active-book/book-builder/effects';
 
-import type { BookDocument, CustomComponentType } from '@types';
+import type { PageDocument, CustomComponentType } from '@types';
 
 
 import { renderNode } from '@utils/renderNode';
@@ -23,12 +23,14 @@ import {
 } from './utils';
 
 type BookPageProps = {
-  document: BookDocument;
+  document: PageDocument;
+  page: number;
+  pageId: string;
   customComponents: Record<string, ComponentType>;
   bookRuntime: BookRuntime;
 };
 
-export const BookPage = ({ document, customComponents, bookRuntime }: BookPageProps) => {
+export const BookPage = ({ document, page, pageId, customComponents, bookRuntime }: BookPageProps) => {
   const content = document.content ?? [];
 
   const audioEffects = getAudioEffects(document);
@@ -38,7 +40,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
   const frameEffects = getFrameEffects(document);
 
   return (
-    <PageWrapper>
+    <PageWrapper data-page-id={pageId}>
       { /* Эффекты */ }
       <>
         {audioEffects.map((effectCur) => {
@@ -46,7 +48,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
             <Audio
               key={effectCur.id}
               id={effectCur.id}
-              page={1}
+              page={page}
               {...effectCur.options}
             />
           );
@@ -57,7 +59,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
             <Flashlight
               key={effectCur.id}
               id={effectCur.id}
-              page={1}
+              page={page}
               {...effectCur.options}
             />
           );
@@ -68,7 +70,7 @@ export const BookPage = ({ document, customComponents, bookRuntime }: BookPagePr
             <Vibration
               key={effectCur.id}
               id={effectCur.id}
-              page={1}
+              page={page}
               {...effectCur.options}
             />
           );

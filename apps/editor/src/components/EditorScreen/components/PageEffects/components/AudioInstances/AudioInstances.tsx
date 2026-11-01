@@ -18,13 +18,15 @@ import { type ResolvedAudioSource, resolveAudioSource } from './utils';
 type AudioInstanceProps = {
   effect: AudioEffectDraft;
   project: BookProject | null;
+  page: number;
 };
 
 type AudioInstancesProps = {
   project: BookProject | null;
+  page: number;
 };
 
-const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
+const AudioInstance = ({ effect, project, page }: AudioInstanceProps) => {
   const dispatch = useDispatch();
 
   const { setAudioPreviewStatus } = usePageEffects();
@@ -179,7 +181,7 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
     <Audio
       key={audioInstanceKey}
       id={id}
-      page={0}
+      page={page}
       src={currentSource.src}
       format={currentSource.format}
       type={type}
@@ -195,7 +197,7 @@ const AudioInstance = ({ effect, project }: AudioInstanceProps) => {
   );
 };
 
-export const AudioInstances = ({ project }: AudioInstancesProps) => {
+export const AudioInstances = ({ project, page }: AudioInstancesProps) => {
   const { effects } = usePageEffects();
 
   const audioEffects = effects.filter((effectCur): effectCur is AudioEffectDraft => {
@@ -206,7 +208,12 @@ export const AudioInstances = ({ project }: AudioInstancesProps) => {
     <>
       {audioEffects.map((effectCur) => {
         return (
-          <AudioInstance key={effectCur.id} effect={effectCur} project={project} />
+          <AudioInstance
+            key={effectCur.id}
+            effect={effectCur}
+            project={project}
+            page={page}
+          />
         );
       })}
     </>

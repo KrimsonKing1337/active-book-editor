@@ -1,0 +1,258 @@
+{
+  "type": "book",
+  "pages": [
+    {
+      "id": "stable-alpha",
+      "document": {
+        "type": "doc",
+        "attrs": {
+          "pageEffects": {
+            "background": [
+              {
+                "id": "bg-alpha",
+                "type": "background",
+                "kind": "background",
+                "slug": "Фон",
+                "options": {
+                  "style": {
+                    "backgroundColor": "#203040"
+                  }
+                }
+              }
+            ],
+            "frame": [
+              {
+                "id": "frame-alpha",
+                "type": "frame",
+                "kind": "shadow",
+                "slug": "Тень",
+                "options": {
+                  "layer": "above",
+                  "shadow": {
+                    "id": "shadow-alpha",
+                    "sides": [
+                      "left",
+                      "right"
+                    ],
+                    "thickness": 20,
+                    "style": {
+                      "color": "#ff0000"
+                    }
+                  }
+                }
+              }
+            ],
+            "audio": [
+              {
+                "id": "audio-alpha",
+                "type": "audio",
+                "slug": "Звук",
+                "options": {
+                  "src": "assets/tone.wav",
+                  "type": "sfx",
+                  "playOnLoad": false,
+                  "fadeOutWhenUnload": false
+                }
+              }
+            ],
+            "vibration": [
+              {
+                "id": "vibration-alpha",
+                "type": "vibration",
+                "options": {
+                  "duration": 30,
+                  "playOnLoad": false
+                }
+              }
+            ],
+            "flashlight": [
+              {
+                "id": "flashlight-alpha",
+                "type": "flashlight",
+                "options": {
+                  "duration": 30,
+                  "withFrameShadow": true,
+                  "playOnLoad": false
+                }
+              }
+            ]
+          }
+        },
+        "content": [
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Альфа: первая страница"
+              }
+            ]
+          },
+          {
+            "type": "coreComponent",
+            "attrs": {
+              "package": "fixture-parts",
+              "name": "Badge"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stable-beta",
+      "document": {
+        "type": "doc",
+        "attrs": {
+          "pageEffects": {
+            "background": [
+              {
+                "id": "bg-beta",
+                "type": "background",
+                "kind": "background",
+                "slug": "Фон",
+                "options": {
+                  "style": {
+                    "backgroundColor": "#304020"
+                  }
+                }
+              }
+            ],
+            "frame": [
+              {
+                "id": "frame-beta",
+                "type": "frame",
+                "kind": "shadow",
+                "slug": "Тень",
+                "options": {
+                  "layer": "above",
+                  "shadow": {
+                    "id": "shadow-beta",
+                    "sides": [
+                      "left",
+                      "right"
+                    ],
+                    "thickness": 20,
+                    "style": {
+                      "color": "#0000ff"
+                    }
+                  }
+                }
+              }
+            ],
+            "audio": [
+              {
+                "id": "audio-beta",
+                "type": "audio",
+                "slug": "Звук",
+                "options": {
+                  "src": "assets/tone.wav",
+                  "type": "sfx",
+                  "playOnLoad": false,
+                  "fadeOutWhenUnload": false
+                }
+              }
+            ],
+            "vibration": [],
+            "flashlight": []
+          }
+        },
+        "content": [
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Бета: вторая страница"
+              }
+            ]
+          },
+          {
+            "type": "coreComponent",
+            "attrs": {
+              "package": "fixture-parts",
+              "name": "Badge"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stable-gamma",
+      "document": {
+        "type": "doc",
+        "attrs": {
+          "pageEffects": {
+            "background": [
+              {
+                "id": "bg-gamma",
+                "type": "background",
+                "kind": "background",
+                "slug": "Фон",
+                "options": {
+                  "style": {
+                    "backgroundColor": "#402030"
+                  }
+                }
+              },
+              {
+                "id": "bg-custom-gamma",
+                "type": "background",
+                "kind": "component",
+                "slug": "Кастомный эффект",
+                "options": {
+                  "component": {
+                    "package": "fixture-parts",
+                    "name": "Overlay"
+                  }
+                }
+              }
+            ],
+            "frame": [
+              {
+                "id": "frame-gamma",
+                "type": "frame",
+                "kind": "shadow",
+                "slug": "Тень",
+                "options": {
+                  "layer": "above",
+                  "shadow": {
+                    "id": "shadow-gamma",
+                    "sides": [
+                      "left",
+                      "right"
+                    ],
+                    "thickness": 20,
+                    "style": {
+                      "color": "#00ff00"
+                    }
+                  }
+                }
+              }
+            ],
+            "audio": [],
+            "vibration": [],
+            "flashlight": []
+          }
+        },
+        "content": [
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Гамма: третья страница"
+              }
+            ]
+          },
+          {
+            "type": "coreComponent",
+            "attrs": {
+              "package": "fixture-parts",
+              "name": "Badge"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

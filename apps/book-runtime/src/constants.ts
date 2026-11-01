@@ -4,10 +4,9 @@ import type { Config } from 'activeBook-core/@types';
 // eslint-disable-next-line @stylistic/max-len
 export const AUDIO_UNLOCK_SRC = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
 
-export const config: Config = {
+export const config: Omit<Config, 'pages'> = {
   id: 'built-book',
   authorComments: 0,
-  pages: 1,
   defaultTheme: 'dark',
   disableThemes: false,
 };

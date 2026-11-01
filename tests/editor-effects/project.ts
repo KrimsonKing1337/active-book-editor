@@ -1,7 +1,8 @@
-import type { JSONContent } from '@tiptap/core';
 
 import { expect, vi } from 'vitest';
 import { page } from 'vitest/browser';
+
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
@@ -18,7 +19,7 @@ const writeFile = async (directory: FileSystemDirectoryHandle, name: string, con
   await writableStream.close();
 };
 
-export const createProject = async () => {
+export const createProject = async ({ empty = false } = {}) => {
   await clearLastProjectHandle();
   localStorage.clear();
 
@@ -27,7 +28,7 @@ export const createProject = async () => {
   const projectDirectory = await storageRoot.getDirectoryHandle(projectName, { create: true });
   const assetsDirectory = await projectDirectory.getDirectoryHandle('assets', { create: true });
 
-  await writeFile(projectDirectory, 'book.json', book);
+  if (!empty) await writeFile(projectDirectory, 'book.json', book);
   await writeFile(projectDirectory, 'package.json', '{"private":true,"dependencies":{}}');
   await writeFile(assetsDirectory, 'herb.svg', herb);
 
@@ -37,7 +38,7 @@ export const createProject = async () => {
   vi.stubGlobal('showDirectoryPicker', pickDirectory);
   vi.spyOn(window, 'confirm').mockReturnValue(true);
 
-  const readDocument = async (): Promise<JSONContent> => {
+  const readDocument = async (): Promise<BookDocument> => {
     const fileHandle = await projectDirectory.getFileHandle('book.json');
     const file = await fileHandle.getFile();
 
@@ -47,7 +48,7 @@ export const createProject = async () => {
   const readEffects = async () => {
     const document = await readDocument();
 
-    return normalizePageEffects(document.attrs?.pageEffects);
+    return normalizePageEffects(document.pages[0].document.attrs?.pageEffects);
   };
 
   const save = async () => {

@@ -6,7 +6,7 @@ Prototype monorepo for the Active Book visual editor and book build pipeline.
 
 - `apps/editor` — Vite + React + TipTap editor. The editable TipTap document is rendered inside the real `activeBook-core` `App` and `PageWrapper`.
 - `packages/book-builder` — internal Vite-based book builder used both by an npm script and by the editor dev server.
-- `example-book/book.json` — minimal serialized TipTap document for CLI builds.
+- `example-book/book.json` — minimal ordered book containing TipTap page documents for CLI builds.
 
 ## Local core
 
@@ -164,3 +164,5 @@ editor. See [the integration test guide](tests/editor-effects/README.md) for
 scenarios, OS-dialog boundaries, local-core installation and Windows screenshot
 reference commands. The local test book and 1.8 KB graphic live in
 `tests/fixtures/effects-book/`.
+
+See [Multiple-page books](docs/multipage-books.md) for the current book.json model, page/history behavior and browser checks.

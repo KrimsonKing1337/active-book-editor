@@ -1,7 +1,18 @@
 {
   "extends": "./apps/editor/tsconfig.json",
   "compilerOptions": {
-    "types": ["vite/client", "node", "@testing-library/jest-dom", "@vitest/browser-playwright"]
+    "types": [
+      "vite/client",
+      "node",
+      "@testing-library/jest-dom",
+      "@vitest/browser-playwright"
+    ]
   },
-  "include": ["vitest.config.ts", "tests", "apps/editor/src/**/*.component.test.tsx", "apps/editor/src/**/*.browser.test.tsx"]
+  "include": [
+    "vitest.config.ts",
+    "tests",
+    "apps/editor/src/**/*.component.test.tsx",
+    "apps/editor/src/**/*.browser.test.tsx",
+    "scripts/bookRuntime.browser.test.ts"
+  ]
 }

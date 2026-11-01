@@ -1,4 +1,4 @@
-import { type PropsWithChildren, useMemo } from 'react';
+import { type PropsWithChildren, useLayoutEffect, useMemo } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
@@ -16,16 +16,23 @@ import {
 
 type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
+  pageId?: string;
+  onStylesFlusher?: (flush: (() => boolean) | null) => void;
 };
 
-export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderProps) => {
+export const PageEffectsProvider = ({
+  children,
+  editor,
+  pageId = 'page',
+  onStylesFlusher,
+}: PageEffectsProviderProps) => {
   const {
     effects,
     writeEffects,
     getCurrentEffects,
     audioPreviewStatuses,
     setAudioPreviewStatus,
-  } = usePageEffectsState(editor);
+  } = usePageEffectsState(editor, pageId);
 
   const {
     backgroundStylePreviews,
@@ -37,13 +44,20 @@ export const PageEffectsProvider = ({ children, editor }: PageEffectsProviderPro
     markStylesSaved,
   } = useStylePreviews({
     editor,
+    pageId,
     writeEffects,
   });
 
   const {
     frameItemPreviews,
     updateFrameItemPreview,
-  } = useFrameItemPreviews();
+  } = useFrameItemPreviews(pageId);
+
+  useLayoutEffect(() => {
+    onStylesFlusher?.(flushStylePreviews);
+
+    return () => onStylesFlusher?.(null);
+  }, [flushStylePreviews, onStylesFlusher]);
 
   const value = useMemo(() => ({
     effects,

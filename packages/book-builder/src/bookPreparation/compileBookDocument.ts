@@ -1,3 +1,7 @@
+import type { BookDocument } from '../book';
+
+import { isBookDocument } from '../book';
+
 import type {
   BuiltAudioEffect,
   BuiltVibrationEffect,
@@ -27,7 +31,7 @@ const getMappedEffects: GetMappedEffects = (effects) => {
   });
 };
 
-export const compileBookDocument = (document: unknown): Record<string, unknown> => {
+export const compilePageDocument = (document: unknown): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
     throw new Error('book.json must contain an Active Book document');
   }
@@ -61,5 +65,19 @@ export const compileBookDocument = (document: unknown): Record<string, unknown> 
         frame,
       },
     },
+  };
+};
+
+export const compileBookDocument = (book: unknown): BookDocument => {
+  if (!isBookDocument(book)) {
+    throw new Error('book.json must contain a nonempty book with unique page IDs and valid positional ranges');
+  }
+
+  return {
+    ...book,
+    pages: book.pages.map((pageCur) => ({
+      ...pageCur,
+      document: compilePageDocument(pageCur.document),
+    })),
   };
 };

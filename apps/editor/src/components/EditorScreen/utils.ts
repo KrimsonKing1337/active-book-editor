@@ -32,7 +32,7 @@ export const bookBlockNodes = [
 
 // Чтобы явно указать, что дефолтный текстовый узел - это P, пишем его первым.
 // И тогда при нажатии на Enter вставится именно он.
-export const BookDocument = Document.extend({
+export const PageDocument = Document.extend({
   content: '(P | bookBlock)+',
 
   addAttributes() {
@@ -111,15 +111,14 @@ export const editorExtensions = [
     },
   }),
 
-  BookDocument,
+  PageDocument,
   ActiveBlockHighlight,
   ...bookBlockNodes,
 ];
 
-export const editorConfig: Config = {
+export const editorConfig: Omit<Config, 'pages'> = {
   id: 'editor-preview',
   authorComments: 0,
-  pages: 0,
   defaultTheme: 'dark',
   disableThemes: false,
 };

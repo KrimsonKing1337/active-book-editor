@@ -1,4 +1,4 @@
-import type { JSONContent } from '@tiptap/core';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import type { ProjectDirectoryHandle, ProjectFileHandle } from './fileSystemAccess';
 
@@ -11,9 +11,9 @@ export interface ProjectStorage {
   readonly name: string;
 
   getHasBook(): Promise<boolean>;
-  initialize(document: JSONContent): Promise<void>;
-  readBook(): Promise<JSONContent>;
-  writeBook(document: JSONContent): Promise<void>;
+  initialize(document: BookDocument): Promise<void>;
+  readBook(): Promise<BookDocument>;
+  writeBook(document: BookDocument): Promise<void>;
   getBuildFiles(): AsyncIterable<ProjectBuildFile>;
   getAssetFile(path: string): Promise<File>;
   importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string>;
@@ -30,7 +30,7 @@ export type BookProject = {
 
 export type OpenedBookProject = {
   project: BookProject;
-  document: JSONContent;
+  document: BookDocument;
 };
 
 export type PendingLocalProject = {

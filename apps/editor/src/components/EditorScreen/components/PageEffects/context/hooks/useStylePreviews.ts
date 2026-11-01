@@ -22,10 +22,11 @@ import {
 
 type UseStylePreviewsParams = {
   editor: Editor | null;
+  pageId: string;
   writeEffects: (effects: EditorEffectDraft[]) => void;
 };
 
-export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParams) => {
+export const useStylePreviews = ({ editor, pageId, writeEffects }: UseStylePreviewsParams) => {
   const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
   const [frameStylePreviews, setFrameStylePreviews] = useState<FrameStylePreviews>({});
 
@@ -34,8 +35,20 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
   const framePreviewRafRef = useRef<number | null>(null);
   const backgroundFrameRef = useRef<number | null>(null);
   const hasUnsavedStylesRef = useRef(false);
+  const previewPageRef = useRef(pageId);
+
+  useEffect(() => {
+    previewPageRef.current = pageId;
+    backgroundStylesRef.current = {};
+    frameStylesRef.current = {};
+    setBackgroundStylePreviews({});
+    setFrameStylePreviews({});
+    hasUnsavedStylesRef.current = false;
+    setHasPendingStyles(false);
+  }, [pageId]);
 
   const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>((update) => {
+    if (previewPageRef.current !== pageId) return;
     const { style } = update;
     const key = getBackgroundPreviewKey(update);
 
@@ -57,9 +70,10 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
 
       backgroundFrameRef.current = null;
     });
-  }, []);
+  }, [pageId]);
 
   const updateFrameStylePreview = useCallback((update: FrameStylePreviewUpdate) => {
+    if (previewPageRef.current !== pageId) return;
     const { style } = update;
     const key = getFrameStylePreviewKey(update);
 
@@ -81,7 +95,7 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
 
       framePreviewRafRef.current = null;
     });
-  }, []);
+  }, [pageId]);
 
   useEffect(() => {
     return () => {
@@ -154,14 +168,15 @@ export const useStylePreviews = ({ editor, writeEffects }: UseStylePreviewsParam
   }, []);
 
   const markStylesSaved = useCallback(() => {
+    if (previewPageRef.current !== pageId) return;
     hasUnsavedStylesRef.current = false;
 
     setHasPendingStyles(false);
-  }, []);
+  }, [pageId]);
 
   return {
-    backgroundStylePreviews,
-    frameStylePreviews,
+    backgroundStylePreviews: previewPageRef.current === pageId ? backgroundStylePreviews : {},
+    frameStylePreviews: previewPageRef.current === pageId ? frameStylePreviews : {},
     updateBackgroundStylePreview,
     updateFrameStylePreview,
     flushStylePreviews,

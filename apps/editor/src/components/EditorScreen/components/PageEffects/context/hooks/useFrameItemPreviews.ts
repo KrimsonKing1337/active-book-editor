@@ -1,13 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { FrameItemPreviews, FrameItemPreviewUpdate } from '../@types';
 
 import { getFramePreviewKey } from '../utils';
 
-export const useFrameItemPreviews = () => {
-  const [frameItemPreviews, setFrameItemPreviews] = useState<FrameItemPreviews>({});
+export const useFrameItemPreviews = (pageId: string) => {
+  const ownerRef = useRef(pageId);
+  ownerRef.current = pageId;
+  const [source, setSource] = useState<{ pageId: string; items: FrameItemPreviews }>({ pageId, items: {} });
+  const frameItemPreviews = source.pageId === pageId ? source.items : {};
+
+  useEffect(() => setSource({ pageId, items: {} }), [pageId]);
 
   const updateFrameItemPreview = useCallback((update: FrameItemPreviewUpdate) => {
+    if (ownerRef.current !== pageId) return;
     const {
       effectId,
       itemId,
@@ -15,18 +21,22 @@ export const useFrameItemPreviews = () => {
     } = update;
     const key = getFramePreviewKey(effectId, itemId);
 
-    setFrameItemPreviews((current) => {
+    setSource((sourceCur) => {
+      const current = sourceCur.pageId === pageId ? sourceCur.items : {};
       const itemPreview = {
         ...current[key],
         ...changes,
       };
 
       return {
-        ...current,
-        [key]: itemPreview,
+        pageId,
+        items: {
+          ...current,
+          [key]: itemPreview,
+        },
       };
     });
-  }, []);
+  }, [pageId]);
 
   return {
     frameItemPreviews,

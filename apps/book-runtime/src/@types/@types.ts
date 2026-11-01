@@ -5,7 +5,7 @@ import type { BookComponentProps } from '@active-book/types';
 import type { BuiltPageEffects } from '@root/packages/book-builder/src/effects';
 
 export type BookMark = {
-  type: string;
+  type?: string;
   attrs?: Record<string, unknown>;
 };
 
@@ -16,15 +16,15 @@ export type BookNodeAttrs = {
 };
 
 export type BookNode = {
-  type: string;
+  type?: string;
   text?: string;
   marks?: BookMark[];
   attrs?: BookNodeAttrs;
   content?: BookNode[];
 };
 
-export type BookDocument = {
-  type: string;
+export type PageDocument = {
+  type?: string;
   attrs?: {
     pageEffects?: BuiltPageEffects;
   };

@@ -1,0 +1,48 @@
+.Pages {
+  display: flex;
+  flex-shrink: 0;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 16px;
+  overflow: auto;
+
+  color: #eee;
+
+  background: #202020;
+
+  ol {
+    display: flex;
+    gap: 12px;
+
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    gap: 4px;
+
+    white-space: nowrap;
+  }
+
+  button {
+    padding: 5px 8px;
+
+    color: inherit;
+
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.4;
+    }
+
+    &[aria-current='page'] {
+      background: #344d72;
+      border-color: #94b9f2;
+    }
+  }
+}

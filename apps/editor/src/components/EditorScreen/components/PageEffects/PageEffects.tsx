@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import type { BackgroundEffectKind, FrameEffectKind } from '@active-book/book-builder/effects';
 
@@ -48,6 +48,13 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   const [styleSaveError, setStyleSaveError] = useState('');
 
   const savingStylesRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useLayoutEffect(() => {
+    mountedRef.current = true;
+
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const persistStyles = async (): Promise<boolean> => {
     if (savingStylesRef.current) {
@@ -71,6 +78,8 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
       }
 
       const savedProject = await onSaveProject();
+
+      if (!mountedRef.current) return false;
 
       if (!savedProject) {
         throw new Error('Проект не был сохранён');
@@ -96,7 +105,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
   const afterStylesSaved = (action: () => void) => {
     void persistStyles().then((saved) => {
-      if (saved) {
+      if (saved && mountedRef.current) {
         action();
       }
     });

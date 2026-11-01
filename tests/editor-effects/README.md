@@ -31,8 +31,7 @@ selection updates, rather than setting DOM values or bypassing handlers.
 
 ## Run (PowerShell, repository root)
 
-Use the existing sibling checkouts and Node 24.19.0. The branch's lockfile
-references the generated core 0.0.25 archive. If you already have that exact
+Use the existing sibling checkouts and Node 24.19.0. The lockfile references the generated core archive named in the root package.json. If you already have that exact
 archive, run `npm ci`. If it is missing or locally rebuilt with a different
 checksum, run `npm ci` in `activeBook-types` and `activeBook-react-core-next`,
 then run `npm run core:package` in this repository. That supported script
@@ -93,3 +92,9 @@ Browser Mode tests. Restoration here is an application remount in the same
 browser context. Those OS permission flows need a separate manual test or a
 platform-specific end-to-end setup. Animated presets, audio/video and project
 build/export are intentionally outside this visual-effects lifecycle scenario.
+
+
+The multipage editor now displays real page positions (1 of 1 in this fixture).
+Its Linux screenshot reference has been refreshed for that intentional change.
+Regenerate/review the Windows reference using the existing --update workflow on
+Windows; Linux rendering is not used to invent a Windows reference.
