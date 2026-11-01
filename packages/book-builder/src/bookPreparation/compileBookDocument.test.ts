@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
 
+import type { FrameEffect } from '../effects';
+
 import { compileBookDocument } from './compileBookDocument';
 
 const audioOptions = {
@@ -94,4 +96,68 @@ test('an empty document compiles with empty effect groups', () => {
     },
     content: [],
   });
+});
+
+test('preserves independent frame layers, masks and component references in compiled JSON', () => {
+  const frame: FrameEffect[] = [
+    {
+      id: 'shadow',
+      type: 'frame',
+      kind: 'shadow',
+      slug: 'Shadow',
+      options: {
+        layer: 'behind',
+        shadow: { id: 'shadow-1', sides: ['left', 'right'], style: { zIndex: 3 } },
+      },
+    },
+    {
+      id: 'text',
+      type: 'frame',
+      kind: 'text',
+      slug: 'Text',
+      options: {
+        layer: 'above',
+        text: { id: 'text-1', leftText: 'Left', rightText: 'Right', style: { zIndex: 7 } },
+      },
+    },
+    {
+      id: 'component',
+      type: 'frame',
+      kind: 'component',
+      slug: 'Component',
+      options: {
+        layer: 'above',
+        component: { package: 'custom-effects', name: 'Smoke' },
+        frameMask: { enabled: true, sides: ['top', 'bottom'] },
+        style: { zIndex: 5 },
+      },
+    },
+  ];
+  const document = {
+    type: 'doc',
+    attrs: { pageEffects: { frame } },
+    content: [{ type: 'P' }],
+  };
+  const saved = JSON.parse(JSON.stringify(document));
+
+  const built = compileBookDocument(saved);
+
+  assert.deepEqual(built, {
+    type: 'doc',
+    attrs: {
+      pageEffects: {
+        audio: [],
+        vibration: [],
+        flashlight: [],
+        background: [],
+        frame: [
+          { id: 'shadow', type: 'frame', kind: 'shadow', options: frame[0].options },
+          { id: 'text', type: 'frame', kind: 'text', options: frame[1].options },
+          { id: 'component', type: 'frame', kind: 'component', options: frame[2].options },
+        ],
+      },
+    },
+    content: document.content,
+  });
+  assert.deepEqual(saved, document);
 });

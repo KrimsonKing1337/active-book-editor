@@ -17,10 +17,10 @@ export const openEffects = async () => {
   await page.getByRole('button', { name: 'Эффекты страницы' }).click();
 };
 
-export const addEffect = async (category: 'Background' | 'Side') => {
+export const addEffect = async (category: 'Background' | 'Frame') => {
   await openEffects();
   await page.getByRole('button', { name: new RegExp(`Категория ${category} `) }).click();
-  const effectLabel = category === 'Background' ? 'Добавить фон' : 'Добавить боковую тень';
+  const effectLabel = category === 'Background' ? 'Добавить фон' : 'Добавить рамочную тень';
 
   await page.getByRole('button', { name: effectLabel, exact: true }).click();
 };

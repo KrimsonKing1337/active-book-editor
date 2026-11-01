@@ -6,13 +6,13 @@ type LayerZIndexParams = {
   effects: EditorEffectDraft[];
   currentStyle: CSSProperties;
   defaultZIndex: number;
-  isSide: boolean;
+  isFrame: boolean;
 };
 
 type LayerStyle = CSSProperties | undefined;
 
-const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): LayerStyle[] => {
-  if (isSide && effect.type === 'side') {
+const getLayerStyles = (effect: EditorEffectDraft, isFrame: boolean): LayerStyle[] => {
+  if (isFrame && effect.type === 'frame') {
     const {
       shadow,
       text,
@@ -26,7 +26,7 @@ const getLayerStyles = (effect: EditorEffectDraft, isSide: boolean): LayerStyle[
     ];
   }
 
-  if (!isSide && effect.type === 'background') {
+  if (!isFrame && effect.type === 'background') {
     const {
       style,
       shadow,
@@ -49,7 +49,7 @@ export const getLayerZIndexData = ({
   effects,
   currentStyle,
   defaultZIndex,
-  isSide,
+  isFrame,
 }: LayerZIndexParams) => {
   const rawZIndex = Number(currentStyle.zIndex ?? defaultZIndex);
   const zIndex = Number.isFinite(rawZIndex) ? rawZIndex : 0;
@@ -57,7 +57,7 @@ export const getLayerZIndexData = ({
   const layerZIndexes: number[] = [];
 
   for (const effectCur of effects) {
-    const layerStyles = getLayerStyles(effectCur, isSide);
+    const layerStyles = getLayerStyles(effectCur, isFrame);
 
     for (const styleCur of layerStyles) {
       const value = Number(styleCur?.zIndex);

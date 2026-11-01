@@ -159,7 +159,7 @@ export const normalizeFrameEffects = (value: unknown): FrameEffect[] => {
       }
     }
 
-    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый боковой эффект';
+    const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый рамочный эффект';
 
     result.push({
       id,

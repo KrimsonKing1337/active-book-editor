@@ -1,7 +1,7 @@
 # Effects integration fixture
 
 A one-paragraph book with one static image effect. Tests add editable background
-and side effects through the editor UI; this original image is an independence
+and frame effects through the editor UI; this original image is an independence
 control. No external resources are fetched while tests execute.
 
 `assets/herb.svg` (1,788 bytes) was downloaded from

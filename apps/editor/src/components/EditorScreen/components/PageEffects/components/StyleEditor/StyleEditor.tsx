@@ -75,7 +75,7 @@ export const StyleEditor = ({
     effects,
     currentStyle,
     defaultZIndex,
-    isSide: Boolean(controller),
+    isFrame: Boolean(controller),
   });
 
   const handleLayerChange = (val: number) => {
