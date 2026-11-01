@@ -28,6 +28,10 @@ beforeEach(async () => {
   await expect.element(page.getByRole('button', { name: 'Открыть проект', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Открыть проект', exact: true }).click();
   await expect.element(page.getByText('Тестовая книга эффектов', { exact: true })).toBeVisible();
+  const effectsTrigger = page.getByRole('button', { name: 'Эффекты страницы', exact: true }).query();
+
+  expect(effectsTrigger?.closest('[data-book-region="book"]')).toBeNull();
+  expect(document.querySelector('[data-book-region="book"] #Toolbar')).not.toBeNull();
 });
 
 afterEach(async () => {

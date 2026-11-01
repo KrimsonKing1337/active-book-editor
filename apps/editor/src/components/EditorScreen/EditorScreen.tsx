@@ -403,9 +403,9 @@ export const EditorScreen = () => {
             appMode="editor"
             tableOfContents={[]}
             rangeEffects={[]}
+            editorTools={<PageEffects project={project} onSaveProject={saveCurrentProject} />}
           >
             <AudioInstances project={project} />
-            <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
               {showBackgrounds && (
