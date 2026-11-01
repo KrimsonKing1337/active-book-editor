@@ -10,8 +10,6 @@ import { App, PageWrapper } from 'activeBook-core/components';
 
 import type { BrowserLibrary } from '@active-book/book-builder/components/custom/browser';
 
-
-
 import { importBrowserLibrary, loadProjectLibraries } from '@project/customComponents';
 
 import { useCustomComponents, replaceCustomLibraries } from '@project/customComponentRegistry';
@@ -346,6 +344,8 @@ export const EditorScreen = () => {
     setIsNodeSelectionActive(false);
   };
 
+  const pageEffects = <PageEffects project={project} onSaveProject={saveCurrentProject} />;
+
   return (
     <PageEffectsProvider editor={editor}>
       <div className={editorScreenClassNames}>
@@ -403,9 +403,9 @@ export const EditorScreen = () => {
             appMode="editor"
             tableOfContents={[]}
             rangeEffects={[]}
+            editorTools={pageEffects}
           >
             <AudioInstances project={project} />
-            <PageEffects project={project} onSaveProject={saveCurrentProject} />
 
             <PageWrapper>
               {showBackgrounds && (
