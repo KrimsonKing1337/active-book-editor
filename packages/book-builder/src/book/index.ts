@@ -38,10 +38,10 @@ const hasValidRangeMetadata = (value: unknown): boolean => {
         return false;
       }
 
-      const bothAreInteger = Number.isInteger(from) && Number.isInteger(to);
-      const bothInRange = from >= 1 && to >= from;
+      const hasIntegerBounds = Number.isInteger(from) && Number.isInteger(to);
+      const hasOrderedBounds = from >= 1 && to >= from;
 
-      return bothAreInteger && bothInRange;
+      return hasIntegerBounds && hasOrderedBounds;
     });
   });
 };
