@@ -96,7 +96,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
     replaceEditorDocument(editor, next.pages[0].document);
 
-    setSession((prev) => prev + 1);
+    setSession((previousSession) => previousSession + 1);
 
     activeIdRef.current = next.pages[0].id;
 
@@ -183,7 +183,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
   const selectPage = useCallback((id: string) => {
     const current = getSnapshot();
 
-    const index = current.pages.findIndex((cur) => cur.id === id);
+    const index = current.pages.findIndex((pageCur) => pageCur.id === id);
 
     if (index >= 0) {
       navigateRef.current(index + 1);
@@ -215,14 +215,14 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
       return;
     }
 
-    const index = current.pages.findIndex((cur) => cur.id === id);
+    const index = current.pages.findIndex((pageCur) => pageCur.id === id);
 
     if (index < 0) {
       return;
     }
 
-    const pages = current.pages.filter((cur) => cur.id !== id);
-    const selected = pages.findIndex((cur) => cur.id === activeIdRef.current);
+    const pages = current.pages.filter((pageCur) => pageCur.id !== id);
+    const selected = pages.findIndex((pageCur) => pageCur.id === activeIdRef.current);
     const nextPosition = selected >= 0 ? selected + 1 : Math.min(index + 1, pages.length);
 
     publish({
@@ -237,7 +237,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
   const movePage = useCallback((id: string, direction: -1 | 1) => {
     const current = getSnapshot();
-    const index = current.pages.findIndex((cur) => cur.id === id);
+    const index = current.pages.findIndex((pageCur) => pageCur.id === id);
     const target = index + direction;
 
     if (index < 0 || target < 0 || target >= current.pages.length) {
@@ -253,7 +253,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
       pages,
     });
 
-    const selected = pages.findIndex((cur) => cur.id === activeIdRef.current);
+    const selected = pages.findIndex((pageCur) => pageCur.id === activeIdRef.current);
 
     navigateRef.current(selected + 1);
   }, [getSnapshot, publish]);
