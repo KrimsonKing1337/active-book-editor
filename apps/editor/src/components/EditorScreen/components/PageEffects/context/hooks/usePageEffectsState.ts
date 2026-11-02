@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
@@ -9,11 +9,27 @@ import type { AudioPreviewStatus } from '../@types';
 
 import { getPageEffects, groupPageEffects } from '../utils';
 
-export const usePageEffectsState = (editor: Editor | null) => {
-  const [effects, setEffects] = useState<EditorEffectDraft[]>(() => getPageEffects(editor));
-  const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
+type AudioPreviewStatuses = Record<string, AudioPreviewStatus>;
+
+export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
+  const [source, setSource] = useState(() => {
+    const effects = getPageEffects(editor);
+
+    return { pageId, effects };
+  });
+
+  const effects = source.pageId === pageId ? source.effects : [];
+
+  const currentPageRef = useRef(pageId);
+  currentPageRef.current = pageId;
+
+  const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<AudioPreviewStatuses>({});
 
   const setAudioPreviewStatus = useCallback((id: string, status: AudioPreviewStatus | null) => {
+    if (currentPageRef.current !== pageId) {
+      return;
+    }
+
     setAudioPreviewStatuses((current) => {
       const previous = current[id];
 
@@ -35,19 +51,22 @@ export const usePageEffectsState = (editor: Editor | null) => {
 
       return next;
     });
-  }, []);
+  }, [pageId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!editor) {
-      setEffects([]);
+      setSource({ pageId, effects: [] });
 
       return;
     }
 
+    setAudioPreviewStatuses({});
+
     const syncEffects = () => {
       const nextEffects = getPageEffects(editor);
 
-      setEffects((current) => {
+      setSource((previous) => {
+        const current = previous.effects;
         const hasSameEffectCount = current.length === nextEffects.length;
 
         const everyEffectMatch = current.every((effectCur, index) => {
@@ -56,7 +75,11 @@ export const usePageEffectsState = (editor: Editor | null) => {
 
         const allEffectReferencesMatch = hasSameEffectCount && everyEffectMatch;
 
-        return allEffectReferencesMatch ? current : nextEffects;
+        if (allEffectReferencesMatch && previous.pageId === pageId) {
+          return previous;
+        }
+
+        return { pageId, effects: nextEffects };
       });
     };
 
@@ -67,7 +90,7 @@ export const usePageEffectsState = (editor: Editor | null) => {
     return () => {
       editor.off('transaction', syncEffects);
     };
-  }, [editor]);
+  }, [editor, pageId]);
 
   const writeEffects = useCallback((nextEffects: EditorEffectDraft[]) => {
     if (!editor || editor.isDestroyed) {

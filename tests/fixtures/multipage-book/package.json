@@ -1,0 +1,7 @@
+{
+  "name": "multipage-test-book",
+  "private": true,
+  "dependencies": {
+    "fixture-parts": "file:./dependencies/fixture-parts.tgz"
+  }
+}

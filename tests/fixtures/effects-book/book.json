@@ -1,25 +1,49 @@
 {
-  "type": "doc",
-  "attrs": {
-    "pageEffects": {
-      "background": [{
-        "id": "fixture-image",
-        "type": "background",
-        "kind": "image",
-        "slug": "Лист из локальной книги",
-        "options": {
-          "image": {
-            "id": "fixture-herb",
-            "src": "assets/herb.svg",
-            "style": { "zIndex": 0, "objectFit": "contain", "opacity": "0.4" }
+  "type": "book",
+  "pages": [
+    {
+      "id": "first-page",
+      "document": {
+        "type": "doc",
+        "attrs": {
+          "pageEffects": {
+            "background": [
+              {
+                "id": "fixture-image",
+                "type": "background",
+                "kind": "image",
+                "slug": "Лист из локальной книги",
+                "options": {
+                  "image": {
+                    "id": "fixture-herb",
+                    "src": "assets/herb.svg",
+                    "style": {
+                      "zIndex": 0,
+                      "objectFit": "contain",
+                      "opacity": "0.4"
+                    }
+                  }
+                }
+              }
+            ],
+            "frame": [],
+            "audio": [],
+            "vibration": [],
+            "flashlight": []
           }
-        }
-      }],
-      "frame": [],
-      "audio": [],
-      "vibration": [],
-      "flashlight": []
+        },
+        "content": [
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Тестовая книга эффектов"
+              }
+            ]
+          }
+        ]
+      }
     }
-  },
-  "content": [{ "type": "P", "content": [{ "type": "text", "text": "Тестовая книга эффектов" }] }]
+  ]
 }

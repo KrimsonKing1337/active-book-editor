@@ -12,7 +12,7 @@ import { createBookRuntime } from '@active-book/book-builder/components/custom/r
 
 import 'activeBook-core/styles/styles.scss';
 
-import type { BookDocument } from '@types';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import { BookPage, StartReading } from '@components';
 
@@ -36,18 +36,15 @@ const start = async (): Promise<void> => {
 
   const document = bookDocumentDefault as BookDocument;
 
-  const element = (
-    <BookPage
-      document={document}
-      customComponents={components}
-      bookRuntime={bookRuntime}
-    />
-  );
+  const bookConfig = {
+    ...config,
+    pages: document.pages.length,
+  };
 
   ReactDOM.createRoot(root).render(
     <StoreProvider>
       <MemoryRouter>
-        <AppWrapper config={config} tableOfContents={[]} rangeEffects={[]}>
+        <AppWrapper config={bookConfig} tableOfContents={[]} rangeEffects={[]}>
           <Routes>
             <Route
               path="/"
@@ -61,10 +58,28 @@ const start = async (): Promise<void> => {
               )}
             />
 
-            <Route
-              path="/page-1"
-              element={element}
-            />
+            {document.pages.map((pageCur, index) => {
+              const path = `/page-${index + 1}`;
+
+              const element = (
+                <BookPage
+                  key={pageCur.id}
+                  document={pageCur.document}
+                  page={index + 1}
+                  pageId={pageCur.id}
+                  customComponents={components}
+                  bookRuntime={bookRuntime}
+                />
+              );
+
+              return (
+                <Route
+                  key={pageCur.id}
+                  path={path}
+                  element={element}
+                />
+              );
+            })}
           </Routes>
         </AppWrapper>
       </MemoryRouter>

@@ -4,7 +4,7 @@ import { test } from 'vitest';
 
 import type { FrameEffect } from '../effects';
 
-import { compileBookDocument } from './compileBookDocument';
+import { compilePageDocument } from './compileBookDocument';
 
 const audioOptions = {
   src: 'assets/rain.ogg',
@@ -71,7 +71,7 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
     content: [{ type: 'P' }],
   };
 
-  const built = compileBookDocument(document);
+  const built = compilePageDocument(document);
 
   assert.deepEqual(built, {
     type: 'doc',
@@ -89,7 +89,7 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
 });
 
 test('an empty document compiles with empty effect groups', () => {
-  assert.deepEqual(compileBookDocument({ type: 'doc', content: [] }), {
+  assert.deepEqual(compilePageDocument({ type: 'doc', content: [] }), {
     type: 'doc',
     attrs: {
       pageEffects: { audio: [], vibration: [], flashlight: [], background: [], frame: [] },
@@ -140,7 +140,7 @@ test('preserves independent frame layers, masks and component references in comp
   };
   const saved = JSON.parse(JSON.stringify(document));
 
-  const built = compileBookDocument(saved);
+  const built = compilePageDocument(saved);
 
   assert.deepEqual(built, {
     type: 'doc',

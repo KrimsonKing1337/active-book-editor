@@ -1,4 +1,4 @@
-import type { JSONContent } from '@tiptap/core';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import {
   FileSystemAccessUnsupportedError,
@@ -100,7 +100,7 @@ const openProjectFromHandle = async (
 };
 
 export const createLocalProject = async (
-  document: JSONContent,
+  document: BookDocument,
 ): Promise<BookProject> => {
   const directoryHandle = await pickProjectDirectory();
   const storage = new LocalProjectStorage(directoryHandle);
@@ -122,7 +122,7 @@ export const openLocalProject = async (): Promise<OpenedBookProject> => {
 
 export const saveProject = async (
   project: BookProject,
-  document: JSONContent,
+  document: BookDocument,
 ): Promise<void> => {
   await project.storage.writeBook(document);
 };

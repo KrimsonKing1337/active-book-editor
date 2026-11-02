@@ -1,4 +1,12 @@
 {
-  "type": "doc",
-  "content": []
+  "type": "book",
+  "pages": [
+    {
+      "id": "first-page",
+      "document": {
+        "type": "doc",
+        "content": []
+      }
+    }
+  ]
 }

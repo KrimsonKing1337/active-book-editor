@@ -27,10 +27,11 @@
     "test:browser": "vitest run --configLoader runner --project browser",
     "test:browser:preview": "vitest run --configLoader runner --mode preview --browser.ui=false --browser.headless=false",
     "test:coverage": "vitest run --configLoader runner --coverage",
-    "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml"
+    "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
+    "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.32.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.35.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {

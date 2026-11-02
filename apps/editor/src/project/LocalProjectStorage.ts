@@ -1,4 +1,5 @@
-import type { JSONContent } from '@tiptap/core';
+import type { BookDocument } from '@active-book/book-builder/book';
+import { isBookDocument } from '@active-book/book-builder/book';
 
 import type {
   ProjectBuildFile,
@@ -23,17 +24,6 @@ import {
   ExistingProjectError,
   InvalidProjectError,
 } from './errors';
-
-const getIsBookDocument = (value: unknown): value is JSONContent => {
-  type Value = {
-    type?: unknown;
-  };
-
-  return typeof value === 'object'
-    && value !== null
-    && 'type' in value
-    && (value as Value).type === 'doc';
-};
 
 export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;
@@ -119,11 +109,11 @@ export class LocalProjectStorage implements ProjectStorage {
     }
   }
 
-  async initialize(document: JSONContent): Promise<void> {
+  async initialize(document: BookDocument): Promise<void> {
     return trackProjectWrite(() => this.initializeInternal(document));
   }
 
-  private async initializeInternal(document: JSONContent): Promise<void> {
+  private async initializeInternal(document: BookDocument): Promise<void> {
     const hasBook = await this.getHasBook();
 
     if (hasBook) {
@@ -134,7 +124,7 @@ export class LocalProjectStorage implements ProjectStorage {
     await this.writeBook(document);
   }
 
-  async readBook(): Promise<JSONContent> {
+  async readBook(): Promise<BookDocument> {
     let fileHandle: ProjectFileHandle;
 
     try {
@@ -158,20 +148,18 @@ export class LocalProjectStorage implements ProjectStorage {
       throw new InvalidProjectError('book.json содержит некорректный JSON.');
     }
 
-    const isBookDocument = getIsBookDocument(document);
-
-    if (!isBookDocument) {
-      throw new InvalidProjectError('book.json не содержит документ Active Book.');
+    if (!isBookDocument(document)) {
+      throw new InvalidProjectError('book.json должен содержать книгу с непустым списком страниц и уникальными id');
     }
 
-    return document as JSONContent;
+    return document;
   }
 
-  async writeBook(document: JSONContent): Promise<void> {
+  async writeBook(document: BookDocument): Promise<void> {
     return trackProjectWrite(() => this.writeBookInternal(document));
   }
 
-  private async writeBookInternal(document: JSONContent): Promise<void> {
+  private async writeBookInternal(document: BookDocument): Promise<void> {
     await this.ensureAssetsDirectory();
 
     const fileHandle = await this.directoryHandle.getFileHandle(BOOK_FILE_NAME, {

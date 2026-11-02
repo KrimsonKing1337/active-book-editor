@@ -1,44 +1,52 @@
 {
-  "type": "doc",
-  "content": [
+  "type": "book",
+  "pages": [
     {
-      "type": "H1",
-      "content": [
-        {
-          "type": "text",
-          "text": "Собранная активная книга"
-        }
-      ]
-    },
-    {
-      "type": "P",
-      "content": [
-        {
-          "type": "text",
-          "text": "Этот файл используется командой npm run build:book как минимальный пример."
-        }
-      ]
-    },
-    {
-      "type": "coreComponent",
-      "attrs": {
-        "name": "Counter"
-      }
-    },
-    {
-      "type": "P",
-      "content": [
-        {
-          "type": "text",
-          "text": "Ниже — компонент из внешнего npm-пакета:"
-        }
-      ]
-    },
-    {
-      "type": "coreComponent",
-      "attrs": {
-        "package": "activebook-custom-test",
-        "name": "Counter"
+      "id": "first-page",
+      "document": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "H1",
+            "content": [
+              {
+                "type": "text",
+                "text": "Собранная активная книга"
+              }
+            ]
+          },
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Этот файл используется командой npm run build:book как минимальный пример."
+              }
+            ]
+          },
+          {
+            "type": "coreComponent",
+            "attrs": {
+              "name": "Counter"
+            }
+          },
+          {
+            "type": "P",
+            "content": [
+              {
+                "type": "text",
+                "text": "Ниже — компонент из внешнего npm-пакета:"
+              }
+            ]
+          },
+          {
+            "type": "coreComponent",
+            "attrs": {
+              "package": "activebook-custom-test",
+              "name": "Counter"
+            }
+          }
+        ]
       }
     }
   ]

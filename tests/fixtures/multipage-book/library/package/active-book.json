@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "components": {
+    "Badge": {
+      "title": "Тестовая вставка",
+      "entry": "./index.js",
+      "export": "Badge"
+    },
+    "Overlay": {
+      "title": "Тестовый эффект",
+      "entry": "./index.js",
+      "export": "Overlay"
+    }
+  }
+}
