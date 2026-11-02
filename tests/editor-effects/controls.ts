@@ -59,7 +59,7 @@ export const addFilter = async () => {
   await fillMaskedInput(brightnessInput, '80');
   await page.getByRole('button', { name: 'Применить фильтры', exact: true }).click();
   const backgroundEffect = document.querySelector<HTMLElement>(
-    '#background-effects [data-effect-id]:not([data-effect-id="fixture-image"])',
+    '[data-visual-plane="background"] [data-effect-id]:not([data-effect-id="fixture-image"])',
   );
 
   await expect.element(backgroundEffect).toHaveStyle({ filter: 'brightness(0.8)' });
