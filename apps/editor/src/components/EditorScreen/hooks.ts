@@ -77,9 +77,7 @@ export const useAutosave = ({
 
   const clearAutosaveTimer = useCallback(() => {
     if (autosaveTimerRef.current !== null) {
-
       window.clearTimeout(autosaveTimerRef.current);
-
       autosaveTimerRef.current = null;
     }
   }, []);
