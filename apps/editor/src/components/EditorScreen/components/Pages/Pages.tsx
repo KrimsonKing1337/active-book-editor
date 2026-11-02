@@ -30,7 +30,7 @@ export const Pages = ({
           const isActive = pageCur.id === activeId;
           const current = isActive ? 'page' : undefined;
 
-          const newIndex = index + 1;
+          const pageNumber = index + 1;
 
           const buttonUpIsDisabled = disabled || index === 0;
           const buttonDownIsDisabled = disabled || index === pages.length - 1;
@@ -47,7 +47,7 @@ export const Pages = ({
               </button>
 
               <button
-                aria-label={`Переместить страницу ${newIndex} вверх`}
+                aria-label={`Переместить страницу ${pageNumber} вверх`}
                 disabled={buttonUpIsDisabled}
                 onClick={() => onMove(pageCur.id, -1)}
               >
@@ -55,7 +55,7 @@ export const Pages = ({
               </button>
 
               <button
-                aria-label={`Переместить страницу ${newIndex} вниз`}
+                aria-label={`Переместить страницу ${pageNumber} вниз`}
                 disabled={buttonDownIsDisabled}
                 onClick={() => onMove(pageCur.id, 1)}
               >
@@ -63,7 +63,7 @@ export const Pages = ({
               </button>
 
               <button
-                aria-label={`Удалить страницу ${newIndex}`}
+                aria-label={`Удалить страницу ${pageNumber}`}
                 disabled={buttonDeleteIsDisabled}
                 onClick={() => onDelete(pageCur.id)}
               >
