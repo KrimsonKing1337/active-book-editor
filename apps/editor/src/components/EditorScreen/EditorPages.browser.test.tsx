@@ -116,6 +116,27 @@ test('edits, reorders, saves and reopens three independent pages with isolated h
   await expect.element(page.getByText('1 из 1', { exact: true })).toBeVisible();
 }, 60_000);
 
+test('restoring a saved book does not mark the project dirty', async () => {
+  await typeText('Сохранённая история');
+  await saveBook();
+
+  cleanup();
+
+  render(
+    <StrictMode>
+      <EditorScreen />
+    </StrictMode>,
+  );
+
+  await expect.element(editorText()).toHaveTextContent('Сохранённая история');
+
+  const unload = new Event('beforeunload', { cancelable: true });
+
+  window.dispatchEvent(unload);
+
+  expect(unload.defaultPrevented).toBe(false);
+});
+
 test('page effects keep their settings and pending autosaves cannot overwrite later pages', async () => {
   await typeText('Красная страница');
   await saveBook();
