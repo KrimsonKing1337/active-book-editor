@@ -92,24 +92,27 @@ custom components continue through their existing renderers. Technical route /
 uses the existing Page0 and real audio-unlock button. The persistent book root
 survives reader navigation.
 
-## Stage 4 integration boundary
+## Stage 5 integration boundary
 
-The reviewed src/visualEffects subsystem and its current public exports were not
-relocated or reorganized. Real Background/Frame renderers and audio lifetime were
-not migrated to the new registration contract.
+Core now adapts the existing Background/Frame declarations to the common visual
+session. Its implementation lives under src/controllers/visualEffects, and its
+factory is exported through activeBook-core/controllers/visualEffects. The editor panels,
+PageEffectsProvider, project format and builder are unchanged.
 
-The editor does not yet pass a createVisualEffects session. Its authoritative count
-is book.pages.length, published to core config and Redux. No artificial session
-or recreation on count changes is introduced. When shared renderers are connected,
-create the session once per opened book and update its validation count at the
-same structural-change boundary. A small setPageCount(count) capability can update
-limits without replacing active registrations/controllers or rewriting ranges;
-that session API should be agreed with the renderer integration, not implemented
-as part of this stage.
+AppWrapper owns one stable default session and updates its page-count bounds from
+book.pages.length. Implicit page declarations wait for a valid current page when
+navigation, project replacement and count updates commit separately. Core's
+PageWrapper no longer bulk-clears Background/Frame registrations, so book-owned
+range declarations retain their activation across page switches.
+
+The full integration remains a later stage: create a session for each opened book,
+compile and reconcile registrations directly by stable IDs, connect the panels to
+that model, and adapt TGZ definitions without replacing the existing loader. No
+range UI or book-data migration is introduced here.
 
 ## Checks
 
-Use the preceding core PR's archive (0.0.35 for this implementation). The existing
+Use the preceding core PR's archive (0.0.37 for this implementation). The existing
 npm run core:package workflow rebuilds core and updates the local archive dependency
 when needed; its version/lockfile changes are expected. After npm ci:
 

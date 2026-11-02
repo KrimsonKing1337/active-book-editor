@@ -5,7 +5,7 @@ import type { BookDocument } from '@active-book/book-builder/book';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
-import { clearLastProjectHandle } from '@project/recentProjectStore';
+import { clearLastProjectHandle } from '../../apps/editor/src/project/recentProjectStore';
 
 import book from '../fixtures/effects-book/book.json?raw';
 import herb from '../fixtures/effects-book/assets/herb.svg?raw';

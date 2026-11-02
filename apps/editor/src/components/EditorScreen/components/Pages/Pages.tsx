@@ -43,7 +43,7 @@ export const Pages = ({
                 disabled={disabled}
                 onClick={() => onSelect(pageCur.id)}
               >
-                Страница {newIndex}
+                Страница {pageNumber}
               </button>
 
               <button
