@@ -7,30 +7,69 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "background": [
-              {
+            "audio": [],
+            "vibration": [],
+            "flashlight": []
+          },
+          "visualEffects": [
+            {
+              "effect": {
                 "id": "fixture-image",
-                "type": "background",
-                "kind": "image",
-                "slug": "Лист из локальной книги",
-                "options": {
+                "definitionId": "builtin.background",
+                "params": {
                   "image": {
                     "id": "fixture-herb",
                     "src": "assets/herb.svg",
                     "style": {
-                      "zIndex": 0,
                       "objectFit": "contain",
                       "opacity": "0.4"
                     }
+                  },
+                  "kind": "image"
+                },
+                "placement": {
+                  "coordinates": "bookViewport",
+                  "anchor": {
+                    "region": "bookViewport",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
                   }
+                },
+                "visibility": {
+                  "region": "bookViewport"
+                },
+                "depth": {
+                  "plane": "background",
+                  "order": 0
                 }
+              },
+              "slug": "Лист из локальной книги",
+              "lifetime": {
+                "type": "page",
+                "pageId": "first-page"
               }
-            ],
-            "frame": [],
-            "audio": [],
-            "vibration": [],
-            "flashlight": []
-          }
+            }
+          ]
         },
         "content": [
           {
@@ -45,5 +84,6 @@
         ]
       }
     }
-  ]
+  ],
+  "visualEffects": []
 }

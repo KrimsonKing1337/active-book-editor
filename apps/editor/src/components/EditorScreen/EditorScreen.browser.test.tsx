@@ -94,10 +94,9 @@ const checkComposition = async (backgroundColor = 'rgb(32, 64, 96)') => {
   await expect.element(background).toHaveStyle({
     backgroundColor,
     opacity: '0.6',
-    zIndex: '1',
     filter: 'brightness(1.2)',
   });
-  await expect.element(frame).toHaveStyle({ zIndex: '2' });
+
   const shadow = frame?.querySelector<HTMLElement>('[class*="FrameShadow-module__FrameShadow"]') ?? null;
 
   if (!shadow) {

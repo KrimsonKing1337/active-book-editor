@@ -1,3 +1,4 @@
+
 import ReactDOM from 'react-dom/client';
 
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -8,11 +9,14 @@ import { StoreProvider } from 'activeBook-core/store';
 
 import { AppWrapper } from 'activeBook-core/components';
 
+import { missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
+
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
 import 'activeBook-core/styles/styles.scss';
 
-import type { BookDocument } from '@active-book/book-builder/book';
+import type { BuiltBookDocument } from '@active-book/book-builder/bookPreparation/compileBookDocument';
+import { createCustomVisualDefinitions } from '@active-book/book-builder/components/custom/visual';
 
 import { BookPage, StartReading } from '@components';
 
@@ -32,19 +36,43 @@ if (!root) {
 const bookRuntime = createBookRuntime('reader');
 
 const start = async (): Promise<void> => {
-  const { components } = await loadCustomComponents();
+  const { components, libraries } = await loadCustomComponents();
+  const definitions = createCustomVisualDefinitions(libraries, bookRuntime);
 
-  const document = bookDocumentDefault as BookDocument;
+  const document = bookDocumentDefault as unknown as BuiltBookDocument;
+
+  const missing = missingVisualDefinitions(document.visualEffects, definitions);
+  if (missing.length) {
+    libraries.forEach((cur) => cur.dispose());
+    throw new Error(`Не загружены определения эффектов: ${missing.join(', ')}`);
+  }
 
   const bookConfig = {
     ...config,
     pages: document.pages.length,
   };
 
-  ReactDOM.createRoot(root).render(
+  const reactRoot = ReactDOM.createRoot(root);
+  const dispose = () => {
+    reactRoot.unmount();
+    libraries.forEach((cur) => cur.dispose());
+  };
+  window.addEventListener('pagehide', (event) => {
+    if (!event.persisted) {
+      dispose();
+    }
+  });
+
+  reactRoot.render(
     <StoreProvider>
       <MemoryRouter>
-        <AppWrapper config={bookConfig} tableOfContents={[]} rangeEffects={[]}>
+        <AppWrapper
+          config={bookConfig}
+          tableOfContents={[]}
+          rangeEffects={[]}
+          registrations={document.visualEffects}
+          definitions={definitions}
+        >
           <Routes>
             <Route
               path="/"

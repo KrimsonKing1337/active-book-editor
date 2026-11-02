@@ -25,3 +25,8 @@ export const normalizePageEffects = (value: unknown): PageEffects => {
     frame,
   };
 };
+
+export const normalizeSpecializedEffects = (value: unknown) => {
+  const grouped = normalizePageEffects(value);
+  return { audio: grouped.audio, vibration: grouped.vibration, flashlight: grouped.flashlight };
+};

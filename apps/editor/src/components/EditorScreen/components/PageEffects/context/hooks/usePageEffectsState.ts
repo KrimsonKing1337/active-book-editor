@@ -2,6 +2,8 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
+import { type AuthoredVisualEffect, draftToVisual } from '@active-book/book-builder/visualEffects';
+
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type { EditorEffectDraft } from '../../@types';
@@ -11,7 +13,13 @@ import { getPageEffects, groupPageEffects } from '../utils';
 
 type AudioPreviewStatuses = Record<string, AudioPreviewStatus>;
 
-export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
+type PageEffectsStateOptions = {
+  editor: Editor | null;
+  pageId: string;
+  ownerPageId: string;
+};
+
+export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffectsStateOptions) => {
   const [source, setSource] = useState(() => {
     const effects = getPageEffects(editor);
 
@@ -93,7 +101,7 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
   }, [editor, pageId]);
 
   const writeEffects = useCallback((nextEffects: EditorEffectDraft[]) => {
-    if (!editor || editor.isDestroyed) {
+    if (!editor || editor.isDestroyed || currentPageRef.current !== pageId) {
       return;
     }
 
@@ -104,10 +112,20 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
       previous,
     });
 
-    const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
+    const { background, frame, ...specialized } = groupedEffects;
+    const previousVisuals: AuthoredVisualEffect[] = editor.state.doc.attrs.visualEffects ?? [];
+    const visualEffects = [...(background ?? []), ...(frame ?? [])].map((draft) => {
+      return draftToVisual({
+        draft,
+        pageId: ownerPageId,
+        previous: previousVisuals.find((cur) => cur.effect.id === draft.id),
+      });
+    });
+    const transaction = editor.state.tr.setDocAttribute('pageEffects', specialized)
+      .setDocAttribute('visualEffects', visualEffects);
 
     editor.view.dispatch(transaction);
-  }, [editor]);
+  }, [editor, pageId, ownerPageId]);
 
   const getCurrentEffects = useCallback((): EditorEffectDraft[] => {
     return getPageEffects(editor);

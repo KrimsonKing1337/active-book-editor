@@ -1,3 +1,4 @@
+
 import type { KeyboardEvent } from 'react';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -6,15 +7,20 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-import { AppWrapper, PageWrapper } from 'activeBook-core/components';
+import { PageWrapper } from 'activeBook-core/components';
 
-import type { BrowserLibrary } from '@active-book/book-builder/components/custom/browser';
+import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
-import { importBrowserLibrary, loadProjectLibraries } from '@project/customComponents';
+import { useBookLibraries } from '@project/useBookLibraries';
 
-import { useCustomComponents, replaceCustomLibraries } from '@project/customComponentRegistry';
+
+import { importBrowserLibrary } from '@project/customComponents';
+
+import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
+
+import { VisualBookPreview } from '../components/VisualBookPreview';
 
 import { useBookPages } from '../book/useBookPages';
 import { Pages } from '../components/Pages';
@@ -38,8 +44,6 @@ import {
 } from '../components';
 
 import { AudioInstances } from '../components/PageEffects/components/AudioInstances';
-import { BackgroundInstances } from '../components/PageEffects/components/BackgroundInstances';
-import { FrameInstances } from '../components/PageEffects/components/FrameInstances';
 
 import {
   editorConfig,
@@ -61,7 +65,6 @@ import {
 } from '../constants';
 
 export const EditorWorkspace = () => {
-  const { definitions: customComponentDefinitions } = useCustomComponents();
 
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
@@ -217,45 +220,24 @@ export const EditorWorkspace = () => {
     localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
   }, [showStructure]);
 
+  const libraries = useBookLibraries({
+    project,
+    session: pages.session,
+    revision: librariesRevision,
+    onError: setProjectMessage,
+  });
+  const customComponentDefinitions = libraries.registry.definitions;
+
   useEffect(() => {
-    let cancelled = false;
+    if (libraries.isLoading) {
+      return;
+    }
+    const missing = missingVisualDefinitions(compileVisualEffects(pages.book), libraries.definitions);
+    if (missing.length) {
+      setProjectMessage(`Не загружены определения эффектов: ${missing.join(', ')}`);
+    }
+  }, [pages.book, libraries.definitions, libraries.isLoading]);
 
-    const load = async () => {
-      try {
-        let libraries: BrowserLibrary[] = [];
-
-        if (project) {
-          libraries = await loadProjectLibraries(project.storage);
-        }
-
-        if (cancelled) {
-          libraries.forEach((cur) => cur.dispose());
-
-          return;
-        }
-
-        replaceCustomLibraries(libraries);
-      } catch (error) {
-        if (!cancelled) {
-          console.error('[custom-components] Load failed.', error);
-
-          const errorMessage = error instanceof Error
-            ? error.message
-            : 'Ошибка загрузки библиотек';
-
-          setProjectMessage(errorMessage);
-
-          replaceCustomLibraries([]);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [project, librariesRevision]);
 
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
@@ -368,93 +350,93 @@ export const EditorWorkspace = () => {
   );
 
   return (
-    <PageEffectsProvider
-      editor={editor}
-      pageId={pageScope}
-      onStylesFlusher={registerStylesFlusher}
-    >
-      <div className={editorScreenClassNames}>
-        <Header
-          projectName={projectName}
-          projectMessage={projectMessage}
-          isDirty={isDirty}
-          isProjectBusy={isProjectBusy}
-          showSavedStatus={showSavedStatus}
-          showStructure={showStructure}
-          showNarrative={showNarrative}
-          showBackgrounds={showBackgrounds}
-          showFrameEffects={showFrameEffects}
-          buildState={buildState}
-          buttonIsDisabled={buttonIsDisabled}
-          structureButtonIsDisabled={structureButtonIsDisabled}
-
-          onNewProject={handleNewProject}
-          onOpenProject={handleOpenProject}
-          onSaveProject={handleSaveProject}
-          onToggleStructure={toggleStructure}
-          onToggleNarrative={() => setShowNarrative((visible) => !visible)}
-          onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
-          onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
-          onInsertCustomComponent={handleInsertCustomComponent}
-          customComponentDefinitions={customComponentDefinitions}
-          onInsertTextComponent={handleInsertTextComponent}
-          onBuildBook={buildBook}
-          onImportCustomComponents={handleImportCustomComponents}
-        />
-
-        <Pages
-          pages={pages.book.pages}
-          activeId={pages.activePage.id}
-          disabled={buttonIsDisabled}
-          onSelect={pages.selectPage}
-          onAdd={pages.addPage}
-          onDelete={pages.deletePage}
-          onMove={pages.movePage}
-        />
-
-        {isImportWarningOpen && (
-          <CustomComponentsWarningModal
-            onClose={() => setIsImportWarningOpen(false)}
-            onConfirm={handleConfirmCustomComponentsImport}
-          />
-        )}
-
-        {pendingRestore && (
-          <RestoreBanner
-            pendingRestore={pendingRestore}
+    <CustomComponentsContext value={libraries.registry}>
+      <PageEffectsProvider
+        editor={editor}
+        pageId={pageScope}
+        ownerPageId={pages.activePage.id}
+        onStylesFlusher={registerStylesFlusher}
+      >
+        <div className={editorScreenClassNames}>
+          <Header
+            projectName={projectName}
+            projectMessage={projectMessage}
+            isDirty={isDirty}
             isProjectBusy={isProjectBusy}
-            onContinueLastProject={handleContinueLastProject}
-            onForgetLastProject={handleForgetLastProject}
+            showSavedStatus={showSavedStatus}
+            showStructure={showStructure}
+            showNarrative={showNarrative}
+            showBackgrounds={showBackgrounds}
+            showFrameEffects={showFrameEffects}
+            buildState={buildState}
+            buttonIsDisabled={buttonIsDisabled}
+            structureButtonIsDisabled={structureButtonIsDisabled}
+
+            onNewProject={handleNewProject}
+            onOpenProject={handleOpenProject}
+            onSaveProject={handleSaveProject}
+            onToggleStructure={toggleStructure}
+            onToggleNarrative={() => setShowNarrative((visible) => !visible)}
+            onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
+            onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
+            onInsertCustomComponent={handleInsertCustomComponent}
+            customComponentDefinitions={customComponentDefinitions}
+            onInsertTextComponent={handleInsertTextComponent}
+            onBuildBook={buildBook}
+            onImportCustomComponents={handleImportCustomComponents}
           />
-        )}
 
-        <div className={styles.BuildStatus} data-state={buildState}>
-          {buildStateLabel}
+          <Pages
+            pages={pages.book.pages}
+            activeId={pages.activePage.id}
+            disabled={buttonIsDisabled}
+            onSelect={pages.selectPage}
+            onAdd={pages.addPage}
+            onDelete={pages.deletePage}
+            onMove={pages.movePage}
+          />
+
+          {isImportWarningOpen && (
+            <CustomComponentsWarningModal
+              onClose={() => setIsImportWarningOpen(false)}
+              onConfirm={handleConfirmCustomComponentsImport}
+            />
+          )}
+
+          {pendingRestore && (
+            <RestoreBanner
+              pendingRestore={pendingRestore}
+              isProjectBusy={isProjectBusy}
+              onContinueLastProject={handleContinueLastProject}
+              onForgetLastProject={handleForgetLastProject}
+            />
+          )}
+
+          <div className={styles.BuildStatus} data-state={buildState}>
+            {buildStateLabel}
+          </div>
+
+          <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
+            <VisualBookPreview
+              book={pages.book}
+              pageId={pages.activePage.id}
+              session={pages.session}
+              definitions={libraries.definitions}
+              project={project}
+              showBackgrounds={showBackgrounds}
+              showFrameEffects={showFrameEffects}
+              config={previewConfig}
+              editorTools={pageEffects}
+            >
+              <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
+
+              <PageWrapper key={`page:${pageScope}`} data-page-id={pages.activePage.id}>
+                <EditorContent editor={editor} />
+              </PageWrapper>
+            </VisualBookPreview>
+          </main>
         </div>
-
-        <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
-          <AppWrapper
-            config={previewConfig}
-            tableOfContents={[]}
-            rangeEffects={[]}
-            editorTools={pageEffects}
-          >
-            <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
-
-            <PageWrapper key={`page:${pageScope}`} data-page-id={pages.activePage.id}>
-              {showBackgrounds && (
-                <BackgroundInstances project={project} />
-              )}
-
-              {showFrameEffects && (
-                <FrameInstances />
-              )}
-
-              <EditorContent editor={editor} />
-            </PageWrapper>
-          </AppWrapper>
-        </main>
-      </div>
-    </PageEffectsProvider>
+      </PageEffectsProvider>
+    </CustomComponentsContext>
   );
 };

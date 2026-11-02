@@ -17,6 +17,7 @@ import {
 type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
   pageId?: string;
+  ownerPageId?: string;
   onStylesFlusher?: (flush: (() => boolean) | null) => void;
 };
 
@@ -24,6 +25,7 @@ export const PageEffectsProvider = ({
   children,
   editor,
   pageId = 'page',
+  ownerPageId = pageId,
   onStylesFlusher,
 }: PageEffectsProviderProps) => {
   const {
@@ -32,7 +34,7 @@ export const PageEffectsProvider = ({
     getCurrentEffects,
     audioPreviewStatuses,
     setAudioPreviewStatus,
-  } = usePageEffectsState(editor, pageId);
+  } = usePageEffectsState({ editor, pageId, ownerPageId });
 
   const {
     backgroundStylePreviews,

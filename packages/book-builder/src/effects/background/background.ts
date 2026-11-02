@@ -1,5 +1,8 @@
 import type { CSSProperties } from 'react';
 
+import type { JsonObject } from '@active-book/types';
+
+
 import type {
   BackgroundEffectMediaOptions,
   BackgroundEffectVideoOptions,
@@ -33,6 +36,8 @@ export const backgroundEffectKinds = ['background', 'image', 'video', 'shadow', 
 export type BackgroundEffectKind = (typeof backgroundEffectKinds)[number];
 
 export type BackgroundOptions = {
+  custom?: JsonObject;
+  componentKey?: string | number;
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
   image?: StyledBackgroundMedia;

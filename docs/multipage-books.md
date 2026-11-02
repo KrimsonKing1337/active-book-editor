@@ -72,8 +72,9 @@ cannot mark a newly opened book saved. Opening/restoring a project loads page 1.
 New Project creates one new ID. Existing project-directory and recent-handle
 storage are reused.
 
-Extra authored top-level metadata is retained by book transformations. Optional
-rangeEffects metadata retains its authored ranges exactly. Numeric bounds are
+Extra authored top-level metadata is retained by book transformations.
+`book.visualEffects` range lifetimes retain their authored ranges exactly. Numeric
+bounds are
 positive, integral and ordered; adding/removing/reordering pages does not shift
 or clip them. Endpoints beyond the shortened book are retained for the author to
 review, not silently corrected. There is no new range UI or range renderer here.
@@ -138,3 +139,11 @@ The Linux composition reference is reviewed and updated for the real 1-of-1 page
 counter. Browser checks run in Chromium on Linux. The existing Windows reference
 needs regeneration/review on Windows after this intentional UI change; see the
 platform-specific screenshot workflow in tests/editor-effects/README.md.
+
+
+Stage 6 makes visual descriptions canonical; see
+[visual-effects-integration.md](visual-effects-integration.md). Page visual effects
+live in document.attrs.visualEffects and book ranges in book.visualEffects. The
+production test now also creates/edits effects through panels, saves/reopens,
+adds/deletes a page, checks disjoint-range media identity, and compares native
+renderer parameters against the shared compiler's output.

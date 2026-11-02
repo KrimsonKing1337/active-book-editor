@@ -7,41 +7,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "background": [
-              {
-                "id": "bg-alpha",
-                "type": "background",
-                "kind": "background",
-                "slug": "Фон",
-                "options": {
-                  "style": {
-                    "backgroundColor": "#203040"
-                  }
-                }
-              }
-            ],
-            "frame": [
-              {
-                "id": "frame-alpha",
-                "type": "frame",
-                "kind": "shadow",
-                "slug": "Тень",
-                "options": {
-                  "layer": "above",
-                  "shadow": {
-                    "id": "shadow-alpha",
-                    "sides": [
-                      "left",
-                      "right"
-                    ],
-                    "thickness": 20,
-                    "style": {
-                      "color": "#ff0000"
-                    }
-                  }
-                }
-              }
-            ],
             "audio": [
               {
                 "id": "audio-alpha",
@@ -76,7 +41,121 @@
                 }
               }
             ]
-          }
+          },
+          "visualEffects": [
+            {
+              "effect": {
+                "id": "bg-alpha",
+                "definitionId": "builtin.background",
+                "params": {
+                  "style": {
+                    "backgroundColor": "#203040"
+                  },
+                  "kind": "background"
+                },
+                "placement": {
+                  "coordinates": "bookViewport",
+                  "anchor": {
+                    "region": "bookViewport",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  }
+                },
+                "visibility": {
+                  "region": "bookViewport"
+                },
+                "depth": {
+                  "plane": "background",
+                  "order": 0
+                }
+              },
+              "slug": "Фон",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-alpha"
+              }
+            },
+            {
+              "effect": {
+                "id": "frame-alpha",
+                "definitionId": "builtin.frame",
+                "params": {
+                  "shadow": {
+                    "id": "shadow-alpha",
+                    "sides": [
+                      "left",
+                      "right"
+                    ],
+                    "thickness": 20,
+                    "style": {
+                      "color": "#ff0000"
+                    }
+                  },
+                  "kind": "shadow"
+                },
+                "placement": {
+                  "coordinates": "page",
+                  "anchor": {
+                    "region": "page",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  }
+                },
+                "visibility": {
+                  "region": "page"
+                },
+                "depth": {
+                  "plane": "aboveNarrative",
+                  "order": 0
+                }
+              },
+              "slug": "Тень",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-alpha"
+              }
+            }
+          ]
         },
         "content": [
           {
@@ -104,41 +183,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "background": [
-              {
-                "id": "bg-beta",
-                "type": "background",
-                "kind": "background",
-                "slug": "Фон",
-                "options": {
-                  "style": {
-                    "backgroundColor": "#304020"
-                  }
-                }
-              }
-            ],
-            "frame": [
-              {
-                "id": "frame-beta",
-                "type": "frame",
-                "kind": "shadow",
-                "slug": "Тень",
-                "options": {
-                  "layer": "above",
-                  "shadow": {
-                    "id": "shadow-beta",
-                    "sides": [
-                      "left",
-                      "right"
-                    ],
-                    "thickness": 20,
-                    "style": {
-                      "color": "#0000ff"
-                    }
-                  }
-                }
-              }
-            ],
             "audio": [
               {
                 "id": "audio-beta",
@@ -154,7 +198,121 @@
             ],
             "vibration": [],
             "flashlight": []
-          }
+          },
+          "visualEffects": [
+            {
+              "effect": {
+                "id": "bg-beta",
+                "definitionId": "builtin.background",
+                "params": {
+                  "style": {
+                    "backgroundColor": "#304020"
+                  },
+                  "kind": "background"
+                },
+                "placement": {
+                  "coordinates": "bookViewport",
+                  "anchor": {
+                    "region": "bookViewport",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  }
+                },
+                "visibility": {
+                  "region": "bookViewport"
+                },
+                "depth": {
+                  "plane": "background",
+                  "order": 0
+                }
+              },
+              "slug": "Фон",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-beta"
+              }
+            },
+            {
+              "effect": {
+                "id": "frame-beta",
+                "definitionId": "builtin.frame",
+                "params": {
+                  "shadow": {
+                    "id": "shadow-beta",
+                    "sides": [
+                      "left",
+                      "right"
+                    ],
+                    "thickness": 20,
+                    "style": {
+                      "color": "#0000ff"
+                    }
+                  },
+                  "kind": "shadow"
+                },
+                "placement": {
+                  "coordinates": "page",
+                  "anchor": {
+                    "region": "page",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  }
+                },
+                "visibility": {
+                  "region": "page"
+                },
+                "depth": {
+                  "plane": "aboveNarrative",
+                  "order": 0
+                }
+              },
+              "slug": "Тень",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-beta"
+              }
+            }
+          ]
         },
         "content": [
           {
@@ -182,39 +340,117 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "background": [
-              {
+            "audio": [],
+            "vibration": [],
+            "flashlight": []
+          },
+          "visualEffects": [
+            {
+              "effect": {
                 "id": "bg-gamma",
-                "type": "background",
-                "kind": "background",
-                "slug": "Фон",
-                "options": {
+                "definitionId": "builtin.background",
+                "params": {
                   "style": {
                     "backgroundColor": "#402030"
+                  },
+                  "kind": "background"
+                },
+                "placement": {
+                  "coordinates": "bookViewport",
+                  "anchor": {
+                    "region": "bookViewport",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
                   }
+                },
+                "visibility": {
+                  "region": "bookViewport"
+                },
+                "depth": {
+                  "plane": "background",
+                  "order": 0
                 }
               },
-              {
-                "id": "bg-custom-gamma",
-                "type": "background",
-                "kind": "component",
-                "slug": "Кастомный эффект",
-                "options": {
-                  "component": {
-                    "package": "fixture-parts",
-                    "name": "Overlay"
-                  }
-                }
+              "slug": "Фон",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-gamma"
               }
-            ],
-            "frame": [
-              {
+            },
+            {
+              "effect": {
+                "id": "bg-custom-gamma",
+                "definitionId": "custom.background/fixture-parts/Overlay",
+                "params": {
+                  "kind": "component"
+                },
+                "placement": {
+                  "coordinates": "bookViewport",
+                  "anchor": {
+                    "region": "bookViewport",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  }
+                },
+                "visibility": {
+                  "region": "bookViewport"
+                },
+                "depth": {
+                  "plane": "background",
+                  "order": 0
+                }
+              },
+              "slug": "Кастомный эффект",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-gamma"
+              }
+            },
+            {
+              "effect": {
                 "id": "frame-gamma",
-                "type": "frame",
-                "kind": "shadow",
-                "slug": "Тень",
-                "options": {
-                  "layer": "above",
+                "definitionId": "builtin.frame",
+                "params": {
                   "shadow": {
                     "id": "shadow-gamma",
                     "sides": [
@@ -225,14 +461,52 @@
                     "style": {
                       "color": "#00ff00"
                     }
+                  },
+                  "kind": "shadow"
+                },
+                "placement": {
+                  "coordinates": "page",
+                  "anchor": {
+                    "region": "page",
+                    "point": "top-left"
+                  },
+                  "origin": "top-left",
+                  "offset": {
+                    "x": {
+                      "value": 0,
+                      "unit": "px"
+                    },
+                    "y": {
+                      "value": 0,
+                      "unit": "px"
+                    }
+                  },
+                  "size": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "height": {
+                      "value": 100,
+                      "unit": "%"
+                    }
                   }
+                },
+                "visibility": {
+                  "region": "page"
+                },
+                "depth": {
+                  "plane": "aboveNarrative",
+                  "order": 0
                 }
+              },
+              "slug": "Тень",
+              "lifetime": {
+                "type": "page",
+                "pageId": "stable-gamma"
               }
-            ],
-            "audio": [],
-            "vibration": [],
-            "flashlight": []
-          }
+            }
+          ]
         },
         "content": [
           {
@@ -250,6 +524,286 @@
               "package": "fixture-parts",
               "name": "Badge"
             }
+          }
+        ]
+      }
+    }
+  ],
+  "visualEffects": [
+    {
+      "effect": {
+        "id": "range-image",
+        "definitionId": "builtin.background",
+        "params": {
+          "image": {
+            "id": "range-picture",
+            "src": "assets/range-pattern.svg",
+            "style": {
+              "opacity": 0.1
+            },
+            "styleFilters": [
+              {
+                "property": "filter",
+                "function": "brightness",
+                "value": "120%"
+              }
+            ]
+          },
+          "kind": "image"
+        },
+        "placement": {
+          "coordinates": "bookViewport",
+          "anchor": {
+            "region": "bookViewport",
+            "point": "top-left"
+          },
+          "origin": "top-left",
+          "offset": {
+            "x": {
+              "value": 0,
+              "unit": "px"
+            },
+            "y": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          "size": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          }
+        },
+        "visibility": {
+          "region": "bookViewport"
+        },
+        "depth": {
+          "plane": "background",
+          "order": 0
+        }
+      },
+      "slug": "Range image",
+      "lifetime": {
+        "type": "range",
+        "range": [
+          {
+            "from": 1,
+            "to": 1
+          },
+          {
+            "from": 3,
+            "to": 5
+          }
+        ]
+      }
+    },
+    {
+      "effect": {
+        "id": "range-video",
+        "definitionId": "builtin.background",
+        "params": {
+          "video": {
+            "id": "range-movie",
+            "src": "assets/movie.webm",
+            "style": {
+              "opacity": 0.05
+            },
+            "muted": true,
+            "relativeVolume": 60
+          },
+          "kind": "video"
+        },
+        "placement": {
+          "coordinates": "bookViewport",
+          "anchor": {
+            "region": "bookViewport",
+            "point": "top-left"
+          },
+          "origin": "top-left",
+          "offset": {
+            "x": {
+              "value": 0,
+              "unit": "px"
+            },
+            "y": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          "size": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          }
+        },
+        "visibility": {
+          "region": "bookViewport"
+        },
+        "depth": {
+          "plane": "background",
+          "order": 0
+        }
+      },
+      "slug": "Range video",
+      "lifetime": {
+        "type": "range",
+        "range": [
+          {
+            "from": 1,
+            "to": 1
+          },
+          {
+            "from": 3,
+            "to": 5
+          }
+        ]
+      }
+    },
+    {
+      "effect": {
+        "id": "range-animation",
+        "definitionId": "builtin.frame",
+        "params": {
+          "shadow": {
+            "id": "range-pulse",
+            "sides": [
+              "left",
+              "right"
+            ],
+            "thickness": 25,
+            "animation": {
+              "preset": "pulse",
+              "duration": 2000
+            },
+            "style": {
+              "color": "#fa0",
+              "opacity": 0.2
+            }
+          },
+          "kind": "shadow"
+        },
+        "placement": {
+          "coordinates": "page",
+          "anchor": {
+            "region": "page",
+            "point": "top-left"
+          },
+          "origin": "top-left",
+          "offset": {
+            "x": {
+              "value": 0,
+              "unit": "px"
+            },
+            "y": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          "size": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          }
+        },
+        "visibility": {
+          "region": "page"
+        },
+        "depth": {
+          "plane": "scene",
+          "order": 0
+        }
+      },
+      "slug": "Range pulse",
+      "lifetime": {
+        "type": "range",
+        "range": [
+          {
+            "from": 1,
+            "to": 1
+          },
+          {
+            "from": 3,
+            "to": 5
+          }
+        ]
+      }
+    },
+    {
+      "effect": {
+        "id": "range-native",
+        "definitionId": "custom.frame/fixture-parts/Native",
+        "params": {
+          "custom": {
+            "color": "#aa00ff"
+          },
+          "componentKey": "initial",
+          "style": {
+            "pointerEvents": "none"
+          },
+          "kind": "component"
+        },
+        "placement": {
+          "coordinates": "page",
+          "anchor": {
+            "region": "page",
+            "point": "top-left"
+          },
+          "origin": "top-left",
+          "offset": {
+            "x": {
+              "value": 0,
+              "unit": "px"
+            },
+            "y": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          "size": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "height": {
+              "value": 100,
+              "unit": "%"
+            }
+          }
+        },
+        "visibility": {
+          "region": "page"
+        },
+        "depth": {
+          "plane": "aboveNarrative",
+          "order": 0
+        }
+      },
+      "slug": "TGZ range",
+      "lifetime": {
+        "type": "range",
+        "range": [
+          {
+            "from": 1,
+            "to": 1
+          },
+          {
+            "from": 3,
+            "to": 5
           }
         ]
       }

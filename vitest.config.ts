@@ -13,6 +13,7 @@ export default defineConfig((env) => {
 
   return mergeConfig(editorConfig(env), {
     root: fileURLToPath(new URL('.', import.meta.url)),
+    optimizeDeps: { include: ['activeBook-core/controllers/visualEffects'] },
 
     test: {
       coverage: {

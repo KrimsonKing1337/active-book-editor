@@ -5,6 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
+import { compileBookDocument } from '../packages/book-builder/src/bookPreparation/compileBookDocument';
+import type { BookDocument } from '../packages/book-builder/src/book';
+
 import { chromium } from 'playwright';
 import { createServer as createViteServer } from 'vite';
 
@@ -15,7 +18,7 @@ const outDir = path.join(repoRoot, 'dist-book');
 
 const mimeTypes: Record<string, string> = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
-  '.tgz': 'application/gzip', '.wav': 'audio/wav', '.woff2': 'font/woff2', '.ttf': 'font/ttf',
+  '.webm': 'video/webm', '.tgz': 'application/gzip', '.wav': 'audio/wav', '.woff2': 'font/woff2', '.ttf': 'font/ttf',
 };
 
 test('production book reads all three positional routes with page-owned effects and custom components', async (context) => {
@@ -33,7 +36,7 @@ test('production book reads all three positional routes with page-owned effects 
   context.after(() => browser.close());
   const editor = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   editor.on('dialog', (dialog) => dialog.accept());
-  const files = await Promise.all(['book.json', 'package.json', 'assets/tone.wav', 'dependencies/fixture-parts.tgz']
+  const files = await Promise.all(['book.json', 'package.json', 'assets/tone.wav', 'assets/movie.webm', 'assets/range-pattern.svg', 'dependencies/fixture-parts.tgz']
     .map(async (filename) => ({ filename, bytes: [...await readFile(path.join(projectRoot, filename))] })));
   // A source string avoids tsx's function-name helpers leaking into serialized browser callbacks.
   await editor.addInitScript(`(() => {
@@ -41,7 +44,9 @@ test('production book reads all three positional routes with page-owned effects 
     const prepared = (async () => {
       const storage = await navigator.storage.getDirectory();
       const directory = await storage.getDirectoryHandle('built-editor-book', { create: true });
-      for (const fileCur of files) {
+      let seeded = false;
+      try { await directory.getFileHandle('book.json'); seeded = true; } catch {}
+      for (const fileCur of seeded ? [] : files) {
         const segments = fileCur.filename.split('/');
         let parent = directory;
         for (const segmentCur of segments.slice(0, -1)) {
@@ -66,13 +71,94 @@ test('production book reads all three positional routes with page-owned effects 
     console.error(await editor.locator('body').innerText(), editorErrors);
     throw error;
   }
+
+  const readSaved = async (): Promise<BookDocument> => editor.evaluate(`(async () => {
+    const storage = await navigator.storage.getDirectory();
+    const directory = await storage.getDirectoryHandle('built-editor-book');
+    const handle = await directory.getFileHandle('book.json');
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      try { return JSON.parse(await (await handle.getFile()).text()); }
+      catch (error) {
+        if (error.name !== 'NotReadableError') throw error;
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    }
+    throw new Error('Could not read saved book after pending writes');
+  })()`);
+  const save = async () => {
+    await editor.getByRole('button', { name: 'Сохранить', exact: true }).click();
+    await editor.getByText('Сохранено', { exact: true }).waitFor();
+    return readSaved();
+  };
+  const initial = await readSaved();
+  const originalIds = initial.pages.flatMap((cur) => cur.document.attrs?.visualEffects.map((visual: { effect: { id: string } }) => visual.effect.id) ?? []);
+  await editor.getByTestId('native-visual').waitFor();
+  const native = await editor.getByTestId('native-visual').elementHandle();
+  const image = await editor.locator('[data-effect-id="range-image"] img').elementHandle();
+  const video = await editor.locator('[data-effect-id="range-video"] video').elementHandle();
+  assert(native && image && video);
+  await editor.waitForFunction(() => (document.querySelector<HTMLVideoElement>('[data-effect-id="range-video"] video')?.currentTime ?? 0) > 0.2);
+  await editor.getByRole('button', { name: 'Скрыть фон', exact: true }).click();
+  assert(await video.evaluate((element) => element === document.querySelector('[data-effect-id="range-video"] video') && element instanceof HTMLVideoElement && !element.paused));
+  assert.equal(await editor.locator('[data-visual-surface="range-video"]').evaluate((element) => getComputedStyle(element).visibility), 'hidden');
+  await editor.getByRole('button', { name: 'Показать фон', exact: true }).click();
+  await editor.evaluate(() => window.dispatchEvent(new Event('increment-native')));
+  await editor.getByTestId('native-visual').filter({ hasText: '1' }).waitFor();
+  await editor.getByRole('button', { name: 'Страница 3', exact: true }).click();
+  assert(await native.evaluate((element) => element === document.querySelector('[data-testid="native-visual"]')));
+  assert(await image.evaluate((element) => element === document.querySelector('[data-effect-id="range-image"] img')));
+  assert(await video.evaluate((element) => element === document.querySelector('[data-effect-id="range-video"] video')));
+  await editor.getByRole('button', { name: 'Страница 2', exact: true }).click();
+  assert.equal(await native.evaluate((element) => element.isConnected), false);
+  await editor.getByRole('button', { name: 'Страница 1', exact: true }).click();
+  await editor.getByTestId('native-visual').filter({ hasText: '0' }).waitFor();
+  for (const category of ['Background', 'Frame']) {
+    await editor.getByRole('button', { name: 'Эффекты страницы', exact: true }).click();
+    await editor.getByRole('button', { name: new RegExp(`Категория ${category} `) }).click();
+    await editor.getByRole('button', { name: category === 'Background' ? 'Добавить фон' : 'Добавить рамочную тень', exact: true }).click();
+    await editor.getByRole('textbox', { name: 'Название эффекта', exact: true }).fill(`Создано в редакторе ${category}`);
+    if (category === 'Frame') {
+      const thickness = editor.getByRole('textbox', { name: 'Толщина тени (px)', exact: true });
+      await thickness.click();
+      await editor.keyboard.press('Control+A');
+      await editor.keyboard.press('Backspace');
+      await thickness.pressSequentially('45', { delay: 30 });
+    }
+    await editor.getByRole('dialog', { name: 'Эффекты страницы' }).getByRole('button', { name: 'Закрыть', exact: true }).click();
+  }
+  const authored = await save();
+  assert.equal(authored.pages[0].document.attrs?.visualEffects.length, 4);
+  assert.equal(authored.pages[0].document.attrs?.pageEffects.background, undefined);
+  assert.equal(authored.pages[0].document.attrs?.pageEffects.frame, undefined);
+  const newFrame = authored.pages[0].document.attrs?.visualEffects.find((cur: { slug: string }) => cur.slug === 'Создано в редакторе Frame');
+  assert.equal(newFrame.effect.params.shadow.thickness, 45);
+  const frameElement = await editor.locator(`[data-effect-id="${newFrame.effect.id}"]`).elementHandle();
+  assert(frameElement);
+  await editor.getByRole('button', { name: 'Добавить страницу', exact: true }).click();
+  await editor.getByRole('button', { name: 'Удалить страницу 4', exact: true }).click();
+  const afterDelete = await save();
+  assert.deepEqual(afterDelete.visualEffects, initial.visualEffects);
+  await editor.reload();
+  await editor.getByText('Альфа: первая страница', { exact: true }).waitFor();
+  const reopened = await readSaved();
+  assert.deepEqual(reopened, afterDelete);
+  const allIds = reopened.pages.flatMap((cur) => cur.document.attrs?.visualEffects.map((visual: { effect: { id: string } }) => visual.effect.id) ?? []);
+  assert(originalIds.every((id: string) => allIds.includes(id)));
   await editor.getByRole('textbox', { name: 'Текст страницы', exact: true }).click();
   await editor.keyboard.press('Control+Home');
   await editor.keyboard.type('Из редактора. ');
   await editor.getByRole('button', { name: 'Переместить страницу 3 вверх', exact: true }).click();
+  const finalSaved = await save();
+  const compiled = compileBookDocument(finalSaved);
   await editor.getByRole('button', { name: 'Собрать книгу', exact: true }).click();
   await editor.getByText('Готово: результат в dist-book/', { exact: true }).waitFor({ timeout: 60000 });
   assert.deepEqual(editorErrors, []);
+
+  assert.deepEqual(compiled.visualEffects.map((cur) => cur.effect.id).sort(), [
+    ...finalSaved.visualEffects.map((cur) => cur.effect.id),
+    ...finalSaved.pages.flatMap((cur) => cur.document.attrs?.visualEffects.map((visual: { effect: { id: string } }) => visual.effect.id) ?? []),
+  ].sort());
+  assert(compiled.pages.every((cur) => !cur.document.attrs?.visualEffects && !cur.document.attrs?.pageEffects.background && !cur.document.attrs?.pageEffects.frame));
 
   const server = createServer(async (request, response) => {
     const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
@@ -101,6 +187,12 @@ test('production book reads all three positional routes with page-owned effects 
   await page.getByRole('button', { name: 'Начать читать', exact: true }).click();
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
   await page.getByText('1 из 3', { exact: true }).waitFor();
+  await page.getByTestId('native-visual').waitFor();
+  const nativeParams = JSON.parse(await page.getByTestId('native-visual').getAttribute('data-params') ?? '{}');
+  assert.deepEqual(nativeParams, compiled.visualEffects.find((cur) => cur.effect.id === 'range-native')?.effect.params);
+  assert.equal(await page.locator(`[data-effect-id="${newFrame.effect.id}"]`).count(), 1);
+  assert.equal(await page.locator('[data-effect-id="range-image"] img').evaluate((element) => getComputedStyle(element).filter), 'brightness(1.2)');
+
   await page.waitForFunction(() => document.querySelector('[data-testid="custom-badge"]')
     ?.getAttribute('data-audio-alpha') === 'true');
   await page.getByTestId('custom-badge').click();

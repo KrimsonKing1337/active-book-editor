@@ -42,6 +42,7 @@ export const PageDocument = Document.extend({
     };
 
     return {
+      visualEffects: { default: [] },
       pageEffects: {
         default: defaultEffects satisfies PageEffects,
       },

@@ -1,10 +1,8 @@
-import { resolveFrameOptions } from '@active-book/book-builder/effects';
-
-import type { FrameEffectDraft } from '../../@types';
-import type { FrameItemPreviews, FrameStylePreviews } from '../../context';
+import type { FrameEffectDraft } from '../PageEffects/@types';
+import type { FrameItemPreviews, FrameStylePreviews } from '../PageEffects/context';
 
 
-import { getFramePreviewKey, getFrameStylePreviewKey } from '../../context';
+import { getFramePreviewKey, getFrameStylePreviewKey } from '../PageEffects/context';
 
 type ResolveFrameInstanceOptionsParams = {
   effect: FrameEffectDraft;
@@ -12,7 +10,7 @@ type ResolveFrameInstanceOptionsParams = {
   stylePreviews: FrameStylePreviews;
 };
 
-export const resolveFrameInstanceOptions = ({
+export const resolveFramePreview = ({
   effect,
   previews,
   stylePreviews,
@@ -86,10 +84,10 @@ export const resolveFrameInstanceOptions = ({
   const resolvedText = previewText ?? undefined;
   const previewComponentStyle = componentStyle ?? effect.options.style;
 
-  return resolveFrameOptions({
+  return {
     ...effect.options,
     shadow: resolvedShadow,
     text: resolvedText,
     style: previewComponentStyle,
-  });
+  };
 };

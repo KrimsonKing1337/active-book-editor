@@ -1,7 +1,17 @@
 import * as React from 'react';
 
 import * as jsxRuntime from 'react/jsx-runtime';
+
 import * as jsxDevRuntime from 'react/jsx-dev-runtime';
+
+import type { BookVisualRendererProps, JsonObject } from '@active-book/types';
+
+import { copyVisualData } from 'activeBook-core/controllers/visualEffects/utils/serialization';
+
+import { customVisualDefinitionId } from '../../visualEffects/definitions';
+import type { VisualCategory } from '../../visualEffects/@types';
+
+
 
 import {
   MAX_ARCHIVE_BYTES,
@@ -19,9 +29,15 @@ type ManifestComponent = {
   styles?: string[];
 };
 
+type ManifestVisualEffect = ManifestComponent & {
+  category: VisualCategory;
+  defaultParams?: JsonObject;
+};
+
 type BrowserManifest = {
   schemaVersion: number;
   components: Record<string, ManifestComponent>;
+  visualEffects?: Record<string, ManifestVisualEffect>;
 };
 
 type BrowserPackage = {
@@ -37,10 +53,17 @@ export type BrowserComponentDefinition = {
   description?: string;
 };
 
+export type BrowserVisualDefinition = BrowserComponentDefinition & {
+  category: VisualCategory;
+  defaultParams: JsonObject;
+};
+
 export type BrowserLibrary = {
   packageName: string;
   definitions: BrowserComponentDefinition[];
   components: Record<string, React.ComponentType>;
+  visualDefinitions: BrowserVisualDefinition[];
+  visualComponents: Record<string, React.ComponentType<BookVisualRendererProps>>;
   dispose: () => void;
 };
 
@@ -137,11 +160,28 @@ export const inspectBrowserArchive = async (archive: Blob): Promise<{
 
   const manifest = getJson<BrowserManifest>(files, packageJson.activeBook);
 
+  if (!manifest.components && manifest.visualEffects) {
+    manifest.components = {};
+  }
   if (manifest.schemaVersion !== 1 || !manifest.components || Array.isArray(manifest.components)) {
     throw new Error('Неподдерживаемый манифест Active Book');
   }
 
-  for (const [name, component] of Object.entries(manifest.components)) {
+  const visuals = manifest.visualEffects ?? {};
+  if (typeof visuals !== 'object' || Array.isArray(visuals)) {
+    throw new Error('Некорректный раздел visualEffects');
+  }
+  for (const visual of Object.values(visuals)) {
+    if (!visual || (visual.category !== 'background' && visual.category !== 'frame')) {
+      throw new Error('Визуальное определение должно указывать category background или frame');
+    }
+    const defaults = visual.defaultParams ?? {};
+    if (typeof defaults !== 'object' || Array.isArray(defaults) || defaults === null) {
+      throw new Error('defaultParams должен быть JSON-объектом');
+    }
+    copyVisualData(defaults);
+  }
+  for (const [name, component] of [...Object.entries(manifest.components), ...Object.entries(visuals)]) {
     if (!component || typeof component.title !== 'string'
       || typeof component.export !== 'string' || typeof component.entry !== 'string'
       || !component.entry.endsWith('.js') || !Array.isArray(component.styles ?? [])) {
@@ -176,7 +216,11 @@ const prepareSharedReact = (): void => {
   };
 };
 
-export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary> => {
+export const loadBrowserLibrary = async (
+  archive: Blob,
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<BrowserLibrary> => {
+  signal?.throwIfAborted();
   const { files, manifest, packageName } = await inspectBrowserArchive(archive);
 
   prepareSharedReact();
@@ -185,6 +229,7 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
   const links: HTMLLinkElement[] = [];
 
   const getResourceUrl = (path: string, mimeType: string): string => {
+    signal?.throwIfAborted();
     const existing = resources.get(path);
 
     if (existing) {
@@ -200,6 +245,7 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
   };
 
   const dispose = () => {
+    signal?.removeEventListener('abort', dispose);
     for (const link of links) {
       link.remove();
     }
@@ -207,20 +253,24 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
     for (const url of resources.values()) {
       URL.revokeObjectURL(url);
     }
+    resources.clear();
+    links.length = 0;
   };
 
+  signal?.addEventListener('abort', dispose, { once: true });
+
   try {
+    signal?.throwIfAborted();
     const definitions: BrowserComponentDefinition[] = [];
     const components: Record<string, React.ComponentType> = {};
 
-    for (const [name, component] of Object.entries(manifest.components)) {
-      const id = `${packageName}/${name}`;
-
+    const visualDefinitions: BrowserVisualDefinition[] = [];
+    const visualComponents: BrowserLibrary['visualComponents'] = {};
+    const loadExport = async (component: ManifestComponent) => {
       for (const stylePath of component.styles ?? []) {
         if (links.some((link) => link.dataset.activeBookStyle === `${packageName}:${stylePath}`)) {
           continue;
         }
-
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = getResourceUrl(stylePath, 'text/css');
@@ -228,26 +278,31 @@ export const loadBrowserLibrary = async (archive: Blob): Promise<BrowserLibrary>
         document.head.appendChild(link);
         links.push(link);
       }
-
       const moduleUrl = getResourceUrl(component.entry, 'text/javascript');
       const module = await import(/* @vite-ignore */ moduleUrl) as Record<string, unknown>;
+      signal?.throwIfAborted();
       const exported = module[component.export];
-
       if (typeof exported !== 'function' && (typeof exported !== 'object' || exported === null)) {
-        throw new Error(`Экспорт ${id} отсутствует в браузерном ESM`);
+        throw new Error(`Экспорт ${packageName}/${component.export} отсутствует в браузерном ESM`);
       }
+      return exported as React.ComponentType;
+    };
 
-      components[id] = exported as React.ComponentType;
-      definitions.push({
-        id,
-        name,
-        packageName,
-        title: component.title,
-        description: component.description,
+    for (const [name, component] of Object.entries(manifest.components)) {
+      const id = `${packageName}/${name}`;
+      components[id] = await loadExport(component);
+      definitions.push({ id, name, packageName, title: component.title, description: component.description });
+    }
+    for (const [name, visual] of Object.entries(manifest.visualEffects ?? {})) {
+      const id = customVisualDefinitionId(visual.category, `${packageName}/${name}`);
+      visualComponents[id] = await loadExport(visual) as React.ComponentType<BookVisualRendererProps>;
+      visualDefinitions.push({
+        id, name, packageName, title: visual.title, description: visual.description,
+        category: visual.category, defaultParams: visual.defaultParams ?? {},
       });
     }
 
-    return { packageName, definitions, components, dispose };
+    return { packageName, definitions, components, visualDefinitions, visualComponents, dispose };
   } catch (error) {
     dispose();
     throw error;

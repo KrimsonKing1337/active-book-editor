@@ -1,6 +1,9 @@
+
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
+
+import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
 import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
@@ -151,7 +154,8 @@ const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesPro
 };
 
 export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: FrameSettingsProps) => {
-  const { definitions } = useCustomComponents();
+  const { visualDefinitions } = useCustomComponents();
+  const definitions = visualDefinitions.filter((cur) => cur.category === 'frame');
 
   const {
     frameItemPreviews,
@@ -345,7 +349,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     updateOptions({ component: updatedComponent });
   };
 
-  const componentId = component ? `${component.package}/${component.name}` : '';
+  const componentId = component ? customVisualDefinitionId('frame', `${component.package}/${component.name}`) : '';
 
   const handleThicknessChange = (val: number) => {
     updateShadow({ thickness: val });

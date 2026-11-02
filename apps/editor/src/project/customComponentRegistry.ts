@@ -1,58 +1,22 @@
-import { type ComponentType, useSyncExternalStore } from 'react';
+import { type ComponentType, createContext, useContext } from 'react';
 
-import type { BrowserLibrary, BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
+import type {
+  BrowserComponentDefinition,
+  BrowserVisualDefinition,
+} from '@active-book/book-builder/components/custom/browser';
 
 export type CustomComponentRegistry = {
   components: Record<string, ComponentType>;
   definitions: BrowserComponentDefinition[];
+  visualDefinitions: BrowserVisualDefinition[];
 };
 
-const empty: CustomComponentRegistry = {
+export const emptyCustomComponents: CustomComponentRegistry = {
   components: {},
   definitions: [],
+  visualDefinitions: [],
 };
 
-let current: CustomComponentRegistry = empty;
-let installedLibraries: BrowserLibrary[] = [];
+export const CustomComponentsContext = createContext<CustomComponentRegistry>(emptyCustomComponents);
 
-const subscribers = new Set<() => void>();
-
-const subscribe = (listener: () => void): (() => void) => {
-  subscribers.add(listener);
-
-  return () => subscribers.delete(listener);
-};
-
-const getSnapshot = (): CustomComponentRegistry => current;
-
-export const useCustomComponents = (): CustomComponentRegistry => {
-  return useSyncExternalStore(subscribe, getSnapshot);
-};
-
-export const replaceCustomLibraries = (libraries: BrowserLibrary[]): void => {
-  const oldLibraries = installedLibraries;
-
-  const components: Record<string, ComponentType> = {};
-  const definitions: BrowserComponentDefinition[] = [];
-
-  for (const library of libraries) {
-    Object.assign(components, library.components);
-
-    definitions.push(...library.definitions);
-  }
-
-  installedLibraries = libraries;
-
-  current = {
-    components,
-    definitions,
-  };
-
-  for (const listener of subscribers) {
-    listener();
-  }
-
-  for (const library of oldLibraries) {
-    library.dispose();
-  }
-};
+export const useCustomComponents = (): CustomComponentRegistry => useContext(CustomComponentsContext);

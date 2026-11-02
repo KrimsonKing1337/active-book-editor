@@ -1,4 +1,7 @@
+import type { VisualEffectRegistration } from '@active-book/types';
+
 import type { BookDocument } from '../book';
+import { compileVisualEffects } from '../visualEffects';
 
 import { isBookDocument } from '../book';
 
@@ -6,19 +9,15 @@ import type {
   BuiltAudioEffect,
   BuiltVibrationEffect,
   BuiltFlashlightEffect,
-  BuiltBackgroundEffect,
-  BuiltFrameEffect,
 
   AudioEffect,
   VibrationEffect,
   FlashlightEffect,
-  BackgroundEffect,
-  FrameEffect,
 } from '../effects';
 
 import { normalizePageEffects, isRecord } from '../effects/utils';
 
-type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect | BackgroundEffect | FrameEffect;
+type EffectForGetMappedEffects = AudioEffect | VibrationEffect | FlashlightEffect;
 type MappedEffect<T extends EffectForGetMappedEffects> = Omit<T, 'slug'>;
 type GetMappedEffects = <T extends EffectForGetMappedEffects>(effects: T[]) => MappedEffect<T>[];
 
@@ -37,38 +36,37 @@ export const compilePageDocument = (document: unknown): Record<string, unknown> 
   }
 
   const attributes = isRecord(document.attrs) ? document.attrs : {};
+  const builtAttributes = { ...attributes };
+  delete builtAttributes.visualEffects;
   const pageEffects = normalizePageEffects(attributes.pageEffects);
 
   const effectsAudio = pageEffects.audio ?? [];
   const effectsVibration = pageEffects.vibration ?? [];
   const effectsFlashlight = pageEffects.flashlight ?? [];
-  const effectsBackground = pageEffects.background ?? [];
-  const effectsFrame = pageEffects.frame ?? [];
 
   const audio: BuiltAudioEffect[] = getMappedEffects(effectsAudio);
   const vibration: BuiltVibrationEffect[] = getMappedEffects(effectsVibration);
   const flashlight: BuiltFlashlightEffect[] = getMappedEffects(effectsFlashlight);
-  const background: BuiltBackgroundEffect[] = getMappedEffects(effectsBackground);
-  const frame: BuiltFrameEffect[] = getMappedEffects(effectsFrame);
 
   return {
     ...document,
 
     attrs: {
-      ...attributes,
+      ...builtAttributes,
 
       pageEffects: {
         audio,
         vibration,
         flashlight,
-        background,
-        frame,
+
       },
     },
   };
 };
 
-export const compileBookDocument = (book: unknown): BookDocument => {
+export type BuiltBookDocument = Omit<BookDocument, 'visualEffects'> & { visualEffects: VisualEffectRegistration[] };
+
+export const compileBookDocument = (book: unknown): BuiltBookDocument => {
   if (!isBookDocument(book)) {
     throw new Error('book.json must contain a nonempty book with unique page IDs and valid positional ranges');
   }
@@ -85,5 +83,6 @@ export const compileBookDocument = (book: unknown): BookDocument => {
   return {
     ...book,
     pages,
+    visualEffects: compileVisualEffects(book),
   };
 };

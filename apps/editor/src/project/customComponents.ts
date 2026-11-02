@@ -32,7 +32,10 @@ const getArchivePath = (specifier: string): string => {
   return path;
 };
 
-export const loadProjectLibraries = async (storage: ProjectStorage): Promise<BrowserLibrary[]> => {
+export const loadProjectLibraries = async (
+  storage: ProjectStorage,
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<BrowserLibrary[]> => {
   const description = await getDependencies(storage);
   const libraries: BrowserLibrary[] = [];
 
@@ -41,7 +44,8 @@ export const loadProjectLibraries = async (storage: ProjectStorage): Promise<Bro
       const archivePath = getArchivePath(specifier);
       const file = await storage.getDependencyFile(archivePath);
 
-      const library = await loadBrowserLibrary(file);
+      signal?.throwIfAborted();
+      const library = await loadBrowserLibrary(file, { signal });
 
       if (library.packageName !== packageName) {
         library.dispose();
@@ -122,7 +126,7 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   await storage.writePackageJson(`${descriptionJson}\n`);
 
-  const componentCount = Object.keys(manifest.components).length;
+  const componentCount = Object.keys(manifest.components).length + Object.keys(manifest.visualEffects ?? {}).length;
 
   return `${packageName} (${componentCount} компонентов)`;
 };
