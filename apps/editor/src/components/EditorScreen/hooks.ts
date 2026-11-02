@@ -140,9 +140,11 @@ export const useAutosave = ({
     clearAutosaveTimer();
 
     sessionRef.current += 1;
-    savedRevisionRef.current = getBookRevision();
 
     replaceBook(book);
+
+    // replaceBook increments the revision synchronously; this new book is already saved.
+    savedRevisionRef.current = getBookRevision();
 
     setIsDirty(false);
     setShowSavedStatus(false);
