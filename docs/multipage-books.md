@@ -96,7 +96,7 @@ survives reader navigation.
 
 Core now adapts the existing Background/Frame declarations to the common visual
 session. Its implementation lives under src/controllers/visualEffects, and its
-factory is exported through activeBook-core/controllers. The editor panels,
+factory is exported through activeBook-core/controllers/visualEffects. The editor panels,
 PageEffectsProvider, project format and builder are unchanged.
 
 AppWrapper owns one stable default session and updates its page-count bounds from
