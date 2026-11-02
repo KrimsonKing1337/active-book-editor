@@ -26,7 +26,11 @@ type UseStylePreviewsParams = {
   writeEffects: (effects: EditorEffectDraft[]) => void;
 };
 
-export const useStylePreviews = ({ editor, pageId, writeEffects }: UseStylePreviewsParams) => {
+export const useStylePreviews = ({
+  editor,
+  pageId,
+  writeEffects,
+}: UseStylePreviewsParams) => {
   const [backgroundStylePreviews, setBackgroundStylePreviews] = useState<BackgroundStylePreviews>({});
   const [frameStylePreviews, setFrameStylePreviews] = useState<FrameStylePreviews>({});
 
@@ -41,20 +45,23 @@ export const useStylePreviews = ({ editor, pageId, writeEffects }: UseStylePrevi
     previewPageRef.current = pageId;
     backgroundStylesRef.current = {};
     frameStylesRef.current = {};
+    hasUnsavedStylesRef.current = false;
+
     setBackgroundStylePreviews({});
     setFrameStylePreviews({});
-    hasUnsavedStylesRef.current = false;
     setHasPendingStyles(false);
   }, [pageId]);
 
   const updateBackgroundStylePreview = useCallback<BackgroundStylePreviewUpdater>((update) => {
-    if (previewPageRef.current !== pageId) return;
-    const { style } = update;
+    if (previewPageRef.current !== pageId) {
+      return;
+    }
+
     const key = getBackgroundPreviewKey(update);
 
     backgroundStylesRef.current = {
       ...backgroundStylesRef.current,
-      [key]: style,
+      [key]: update.style,
     };
 
     hasUnsavedStylesRef.current = true;
@@ -73,13 +80,15 @@ export const useStylePreviews = ({ editor, pageId, writeEffects }: UseStylePrevi
   }, [pageId]);
 
   const updateFrameStylePreview = useCallback((update: FrameStylePreviewUpdate) => {
-    if (previewPageRef.current !== pageId) return;
-    const { style } = update;
+    if (previewPageRef.current !== pageId) {
+      return;
+    }
+
     const key = getFrameStylePreviewKey(update);
 
     frameStylesRef.current = {
       ...frameStylesRef.current,
-      [key]: style,
+      [key]: update.style,
     };
 
     hasUnsavedStylesRef.current = true;
@@ -168,15 +177,21 @@ export const useStylePreviews = ({ editor, pageId, writeEffects }: UseStylePrevi
   }, []);
 
   const markStylesSaved = useCallback(() => {
-    if (previewPageRef.current !== pageId) return;
+    if (previewPageRef.current !== pageId) {
+      return;
+    }
+
     hasUnsavedStylesRef.current = false;
 
     setHasPendingStyles(false);
   }, [pageId]);
 
+  const backgroundStylePreviewsReturns = previewPageRef.current === pageId ? backgroundStylePreviews : {};
+  const frameStylePreviewsReturns = previewPageRef.current === pageId ? frameStylePreviews : {};
+
   return {
-    backgroundStylePreviews: previewPageRef.current === pageId ? backgroundStylePreviews : {},
-    frameStylePreviews: previewPageRef.current === pageId ? frameStylePreviews : {},
+    backgroundStylePreviews: backgroundStylePreviewsReturns,
+    frameStylePreviews: frameStylePreviewsReturns,
     updateBackgroundStylePreview,
     updateFrameStylePreview,
     flushStylePreviews,

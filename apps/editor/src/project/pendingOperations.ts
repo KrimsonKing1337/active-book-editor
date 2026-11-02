@@ -42,6 +42,6 @@ export const markProjectStylesSaved = (): void => {
   }
 };
 
-export const hasPendingProjectChanges = (): boolean => {
+export const getHasPendingProjectChanges = (): boolean => {
   return hasPendingStyles || pendingWrites > 0;
 };

@@ -1,4 +1,3 @@
-
 import { expect, vi } from 'vitest';
 import { page } from 'vitest/browser';
 
@@ -6,7 +5,7 @@ import type { BookDocument } from '@active-book/book-builder/book';
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
-import { clearLastProjectHandle } from '../../apps/editor/src/project/recentProjectStore';
+import { clearLastProjectHandle } from '@project/recentProjectStore';
 
 import book from '../fixtures/effects-book/book.json?raw';
 import herb from '../fixtures/effects-book/assets/herb.svg?raw';
@@ -28,7 +27,10 @@ export const createProject = async ({ empty = false } = {}) => {
   const projectDirectory = await storageRoot.getDirectoryHandle(projectName, { create: true });
   const assetsDirectory = await projectDirectory.getDirectoryHandle('assets', { create: true });
 
-  if (!empty) await writeFile(projectDirectory, 'book.json', book);
+  if (!empty) {
+    await writeFile(projectDirectory, 'book.json', book);
+  }
+
   await writeFile(projectDirectory, 'package.json', '{"private":true,"dependencies":{}}');
   await writeFile(assetsDirectory, 'herb.svg', herb);
 

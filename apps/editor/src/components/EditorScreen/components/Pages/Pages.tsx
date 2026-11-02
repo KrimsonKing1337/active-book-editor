@@ -6,6 +6,7 @@ type PagesProps = {
   pages: BookPage[];
   activeId: string;
   disabled: boolean;
+
   onSelect: (id: string) => void;
   onAdd: () => void;
   onDelete: (id: string) => void;
@@ -16,6 +17,7 @@ export const Pages = ({
   pages,
   activeId,
   disabled,
+
   onSelect,
   onAdd,
   onDelete,
@@ -28,28 +30,41 @@ export const Pages = ({
           const isActive = pageCur.id === activeId;
           const current = isActive ? 'page' : undefined;
 
+          const newIndex = index + 1;
+
+          const buttonUpIsDisabled = disabled || index === 0;
+          const buttonDownIsDisabled = disabled || index === pages.length - 1;
+          const buttonDeleteIsDisabled = disabled || pages.length === 1;
+
           return (
             <li key={pageCur.id} data-page-id={pageCur.id}>
-              <button disabled={disabled} aria-current={current} onClick={() => onSelect(pageCur.id)}>
-                Страница {index + 1}
-              </button>
               <button
-                aria-label={`Переместить страницу ${index + 1} вверх`}
-                disabled={disabled || index === 0}
+                aria-current={current}
+                disabled={disabled}
+                onClick={() => onSelect(pageCur.id)}
+              >
+                Страница {newIndex}
+              </button>
+
+              <button
+                aria-label={`Переместить страницу ${newIndex} вверх`}
+                disabled={buttonUpIsDisabled}
                 onClick={() => onMove(pageCur.id, -1)}
               >
                 ↑
               </button>
+
               <button
-                aria-label={`Переместить страницу ${index + 1} вниз`}
-                disabled={disabled || index === pages.length - 1}
+                aria-label={`Переместить страницу ${newIndex} вниз`}
+                disabled={buttonDownIsDisabled}
                 onClick={() => onMove(pageCur.id, 1)}
               >
                 ↓
               </button>
+
               <button
-                aria-label={`Удалить страницу ${index + 1}`}
-                disabled={disabled || pages.length === 1}
+                aria-label={`Удалить страницу ${newIndex}`}
+                disabled={buttonDeleteIsDisabled}
                 onClick={() => onDelete(pageCur.id)}
               >
                 Удалить
@@ -58,6 +73,7 @@ export const Pages = ({
           );
         })}
       </ol>
+
       <button disabled={disabled} onClick={onAdd}>
         Добавить страницу
       </button>

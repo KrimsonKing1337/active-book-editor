@@ -122,6 +122,9 @@ export default defineConfig([
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/object-curly-spacing': ['error', 'always'],
+      '@stylistic/curly-newline': ['error', {
+        'minElements': 1,
+      }],
 
       '@stylistic/max-len': [
         'error',
@@ -143,6 +146,7 @@ export default defineConfig([
       'no-negated-in-lhs': 'off',
       'no-native-reassign': 'off',
       'jsx-a11y/anchor-is-valid': 'off',
+      'curly': ['error', 'all'],
 
       '@stylistic/jsx-max-props-per-line': [
         'error',

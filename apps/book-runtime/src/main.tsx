@@ -59,6 +59,8 @@ const start = async (): Promise<void> => {
             />
 
             {document.pages.map((pageCur, index) => {
+              const path = `/page-${index + 1}`;
+
               const element = (
                 <BookPage
                   key={pageCur.id}
@@ -70,7 +72,13 @@ const start = async (): Promise<void> => {
                 />
               );
 
-              return <Route key={pageCur.id} path={`/page-${index + 1}`} element={element} />;
+              return (
+                <Route
+                  key={pageCur.id}
+                  path={path}
+                  element={element}
+                />
+              );
             })}
           </Routes>
         </AppWrapper>

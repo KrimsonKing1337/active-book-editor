@@ -73,11 +73,17 @@ export const compileBookDocument = (book: unknown): BookDocument => {
     throw new Error('book.json must contain a nonempty book with unique page IDs and valid positional ranges');
   }
 
+  const pages = book.pages.map((pageCur) => {
+    const document = compilePageDocument(pageCur.document);
+
+    return {
+      ...pageCur,
+      document,
+    };
+  });
+
   return {
     ...book,
-    pages: book.pages.map((pageCur) => ({
-      ...pageCur,
-      document: compilePageDocument(pageCur.document),
-    })),
+    pages,
   };
 };

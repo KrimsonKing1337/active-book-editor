@@ -9,15 +9,27 @@ import type { AudioPreviewStatus } from '../@types';
 
 import { getPageEffects, groupPageEffects } from '../utils';
 
+type AudioPreviewStatuses = Record<string, AudioPreviewStatus>;
+
 export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
-  const [source, setSource] = useState(() => ({ pageId, effects: getPageEffects(editor) }));
+  const [source, setSource] = useState(() => {
+    const effects = getPageEffects(editor);
+
+    return { pageId, effects };
+  });
+
   const effects = source.pageId === pageId ? source.effects : [];
+
   const currentPageRef = useRef(pageId);
   currentPageRef.current = pageId;
-  const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<Record<string, AudioPreviewStatus>>({});
+
+  const [audioPreviewStatuses, setAudioPreviewStatuses] = useState<AudioPreviewStatuses>({});
 
   const setAudioPreviewStatus = useCallback((id: string, status: AudioPreviewStatus | null) => {
-    if (currentPageRef.current !== pageId) return;
+    if (currentPageRef.current !== pageId) {
+      return;
+    }
+
     setAudioPreviewStatuses((current) => {
       const previous = current[id];
 
@@ -63,8 +75,11 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
 
         const allEffectReferencesMatch = hasSameEffectCount && everyEffectMatch;
 
-        return allEffectReferencesMatch && previous.pageId === pageId
-          ? previous : { pageId, effects: nextEffects };
+        if (allEffectReferencesMatch && previous.pageId === pageId) {
+          return previous;
+        }
+
+        return { pageId, effects: nextEffects };
       });
     };
 

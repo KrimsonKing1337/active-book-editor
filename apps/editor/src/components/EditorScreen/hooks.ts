@@ -11,7 +11,6 @@ import type { Editor } from '@tiptap/core';
 
 import type { BookDocument } from '@active-book/book-builder/book';
 
-
 import { buildProject } from '@build/buildProject';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
@@ -26,7 +25,7 @@ import {
   saveProject,
 } from '@project/projectService';
 
-import { hasPendingProjectChanges, markProjectStylesSaved } from '@project/pendingOperations';
+import { getHasPendingProjectChanges, markProjectStylesSaved } from '@project/pendingOperations';
 
 import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
@@ -78,7 +77,9 @@ export const useAutosave = ({
 
   const clearAutosaveTimer = useCallback(() => {
     if (autosaveTimerRef.current !== null) {
+
       window.clearTimeout(autosaveTimerRef.current);
+
       autosaveTimerRef.current = null;
     }
   }, []);
@@ -87,21 +88,28 @@ export const useAutosave = ({
     if (revision !== getBookRevision()) {
       return;
     }
+
     savedRevisionRef.current = revision;
+
     setIsDirty(false);
     setShowSavedStatus(true);
     setProjectMessage('Локальный проект');
+
     markProjectStylesSaved();
   }, [getBookRevision, setIsDirty, setShowSavedStatus, setProjectMessage]);
 
   const scheduleAutosave = useCallback(() => {
     clearAutosaveTimer();
+
     autosaveTimerRef.current = window.setTimeout(() => {
       autosaveTimerRef.current = null;
+
       const target = projectRef.current;
+
       if (!target || busyRef.current) {
         return;
       }
+
       const session = sessionRef.current;
       const job = saveQueueRef.current.then(async () => {
         if (session !== sessionRef.current || target !== projectRef.current) {
@@ -110,21 +118,32 @@ export const useAutosave = ({
         // Read at execution time: an older queued autosave must not overwrite a newer manual save.
         const book = getBookSnapshot();
         const revision = getBookRevision();
+
         await saveProject(target, book);
-        if (session === sessionRef.current && target === projectRef.current) markSaved(revision);
+
+        if (session === sessionRef.current && target === projectRef.current) {
+          markSaved(revision);
+        }
       });
+
       saveQueueRef.current = job.catch((error: unknown) => {
         console.error('[project] Autosave failed.', error);
-        if (session === sessionRef.current) setProjectMessage(getProjectErrorMessage(error));
+
+        if (session === sessionRef.current) {
+          setProjectMessage(getProjectErrorMessage(error));
+        }
       });
     }, AUTO_SAVE_DELAY);
   }, [clearAutosaveTimer, getBookSnapshot, getBookRevision, markSaved, setProjectMessage]);
 
   const replaceDocument = useCallback((book: BookDocument) => {
     clearAutosaveTimer();
+
     sessionRef.current += 1;
-    replaceBook(book);
     savedRevisionRef.current = getBookRevision();
+
+    replaceBook(book);
+
     setIsDirty(false);
     setShowSavedStatus(false);
   }, [clearAutosaveTimer, replaceBook, getBookRevision, setIsDirty, setShowSavedStatus]);
@@ -133,46 +152,63 @@ export const useAutosave = ({
     if (!editor) {
       return Promise.resolve(null);
     }
+
     clearAutosaveTimer();
+
     const session = sessionRef.current;
+
     const job = saveQueueRef.current.then(async () => {
       if (session !== sessionRef.current) {
         return null;
       }
+
       const book = getBookSnapshot();
       const revision = getBookRevision();
+
       let target = projectRef.current;
+
       if (target) {
         await saveProject(target, book);
       } else {
         target = await createLocalProject(book);
       }
+
       if (session !== sessionRef.current) {
         return target;
       }
+
       projectRef.current = target;
+
       setProject(target);
       setPendingRestore(null);
+
       markSaved(revision);
+
       if (revision !== getBookRevision()) {
         setIsDirty(true);
         setShowSavedStatus(false);
+
         scheduleAutosave();
       }
+
       return target;
     });
     // Both manual and automatic writes use this queue, including failures.
     saveQueueRef.current = job.then(() => {}, () => {});
+
     return job;
   }, [editor, clearAutosaveTimer, getBookSnapshot, getBookRevision, markSaved,
     scheduleAutosave, setProject, setPendingRestore, setIsDirty, setShowSavedStatus]);
 
   useEffect(() => {
     projectRef.current = project;
+
     clearAutosaveTimer();
   }, [project, clearAutosaveTimer]);
 
-  useEffect(() => { busyRef.current = isProjectBusy; }, [isProjectBusy]);
+  useEffect(() => {
+    busyRef.current = isProjectBusy;
+  }, [isProjectBusy]);
 
   useEffect(() => {
     if (bookRevision !== savedRevisionRef.current) {
@@ -182,14 +218,25 @@ export const useAutosave = ({
   }, [bookRevision, setIsDirty, setShowSavedStatus]);
 
   useEffect(() => {
-    if (editor && project && isDirty && !isProjectBusy) scheduleAutosave();
+    if (editor && project && isDirty && !isProjectBusy) {
+      scheduleAutosave();
+    }
   }, [editor, project, isDirty, isProjectBusy, bookRevision, scheduleAutosave]);
 
-  useEffect(() => clearAutosaveTimer, [clearAutosaveTimer]);
+  useEffect(() => {
+    return clearAutosaveTimer;
+  }, [clearAutosaveTimer]);
 
-  const waitForSaves = useCallback(() => saveQueueRef.current, []);
+  const waitForSaves = useCallback(() => {
+    return saveQueueRef.current;
+  }, []);
 
-  return { clearAutosaveTimer, replaceDocument, saveCurrentProject, waitForSaves };
+  return {
+    clearAutosaveTimer,
+    replaceDocument,
+    saveCurrentProject,
+    waitForSaves,
+  };
 };
 
 type UseProjectRestoreParams = {
@@ -283,7 +330,7 @@ export const useProjectActions = ({
   setBuildState,
 }: UseProjectActionsParams) => {
   const confirmDiscardChanges = useCallback(() => {
-    if (!isDirty && !hasPendingProjectChanges()) {
+    if (!isDirty && !getHasPendingProjectChanges()) {
       return true;
     }
 
@@ -332,9 +379,11 @@ export const useProjectActions = ({
 
     try {
       await waitForSaves();
+
       const openedProject = await openLocalProject();
 
       replaceDocument(openedProject.document);
+
       setProject(openedProject.project);
       setPendingRestore(null);
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
@@ -391,6 +440,7 @@ export const useProjectActions = ({
 
     try {
       await waitForSaves();
+
       const openedProject = await continueLastProject(pendingRestore);
 
       if (!openedProject) {
@@ -400,6 +450,7 @@ export const useProjectActions = ({
       }
 
       replaceDocument(openedProject.document);
+
       setProject(openedProject.project);
       setPendingRestore(null);
       setProjectMessage(`Открыт проект: ${openedProject.project.name}`);
@@ -484,7 +535,9 @@ export const useBeforeUnload = (isDirty: boolean): void => {
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (isDirtyRef.current || hasPendingProjectChanges()) {
+      const hasPendingProjectChanges = getHasPendingProjectChanges();
+
+      if (isDirtyRef.current || hasPendingProjectChanges) {
         event.preventDefault();
       }
     };

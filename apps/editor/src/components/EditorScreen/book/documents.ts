@@ -6,25 +6,36 @@ import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import { createEmptyDocument } from '../utils';
 
-export const createPage = (): BookPage => ({
-  id: crypto.randomUUID(),
-  document: createEmptyDocument(),
-});
+export const createPage = (): BookPage => {
+  return {
+    id: crypto.randomUUID(),
+    document: createEmptyDocument(),
+  };
+};
 
-export const createEmptyBook = (): BookDocument => ({
-  type: 'book',
-  pages: [createPage()],
-});
+export const createEmptyBook = (): BookDocument => {
+  const page = createPage();
+
+  return {
+    type: 'book',
+    pages: [page],
+  };
+};
 
 /** A fresh plugin state intentionally clears undo/redo when changing pages or projects. */
 export const replaceEditorDocument = (editor: Editor, document: JSONContent): void => {
+  const pageEffects = normalizePageEffects(document.attrs?.pageEffects);
+
+  const attrs = {
+    ...document.attrs,
+    pageEffects,
+  };
+
   const normalized = {
     ...document,
-    attrs: {
-      ...document.attrs,
-      pageEffects: normalizePageEffects(document.attrs?.pageEffects),
-    },
+    attrs,
   };
+
   const state = EditorState.create({
     schema: editor.schema,
     doc: editor.schema.nodeFromJSON(normalized),
@@ -32,6 +43,7 @@ export const replaceEditorDocument = (editor: Editor, document: JSONContent): vo
   });
 
   editor.view.updateState(state);
+
   editor.emit('transaction', { editor, transaction: state.tr, appendedTransactions: [] });
   editor.emit('selectionUpdate', { editor, transaction: state.tr });
 };

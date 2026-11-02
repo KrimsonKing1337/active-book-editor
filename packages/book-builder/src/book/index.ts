@@ -14,53 +14,79 @@ export type BookDocument = {
 };
 
 const hasValidRangeMetadata = (value: unknown): boolean => {
-  if (value === undefined) return true;
-  if (!Array.isArray(value)) return false;
+  if (value === undefined) {
+    return true;
+  }
+
+  if (!Array.isArray(value)) {
+    return false;
+  }
 
   return value.every((effectCur: unknown) => {
-    if (!isRecord(effectCur) || !Array.isArray(effectCur.range)) return false;
+    if (!isRecord(effectCur) || !Array.isArray(effectCur.range)) {
+      return false;
+    }
 
     return effectCur.range.every((rangeCur: unknown) => {
-      if (!isRecord(rangeCur)) return false;
-      const { from, to } = rangeCur;
-      if (typeof from !== 'number' || typeof to !== 'number') return false;
+      if (!isRecord(rangeCur)) {
+        return false;
+      }
 
-      return Number.isInteger(from)
-        && Number.isInteger(to)
-        && from >= 1
-        && to >= from;
+      const { from, to } = rangeCur;
+
+      if (typeof from !== 'number' || typeof to !== 'number') {
+        return false;
+      }
+
+      const bothAreInteger = Number.isInteger(from) && Number.isInteger(to);
+      const bothInRange = from >= 1 && to >= from;
+
+      return bothAreInteger && bothInRange;
     });
   });
 };
 
 export const isBookDocument = (value: unknown): value is BookDocument => {
-  if (
-    !isRecord(value)
-    || value.type !== 'book'
-    || !Array.isArray(value.pages)
-    || value.pages.length === 0
-  ) {
+  if (!isRecord(value)) {
     return false;
   }
 
-  if (!hasValidRangeMetadata(value.rangeEffects)) return false;
+  const isBook = value.type === 'book';
+  const pages = value.pages;
+  const hasPages = Array.isArray(pages);
+
+  if (!isBook || !hasPages) {
+    return false;
+  }
+
+  const hasNonEmptyPages = pages.length > 0;
+  const hasValidRanges = hasValidRangeMetadata(value.rangeEffects);
+
+  if (!hasNonEmptyPages || !hasValidRanges) {
+    return false;
+  }
 
   const ids = new Set<string>();
 
-  return value.pages.every((pageCur: unknown) => {
-    if (
-      !isRecord(pageCur)
-      || typeof pageCur.id !== 'string'
-      || !pageCur.id.trim()
-      || ids.has(pageCur.id)
-      || !isRecord(pageCur.document)
-      || pageCur.document.type !== 'doc'
-      || !Array.isArray(pageCur.document.content)
-    ) {
+  return pages.every((pageCur: unknown) => {
+    if (!isRecord(pageCur)) {
       return false;
     }
 
-    ids.add(pageCur.id);
+    const { id, document } = pageCur;
+
+    const hasValidId = typeof id === 'string' && !!id.trim();
+    const isUniqueId = typeof id === 'string' && !ids.has(id);
+
+    const hasValidDocument = isRecord(document)
+      && document.type === 'doc'
+      && Array.isArray(document.content);
+
+    if (!hasValidId || !isUniqueId || !hasValidDocument) {
+      return false;
+    }
+
+    ids.add(id);
 
     return true;
   });

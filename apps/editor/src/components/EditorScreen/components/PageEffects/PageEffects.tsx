@@ -53,7 +53,9 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   useLayoutEffect(() => {
     mountedRef.current = true;
 
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const persistStyles = async (): Promise<boolean> => {
@@ -79,7 +81,9 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
       const savedProject = await onSaveProject();
 
-      if (!mountedRef.current) return false;
+      if (!mountedRef.current) {
+        return false;
+      }
 
       if (!savedProject) {
         throw new Error('Проект не был сохранён');
@@ -89,9 +93,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
       return true;
     } catch (error) {
-      const errorMessage = error instanceof Error
-        ? error.message
-        : 'Не удалось сохранить изменения';
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось сохранить изменения';
 
       setStyleSaveError(errorMessage);
 
