@@ -186,12 +186,12 @@ export const useStylePreviews = ({
     setHasPendingStyles(false);
   }, [pageId]);
 
-  const backgroundStylePreviewsReturns = previewPageRef.current === pageId ? backgroundStylePreviews : {};
-  const frameStylePreviewsReturns = previewPageRef.current === pageId ? frameStylePreviews : {};
+  const currentBackgroundStylePreviews = previewPageRef.current === pageId ? backgroundStylePreviews : {};
+  const currentFrameStylePreviews = previewPageRef.current === pageId ? frameStylePreviews : {};
 
   return {
-    backgroundStylePreviews: backgroundStylePreviewsReturns,
-    frameStylePreviews: frameStylePreviewsReturns,
+    backgroundStylePreviews: currentBackgroundStylePreviews,
+    frameStylePreviews: currentFrameStylePreviews,
     updateBackgroundStylePreview,
     updateFrameStylePreview,
     flushStylePreviews,
