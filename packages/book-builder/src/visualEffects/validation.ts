@@ -1,70 +1,33 @@
-import type { JsonObject } from '@active-book/types';
+import type { JsonObject, VisualLength } from '@active-book/types';
 
 import { copyVisualData } from 'activeBook-core/controllers/visualEffects/utils/serialization';
 
 import type { AuthoredVisualEffect } from './@types';
 
+import { backgroundEffectKinds } from '../effects/background';
+import { frameEffectKinds } from '../effects/frame';
+
+import {
+  FRAME_SIDES,
+  VISUAL_ANCHORS,
+  VISUAL_PLANES,
+  VISUAL_REGIONS,
+} from './constants';
 import { getVisualCategory } from './definitions';
 
-type Length = {
-  value: number;
-  unit: 'px' | '%';
-};
+const regions = new Set<string>(VISUAL_REGIONS);
+const anchors = new Set<string>(VISUAL_ANCHORS);
+const sides = new Set<string>(FRAME_SIDES);
+const planes = new Set<string>(VISUAL_PLANES);
 
-const regions = new Set([
-  'book',
-  'bookViewport',
-  'page',
-  'frame',
-  'narrativeViewport',
-  'narrativeContent',
-]);
-
-const anchors = new Set([
-  'top-left',
-  'top',
-  'top-right',
-  'left',
-  'center',
-  'right',
-  'bottom-left',
-  'bottom',
-  'bottom-right',
-]);
-
-const sides = new Set([
-  'top',
-  'right',
-  'bottom',
-  'left',
-]);
-
-const planes = new Set([
-  'background',
-  'scene',
-  'aboveNarrative',
-  'aboveControls',
-]);
-
-const backgroundKinds = new Set([
-  'background',
-  'image',
-  'video',
-  'shadow',
-  'component',
-]);
-
-const frameKinds = new Set([
-  'shadow',
-  'text',
-  'component',
-]);
+const backgroundKinds = new Set<string>(backgroundEffectKinds);
+const frameKinds = new Set<string>(frameEffectKinds);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
-const isValidLength = (value: unknown): value is Length => {
+const isValidLength = (value: unknown): value is VisualLength => {
   if (!isRecord(value)) {
     return false;
   }

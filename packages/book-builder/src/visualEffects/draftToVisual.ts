@@ -19,6 +19,14 @@ type DraftToVisualOptions = {
 
 type RegistrationOptions = Parameters<typeof createBuiltinRegistration>[0]['options'];
 
+const Z_INDEX_STYLE_PROPERTIES = [
+  'style',
+  'shadow',
+  'text',
+  'image',
+  'video',
+] as const;
+
 export const draftToVisual = ({
   draft,
   pageId,
@@ -80,9 +88,7 @@ export const draftToVisual = ({
   delete params.frameMask;
 
   // Удаляем дублирующий zIndex: порядок хранится в depth.order
-  const properties = ['style', 'shadow', 'text', 'image', 'video'];
-
-  for (const propertyCur of properties) {
+  for (const propertyCur of Z_INDEX_STYLE_PROPERTIES) {
     const item = params[propertyCur] as Record<string, JsonValue> | undefined;
 
     let style = item;
