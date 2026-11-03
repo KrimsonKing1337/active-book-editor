@@ -31,11 +31,15 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
   const hasNonEmptyPages = pages.length > 0;
   const ranges = value.visualEffects;
 
-  const hasValidRanges = Array.isArray(ranges) && ranges.every((rangeCur: unknown) => {
+  if (!hasNonEmptyPages || !Array.isArray(ranges)) {
+    return false;
+  }
+
+  const hasValidRanges = ranges.every((rangeCur: unknown) => {
     return isAuthoredVisualEffect(rangeCur) && rangeCur.lifetime.type === 'range';
   });
 
-  if (!hasNonEmptyPages || !hasValidRanges) {
+  if (!hasValidRanges) {
     return false;
   }
 
