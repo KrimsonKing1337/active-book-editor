@@ -54,9 +54,9 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "bookViewport",
+                  "coordinates": "storyViewport",
                   "anchor": {
-                    "region": "bookViewport",
+                    "region": "storyViewport",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -82,7 +82,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "bookViewport"
+                  "region": "storyViewport"
                 },
                 "depth": {
                   "plane": "background",
@@ -114,9 +114,9 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "page",
+                  "coordinates": "narrativeFrame",
                   "anchor": {
-                    "region": "page",
+                    "region": "narrativeFrame",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -142,7 +142,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "page"
+                  "region": "narrativeFrame"
                 },
                 "depth": {
                   "plane": "aboveNarrative",
@@ -211,9 +211,9 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "bookViewport",
+                  "coordinates": "storyViewport",
                   "anchor": {
-                    "region": "bookViewport",
+                    "region": "storyViewport",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -239,7 +239,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "bookViewport"
+                  "region": "storyViewport"
                 },
                 "depth": {
                   "plane": "background",
@@ -271,9 +271,9 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "page",
+                  "coordinates": "narrativeFrame",
                   "anchor": {
-                    "region": "page",
+                    "region": "narrativeFrame",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -299,7 +299,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "page"
+                  "region": "narrativeFrame"
                 },
                 "depth": {
                   "plane": "aboveNarrative",
@@ -356,9 +356,9 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "bookViewport",
+                  "coordinates": "storyViewport",
                   "anchor": {
-                    "region": "bookViewport",
+                    "region": "storyViewport",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -384,7 +384,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "bookViewport"
+                  "region": "storyViewport"
                 },
                 "depth": {
                   "plane": "background",
@@ -405,9 +405,9 @@
                   "kind": "component"
                 },
                 "placement": {
-                  "coordinates": "bookViewport",
+                  "coordinates": "storyViewport",
                   "anchor": {
-                    "region": "bookViewport",
+                    "region": "storyViewport",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -433,7 +433,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "bookViewport"
+                  "region": "storyViewport"
                 },
                 "depth": {
                   "plane": "background",
@@ -465,9 +465,9 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "page",
+                  "coordinates": "narrativeFrame",
                   "anchor": {
-                    "region": "page",
+                    "region": "narrativeFrame",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -493,7 +493,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "page"
+                  "region": "narrativeFrame"
                 },
                 "depth": {
                   "plane": "aboveNarrative",
@@ -552,9 +552,9 @@
           "kind": "image"
         },
         "placement": {
-          "coordinates": "bookViewport",
+          "coordinates": "storyViewport",
           "anchor": {
-            "region": "bookViewport",
+            "region": "storyViewport",
             "point": "top-left"
           },
           "origin": "top-left",
@@ -580,7 +580,7 @@
           }
         },
         "visibility": {
-          "region": "bookViewport"
+          "region": "storyViewport"
         },
         "depth": {
           "plane": "background",
@@ -619,9 +619,9 @@
           "kind": "video"
         },
         "placement": {
-          "coordinates": "bookViewport",
+          "coordinates": "storyViewport",
           "anchor": {
-            "region": "bookViewport",
+            "region": "storyViewport",
             "point": "top-left"
           },
           "origin": "top-left",
@@ -647,7 +647,7 @@
           }
         },
         "visibility": {
-          "region": "bookViewport"
+          "region": "storyViewport"
         },
         "depth": {
           "plane": "background",
@@ -693,9 +693,9 @@
           "kind": "shadow"
         },
         "placement": {
-          "coordinates": "page",
+          "coordinates": "narrativeFrame",
           "anchor": {
-            "region": "page",
+            "region": "narrativeFrame",
             "point": "top-left"
           },
           "origin": "top-left",
@@ -721,10 +721,10 @@
           }
         },
         "visibility": {
-          "region": "page"
+          "region": "narrativeFrame"
         },
         "depth": {
-          "plane": "scene",
+          "plane": "belowNarrative",
           "order": 0
         }
       },
@@ -758,9 +758,9 @@
           "kind": "component"
         },
         "placement": {
-          "coordinates": "page",
+          "coordinates": "narrativeFrame",
           "anchor": {
-            "region": "page",
+            "region": "narrativeFrame",
             "point": "top-left"
           },
           "origin": "top-left",
@@ -786,7 +786,7 @@
           }
         },
         "visibility": {
-          "region": "page"
+          "region": "narrativeFrame"
         },
         "depth": {
           "plane": "aboveNarrative",

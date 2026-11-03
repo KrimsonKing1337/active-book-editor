@@ -1,6 +1,6 @@
 import type { JsonValue } from '@active-book/types';
 
-import { createBuiltinRegistration } from 'activeBook-core/controllers/visualEffects/utils/declarations';
+import { createBuiltinRegistration, fillRegion } from 'activeBook-core/controllers/visualEffects/utils/declarations';
 
 import type { FrameOptions } from '../effects';
 import { resolveBackgroundOptions, resolveFrameOptions } from '../effects';
@@ -65,6 +65,15 @@ export const draftToVisual = ({
   });
 
   const defaultEffect = registration.effect;
+  const displayRegion = draft.displayRegion;
+
+  if (displayRegion && displayRegion !== 'custom') {
+    defaultEffect.placement = fillRegion(displayRegion);
+
+    if (defaultEffect.visibility.region !== 'frame') {
+      defaultEffect.visibility = { region: displayRegion };
+    }
+  }
 
   // Определяем реализацию компонента
   let definitionId = defaultEffect.definitionId;
@@ -104,6 +113,9 @@ export const draftToVisual = ({
 
   // Проверяем, какие свойства предыдущей регистрации можно сохранить
   const previousDraft = previous ? visualToDraft(previous) : null;
+  const hasDisplayRegionChange = displayRegion !== undefined
+    && displayRegion !== 'custom'
+    && displayRegion !== previousDraft?.displayRegion;
 
   let shouldPreservePlane = previousDraft?.type === 'background';
   let shouldPreserveVisibility = shouldPreservePlane;
@@ -140,7 +152,7 @@ export const draftToVisual = ({
     ...defaultEffect.visibility,
   };
 
-  if (shouldPreserveVisibility && previous) {
+  if (shouldPreserveVisibility && previous && !hasDisplayRegionChange) {
     visibility = previous.effect.visibility;
   } else {
     const previousMask = previous?.effect.visibility.mask;
@@ -154,7 +166,11 @@ export const draftToVisual = ({
   }
 
   // Собираем эффект
-  const placement = previous?.effect.placement ?? defaultEffect.placement;
+  // An explicit region switch replaces custom placement with a fill of that region.
+  // Ordinary edits retain both independently authored placement and visibility.
+  const placement = hasDisplayRegionChange
+    ? defaultEffect.placement
+    : previous?.effect.placement ?? defaultEffect.placement;
 
   const effect = {
     ...defaultEffect,

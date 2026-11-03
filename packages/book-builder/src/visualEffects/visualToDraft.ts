@@ -8,6 +8,7 @@ import type {
 import type { AuthoredVisualEffect } from './@types';
 
 import { getVisualCategory, getVisualComponentId } from './definitions';
+import { getDisplayRegion } from './displayRegion';
 
 export type VisualDraft = BackgroundEffect | FrameEffect;
 
@@ -66,7 +67,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
   if (type === 'frame') {
     let layer: FrameOptions['layer'] = 'above';
 
-    if (effect.depth.plane === 'scene') {
+    if (effect.depth.plane === 'belowNarrative') {
       layer = 'behind';
     }
 
@@ -101,5 +102,6 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     kind,
     slug,
     options,
+    displayRegion: getDisplayRegion(effect),
   } as VisualDraft;
 };

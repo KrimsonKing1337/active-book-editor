@@ -4,7 +4,7 @@ import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@
 
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
-import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
+import type { FilterOperation, FrameOptions, VisualDisplayRegion } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
@@ -17,6 +17,7 @@ import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
 import { TextInput, Select, Checkbox, Button } from '../EffectControls';
+import { VisualRegionSettings } from '../VisualRegionSettings';
 
 import { AnimationSettings } from './components';
 
@@ -335,6 +336,13 @@ export const FrameSettings = ({
     updateOptions({ layer });
   };
 
+  const handleDisplayRegionChange = (displayRegion: VisualDisplayRegion) => {
+    onUpdate(effect.id, {
+      ...effect,
+      displayRegion,
+    });
+  };
+
   const handleComponentMaskEnabledChange = (e: ChangeEvent<HTMLInputElement>) => {
     updateOptions({
       frameMask: {
@@ -523,6 +531,8 @@ export const FrameSettings = ({
           </option>
         </Select>
       </label>
+
+      <VisualRegionSettings value={effect.displayRegion} onChange={handleDisplayRegionChange} />
 
       {effect.kind === 'shadow' && shadow && (
         <>

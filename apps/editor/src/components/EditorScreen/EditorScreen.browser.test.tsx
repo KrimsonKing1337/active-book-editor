@@ -2,6 +2,8 @@ import { cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { page } from 'vitest/browser';
 
+import { pageVisualEffects } from '@active-book/book-builder/visualEffects';
+
 import { createProject } from '@root/tests/editor-effects/project';
 import {
   addEffect,
@@ -39,8 +41,8 @@ beforeEach(async () => {
     exact: true,
   }).query();
 
-  expect(effectsTrigger?.closest('[data-book-region="book"]')).toBeNull();
-  expect(document.querySelector('[data-book-region="book"] #Toolbar')).not.toBeNull();
+  expect(effectsTrigger?.closest('[data-story-region="story"]')).toBeNull();
+  expect(document.querySelector('[data-story-region="story"] #Toolbar')).not.toBeNull();
 });
 
 afterEach(async () => {
@@ -75,6 +77,7 @@ const addComposition = async () => {
 
   await addEffect('Frame');
   await configureShadow();
+  await page.getByRole('combobox', { name: 'Область отображения эффекта' }).selectOptions('narrativeFrame');
   const composed = await project.save();
 
   expect(composed.background).toEqual(withBackground.background);
@@ -180,3 +183,57 @@ test('deletes only the selected effect and supports undo and redo through the ed
   expect(redone).toEqual(deleted);
   expect(document.querySelector<HTMLElement>(deletedFrameSelector)).toBeNull();
 }, 60_000);
+
+test('visual region controls persist canonical geometry and selection clears on back, close and delete', async () => {
+  await addEffect('Frame');
+  const regionControl = page.getByRole('combobox', { name: 'Область отображения эффекта' });
+  await expect.element(regionControl).toHaveValue('storyViewport');
+  const outline = () => document.querySelector<HTMLElement>('[data-visual-selection]');
+  await expect.poll(outline).not.toBeNull();
+  const id = outline()!.dataset.visualSelection!;
+  const renderer = document.querySelector(`[data-effect-id="${id}"]`);
+  const visibility = () => document.querySelector<HTMLElement>(`[data-visual-surface="${id}"]`);
+  const region = (name: string) => document.querySelector<HTMLElement>(`[data-story-region="${name}"]`);
+  await expect.poll(() => visibility()?.getBoundingClientRect().toJSON())
+    .toEqual(region('storyViewport')?.getBoundingClientRect().toJSON());
+  await expect.poll(() => outline()?.getBoundingClientRect().toJSON())
+    .toEqual(visibility()?.getBoundingClientRect().toJSON());
+
+  await regionControl.selectOptions('narrativeFrame');
+  await expect.poll(() => visibility()?.getBoundingClientRect().toJSON())
+    .toEqual(region('narrativeFrame')?.getBoundingClientRect().toJSON());
+  expect(document.querySelector(`[data-effect-id="${id}"]`)).toBe(renderer);
+  await expect.poll(() => outline()?.getBoundingClientRect().toJSON())
+    .toEqual(visibility()?.getBoundingClientRect().toJSON());
+  await page.getByRole('textbox', {
+    name: 'Название эффекта',
+    exact: true,
+  }).fill('Область нарратива');
+  await expect.element(regionControl).toHaveValue('narrativeFrame');
+  await page.getByRole('button', {
+    name: '← Назад',
+    exact: true,
+  }).click();
+  await expect.poll(outline).toBeNull();
+  await page.getByRole('button', { name: /Область нарратива/ }).click();
+  await expect.poll(outline).not.toBeNull();
+  await page.getByRole('dialog', { name: 'Эффекты страницы' }).getByRole('button', {
+    name: 'Закрыть',
+    exact: true,
+  }).click();
+  await expect.poll(outline).toBeNull();
+  const saved = await project.save();
+  expect(saved.frame?.[0].displayRegion).toBe('narrativeFrame');
+  const savedDocument = await project.readDocument();
+  const authored = pageVisualEffects(savedDocument.pages[0].document).find((cur) => cur.effect.id === id);
+  expect(authored?.effect.placement.coordinates).toBe('narrativeFrame');
+  expect(authored?.effect.visibility.region).toBe('narrativeFrame');
+  expect(authored?.effect.params).not.toHaveProperty('displayRegion');
+  await selectEffect('Область нарратива');
+  await expect.poll(outline).not.toBeNull();
+  await page.getByRole('button', {
+    name: 'Удалить эффект',
+    exact: true,
+  }).click();
+  await expect.poll(outline).toBeNull();
+});

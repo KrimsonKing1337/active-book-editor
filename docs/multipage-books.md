@@ -45,7 +45,7 @@ There is no global structural undo history.
 Node views may flush React synchronously, so navigation's state replacement runs
 in a guarded microtask outside the React commit. A superseded selection is cancelled.
 PageWrapper and AudioInstances are keyed by project session and persistent page
-ID. Their legacy cleanup runs on page changes, while AppWrapper/BookVisualRoot
+ID. Their legacy cleanup runs on page changes, while AppWrapper/StoryVisualRoot
 remain mounted. Page-effect state, audio statuses and style callbacks are scoped
 to that page; obsolete async effect-panel actions cannot commit into its successor.
 

@@ -134,3 +134,33 @@ The project-switch case delays actual TGZ ESM evaluation, switches to New, verif
 URL disposal and absence of stale definitions, then opens the original library
 again. A separate StrictMode test covers equal props, changed props, React key,
 playback, session replacement and stale controller isolation.
+
+## Story geometry and preview selection
+
+The common regions are story, storyViewport, narrativeFrame, frame,
+narrativeViewport and narrativeContent. The author plane below narrative is
+belowNarrative. The page lifetime and permanent page IDs are unchanged.
+Background and frame defaults now fill storyViewport, including Toolbar.
+
+Background and frame panels expose one area selector. The derived displayRegion
+is transient and never enters authored params or built registrations. A normal
+edit retains independent placement/visibility, including custom coordinates,
+shape masks and manual planes. Arbitrary combinations appear as "Произвольное
+позиционирование". Explicitly choosing storyViewport or narrativeFrame replaces
+placement with a fill and sets visibility to that region. Shape masks remain;
+an enabled frame mask keeps visibility.frame and its sides relative to
+narrativeFrame. Disabling that mask restores the selected fill region. Switching
+areas does not change depth, lifetime or the renderer's identity.
+
+PageEffects supplies its selected visual ID through PageEffectsProvider and
+VisualBookPreview to AppWrapper.selectedVisualEffectId. Back, close, deletion,
+missing effects and unmount clear the outline. Core ignores selection in reader
+mode. A separate inert overlay uses the existing shared geometry, draws the outer
+visibility rectangle at z-index 40, and never changes effect styles or renderer
+keys. No ResizeObserver or measurement loop was added.
+
+The existing composition screenshot explicitly selects narrativeFrame, retaining
+both platform references for that restricted layout. Separate region tests check
+the storyViewport default and explicit switching. Chromium tests were run on Linux;
+Windows execution was unavailable. Existing large-file/hook lint warnings and Vite
+bundle-size/dynamic-import warnings are unrelated to this change.

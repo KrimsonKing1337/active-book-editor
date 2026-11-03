@@ -40,6 +40,7 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     flushStylePreviews,
     hasUnsavedStyleChanges,
     markStylesSaved,
+    setSelectedVisualEffectId,
   } = usePageEffects();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -114,6 +115,15 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
   };
 
   const selectedEffect = effects.find((cur) => cur.id === selectedEffectId);
+  const selectedEffectType = selectedEffect?.type;
+
+  useLayoutEffect(() => {
+    const isVisualEffect = selectedEffectType === 'background' || selectedEffectType === 'frame';
+
+    setSelectedVisualEffectId(isOpen && isVisualEffect ? selectedEffectId : null);
+
+    return () => setSelectedVisualEffectId(null);
+  }, [isOpen, selectedEffectId, selectedEffectType, setSelectedVisualEffectId]);
 
   const openEffects = () => {
     setIsOpen(true);

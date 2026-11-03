@@ -53,6 +53,7 @@ export const VisualBookPreview = ({
     effects,
     frameItemPreviews,
     frameStylePreviews,
+    selectedVisualEffectId,
   } = usePageEffects();
   const backgroundStyles = useBackgroundStylePreviews();
 
@@ -149,6 +150,7 @@ export const VisualBookPreview = ({
       registrations={registrations}
       definitions={definitions}
       hiddenVisualEffects={hidden}
+      selectedVisualEffectId={selectedVisualEffectId}
       editorTools={editorTools}
     >
       {children}

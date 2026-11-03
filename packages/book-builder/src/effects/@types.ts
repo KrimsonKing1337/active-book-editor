@@ -4,6 +4,9 @@ import type { BuiltFlashlightEffect, FlashlightEffect } from './flashlight';
 import type { BackgroundEffect, BuiltBackgroundEffect } from './background';
 import type { FrameEffect, BuiltFrameEffect } from './frame';
 
+/** Transient panel choice; authored placement and visibility remain authoritative. */
+export type VisualDisplayRegion = 'storyViewport' | 'narrativeFrame' | 'custom';
+
 export type EditorEffect =
   | AudioEffect
   | VibrationEffect
