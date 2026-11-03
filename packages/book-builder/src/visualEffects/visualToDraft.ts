@@ -43,7 +43,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
   const componentId = getVisualComponentId(effect.definitionId);
 
   // Authored options have passed JSON validation at the book boundary.
-  const options: PanelOptions = structuredClone(effect.params);
+  const options = structuredClone(effect.params) as PanelOptions;
 
   const kind = componentId ? 'component' : options.kind;
 
