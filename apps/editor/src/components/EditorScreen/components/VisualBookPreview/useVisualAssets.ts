@@ -86,8 +86,8 @@ export const useVisualAssets = ({
     return assetPaths(registrationCur.effect.params);
   });
 
-  const pathsKeySet = new Set(registrationsFlat);
-  const pathsKey = JSON.stringify([pathsKeySet]);
+  const uniquePaths = [...new Set(registrationsFlat)];
+  const pathsKey = JSON.stringify(uniquePaths);
 
   useEffect(() => {
     cache.closed = false;

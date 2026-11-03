@@ -17,17 +17,18 @@ export const resolveVisualParams = (description: AuthoredVisualEffect): Params =
   const params = description.effect.params;
   const options = params as Options;
 
-  const visualCategory = getVisualCategory(description.effect.definitionId);
+  const category = getVisualCategory(description.effect.definitionId);
 
-  let resolved: FrameOptions | BackgroundOptions = resolveFrameOptions(options);
+  let resolved: FrameOptions | BackgroundOptions;
 
-  if (visualCategory === 'background') {
+  if (category === 'background') {
     resolved = resolveBackgroundOptions(options);
+  } else {
+    resolved = resolveFrameOptions(options);
   }
 
-  const isNative = getVisualComponentId(description.effect.definitionId);
-
-  const nativeParams = isNative ? params : {};
+  const isCustomComponent = Boolean(getVisualComponentId(description.effect.definitionId));
+  const nativeParams = isCustomComponent ? params : {};
 
   const compiled: Record<string, JsonValue> = JSON.parse(JSON.stringify({
     ...nativeParams,
@@ -39,7 +40,7 @@ export const resolveVisualParams = (description: AuthoredVisualEffect): Params =
 
   delete compiled.styleFilters;
 
-  if (isNative && params.style === undefined && params.styleFilters === undefined) {
+  if (isCustomComponent && params.style === undefined && params.styleFilters === undefined) {
     delete compiled.style;
   }
 

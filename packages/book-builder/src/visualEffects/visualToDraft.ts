@@ -1,5 +1,3 @@
-import type { VisualFrameVisibility } from '@active-book/types';
-
 import type {
   BackgroundEffect,
   BackgroundOptions,
@@ -45,7 +43,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
   const componentId = getVisualComponentId(effect.definitionId);
 
   // Authored options have passed JSON validation at the book boundary.
-  const options: PanelOptions = JSON.parse(JSON.stringify(effect.params));
+  const options: PanelOptions = structuredClone(effect.params);
 
   const kind = componentId ? 'component' : options.kind;
 
@@ -72,10 +70,14 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
       layer = 'behind';
     }
 
-    const visibility = effect.visibility as VisualFrameVisibility;
-
+    const visibility = effect.visibility;
     const isFrameMaskEnabled = visibility.region === 'frame';
-    const frameSides = [...visibility.sides];
+
+    let frameSides: NonNullable<FrameOptions['frameMask']>['sides'] = [];
+
+    if (visibility.region === 'frame') {
+      frameSides = [...visibility.sides];
+    }
 
     options.layer = layer;
 
@@ -93,7 +95,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     zIndex: effect.depth.order,
   };
 
-  return  {
+  return {
     id: effect.id,
     type,
     kind,

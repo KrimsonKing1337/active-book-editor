@@ -10,6 +10,7 @@ import type { VisualDraft } from './drafts';
 import type { AuthoredVisualEffect } from './@types';
 
 import { compileVisualEffects } from './compile';
+import { missingVisualDefinitions } from './definitions';
 import { draftToVisual, visualToDraft } from './drafts';
 
 const readFixture = () => {
@@ -132,6 +133,37 @@ test('custom frame panel round trips retain native params and component identity
     pageId: 'unused-for-range',
   });
   expect(edited).toEqual(previous);
+});
+
+test('known custom definitions are not reported as missing', () => {
+  const book = readFixture();
+  const customRegistration = compileVisualEffects(book).find((registrationCur) => {
+    return registrationCur.effect.definitionId.startsWith('custom.');
+  });
+
+  if (!customRegistration) {
+    throw new Error('Fixture must contain a custom visual effect');
+  }
+
+  const definitionId = customRegistration.effect.definitionId;
+  const customDefinition = {
+    id: definitionId,
+    defaultParams: {},
+    Renderer: () => null,
+  };
+
+  expect(missingVisualDefinitions([customRegistration], [customDefinition])).toEqual([]);
+  expect(missingVisualDefinitions([customRegistration], [])).toEqual([definitionId]);
+});
+
+test('book validation rejects malformed visual effects before inspecting their properties', () => {
+  const book = readFixture();
+  const visuals = book.pages[0].document.attrs!.visualEffects;
+
+  book.pages[0].document.attrs!.visualEffects = [null];
+  expect(isBookDocument(book)).toBe(false);
+
+  book.pages[0].document.attrs!.visualEffects = visuals;
 });
 
 test('book validation rejects duplicate effect IDs and orphaned page owners', () => {

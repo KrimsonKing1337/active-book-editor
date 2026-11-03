@@ -31,17 +31,15 @@ export const missingVisualDefinitions = (
   registrations: readonly VisualEffectRegistration[],
   definitions: readonly VisualEffectDefinition[],
 ): string[] => {
-  const definitionsIds = [...definitions].map((cur) => cur.id);
-  const allIds = [backgroundDefinitionId, frameDefinitionId, definitionsIds];
-
-  const known = new Set(allIds);
+  const definitionIds = definitions.map((definitionCur) => definitionCur.id);
+  const known = new Set([backgroundDefinitionId, frameDefinitionId, ...definitionIds]);
 
   const missing = registrations.filter((registrationCur) => {
     return !known.has(registrationCur.effect.definitionId);
   });
 
   const missingIds = missing.map((cur) => cur.effect.definitionId);
-  const uniqMissingIds = new Set(missingIds);
+  const uniqueMissingIds = new Set(missingIds);
 
-  return [...uniqMissingIds];
+  return [...uniqueMissingIds];
 };

@@ -93,11 +93,11 @@ export const useBookLibraries = ({
       visualDefinitions,
     };
 
-    const definitionsNonRegistry = createCustomVisualDefinitions(libraries, bookRuntime);
+    const runtimeDefinitions = createCustomVisualDefinitions(libraries, bookRuntime);
 
     return {
       registry,
-      definitions: definitionsNonRegistry,
+      definitions: runtimeDefinitions,
       isLoading: !isCurrent,
     };
   }, [libraries, isCurrent]);

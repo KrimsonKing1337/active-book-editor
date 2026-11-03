@@ -479,11 +479,7 @@ export const FrameSettings = ({
     styleEditorShadowStyle = getItemStyle('shadow', shadow.id, shadow.style);
   }
 
-  let textFontSize = '12px';
-
-  if (text) {
-    textFontSize = String(text.style?.fontSize);
-  }
+  const textFontSize = String(text?.style?.fontSize ?? '12px');
 
   return (
     <div className={styles.Settings}>

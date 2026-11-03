@@ -90,7 +90,7 @@ const readTar = (data: Uint8Array): Map<string, Uint8Array> => {
     const validLength = Number.isSafeInteger(length) && length >= 0;
     const validContent = contentEnd <= data.byteLength;
 
-    if (!validLength || validContent) {
+    if (!validLength || !validContent) {
       throw new Error('Некорректный TGZ: повреждён TAR-заголовок');
     }
 
@@ -183,8 +183,8 @@ export const inspectBrowserArchive = async (archive: Blob): Promise<BrowserArchi
   const decodedText = textDecoder.decode(file);
   const packageJson = JSON.parse(decodedText) as BrowserPackage;
 
-  const packageJsonIsValid = typeof packageJson.name === 'string'
-    && typeof packageJson.activeBook === 'string';
+  const packageJsonIsValid = typeof packageJson?.name === 'string'
+    && typeof packageJson?.activeBook === 'string';
 
   if (!packageJson || !packageJsonIsValid) {
     throw new Error('TGZ не содержит корректный package.json с полем activeBook');
@@ -207,7 +207,7 @@ export const inspectBrowserArchive = async (archive: Blob): Promise<BrowserArchi
   }
 
   for (const visualCur of Object.values(visuals)) {
-    const categoryIsValid = visualCur.category === 'background' || visualCur.category === 'frame';
+    const categoryIsValid = visualCur?.category === 'background' || visualCur?.category === 'frame';
 
     if (!visualCur || !categoryIsValid) {
       throw new Error('Визуальное определение должно указывать category background или frame');
