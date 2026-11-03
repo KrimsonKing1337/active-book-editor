@@ -2,7 +2,7 @@ import type { Editor, JSONContent } from '@tiptap/core';
 import { EditorState } from '@tiptap/pm/state';
 
 import type { BookDocument, BookPage } from '@active-book/book-builder/book';
-import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
+import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
 
 import { createEmptyDocument } from '../utils';
 
@@ -19,16 +19,19 @@ export const createEmptyBook = (): BookDocument => {
   return {
     type: 'book',
     pages: [page],
+    visualEffects: [],
   };
 };
 
 /** A fresh plugin state intentionally clears undo/redo when changing pages or projects. */
 export const replaceEditorDocument = (editor: Editor, document: JSONContent): void => {
-  const pageEffects = normalizePageEffects(document.attrs?.pageEffects);
+  const pageEffects = normalizeSpecializedEffects(document.attrs?.pageEffects);
+  const visualEffects = document.attrs?.visualEffects ?? [];
 
   const attrs = {
     ...document.attrs,
     pageEffects,
+    visualEffects,
   };
 
   const normalized = {
@@ -44,6 +47,17 @@ export const replaceEditorDocument = (editor: Editor, document: JSONContent): vo
 
   editor.view.updateState(state);
 
-  editor.emit('transaction', { editor, transaction: state.tr, appendedTransactions: [] });
-  editor.emit('selectionUpdate', { editor, transaction: state.tr });
+  const emittingTransaction = {
+    editor,
+    transaction: state.tr,
+    appendedTransactions: [],
+  };
+
+  const emittingSelectionUpdate = {
+    editor,
+    transaction: state.tr,
+  };
+
+  editor.emit('transaction', emittingTransaction);
+  editor.emit('selectionUpdate', emittingSelectionUpdate);
 };

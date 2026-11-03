@@ -10,7 +10,11 @@ export type EffectTileProps = {
   onSelect: (id: string) => void;
 };
 
-export const EffectTile = ({ effect, path, onSelect }: EffectTileProps) => {
+export const EffectTile = ({
+  effect,
+  path,
+  onSelect,
+}: EffectTileProps) => {
   const effectSlug = effect.slug.trim() || 'Без названия';
 
   const { effectType, effectDetails } = getEffectTileContent(effect);

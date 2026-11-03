@@ -1,14 +1,32 @@
 import { expect, vi } from 'vitest';
 import { page } from 'vitest/browser';
 
+import type { JSONContent } from '@tiptap/core';
+
 import type { BookDocument } from '@active-book/book-builder/book';
 
-import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
+
+import { visualToDraft, pageVisualEffects } from '@active-book/book-builder/visualEffects';
+import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
+
+import { groupPageEffects } from '../../apps/editor/src/components/EditorScreen/components/PageEffects/context/utils';
 
 import { clearLastProjectHandle } from '../../apps/editor/src/project/recentProjectStore';
 
 import book from '../fixtures/effects-book/book.json?raw';
 import herb from '../fixtures/effects-book/assets/herb.svg?raw';
+
+export const savedPageEffects = (document: JSONContent) => {
+  const specialized = normalizeSpecializedEffects(document.attrs?.pageEffects);
+  const effects = [
+    ...(specialized.audio ?? []),
+    ...(specialized.vibration ?? []),
+    ...(specialized.flashlight ?? []),
+    ...pageVisualEffects(document).map(visualToDraft),
+  ];
+
+  return groupPageEffects({ effects, previous: {} });
+};
 
 const writeFile = async (directory: FileSystemDirectoryHandle, name: string, content: string) => {
   const fileHandle = await directory.getFileHandle(name, { create: true });
@@ -50,7 +68,7 @@ export const createProject = async ({ empty = false } = {}) => {
   const readEffects = async () => {
     const document = await readDocument();
 
-    return normalizePageEffects(document.pages[0].document.attrs?.pageEffects);
+    return savedPageEffects(document.pages[0].document);
   };
 
   const save = async () => {

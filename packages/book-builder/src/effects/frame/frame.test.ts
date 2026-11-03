@@ -148,7 +148,10 @@ test('resolves filters on one frame effect at a time', () => {
     }],
   };
 
-  const result = resolveFrameOptions({ shadow, text });
+  const result = resolveFrameOptions({
+    shadow,
+    text,
+  });
 
   assert.deepEqual(result.shadow, {
     id: 'shadow',
@@ -161,7 +164,10 @@ test('resolves filters on one frame effect at a time', () => {
   });
 
   assert.equal(result.text?.style.filter, 'opacity(50%)');
-  assert.deepEqual(shadow.style, { color: '#ff0000', zIndex: 4 });
+  assert.deepEqual(shadow.style, {
+    color: '#ff0000',
+    zIndex: 4,
+  });
 });
 
 test('rejects missing frame text fields and invalid shadow IDs', () => {

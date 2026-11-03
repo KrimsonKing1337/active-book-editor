@@ -44,7 +44,10 @@ export const loadCustomComponents = async (): Promise<{
       Object.assign(components, library.components);
     }
 
-    return { libraries, components };
+    return {
+      libraries,
+      components,
+    };
   } catch (error) {
     for (const library of libraries) {
       library.dispose();

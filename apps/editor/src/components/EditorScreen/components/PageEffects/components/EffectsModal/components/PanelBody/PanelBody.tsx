@@ -8,7 +8,11 @@ type PanelBodyProps = {
   isLoading: boolean;
 };
 
-export const PanelBody = ({ content, notice, isLoading }: PanelBodyProps) => {
+export const PanelBody = ({
+  content,
+  notice,
+  isLoading,
+}: PanelBodyProps) => {
   return (
     <div className={styles.PanelBody}>
       <div className={styles.Content} inert={isLoading}>

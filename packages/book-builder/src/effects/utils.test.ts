@@ -14,7 +14,11 @@ const frame: FrameEffect[] = [
     slug: 'Shadow',
     options: {
       layer: 'behind',
-      shadow: { id: 'shadow-1', sides: ['left', 'right'], style: { zIndex: 3 } },
+      shadow: {
+        id: 'shadow-1',
+        sides: ['left', 'right'],
+        style: { zIndex: 3 },
+      },
     },
   },
   {
@@ -24,7 +28,12 @@ const frame: FrameEffect[] = [
     slug: 'Text',
     options: {
       layer: 'above',
-      text: { id: 'text-1', leftText: 'Left', rightText: 'Right', style: { zIndex: 7 } },
+      text: {
+        id: 'text-1',
+        leftText: 'Left',
+        rightText: 'Right',
+        style: { zIndex: 7 },
+      },
     },
   },
   {
@@ -34,8 +43,14 @@ const frame: FrameEffect[] = [
     slug: 'Component',
     options: {
       layer: 'above',
-      component: { package: 'custom-effects', name: 'Smoke' },
-      frameMask: { enabled: true, sides: ['top', 'bottom'] },
+      component: {
+        package: 'custom-effects',
+        name: 'Smoke',
+      },
+      frameMask: {
+        enabled: true,
+        sides: ['top', 'bottom'],
+      },
       style: { zIndex: 5 },
     },
   },
@@ -49,7 +64,10 @@ test('restores every frame kind and its placement from saved page effects', () =
     slug: 'Background',
     options: { style: { zIndex: 1 } },
   }];
-  const saved = JSON.parse(JSON.stringify({ background, frame }));
+  const saved = JSON.parse(JSON.stringify({
+    background,
+    frame,
+  }));
 
   const normalized = normalizePageEffects(saved);
 
@@ -72,7 +90,10 @@ test('normalizes absent and malformed frame groups to empty lists', () => {
     frame: [],
   });
 
-  const normalized = normalizePageEffects({ frame: {}, background: [] });
+  const normalized = normalizePageEffects({
+    frame: {},
+    background: [],
+  });
 
   assert.deepEqual(normalized.frame, []);
   assert.deepEqual(normalized.background, []);

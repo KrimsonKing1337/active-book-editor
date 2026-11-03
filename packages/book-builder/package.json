@@ -27,7 +27,9 @@
     "./bookPreparation": "./src/bookPreparation/index.ts",
     "./server": "./src/server/index.ts",
     "./components/custom": "./src/components/custom/index.ts",
-    "./book": "./src/book/index.ts"
+    "./book": "./src/book/index.ts",
+    "./visualEffects": "./src/visualEffects/index.ts",
+    "./components/custom/visual": "./src/components/custom/visual.ts"
   },
   "devDependencies": {
     "@types/node": "^26.5.1",

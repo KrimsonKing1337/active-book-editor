@@ -5,8 +5,13 @@
       "id": "first-page",
       "document": {
         "type": "doc",
-        "content": []
+        "content": [],
+        "attrs": {
+          "visualEffects": [],
+          "pageEffects": {}
+        }
       }
     }
-  ]
+  ],
+  "visualEffects": []
 }

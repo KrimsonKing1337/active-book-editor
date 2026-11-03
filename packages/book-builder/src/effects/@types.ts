@@ -12,7 +12,9 @@ export type EditorEffect =
   | FrameEffect;
 
 export type PageEffects = {
-  [K in EditorEffect['type']]?: Extract<EditorEffect, { type: K }>[];
+  [K in EditorEffect['type']]?: Extract<EditorEffect, {
+    type: K
+  }>[];
 };
 
 export type BuiltEffect =
@@ -23,5 +25,7 @@ export type BuiltEffect =
   | BuiltFrameEffect;
 
 export type BuiltPageEffects = {
-  [K in BuiltEffect['type']]?: Extract<BuiltEffect, { type: K }>[];
+  [K in BuiltEffect['type']]?: Extract<BuiltEffect, {
+    type: K
+  }>[];
 };

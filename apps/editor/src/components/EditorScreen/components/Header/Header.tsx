@@ -47,7 +47,6 @@ export const Header = ({
   buildState,
   buttonIsDisabled,
   structureButtonIsDisabled,
-
   onNewProject,
   onOpenProject,
   onSaveProject,
@@ -135,7 +134,13 @@ export const Header = ({
         </button>
 
         {customComponentDefinitions.map((componentCur) => {
-          const { id, description, packageName, name, title } = componentCur;
+          const {
+            id,
+            description,
+            packageName,
+            name,
+            title,
+          } = componentCur;
 
           return (
             <button

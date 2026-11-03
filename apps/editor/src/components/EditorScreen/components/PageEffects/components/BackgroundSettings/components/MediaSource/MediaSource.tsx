@@ -44,7 +44,13 @@ const mediaTypes = {
   video: videoMediaType,
 };
 
-export const MediaSource = ({ kind, src, canImport, onChange, onImportAsset }: MediaSourceProps) => {
+export const MediaSource = ({
+  kind,
+  src,
+  canImport,
+  onChange,
+  onImportAsset,
+}: MediaSourceProps) => {
   const sourceInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);

@@ -26,7 +26,7 @@ export type BookNode = {
 export type PageDocument = {
   type?: string;
   attrs?: {
-    pageEffects?: BuiltPageEffects;
+    pageEffects?: Pick<BuiltPageEffects, 'audio' | 'vibration' | 'flashlight'>;
   };
   content?: BookNode[];
 };

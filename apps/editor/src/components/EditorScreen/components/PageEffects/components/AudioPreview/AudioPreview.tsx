@@ -15,7 +15,11 @@ type AudioPreviewProps = {
 
 export const AudioPreview = ({ effect, onLoadingChange }: AudioPreviewProps) => {
   const { audioPreviewStatuses } = usePageEffects();
-  const { audio, play, stop } = useAudioController(effect.id);
+  const {
+    audio,
+    play,
+    stop,
+  } = useAudioController(effect.id);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [loopPreview, setLoopPreview] = useState(false);

@@ -8,3 +8,4 @@ export const DATABASE_VERSION = 1;
 export const STORE_NAME = 'project-handles';
 export const LAST_PROJECT_KEY = 'last-project';
 
+export const LOCAL_FILE_PATH = 'file:./';

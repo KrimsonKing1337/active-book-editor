@@ -4,6 +4,8 @@ import {
   loadBrowserLibrary,
 } from '@active-book/book-builder/components/custom/browser';
 
+import { LOCAL_FILE_PATH } from '@project/constants';
+
 import type { ProjectStorage } from './@types';
 import type { FilePickerWindow, ProjectFileHandle } from './fileSystemAccess';
 
@@ -19,29 +21,45 @@ const getDependencies = async (storage: ProjectStorage): Promise<PackageDescript
 };
 
 const getArchivePath = (specifier: string): string => {
-  if (!specifier.startsWith('file:./dependencies/')) {
+  const dependenciesPath = `${LOCAL_FILE_PATH}dependencies/`;
+
+  if (!specifier.startsWith(dependenciesPath)) {
     throw new Error(`Active Book поддерживает только готовые TGZ из dependencies/: ${specifier}`);
   }
 
-  const path = specifier.slice('file:./'.length);
+  const path = specifier.slice(LOCAL_FILE_PATH.length);
 
-  if (path.split('/').length !== 2 || !path.toLowerCase().endsWith('.tgz')) {
+  const pathSlashesAmount = path.split('/').length;
+  const pathTgzIsValid = path.toLowerCase().endsWith('.tgz');
+
+  if (pathSlashesAmount !== 2 || !pathTgzIsValid) {
     throw new Error(`Некорректный путь к TGZ: ${specifier}`);
   }
 
   return path;
 };
 
-export const loadProjectLibraries = async (storage: ProjectStorage): Promise<BrowserLibrary[]> => {
+type LoadProjectLibrariesSignal = {
+  signal?: AbortSignal;
+};
+
+export const loadProjectLibraries = async (
+  storage: ProjectStorage,
+  { signal }: LoadProjectLibrariesSignal = {},
+): Promise<BrowserLibrary[]> => {
   const description = await getDependencies(storage);
+
   const libraries: BrowserLibrary[] = [];
+  const dependencies = description.dependencies ?? {};
 
   try {
-    for (const [packageName, specifier] of Object.entries(description.dependencies ?? {})) {
+    for (const [packageName, specifier] of Object.entries(dependencies)) {
       const archivePath = getArchivePath(specifier);
       const file = await storage.getDependencyFile(archivePath);
 
-      const library = await loadBrowserLibrary(file);
+      signal?.throwIfAborted();
+
+      const library = await loadBrowserLibrary(file, { signal });
 
       if (library.packageName !== packageName) {
         library.dispose();
@@ -74,14 +92,16 @@ const pickArchive = async (): Promise<PickedArchive> => {
 
   const filePickerWindow = window as FilePickerWindow;
 
+  const readyLibrariesType = {
+    description: 'Готовые библиотеки Active Book (.tgz)',
+    accept: {
+      'application/gzip': ['.tgz'],
+    },
+  };
+
   const [handle] = await filePickerWindow.showOpenFilePicker({
     id: 'active-book-custom-package',
-    types: [{
-      description: 'Готовые библиотеки Active Book (.tgz)',
-      accept: {
-        'application/gzip': ['.tgz'],
-      },
-    }],
+    types: [readyLibrariesType],
   });
 
   const file = await handle.getFile();
@@ -115,14 +135,15 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   description.dependencies = {
     ...description.dependencies,
-    [packageName]: `file:./${path}`,
+    [packageName]: `${LOCAL_FILE_PATH}${path}`,
   };
 
   const descriptionJson = JSON.stringify(description, null, 2);
 
   await storage.writePackageJson(`${descriptionJson}\n`);
 
-  const componentCount = Object.keys(manifest.components).length;
+  const visualEffects = manifest.visualEffects ?? {};
+  const componentCount = Object.keys(manifest.components).length + Object.keys(visualEffects).length;
 
   return `${packageName} (${componentCount} компонентов)`;
 };

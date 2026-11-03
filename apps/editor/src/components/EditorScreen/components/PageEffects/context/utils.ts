@@ -1,5 +1,7 @@
 import type { Editor } from '@tiptap/core';
 
+import { visualToDraft } from '@active-book/book-builder/visualEffects';
+
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
 
 import type {
@@ -50,24 +52,20 @@ export const getBackgroundPreviewKey = ({
 };
 
 export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
-  const grouped = editor?.state.doc.attrs.pageEffects as GroupedPageEffects | undefined;
-
-  if (!grouped) {
-    return [];
-  }
+  const grouped: GroupedPageEffects = editor?.state.doc.attrs.pageEffects ?? {};
 
   const groupedAudio = grouped.audio ?? [];
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
-  const groupedBackground = grouped.background?.filter((cur) => Boolean(cur.kind)) ?? [];
-  const groupedFrame = grouped.frame?.filter((cur) => Boolean(cur.kind)) ?? [];
+
+  const visual = editor?.state.doc.attrs.visualEffects ?? [];
+  const visualDraft = visual.map(visualToDraft);
 
   return [
     ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
-    ...groupedBackground,
-    ...groupedFrame,
+    ...visualDraft,
   ];
 };
 
@@ -94,6 +92,7 @@ export const groupPageEffects = ({ effects, previous }: GroupPageEffectsParams):
 
   return {
     ...previous,
+
     audio,
     vibration,
     flashlight,
@@ -212,6 +211,7 @@ const applyBackgroundStylePreviews = (
   }
 
   const updatedStyle = backgroundStyle ?? effect.options.style;
+
   let updatedImage = image;
   let updatedVideo = video;
   let updatedShadow = shadow;
@@ -239,6 +239,7 @@ const applyBackgroundStylePreviews = (
 
   const options = {
     ...effect.options,
+
     style: updatedStyle,
     image: updatedImage,
     video: updatedVideo,

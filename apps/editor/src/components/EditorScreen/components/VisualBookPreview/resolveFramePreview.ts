@@ -1,10 +1,11 @@
-import { resolveFrameOptions } from '@active-book/book-builder/effects';
+import type { FrameEffectDraft } from '../PageEffects/@types';
 
-import type { FrameEffectDraft } from '../../@types';
-import type { FrameItemPreviews, FrameStylePreviews } from '../../context';
-
-
-import { getFramePreviewKey, getFrameStylePreviewKey } from '../../context';
+import {
+  type FrameItemPreviews,
+  type FrameStylePreviews,
+  getFramePreviewKey,
+  getFrameStylePreviewKey,
+} from '../PageEffects/context';
 
 type ResolveFrameInstanceOptionsParams = {
   effect: FrameEffectDraft;
@@ -12,7 +13,7 @@ type ResolveFrameInstanceOptionsParams = {
   stylePreviews: FrameStylePreviews;
 };
 
-export const resolveFrameInstanceOptions = ({
+export const resolveFramePreview = ({
   effect,
   previews,
   stylePreviews,
@@ -25,21 +26,26 @@ export const resolveFrameInstanceOptions = ({
   const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
   const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
 
-  const shadowStyleKey = shadow
-    ? getFrameStylePreviewKey({
+  let shadowStyleKey = '';
+
+  if (shadow) {
+    shadowStyleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'shadow',
       itemId: shadow.id,
-    })
-    : undefined;
+    });
+  }
 
-  const textStyleKey = text
-    ? getFrameStylePreviewKey({
+  let textStyleKey = '';
+
+  if (text) {
+    textStyleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'text',
       itemId: text.id,
-    })
-    : undefined;
+    });
+  }
+
   const componentStyleKey = getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'component',
@@ -86,10 +92,10 @@ export const resolveFrameInstanceOptions = ({
   const resolvedText = previewText ?? undefined;
   const previewComponentStyle = componentStyle ?? effect.options.style;
 
-  return resolveFrameOptions({
+  return {
     ...effect.options,
     shadow: resolvedShadow,
     text: resolvedText,
     style: previewComponentStyle,
-  });
+  };
 };

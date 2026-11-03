@@ -2,6 +2,8 @@ import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
 import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
+import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
+
 import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
@@ -16,7 +18,7 @@ import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
 import { TextInput, Select, Checkbox, Button } from '../EffectControls';
 
-import { AnimationSettings } from './components/AnimationSettings';
+import { AnimationSettings } from './components';
 
 import { frameSides, positions, shadowPresets, textPresets } from './constants';
 
@@ -28,9 +30,8 @@ type FrameAnimation = NonNullable<ShadowItem['animation']>;
 type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 type Kind = 'shadow' | 'text' | 'component';
 
-type FrameSettingsProps = {
+export type FrameSettingsProps = {
   effect: FrameEffectDraft;
-
   onUpdate: (previousId: string, effect: FrameEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -39,7 +40,6 @@ type FrameSettingsProps = {
 type LayoutSettingsProps = {
   item: ItemLayout;
   hidden: boolean;
-
   onChange: (changes: Partial<ItemLayout>) => void;
   onHiddenChange: (hidden: boolean) => void;
 };
@@ -150,8 +150,17 @@ const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesPro
   );
 };
 
-export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: FrameSettingsProps) => {
-  const { definitions } = useCustomComponents();
+export const FrameSettings = ({
+  effect,
+  onUpdate,
+  onDuplicate,
+  onDelete,
+}: FrameSettingsProps) => {
+  const { visualDefinitions } = useCustomComponents();
+
+  const definitions = visualDefinitions.filter((definitionCur) => {
+    return definitionCur.category === 'frame';
+  });
 
   const {
     frameItemPreviews,
@@ -162,13 +171,25 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     getCurrentEffects,
   } = usePageEffects();
 
-  const { shadow, text, component } = effect.options;
-  const componentMask: FrameMask = effect.options.frameMask ?? {
-    enabled: false,
-    sides: ['top', 'right', 'bottom', 'left'],
-  };
+  const {
+    shadow,
+    text,
+    component,
+    frameMask,
+  } = effect.options;
+
+  let componentMask = frameMask as FrameMask;
+
+  if (!frameMask) {
+    componentMask = {
+      enabled: false,
+      sides: ['top', 'right', 'bottom', 'left'],
+    };
+  }
+
   const item = effect.kind === 'shadow' ? shadow : text;
   const previewKey = item ? getFramePreviewKey(effect.id, item.id) : '';
+
   const preview = frameItemPreviews[previewKey] ?? {};
   const previewIsHidden = preview.hidden ?? item?.hidden ?? false;
 
@@ -243,14 +264,23 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     const options = { ...currentEffect.options };
 
     if (kind === 'shadow' && options.shadow) {
-      options.shadow = { ...options.shadow, styleFilters };
+      options.shadow = {
+        ...options.shadow,
+        styleFilters,
+      };
     } else if (kind === 'text' && options.text) {
-      options.text = { ...options.text, styleFilters };
+      options.text = {
+        ...options.text,
+        styleFilters,
+      };
     } else if (kind === 'component') {
       options.styleFilters = styleFilters;
     }
 
-    onUpdate(effect.id, { ...currentEffect, options });
+    onUpdate(effect.id, {
+      ...currentEffect,
+      options,
+    });
   };
 
   const handlePlaybackChange = (state: NonNullable<FrameAnimation['playState']>) => {
@@ -334,6 +364,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
 
     if (!definition) {
       updateOptions({ component: undefined });
+
       return;
     }
 
@@ -345,7 +376,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
     updateOptions({ component: updatedComponent });
   };
 
-  const componentId = component ? `${component.package}/${component.name}` : '';
+  const componentId = component ? customVisualDefinitionId('frame', `${component.package}/${component.name}`) : '';
 
   const handleThicknessChange = (val: number) => {
     updateShadow({ thickness: val });
@@ -396,6 +427,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
         handleStylePreview('shadow', shadow.id, val);
       }
     },
+
     commit: flushStylePreviews,
     commitFilters: (val) => commitItemFilters('shadow', val),
   };
@@ -406,6 +438,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
         handleStylePreview('text', text.id, val);
       }
     },
+
     commit: flushStylePreviews,
     commitFilters: (val) => commitItemFilters('text', val),
   };
@@ -431,6 +464,22 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
       colorDisabledReason = 'Цвет этого пресета меняется автоматически. Выберите одноцветный пресет';
     }
   }
+
+  const styleEditorComponentStyle = getItemStyle('component', effect.id, effect.options.style);
+
+  let styleEditorTextStyle = {};
+
+  if (text) {
+    styleEditorTextStyle = getItemStyle('text', text.id, text.style);
+  }
+
+  let styleEditorShadowStyle = {};
+
+  if (shadow) {
+    styleEditorShadowStyle = getItemStyle('shadow', shadow.id, shadow.style);
+  }
+
+  const textFontSize = String(text?.style?.fontSize ?? '12px');
 
   return (
     <div className={styles.Settings}>
@@ -519,7 +568,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
               colorLabel="Цвет тени (color)"
               colorDisabledReason={colorDisabledReason}
               defaultZIndex={1}
-              value={getItemStyle('shadow', shadow.id, shadow.style)}
+              value={styleEditorShadowStyle}
               styleFilters={shadow.styleFilters}
               controller={shadowController}
             />
@@ -577,7 +626,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
             <CssLengthInput
               label="Размер шрифта"
               allowNegative={false}
-              value={String(text.style?.fontSize ?? '12px')}
+              value={textFontSize}
               onChange={handleFontSizeChange}
             />
           </div>
@@ -593,7 +642,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
               colorLabel="Цвет текста (color)"
               additionalColorProperty="backgroundColor"
               defaultZIndex={1}
-              value={getItemStyle('text', text.id, text.style)}
+              value={styleEditorTextStyle}
               styleFilters={text.styleFilters}
               controller={textController}
             />
@@ -660,7 +709,7 @@ export const FrameSettings = ({ effect, onUpdate, onDuplicate, onDelete }: Frame
             <StyleEditor
               layer="background"
               defaultZIndex={1}
-              value={getItemStyle('component', effect.id, effect.options.style)}
+              value={styleEditorComponentStyle}
               styleFilters={effect.options.styleFilters}
               controller={componentController}
             />

@@ -12,13 +12,21 @@ test('does not carry preview state or delayed callbacks into another page with t
   const updateFirstPage = result.current.updateFrameItemPreview;
   const key = getFramePreviewKey('frame', 'shadow');
 
-  act(() => updateFirstPage({ effectId: 'frame', itemId: 'shadow', changes: { hidden: true } }));
+  act(() => updateFirstPage({
+    effectId: 'frame',
+    itemId: 'shadow',
+    changes: { hidden: true },
+  }));
   expect(result.current.frameItemPreviews[key]).toEqual({ hidden: true });
 
   rerender({ pageId: 'second' });
   expect(result.current.frameItemPreviews).toEqual({});
 
-  act(() => updateFirstPage({ effectId: 'frame', itemId: 'shadow', changes: { playState: 'paused' } }));
+  act(() => updateFirstPage({
+    effectId: 'frame',
+    itemId: 'shadow',
+    changes: { playState: 'paused' },
+  }));
   expect(result.current.frameItemPreviews).toEqual({});
 
   act(() => result.current.updateFrameItemPreview({

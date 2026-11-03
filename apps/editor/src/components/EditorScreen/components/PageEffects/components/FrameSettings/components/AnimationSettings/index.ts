@@ -1,1 +1,1 @@
-export { AnimationSettings } from './AnimationSettings';
+export * from './AnimationSettings';

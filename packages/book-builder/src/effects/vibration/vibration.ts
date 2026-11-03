@@ -29,7 +29,11 @@ export const normalizeVibrationEffects = (value: unknown): VibrationEffect[] => 
       continue;
     }
 
-    const { duration, delay, playOnLoad } = effect.options;
+    const {
+      duration,
+      delay,
+      playOnLoad,
+    } = effect.options;
 
     if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 0) {
       continue;
@@ -47,7 +51,11 @@ export const normalizeVibrationEffects = (value: unknown): VibrationEffect[] => 
       id: effect.id,
       type: 'vibration',
       slug: typeof effect.slug === 'string' ? effect.slug : 'Новая вибрация',
-      options: { duration, delay, playOnLoad },
+      options: {
+        duration,
+        delay,
+        playOnLoad,
+      },
     });
   }
 

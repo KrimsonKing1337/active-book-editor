@@ -1,6 +1,13 @@
 import type { CSSProperties } from 'react';
 
-import type { FrameMask, FrameLayer, FrameShadowItem, FrameTextItem } from 'activeBook-core/hooks/effects/frame/@types';
+import type { JsonObject } from '@active-book/types';
+
+import type {
+  FrameMask,
+  FrameLayer,
+  FrameShadowItem,
+  FrameTextItem,
+} from 'activeBook-core/hooks/effects/frame/@types';
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
@@ -20,6 +27,8 @@ export const frameEffectKinds = ['shadow', 'text', 'component'] as const;
 export type FrameEffectKind = (typeof frameEffectKinds)[number];
 
 export type FrameOptions = {
+  custom?: JsonObject;
+  componentKey?: string | number;
   layer?: FrameLayer;
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
@@ -116,7 +125,9 @@ export const normalizeFrameEffects = (value: unknown): FrameEffect[] => {
       continue;
     }
 
-    const kind = frameEffectKinds.find((cur) => cur === effectCur.kind);
+    const kind = frameEffectKinds.find((kindCur) => {
+      return kindCur === effectCur.kind;
+    });
 
     if (!kind) {
       continue;

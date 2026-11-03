@@ -5,11 +5,25 @@
       "title": "Тестовая вставка",
       "entry": "./index.js",
       "export": "Badge"
-    },
+    }
+  },
+  "visualEffects": {
     "Overlay": {
       "title": "Тестовый эффект",
       "entry": "./index.js",
-      "export": "Overlay"
+      "export": "Overlay",
+      "category": "background"
+    },
+    "Native": {
+      "title": "Native range",
+      "entry": "./index.js",
+      "export": "Native",
+      "category": "frame",
+      "defaultParams": {
+        "custom": {
+          "color": "white"
+        }
+      }
     }
   }
 }

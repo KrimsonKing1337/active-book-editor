@@ -23,7 +23,6 @@ export const EffectsModal = ({
   selectedEffect,
   isSavingStyles,
   styleSaveError,
-
   onClose,
   onBack,
   onAddAudio,

@@ -37,7 +37,6 @@ export const BackgroundSettings = ({
   effect,
   effects,
   project,
-
   onLoadingChange,
   onUpdate,
   onDuplicate,

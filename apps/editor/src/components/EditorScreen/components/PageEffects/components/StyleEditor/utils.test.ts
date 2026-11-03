@@ -15,8 +15,16 @@ const effects: EditorEffectDraft[] = [
     options: {
       style: { zIndex: 2 },
       shadow: { style: { zIndex: 10 } },
-      image: { id: 'image', src: '', style: { zIndex: 5 } },
-      video: { id: 'video', src: '', style: { zIndex: 5 } },
+      image: {
+        id: 'image',
+        src: '',
+        style: { zIndex: 5 },
+      },
+      video: {
+        id: 'video',
+        src: '',
+        style: { zIndex: 5 },
+      },
     },
   },
   {
@@ -25,7 +33,11 @@ const effects: EditorEffectDraft[] = [
     kind: 'shadow',
     slug: 'Frame shadow',
     options: {
-      shadow: { id: 'shadow', sides: ['left', 'right'], style: { zIndex: 3 } },
+      shadow: {
+        id: 'shadow',
+        sides: ['left', 'right'],
+        style: { zIndex: 3 },
+      },
     },
   },
   {
@@ -34,7 +46,12 @@ const effects: EditorEffectDraft[] = [
     kind: 'text',
     slug: 'Frame text',
     options: {
-      text: { id: 'text', leftText: 'Left', rightText: 'Right', style: { zIndex: 9 } },
+      text: {
+        id: 'text',
+        leftText: 'Left',
+        rightText: 'Right',
+        style: { zIndex: 9 },
+      },
     },
   },
   {

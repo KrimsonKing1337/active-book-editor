@@ -2,6 +2,8 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
+import { type AuthoredVisualEffect, draftToVisual } from '@active-book/book-builder/visualEffects';
+
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
 import type { EditorEffectDraft } from '../../@types';
@@ -11,11 +13,24 @@ import { getPageEffects, groupPageEffects } from '../utils';
 
 type AudioPreviewStatuses = Record<string, AudioPreviewStatus>;
 
-export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
+type PageEffectsStateOptions = {
+  editor: Editor | null;
+  pageId: string;
+  ownerPageId: string;
+};
+
+export const usePageEffectsState = ({
+  editor,
+  pageId,
+  ownerPageId,
+}: PageEffectsStateOptions) => {
   const [source, setSource] = useState(() => {
     const effects = getPageEffects(editor);
 
-    return { pageId, effects };
+    return {
+      pageId,
+      effects,
+    };
   });
 
   const effects = source.pageId === pageId ? source.effects : [];
@@ -55,7 +70,10 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
 
   useLayoutEffect(() => {
     if (!editor) {
-      setSource({ pageId, effects: [] });
+      setSource({
+        pageId,
+        effects: [],
+      });
 
       return;
     }
@@ -79,7 +97,10 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
           return previous;
         }
 
-        return { pageId, effects: nextEffects };
+        return {
+          pageId,
+          effects: nextEffects,
+        };
       });
     };
 
@@ -93,7 +114,10 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
   }, [editor, pageId]);
 
   const writeEffects = useCallback((nextEffects: EditorEffectDraft[]) => {
-    if (!editor || editor.isDestroyed) {
+    const editorIsUnavailable = !editor || editor.isDestroyed;
+    const theSamePage = currentPageRef.current === pageId;
+
+    if (editorIsUnavailable || !theSamePage) {
       return;
     }
 
@@ -104,10 +128,36 @@ export const usePageEffectsState = (editor: Editor | null, pageId: string) => {
       previous,
     });
 
-    const transaction = editor.state.tr.setDocAttribute('pageEffects', groupedEffects);
+    const {
+      background,
+      frame,
+      ...specialized
+    } = groupedEffects;
+
+    const previousVisuals: AuthoredVisualEffect[] = editor.state.doc.attrs.visualEffects ?? [];
+
+    const backgroundEffects = background ?? [];
+    const frameEffects = frame ?? [];
+    const backgroundAndFrameEffects = [...backgroundEffects, ...frameEffects];
+
+    const visualEffects = backgroundAndFrameEffects.map((effectCur) => {
+      const previousEffects = previousVisuals.find((prevEffectCur) => {
+        return prevEffectCur.effect.id === effectCur.id;
+      });
+
+      return draftToVisual({
+        draft: effectCur,
+        pageId: ownerPageId,
+        previous: previousEffects,
+      });
+    });
+
+    const transaction = editor.state.tr
+      .setDocAttribute('pageEffects', specialized)
+      .setDocAttribute('visualEffects', visualEffects);
 
     editor.view.dispatch(transaction);
-  }, [editor]);
+  }, [editor, pageId, ownerPageId]);
 
   const getCurrentEffects = useCallback((): EditorEffectDraft[] => {
     return getPageEffects(editor);

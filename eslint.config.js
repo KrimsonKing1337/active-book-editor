@@ -12,6 +12,7 @@ import _import from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
+import newlineDestructuring from 'eslint-plugin-newline-destructuring';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +51,7 @@ export default defineConfig([
       'jsx-a11y': jsxA11y,
       react,
       'react-hooks': fixupPluginRules(reactHooks),
+      'newline-destructuring': newlineDestructuring,
     },
 
     languageOptions: {
@@ -122,8 +124,44 @@ export default defineConfig([
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/object-curly-spacing': ['error', 'always'],
+      '@stylistic/object-property-newline': ['error'],
+
+      '@stylistic/object-curly-newline': ['error', {
+        ObjectExpression: {
+          minProperties: 3,
+          multiline: true,
+          consistent: true,
+        },
+        ObjectPattern: {
+          minProperties: 3,
+          multiline: true,
+          consistent: true,
+        },
+        TSTypeLiteral: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        },
+        TSInterfaceBody: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        },
+        TSEnumBody: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        }
+      }],
+
       '@stylistic/curly-newline': ['error', {
         'minElements': 1,
+      }],
+
+      '@stylistic/padding-line-between-statements': ['error', {
+        blankLine: 'always',
+        prev: '*',
+        next: 'return',
       }],
 
       '@stylistic/max-len': [
@@ -182,6 +220,12 @@ export default defineConfig([
           ignoreRestArgs: false,
         },
       ],
+
+      'newline-destructuring/newline': ['error', {
+        items: 2,
+        consistent: false,
+        allowAllPropertiesOnSameLine: false,
+      }],
     },
   },
 ]);

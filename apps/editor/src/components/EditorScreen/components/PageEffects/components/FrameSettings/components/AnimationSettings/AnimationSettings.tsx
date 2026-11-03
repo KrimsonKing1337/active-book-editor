@@ -16,11 +16,12 @@ type Preset = {
 
 type PlaybackState = NonNullable<FrameAnimation['playState']>;
 
-type AnimationSettingsProps = {
+export type AnimationSettingsProps = {
   animation?: FrameAnimation;
   presets: Preset[];
   defaultDuration: number;
   playState?: FrameAnimation['playState'];
+
   onPlaybackChange: (state: PlaybackState) => void;
   onChange: (animation: FrameAnimation) => void;
 };

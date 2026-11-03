@@ -31,7 +31,7 @@
     "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.37.tgz",
+    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.41.tgz",
     "react-router-dom": "^7.10.1"
   },
   "devDependencies": {
@@ -51,6 +51,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-newline-destructuring": "^1.2.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
     "husky": "^9.1.7",

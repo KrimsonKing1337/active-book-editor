@@ -1,1 +1,1 @@
-export { FrameSettings } from './FrameSettings';
+export * from './FrameSettings';

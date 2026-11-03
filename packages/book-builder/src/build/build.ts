@@ -42,7 +42,9 @@ const prepareRuntime = async (
 
   try {
     const packageRaw = await fs.readFile(path.join(projectRoot, 'package.json'), 'utf8');
-    const packageJson = JSON.parse(packageRaw) as { dependencies?: Record<string, string> };
+    const packageJson = JSON.parse(packageRaw) as {
+      dependencies?: Record<string, string>
+    };
 
     dependencies = packageJson.dependencies ?? {};
   } catch (error) {
@@ -92,7 +94,10 @@ export async function buildBook({
   const outDirSafe = outDir ?? path.join(repoRoot, 'dist-book');
 
   try {
-    await fs.rm(tempRoot, { recursive: true, force: true });
+    await fs.rm(tempRoot, {
+      recursive: true,
+      force: true,
+    });
 
     await prepareRuntime(projectRoot, runtimeRoot, tempRoot);
 
@@ -104,7 +109,10 @@ export async function buildBook({
 
     await build(createViteConfig(viteConfig));
   } finally {
-    await fs.rm(tempRoot, { recursive: true, force: true });
+    await fs.rm(tempRoot, {
+      recursive: true,
+      force: true,
+    });
   }
 
   return outDirSafe;
