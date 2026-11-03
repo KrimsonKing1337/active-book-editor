@@ -67,7 +67,12 @@ export default defineConfig((env) => {
                 toMatchScreenshot: {
                   resolveScreenshotPath: (data) => {
                     const {
-                      arg, browserName, ext, platform, root, testFileName,
+                      arg,
+                      browserName,
+                      ext,
+                      platform,
+                      root,
+                      testFileName,
                     } = data;
 
                     const screenshotFileName = `${(arg)}-${(browserName)}-${(platform)}${(ext)}`;
