@@ -28,6 +28,7 @@ import 'activeBook-core/styles/styles.scss';
 let session: VisualEffects;
 const Probe = () => {
   session = useVisualEffects();
+
   return null;
 };
 
@@ -47,7 +48,11 @@ test('native identity and independent book sessions', async () => {
     const initial = compileVisualEffects(book)
       .filter((cur) => cur.effect.id === 'range-native');
     const original = initial[0];
-    const config = { id: 'native-contract', pages: 3, defaultTheme: 'dark' };
+    const config = {
+      id: 'native-contract',
+      pages: 3,
+      defaultTheme: 'dark',
+    };
     const view = (registrations = initial, bookKey = 1) => (
       <StrictMode>
         <StoreProvider>

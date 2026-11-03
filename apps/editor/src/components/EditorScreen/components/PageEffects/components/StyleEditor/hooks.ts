@@ -21,7 +21,12 @@ export type UseStyleEditorProps = {
   controller?: StyleEditorController;
 };
 
-export const useStyleEditor = ({ value, layer, mediaId, controller }: UseStyleEditorProps) => {
+export const useStyleEditor = ({
+  value,
+  layer,
+  mediaId,
+  controller,
+}: UseStyleEditorProps) => {
   const backgroundStyle = useOptionalBackgroundStyle();
 
   const [draftStyle, setDraftStyle] = useState<CSSProperties | null>(null);

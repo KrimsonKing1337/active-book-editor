@@ -32,7 +32,13 @@ export const normalizeFlashlightEffects = (value: unknown): FlashlightEffect[] =
       continue;
     }
 
-    const { duration, delay, playOnLoad, withFrameShadow, speed } = effect.options;
+    const {
+      duration,
+      delay,
+      playOnLoad,
+      withFrameShadow,
+      speed,
+    } = effect.options;
 
     if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 0) {
       continue;
@@ -54,7 +60,13 @@ export const normalizeFlashlightEffects = (value: unknown): FlashlightEffect[] =
       id: effect.id,
       type: 'flashlight',
       slug: typeof effect.slug === 'string' ? effect.slug : 'Новая вспышка',
-      options: { duration, delay, playOnLoad, withFrameShadow, speed },
+      options: {
+        duration,
+        delay,
+        playOnLoad,
+        withFrameShadow,
+        speed,
+      },
     });
   }
 

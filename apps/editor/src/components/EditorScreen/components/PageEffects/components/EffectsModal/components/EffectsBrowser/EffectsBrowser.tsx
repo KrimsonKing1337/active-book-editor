@@ -69,7 +69,6 @@ export const EffectsBrowser = ({
   group,
   grouping,
   search,
-
   onAddAudio,
   onAddVibration,
   onAddFlashlight,

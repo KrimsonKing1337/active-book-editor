@@ -8,7 +8,11 @@ type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'child
   children: ReactNode;
 };
 
-export const Checkbox = ({ children, className, ...props }: CheckboxProps) => {
+export const Checkbox = ({
+  children,
+  className,
+  ...props
+}: CheckboxProps) => {
   const checkboxClassNames = classNames(styles.Checkbox, className);
 
   return (

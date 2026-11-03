@@ -23,7 +23,12 @@ type SearchSelectProps = {
   onChange: (value: string) => void;
 };
 
-export const SearchSelect = ({ value, options, placeholder, onChange }: SearchSelectProps) => {
+export const SearchSelect = ({
+  value,
+  options,
+  placeholder,
+  onChange,
+}: SearchSelectProps) => {
   const listId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');

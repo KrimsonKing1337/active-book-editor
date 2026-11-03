@@ -26,7 +26,11 @@ test('delayed settings from a previous page cannot write into the current page',
     slug: 'Background',
     options: { style: { backgroundColor: 'red' } },
   };
-  const { result, rerender, unmount } = renderHook(({ pageId }) => usePageEffectsState({
+  const {
+    result,
+    rerender,
+    unmount,
+  } = renderHook(({ pageId }) => usePageEffectsState({
     editor,
     pageId,
     ownerPageId: pageId,
@@ -38,7 +42,10 @@ test('delayed settings from a previous page cannot write into the current page',
   act(() => result.current.writeEffects([draft]));
   const descriptions = editor.state.doc.attrs.visualEffects;
   expect(descriptions[0].effect.id).toBe('canonical-background');
-  expect(descriptions[0].lifetime).toEqual({ type: 'page', pageId: 'current-page' });
+  expect(descriptions[0].lifetime).toEqual({
+    type: 'page',
+    pageId: 'current-page',
+  });
   expect(editor.state.doc.attrs.pageEffects).not.toHaveProperty('background');
   unmount();
   editor.destroy();

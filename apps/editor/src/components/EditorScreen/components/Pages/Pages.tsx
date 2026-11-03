@@ -17,7 +17,6 @@ export const Pages = ({
   pages,
   activeId,
   disabled,
-
   onSelect,
   onAdd,
   onDelete,

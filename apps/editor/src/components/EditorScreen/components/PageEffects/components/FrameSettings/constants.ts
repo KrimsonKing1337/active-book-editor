@@ -15,15 +15,42 @@ type PositionOption = {
 };
 
 export const positions: PositionOption[] = [
-  { value: 'top-left', label: 'Сверху слева' },
-  { value: 'top', label: 'Сверху' },
-  { value: 'top-right', label: 'Сверху справа' },
-  { value: 'left', label: 'Слева' },
-  { value: 'center', label: 'По центру' },
-  { value: 'right', label: 'Справа' },
-  { value: 'bottom-left', label: 'Снизу слева' },
-  { value: 'bottom', label: 'Снизу' },
-  { value: 'bottom-right', label: 'Снизу справа' },
+  {
+    value: 'top-left',
+    label: 'Сверху слева',
+  },
+  {
+    value: 'top',
+    label: 'Сверху',
+  },
+  {
+    value: 'top-right',
+    label: 'Сверху справа',
+  },
+  {
+    value: 'left',
+    label: 'Слева',
+  },
+  {
+    value: 'center',
+    label: 'По центру',
+  },
+  {
+    value: 'right',
+    label: 'Справа',
+  },
+  {
+    value: 'bottom-left',
+    label: 'Снизу слева',
+  },
+  {
+    value: 'bottom',
+    label: 'Снизу',
+  },
+  {
+    value: 'bottom-right',
+    label: 'Снизу справа',
+  },
 ];
 
 type FrameSides = {
@@ -32,15 +59,33 @@ type FrameSides = {
 };
 
 export const frameSides: FrameSides[] = [
-  { value: 'top', label: 'Сверху' },
-  { value: 'right', label: 'Справа' },
-  { value: 'bottom', label: 'Снизу' },
-  { value: 'left', label: 'Слева' },
+  {
+    value: 'top',
+    label: 'Сверху',
+  },
+  {
+    value: 'right',
+    label: 'Справа',
+  },
+  {
+    value: 'bottom',
+    label: 'Снизу',
+  },
+  {
+    value: 'left',
+    label: 'Слева',
+  },
 ];
 
 export const shadowPresets: FrameShadowPreset[] = [...FRAME_SHADOW_PRESETS];
 
 export const textPresets = [
-  { value: 'scroll' as const, label: 'Прокрутка' },
-  { value: 'none' as const, label: 'Без анимации' },
+  {
+    value: 'scroll' as const,
+    label: 'Прокрутка',
+  },
+  {
+    value: 'none' as const,
+    label: 'Без анимации',
+  },
 ];

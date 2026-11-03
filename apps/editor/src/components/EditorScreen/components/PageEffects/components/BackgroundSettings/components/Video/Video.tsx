@@ -20,8 +20,21 @@ export type VideoProps = {
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
-export const Video = ({ video, canImport, onChange, onImportAsset }: VideoProps) => {
-  const { id, src, style, styleFilters, loop, autoPlay, muted } = video;
+export const Video = ({
+  video,
+  canImport,
+  onChange,
+  onImportAsset,
+}: VideoProps) => {
+  const {
+    id,
+    src,
+    style,
+    styleFilters,
+    loop,
+    autoPlay,
+    muted,
+  } = video;
 
   const handlePathChange = (path: string) => {
     onChange({

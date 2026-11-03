@@ -35,7 +35,6 @@ export const AudioSettings = ({
   effect,
   project,
   existingIds,
-
   onLoadingChange,
   onUpdate,
   onDuplicate,

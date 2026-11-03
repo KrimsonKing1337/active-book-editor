@@ -16,8 +16,18 @@ export type ImageProps = {
   onImportAsset: (file: File, fileHandle?: ProjectFileHandle) => Promise<string>;
 };
 
-export const Image = ({ image, canImport, onChange, onImportAsset }: ImageProps) => {
-  const { id, src, style, styleFilters } = image;
+export const Image = ({
+  image,
+  canImport,
+  onChange,
+  onImportAsset,
+}: ImageProps) => {
+  const {
+    id,
+    src,
+    style,
+    styleFilters,
+  } = image;
 
   const handlePathChange = (path: string) => {
     onChange({

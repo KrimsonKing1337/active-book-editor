@@ -25,10 +25,19 @@ beforeEach(async () => {
   project = await createProject();
   render(<EditorScreen />);
 
-  await expect.element(page.getByRole('button', { name: 'Открыть проект', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Открыть проект', exact: true }).click();
+  await expect.element(page.getByRole('button', {
+    name: 'Открыть проект',
+    exact: true,
+  })).toBeEnabled();
+  await page.getByRole('button', {
+    name: 'Открыть проект',
+    exact: true,
+  }).click();
   await expect.element(page.getByText('Тестовая книга эффектов', { exact: true })).toBeVisible();
-  const effectsTrigger = page.getByRole('button', { name: 'Эффекты страницы', exact: true }).query();
+  const effectsTrigger = page.getByRole('button', {
+    name: 'Эффекты страницы',
+    exact: true,
+  }).query();
 
   expect(effectsTrigger?.closest('[data-book-region="book"]')).toBeNull();
   expect(document.querySelector('[data-book-region="book"] #Toolbar')).not.toBeNull();
@@ -149,7 +158,10 @@ test('deletes only the selected effect and supports undo and redo through the ed
   const deletedFrameSelector = `[data-effect-id="${composed.frame?.[0].id}"]`;
 
   await selectEffect('Тестовая тень');
-  await page.getByRole('button', { name: 'Удалить эффект', exact: true }).click();
+  await page.getByRole('button', {
+    name: 'Удалить эффект',
+    exact: true,
+  }).click();
   const deleted = await project.save();
 
   expect(window.confirm).toHaveBeenCalledWith('Удалить эффект «Тестовая тень»?');

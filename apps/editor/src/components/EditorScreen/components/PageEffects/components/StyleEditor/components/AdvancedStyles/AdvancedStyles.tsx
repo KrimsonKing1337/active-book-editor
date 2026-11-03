@@ -50,7 +50,12 @@ const getDrafts = (style: CSSProperties): Draft[] => {
     });
 };
 
-export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: AdvancedStylesProps) => {
+export const AdvancedStyles = ({
+  style,
+  isMedia,
+  onPreview,
+  onCommit,
+}: AdvancedStylesProps) => {
   const [drafts, setDrafts] = useState<Draft[]>(() => getDrafts(style));
   const [error, setError] = useState('');
 
@@ -155,7 +160,11 @@ export const AdvancedStyles = ({ style, isMedia, onPreview, onCommit }: Advanced
       </summary>
 
       {drafts.map((draftCur) => {
-        const { id, property, value } = draftCur;
+        const {
+          id,
+          property,
+          value,
+        } = draftCur;
 
         const config = property ? NUMERIC[property] : undefined;
 

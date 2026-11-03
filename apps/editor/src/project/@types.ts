@@ -39,7 +39,17 @@ export type PendingLocalProject = {
 };
 
 export type RestoreLastProjectResult =
-  | { status: 'none' }
-  | { status: 'opened'; openedProject: OpenedBookProject }
-  | { status: 'permission-required'; project: PendingLocalProject }
-  | { status: 'unavailable' };
+  | {
+    status: 'none'
+  }
+  | {
+    status: 'opened';
+    openedProject: OpenedBookProject
+  }
+  | {
+    status: 'permission-required';
+    project: PendingLocalProject
+  }
+  | {
+    status: 'unavailable'
+  };

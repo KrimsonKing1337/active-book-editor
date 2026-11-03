@@ -223,7 +223,7 @@ export default defineConfig([
 
       'newline-destructuring/newline': ['error', {
         items: 2,
-        consistent: true,
+        consistent: false,
         allowAllPropertiesOnSameLine: false,
       }],
     },

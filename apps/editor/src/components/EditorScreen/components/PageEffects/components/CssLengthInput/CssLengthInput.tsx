@@ -18,7 +18,10 @@ type CssLengthInputProps = {
   onChange: (value: string) => void;
 };
 
-const getParts = (value: string): { amount: string; unit: Unit } => {
+const getParts = (value: string): {
+  amount: string;
+  unit: Unit
+} => {
   const match = value.match(/^(-?(?:\d+(?:\.\d{1,2})?|\.\d{1,2}))(px|%|rem|em|vw|vh)$/);
 
   if (!match) {

@@ -294,7 +294,9 @@ export const loadBrowserLibrary = async (
   signal?.throwIfAborted();
 
   const {
-    files, manifest, packageName,
+    files,
+    manifest,
+    packageName,
   } = await inspectBrowserArchive(archive);
 
   prepareSharedReact();

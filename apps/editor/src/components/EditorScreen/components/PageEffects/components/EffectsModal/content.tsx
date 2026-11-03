@@ -38,7 +38,6 @@ export const getModalContent = ({
   effects,
   project,
   selectedEffect,
-
   onUpdateEffect,
   onDuplicateEffect,
   onDeleteEffect,

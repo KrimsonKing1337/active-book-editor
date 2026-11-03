@@ -178,7 +178,12 @@ export const FilterSettings = ({ operations, onApply }: FilterSettingsProps) => 
       </summary>
 
       {drafts.map((draftCur, index) => {
-        const { id, property, function: functionName, value } = draftCur;
+        const {
+          id,
+          property,
+          function: functionName,
+          value,
+        } = draftCur;
 
         const config = functionName ? CONFIG[functionName] : null;
         const expanded = id === expandedId;

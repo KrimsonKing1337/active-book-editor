@@ -44,7 +44,12 @@ export const isValidNumericValue = (value: string, config: NumericConfig): boole
   return number >= config.min && number <= config.max;
 };
 
-export const NumericControl = ({ value, config, label, onChange }: NumericControlProps) => {
+export const NumericControl = ({
+  value,
+  config,
+  label,
+  onChange,
+}: NumericControlProps) => {
   const sliderFrameRef = useRef<number | null>(null);
 
   useEffect(() => {

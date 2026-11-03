@@ -26,7 +26,11 @@ type AudioInstancesProps = {
   page: number;
 };
 
-const AudioInstance = ({ effect, project, page }: AudioInstanceProps) => {
+const AudioInstance = ({
+  effect,
+  project,
+  page,
+}: AudioInstanceProps) => {
   const dispatch = useDispatch();
 
   const { setAudioPreviewStatus } = usePageEffects();

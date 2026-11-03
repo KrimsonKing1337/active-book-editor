@@ -151,7 +151,10 @@ const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesPro
 };
 
 export const FrameSettings = ({
-  effect, onUpdate, onDuplicate, onDelete, 
+  effect,
+  onUpdate,
+  onDuplicate,
+  onDelete,
 }: FrameSettingsProps) => {
   const { visualDefinitions } = useCustomComponents();
 
@@ -169,7 +172,10 @@ export const FrameSettings = ({
   } = usePageEffects();
 
   const {
-    shadow, text, component, frameMask, 
+    shadow,
+    text,
+    component,
+    frameMask,
   } = effect.options;
 
   let componentMask = frameMask as FrameMask;
@@ -260,12 +266,12 @@ export const FrameSettings = ({
     if (kind === 'shadow' && options.shadow) {
       options.shadow = {
         ...options.shadow,
-        styleFilters, 
+        styleFilters,
       };
     } else if (kind === 'text' && options.text) {
       options.text = {
         ...options.text,
-        styleFilters, 
+        styleFilters,
       };
     } else if (kind === 'component') {
       options.styleFilters = styleFilters;
@@ -273,7 +279,7 @@ export const FrameSettings = ({
 
     onUpdate(effect.id, {
       ...currentEffect,
-      options, 
+      options,
     });
   };
 

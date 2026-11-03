@@ -29,7 +29,7 @@ export const usePageEffectsState = ({
 
     return {
       pageId,
-      effects, 
+      effects,
     };
   });
 
@@ -72,7 +72,7 @@ export const usePageEffectsState = ({
     if (!editor) {
       setSource({
         pageId,
-        effects: [], 
+        effects: [],
       });
 
       return;
@@ -99,7 +99,7 @@ export const usePageEffectsState = ({
 
         return {
           pageId,
-          effects: nextEffects, 
+          effects: nextEffects,
         };
       });
     };
@@ -129,7 +129,9 @@ export const usePageEffectsState = ({
     });
 
     const {
-      background, frame, ...specialized 
+      background,
+      frame,
+      ...specialized
     } = groupedEffects;
 
     const previousVisuals: AuthoredVisualEffect[] = editor.state.doc.attrs.visualEffects ?? [];

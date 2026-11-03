@@ -50,7 +50,9 @@ export const VisualBookPreview = ({
   children,
 }: VisualBookPreviewProps) => {
   const {
-    effects, frameItemPreviews, frameStylePreviews, 
+    effects,
+    frameItemPreviews,
+    frameStylePreviews,
   } = usePageEffects();
   const backgroundStyles = useBackgroundStylePreviews();
 

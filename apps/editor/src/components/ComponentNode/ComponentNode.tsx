@@ -15,7 +15,11 @@ import styles from './ComponentNode.module.scss';
 
 const bookRuntime = createBookRuntime('editor');
 
-const ComponentView = ({ node, editor, getPos }: NodeViewProps) => {
+const ComponentView = ({
+  node,
+  editor,
+  getPos,
+}: NodeViewProps) => {
   const { components: customComponents, definitions: customComponentDefinitions } = useCustomComponents();
 
   const name = node.attrs.name as string;
@@ -142,7 +146,10 @@ export const ComponentNode = Node.create({
       }
 
       if (doc.childCount === 1) {
-        const selectionContent = { from: selection.from, to: selection.to };
+        const selectionContent = {
+          from: selection.from,
+          to: selection.to,
+        };
         const typeContent = { type: 'P' };
 
         return this.editor.commands.insertContentAt(selectionContent, typeContent);

@@ -12,10 +12,18 @@ const renderText = (node: BookNode): ReactNode => {
   let result: ReactNode = node.text ?? '';
 
   for (const markCur of marks) {
-    if (markCur.type === 'bold') result = <strong>{result}</strong>;
-    if (markCur.type === 'italic') result = <em>{result}</em>;
-    if (markCur.type === 'strike') result = <s>{result}</s>;
-    if (markCur.type === 'code') result = <code>{result}</code>;
+    if (markCur.type === 'bold') {
+      result = <strong>{result}</strong>;
+    }
+    if (markCur.type === 'italic') {
+      result = <em>{result}</em>;
+    }
+    if (markCur.type === 'strike') {
+      result = <s>{result}</s>;
+    }
+    if (markCur.type === 'code') {
+      result = <code>{result}</code>;
+    }
   }
 
   return result;
@@ -57,8 +65,12 @@ export const renderNode = ({
     });
   });
 
-  if (node.type === 'H1' || node.type === 'activeBookH1') return <H1 key={key}>{children}</H1>;
-  if (node.type === 'H2' || node.type === 'activeBookH2') return <H2 key={key}>{children}</H2>;
+  if (node.type === 'H1' || node.type === 'activeBookH1') {
+    return <H1 key={key}>{children}</H1>;
+  }
+  if (node.type === 'H2' || node.type === 'activeBookH2') {
+    return <H2 key={key}>{children}</H2>;
+  }
   if (node.type === 'P' || node.type === 'activeBookP' || node.type === 'paragraph') {
     return <P key={key} data-active-book-node="P">{children}</P>;
   }

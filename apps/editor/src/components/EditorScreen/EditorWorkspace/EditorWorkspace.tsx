@@ -126,7 +126,7 @@ export const EditorWorkspace = () => {
 
   const pages = useBookPages({
     editor,
-    flushStyles, 
+    flushStyles,
   });
 
   const pageScope = `${pages.session}:${pages.activePage.id}`;
@@ -153,7 +153,10 @@ export const EditorWorkspace = () => {
   });
 
   const {
-    clearAutosaveTimer, replaceDocument, saveCurrentProject, waitForSaves, 
+    clearAutosaveTimer,
+    replaceDocument,
+    saveCurrentProject,
+    waitForSaves,
   } = autosave;
 
   useProjectRestore({

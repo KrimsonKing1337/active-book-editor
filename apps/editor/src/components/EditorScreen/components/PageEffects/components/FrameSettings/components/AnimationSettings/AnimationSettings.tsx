@@ -31,7 +31,6 @@ export const AnimationSettings = ({
   presets,
   defaultDuration,
   playState,
-
   onChange,
   onPlaybackChange,
 }: AnimationSettingsProps) => {

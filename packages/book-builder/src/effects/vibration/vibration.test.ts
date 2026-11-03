@@ -25,7 +25,11 @@ test('rejects invalid vibration effects', () => {
   const invalid = {
     type: 'vibration',
     id: 'bad',
-    options: { duration: -1, delay: 0, playOnLoad: true },
+    options: {
+      duration: -1,
+      delay: 0,
+      playOnLoad: true,
+    },
   };
 
   assert.deepEqual(normalizeVibrationEffects({ vibration: [invalid] }), []);

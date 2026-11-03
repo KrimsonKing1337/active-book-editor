@@ -27,7 +27,6 @@ export const FileChooser = ({
   placeholder,
   disabled = false,
   buttonLabel = 'Выбрать файл',
-
   onChange,
   onChoose,
   onFileChange,
