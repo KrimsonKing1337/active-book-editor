@@ -7,16 +7,19 @@ import type { Config } from 'activeBook-core/@types';
 import { AppWrapper } from 'activeBook-core/components';
 
 import type { BookDocument } from '@active-book/book-builder/book';
+
 import {
+  type VisualDraft,
   compileVisualEffects,
   draftToVisual,
   pageVisualEffects,
-  visualCategory,
+  getVisualCategory,
 } from '@active-book/book-builder/visualEffects';
 
 import type { BookProject } from '@project/@types';
 
 import { useBackgroundStylePreviews, usePageEffects } from '../PageEffects/context';
+
 import { resolveFramePreview } from './resolveFramePreview';
 import { resolveBackgroundPreview } from './resolveBackgroundPreview';
 
@@ -46,42 +49,60 @@ export const VisualBookPreview = ({
   editorTools,
   children,
 }: VisualBookPreviewProps) => {
-  const { effects, frameItemPreviews, frameStylePreviews } = usePageEffects();
+  const {
+    effects, frameItemPreviews, frameStylePreviews, 
+  } = usePageEffects();
   const backgroundStyles = useBackgroundStylePreviews();
+
   const page = book.pages.find((cur) => cur.id === pageId);
   const previous = page ? pageVisualEffects(page.document) : [];
-  const visuals = effects.filter((cur) => cur.type === 'background' || cur.type === 'frame').map((draftCur) => {
-    let draft = draftCur;
-    if (draftCur.type === 'frame') {
-      const options = resolveFramePreview({
-        effect: draftCur,
+
+  const visualEffects = effects.filter((effectCur) => {
+    return effectCur.type === 'background' || effectCur.type === 'frame';
+  });
+
+  const visuals = visualEffects.map((effectCur) => {
+    let options;
+
+    if (effectCur.type === 'frame') {
+      options = resolveFramePreview({
+        effect: effectCur,
         previews: frameItemPreviews,
         stylePreviews: frameStylePreviews,
       });
-      draft = {
-        ...draftCur,
-        options,
-      };
     } else {
-      draft = {
-        ...draftCur,
-        options: resolveBackgroundPreview({ effect: draftCur, stylePreviews: backgroundStyles }),
-      };
+      options = resolveBackgroundPreview({
+        effect: effectCur,
+        stylePreviews: backgroundStyles,
+      });
     }
+
+    const draft = {
+      ...effectCur,
+      options,
+    };
+
+    const previousRegistration = previous.find((registrationCur) => {
+      return registrationCur.effect.id === draft.id;
+    });
+
     return draftToVisual({
-      draft,
+      draft: draft as VisualDraft,
       pageId,
-      previous: previous.find((cur) => cur.effect.id === draft.id),
+      previous: previousRegistration,
     });
   });
+
   const previewPages = book.pages.map((pageCur) => {
     if (pageCur.id !== pageId) {
       return pageCur;
     }
+
     const attrs = {
       ...pageCur.document.attrs,
       visualEffects: visuals,
     };
+
     const document = {
       ...pageCur.document,
       attrs,
@@ -96,13 +117,26 @@ export const VisualBookPreview = ({
     ...book,
     pages: previewPages,
   };
+
   const registrations = useVisualAssets({
     registrations: compileVisualEffects(previewBook),
     project,
     session,
   });
-  const hidden = registrations.filter((cur) => visualCategory(cur.effect.definitionId) === 'background'
-    ? !showBackgrounds : !showFrameEffects).map((cur) => cur.effect.id);
+
+  const hiddenRegistrations = registrations.filter((registrationCur) => {
+    const category = getVisualCategory(registrationCur.effect.definitionId);
+
+    if (category === 'background') {
+      return !showBackgrounds;
+    }
+
+    return !showFrameEffects;
+  });
+
+  const hidden = hiddenRegistrations.map((registrationCur) => {
+    return registrationCur.effect.id;
+  });
 
   return (
     <AppWrapper

@@ -13,7 +13,9 @@ export default defineConfig((env) => {
 
   return mergeConfig(editorConfig(env), {
     root: fileURLToPath(new URL('.', import.meta.url)),
-    optimizeDeps: { include: ['activeBook-core/controllers/visualEffects'] },
+    optimizeDeps: {
+      include: ['activeBook-core/controllers/visualEffects'],
+    },
 
     test: {
       coverage: {
@@ -63,8 +65,12 @@ export default defineConfig((env) => {
               instances: [{ browser: 'chromium' }],
               expect: {
                 toMatchScreenshot: {
-                  resolveScreenshotPath: ({ root, testFileName, arg, browserName, platform, ext }) => {
-                    const screenshotFileName = `${arg}-${browserName}-${platform}${ext}`;
+                  resolveScreenshotPath: (data) => {
+                    const {
+                      arg, browserName, ext, platform, root, testFileName,
+                    } = data;
+
+                    const screenshotFileName = `${(arg)}-${(browserName)}-${(platform)}${(ext)}`;
 
                     return path.join(root, 'tests/screenshots', testFileName, screenshotFileName);
                   },

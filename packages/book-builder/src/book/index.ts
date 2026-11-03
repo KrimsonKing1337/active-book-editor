@@ -30,9 +30,14 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
 
   const hasNonEmptyPages = pages.length > 0;
   const ranges = value.visualEffects;
-  const hasValidRanges = Array.isArray(ranges) && ranges.every((cur) => {
-    return isAuthoredVisualEffect(cur) && cur.lifetime.type === 'range';
-  });
+
+  const getEveryRangesAreValid = (ranges: AuthoredVisualEffect[]) => {
+    return ranges.every((cur) => {
+      return isAuthoredVisualEffect(cur) && cur.lifetime.type === 'range';
+    });
+  };
+
+  const hasValidRanges = Array.isArray(ranges) && getEveryRangesAreValid(ranges);
 
   if (!hasNonEmptyPages || !hasValidRanges) {
     return false;
@@ -40,10 +45,12 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
 
   const ids = new Set<string>();
   const visualIds = new Set<string>();
+
   for (const rangeCur of ranges as AuthoredVisualEffect[]) {
     if (visualIds.has(rangeCur.effect.id)) {
       return false;
     }
+
     visualIds.add(rangeCur.effect.id);
   }
 
@@ -66,24 +73,41 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
     }
 
     const attrs = document.attrs;
+
     if (attrs !== undefined && !isRecord(attrs)) {
       return false;
     }
+
     const specialized = attrs?.pageEffects;
-    if (isRecord(specialized) && ('background' in specialized || 'frame' in specialized)) {
+
+    const getSpecializedEffectChecks = (specialized: Record<string, unknown>) => {
+      return 'background' in specialized || 'frame' in specialized;
+    };
+
+    if (isRecord(specialized) && getSpecializedEffectChecks(specialized)) {
       return false;
     }
+
     const visuals = attrs?.visualEffects ?? [];
+
     if (!Array.isArray(visuals)) {
       return false;
     }
+
     for (const visualCur of visuals) {
-      if (!isAuthoredVisualEffect(visualCur) || visualCur.lifetime.type !== 'page'
-        || visualCur.lifetime.pageId !== id || visualIds.has(visualCur.effect.id)) {
+      const { lifetime, effect } = visualCur;
+
+      const lifetimeIsValid = lifetime.type === 'page' || lifetime.pageId === id;
+      const effectIsAuthorised = isAuthoredVisualEffect(visualCur);
+      const effectIdIsVisual = visualIds.has(effect.id);
+
+      if (!effectIsAuthorised || !lifetimeIsValid || effectIdIsVisual) {
         return false;
       }
-      visualIds.add(visualCur.effect.id);
+
+      visualIds.add(effect.id);
     }
+
     ids.add(id);
 
     return true;

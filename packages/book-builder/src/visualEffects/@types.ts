@@ -1,8 +1,14 @@
-import type { VisualEffectInstance, VisualEffectLifetime, VisualEffectRegistration } from '@active-book/types';
+import type { PageRange, VisualEffectInstance, VisualEffectRegistration } from '@active-book/types';
 
 export type AuthoredVisualLifetime =
-  | { type: 'page'; pageId: string }
-  | Extract<VisualEffectLifetime, { type: 'range' }>;
+  | {
+    type: 'page';
+    pageId: string
+  }
+  | {
+    type: 'range';
+    range: readonly PageRange[];
+  };
 
 export type AuthoredVisualEffect = {
   effect: VisualEffectInstance;

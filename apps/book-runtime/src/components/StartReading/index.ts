@@ -1,1 +1,1 @@
-export { StartReading } from './StartReading';
+export * from './StartReading';

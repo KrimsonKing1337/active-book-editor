@@ -122,8 +122,44 @@ export default defineConfig([
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/object-curly-spacing': ['error', 'always'],
+      '@stylistic/object-property-newline': ['error'],
+
+      '@stylistic/object-curly-newline': ['error', {
+        ObjectExpression: {
+          minProperties: 3,
+          multiline: true,
+          consistent: true,
+        },
+        ObjectPattern: {
+          minProperties: 3,
+          multiline: true,
+          consistent: true,
+        },
+        TSTypeLiteral: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        },
+        TSInterfaceBody: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        },
+        TSEnumBody: {
+          minProperties: 1,
+          multiline: true,
+          consistent: true,
+        }
+      }],
+
       '@stylistic/curly-newline': ['error', {
         'minElements': 1,
+      }],
+
+      '@stylistic/padding-line-between-statements': ['error', {
+        blankLine: 'always',
+        prev: '*',
+        next: 'return',
       }],
 
       '@stylistic/max-len': [

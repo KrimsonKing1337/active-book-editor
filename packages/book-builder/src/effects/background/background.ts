@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react';
 
 import type { JsonObject } from '@active-book/types';
 
-
 import type {
   BackgroundEffectMediaOptions,
   BackgroundEffectVideoOptions,

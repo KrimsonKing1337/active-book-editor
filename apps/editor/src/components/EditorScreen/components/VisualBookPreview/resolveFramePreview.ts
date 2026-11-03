@@ -1,8 +1,11 @@
 import type { FrameEffectDraft } from '../PageEffects/@types';
-import type { FrameItemPreviews, FrameStylePreviews } from '../PageEffects/context';
 
-
-import { getFramePreviewKey, getFrameStylePreviewKey } from '../PageEffects/context';
+import {
+  type FrameItemPreviews,
+  type FrameStylePreviews,
+  getFramePreviewKey,
+  getFrameStylePreviewKey,
+} from '../PageEffects/context';
 
 type ResolveFrameInstanceOptionsParams = {
   effect: FrameEffectDraft;
@@ -23,21 +26,26 @@ export const resolveFramePreview = ({
   const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
   const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
 
-  const shadowStyleKey = shadow
-    ? getFrameStylePreviewKey({
+  let shadowStyleKey = '';
+
+  if (shadow) {
+    shadowStyleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'shadow',
       itemId: shadow.id,
-    })
-    : undefined;
+    });
+  }
 
-  const textStyleKey = text
-    ? getFrameStylePreviewKey({
+  let textStyleKey = '';
+
+  if (text) {
+    textStyleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'text',
       itemId: text.id,
-    })
-    : undefined;
+    });
+  }
+
   const componentStyleKey = getFrameStylePreviewKey({
     effectId: effect.id,
     kind: 'component',

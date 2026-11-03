@@ -17,7 +17,13 @@ type DraftToVisualOptions = {
   previous?: AuthoredVisualEffect;
 };
 
-export const draftToVisual = ({ draft, pageId, previous }: DraftToVisualOptions): AuthoredVisualEffect => {
+type RegistrationOptions = Parameters<typeof createBuiltinRegistration>[0]['options'];
+
+export const draftToVisual = ({
+  draft,
+  pageId,
+  previous,
+}: DraftToVisualOptions): AuthoredVisualEffect => {
   const {
     id,
     kind,
@@ -25,60 +31,142 @@ export const draftToVisual = ({ draft, pageId, previous }: DraftToVisualOptions)
     slug,
     options,
   } = draft;
-  const resolved = type === 'background' ? resolveBackgroundOptions(options) : resolveFrameOptions(options);
+
+  // Подготавливаем параметры встроенного эффекта
+  let resolvedOptions;
+
+  if (type === 'background') {
+    resolvedOptions = resolveBackgroundOptions(options);
+  } else {
+    resolvedOptions = resolveFrameOptions(options);
+  }
+
+  const registrationOptions = {
+    ...resolvedOptions,
+    id,
+    kind,
+  };
+
   const registration = createBuiltinRegistration({
     type,
-    options: { ...resolved, id, kind } as Parameters<typeof createBuiltinRegistration>[0]['options'],
+    options: registrationOptions as RegistrationOptions,
     lifetime: {
       type: 'page',
       page: 1,
     },
   });
+
+  const defaultEffect = registration.effect;
+
+  // Определяем реализацию компонента
+  let definitionId = defaultEffect.definitionId;
+
   const component = options.component;
-  const definitionId = kind === 'component' && component
-    ? customVisualDefinitionId(type, `${component.package}/${component.name}`)
-    : registration.effect.definitionId;
-  const params: Record<string, JsonValue> = JSON.parse(JSON.stringify({ ...options, kind }));
+
+  if (kind === 'component' && component) {
+    const componentId = `${component.package}/${component.name}`;
+
+    definitionId = customVisualDefinitionId(type, componentId);
+  }
+
+  // Подготавливаем сериализуемые параметры
+  const params: Record<string, JsonValue> = JSON.parse(JSON.stringify({
+    ...options,
+    kind,
+  }));
+
   delete params.component;
   delete params.layer;
   delete params.frameMask;
 
-  // These controls are panel views of depth.order, never a second persisted order.
-  for (const property of ['style', 'shadow', 'text', 'image', 'video']) {
-    const item = params[property] as Record<string, JsonValue> | undefined;
-    const style = property === 'style' ? item : item?.style as Record<string, JsonValue> | undefined;
+  // Удаляем дублирующий zIndex: порядок хранится в depth.order
+  const properties = ['style', 'shadow', 'text', 'image', 'video'];
+
+  for (const propertyCur of properties) {
+    const item = params[propertyCur] as Record<string, JsonValue> | undefined;
+
+    let style = item;
+
+    if (propertyCur !== 'style') {
+      style = item?.style as Record<string, JsonValue> | undefined;
+    }
+
     if (style) {
       delete style.zIndex;
     }
   }
 
-  const before = previous ? visualToDraft(previous) : null;
-  const frameOptions = options as FrameOptions;
-  const keepPlane = before?.type === 'background'
-    || (before?.type === 'frame' && before.options.layer === frameOptions.layer);
-  const keepVisibility = before?.type === 'background'
-    || (before?.type === 'frame'
-      && JSON.stringify(before.options.frameMask) === JSON.stringify(frameOptions.frameMask));
+  // Проверяем, какие свойства предыдущей регистрации можно сохранить
+  const previousDraft = previous ? visualToDraft(previous) : null;
+
+  let shouldPreservePlane = previousDraft?.type === 'background';
+  let shouldPreserveVisibility = shouldPreservePlane;
+
+  if (previousDraft?.type === 'frame') {
+    const previousFrameOptions = previousDraft.options as FrameOptions;
+    const currentFrameOptions = options as FrameOptions;
+
+    const hasSameLayer = previousFrameOptions.layer === currentFrameOptions.layer;
+
+    const frameMaskPrev = previousFrameOptions.frameMask;
+    const frameMaskCur = currentFrameOptions.frameMask;
+
+    const hasSameMask = JSON.stringify(frameMaskPrev) === JSON.stringify(frameMaskCur);
+
+    shouldPreservePlane = hasSameLayer;
+    shouldPreserveVisibility = hasSameMask;
+  }
+
+  // Восстанавливаем глубину
+  let plane = defaultEffect.depth.plane;
+
+  if (shouldPreservePlane && previous) {
+    plane = previous.effect.depth.plane;
+  }
+
   const depth = {
-    ...registration.effect.depth,
-    plane: keepPlane && previous ? previous.effect.depth.plane : registration.effect.depth.plane,
+    ...defaultEffect.depth,
+    plane,
   };
-  const visibility = keepVisibility && previous ? previous.effect.visibility : {
-    ...registration.effect.visibility,
-    ...(previous?.effect.visibility.mask ? { mask: previous.effect.visibility.mask } : {}),
+
+  // Восстанавливаем видимость и пользовательскую маску
+  let visibility = {
+    ...defaultEffect.visibility,
   };
+
+  if (shouldPreserveVisibility && previous) {
+    visibility = previous.effect.visibility;
+  } else {
+    const previousMask = previous?.effect.visibility.mask;
+
+    if (previousMask) {
+      visibility = {
+        ...visibility,
+        mask: previousMask,
+      };
+    }
+  }
+
+  // Собираем эффект
+  const placement = previous?.effect.placement ?? defaultEffect.placement;
+
   const effect = {
-    ...registration.effect,
+    ...defaultEffect,
     definitionId,
     params,
-    placement: previous?.effect.placement ?? registration.effect.placement,
+    placement,
     visibility,
     depth,
   };
-  const lifetime = previous?.lifetime ?? {
+
+  let lifetime: AuthoredVisualEffect['lifetime'] = {
     type: 'page',
     pageId,
   };
+
+  if (previous) {
+    lifetime = previous.lifetime;
+  }
 
   return {
     effect,

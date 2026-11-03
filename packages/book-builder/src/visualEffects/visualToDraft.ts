@@ -1,68 +1,99 @@
-import type { BackgroundEffect, BackgroundOptions, FrameEffect, FrameOptions } from '../effects';
+import type { VisualFrameVisibility } from '@active-book/types';
+
+import type {
+  BackgroundEffect,
+  BackgroundOptions,
+  FrameEffect,
+  FrameOptions,
+} from '../effects';
 
 import type { AuthoredVisualEffect } from './@types';
-import { visualCategory, visualComponentId } from './definitions';
+
+import { getVisualCategory, getVisualComponentId } from './definitions';
 
 export type VisualDraft = BackgroundEffect | FrameEffect;
 
-type PanelOptions = BackgroundOptions & FrameOptions & { kind?: VisualDraft['kind'] };
+type PanelOptions = BackgroundOptions & FrameOptions & {
+  kind?: VisualDraft['kind'];
+};
+
+const getStyleTarget = (options: PanelOptions, kind: PanelOptions['kind']) => {
+  if (kind === 'shadow' && options.shadow) {
+    return options.shadow;
+  }
+
+  if (kind === 'text' && options.text) {
+    return options.text;
+  }
+
+  if (kind === 'image' && options.image) {
+    return options.image;
+  }
+
+  if (kind === 'video' && options.video) {
+    return options.video;
+  }
+
+  return options;
+};
 
 /** A transient panel view. Depth and visibility remain authoritative in the description. */
 export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft => {
   const { effect, slug } = description;
-  const type = visualCategory(effect.definitionId);
-  const componentId = visualComponentId(effect.definitionId);
+
+  const type = getVisualCategory(effect.definitionId);
+  const componentId = getVisualComponentId(effect.definitionId);
+
   // Authored options have passed JSON validation at the book boundary.
   const options: PanelOptions = JSON.parse(JSON.stringify(effect.params));
+
   const kind = componentId ? 'component' : options.kind;
+
   delete options.kind;
 
+  // Восстанавливаем ссылку на пользовательский компонент
   if (componentId) {
-    const separator = componentId.lastIndexOf('/');
+    const separatorIndex = componentId.lastIndexOf('/');
+
+    const packageName = componentId.slice(0, separatorIndex);
+    const componentName = componentId.slice(separatorIndex + 1);
+
     options.component = {
-      package: componentId.slice(0, separator),
-      name: componentId.slice(separator + 1),
+      package: packageName,
+      name: componentName,
     };
   }
 
+  // Восстанавливаем настройки рамочного эффекта
   if (type === 'frame') {
-    options.layer = effect.depth.plane === 'scene' ? 'behind' : 'above';
+    let layer: FrameOptions['layer'] = 'above';
+
+    if (effect.depth.plane === 'scene') {
+      layer = 'behind';
+    }
+
+    const visibility = effect.visibility as VisualFrameVisibility;
+
+    const isFrameMaskEnabled = visibility.region === 'frame';
+    const frameSides = [...visibility.sides];
+
+    options.layer = layer;
+
     options.frameMask = {
-      enabled: effect.visibility.region === 'frame',
-      sides: effect.visibility.region === 'frame' ? [...effect.visibility.sides] : [],
+      enabled: isFrameMaskEnabled,
+      sides: frameSides,
     };
   }
 
-  const orderStyle = { zIndex: effect.depth.order };
-  if (kind === 'shadow' && options.shadow) {
-    options.shadow.style = {
-      ...options.shadow.style,
-      ...orderStyle,
-    };
-  } else if (kind === 'text' && options.text) {
-    options.text.style = {
-      ...options.text.style,
-      ...orderStyle,
-    };
-  } else if (kind === 'image' && options.image) {
-    options.image.style = {
-      ...options.image.style,
-      ...orderStyle,
-    };
-  } else if (kind === 'video' && options.video) {
-    options.video.style = {
-      ...options.video.style,
-      ...orderStyle,
-    };
-  } else {
-    options.style = {
-      ...options.style,
-      ...orderStyle,
-    };
-  }
+  // Восстанавливаем zIndex для отображения в панели редактора
+  const styleTarget = getStyleTarget(options, kind);
 
-  // The definition family and kind determine the discriminated panel type.
-  return {
+  styleTarget.style = {
+    ...styleTarget.style,
+    zIndex: effect.depth.order,
+  };
+
+  return  {
     id: effect.id,
     type,
     kind,

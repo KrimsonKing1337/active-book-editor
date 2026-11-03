@@ -19,11 +19,18 @@ type PageEffectsStateOptions = {
   ownerPageId: string;
 };
 
-export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffectsStateOptions) => {
+export const usePageEffectsState = ({
+  editor,
+  pageId,
+  ownerPageId,
+}: PageEffectsStateOptions) => {
   const [source, setSource] = useState(() => {
     const effects = getPageEffects(editor);
 
-    return { pageId, effects };
+    return {
+      pageId,
+      effects, 
+    };
   });
 
   const effects = source.pageId === pageId ? source.effects : [];
@@ -63,7 +70,10 @@ export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffects
 
   useLayoutEffect(() => {
     if (!editor) {
-      setSource({ pageId, effects: [] });
+      setSource({
+        pageId,
+        effects: [], 
+      });
 
       return;
     }
@@ -87,7 +97,10 @@ export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffects
           return previous;
         }
 
-        return { pageId, effects: nextEffects };
+        return {
+          pageId,
+          effects: nextEffects, 
+        };
       });
     };
 
@@ -101,7 +114,10 @@ export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffects
   }, [editor, pageId]);
 
   const writeEffects = useCallback((nextEffects: EditorEffectDraft[]) => {
-    if (!editor || editor.isDestroyed || currentPageRef.current !== pageId) {
+    const editorIsUnavailable = !editor || editor.isDestroyed;
+    const theSamePage = currentPageRef.current === pageId;
+
+    if (editorIsUnavailable || !theSamePage) {
       return;
     }
 
@@ -112,16 +128,30 @@ export const usePageEffectsState = ({ editor, pageId, ownerPageId }: PageEffects
       previous,
     });
 
-    const { background, frame, ...specialized } = groupedEffects;
+    const {
+      background, frame, ...specialized 
+    } = groupedEffects;
+
     const previousVisuals: AuthoredVisualEffect[] = editor.state.doc.attrs.visualEffects ?? [];
-    const visualEffects = [...(background ?? []), ...(frame ?? [])].map((draft) => {
+
+    const backgroundEffects = background ?? [];
+    const frameEffects = frame ?? [];
+    const backgroundAndFrameEffects = [...backgroundEffects, ...frameEffects];
+
+    const visualEffects = backgroundAndFrameEffects.map((effectCur) => {
+      const previousEffects = previousVisuals.find((prevEffectCur) => {
+        return prevEffectCur.effect.id === effectCur.id;
+      });
+
       return draftToVisual({
-        draft,
+        draft: effectCur,
         pageId: ownerPageId,
-        previous: previousVisuals.find((cur) => cur.effect.id === draft.id),
+        previous: previousEffects,
       });
     });
-    const transaction = editor.state.tr.setDocAttribute('pageEffects', specialized)
+
+    const transaction = editor.state.tr
+      .setDocAttribute('pageEffects', specialized)
       .setDocAttribute('visualEffects', visualEffects);
 
     editor.view.dispatch(transaction);

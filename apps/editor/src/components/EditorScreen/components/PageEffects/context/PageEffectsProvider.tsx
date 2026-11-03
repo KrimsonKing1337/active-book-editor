@@ -34,7 +34,11 @@ export const PageEffectsProvider = ({
     getCurrentEffects,
     audioPreviewStatuses,
     setAudioPreviewStatus,
-  } = usePageEffectsState({ editor, pageId, ownerPageId });
+  } = usePageEffectsState({
+    editor,
+    pageId,
+    ownerPageId, 
+  });
 
   const {
     backgroundStylePreviews,
@@ -50,15 +54,14 @@ export const PageEffectsProvider = ({
     writeEffects,
   });
 
-  const {
-    frameItemPreviews,
-    updateFrameItemPreview,
-  } = useFrameItemPreviews(pageId);
+  const { frameItemPreviews, updateFrameItemPreview } = useFrameItemPreviews(pageId);
 
   useLayoutEffect(() => {
     onStylesFlusher?.(flushStylePreviews);
 
-    return () => onStylesFlusher?.(null);
+    return () => {
+      return onStylesFlusher?.(null);
+    };
   }, [flushStylePreviews, onStylesFlusher]);
 
   const value = useMemo(() => ({

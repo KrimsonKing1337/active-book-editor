@@ -2,7 +2,6 @@ import type { ChangeEvent } from 'react';
 
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
-
 import { useCustomComponents } from '@project/customComponentRegistry';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
@@ -13,19 +12,24 @@ import styles from '../../BackgroundSettings.module.scss';
 
 type ComponentReference = BackgroundOptions['component'];
 
-type CustomComponentProps = {
+export type CustomComponentProps = {
   component: ComponentReference;
   onChange: (component: ComponentReference) => void;
 };
 
 export const CustomComponent = ({ component, onChange }: CustomComponentProps) => {
   const { visualDefinitions } = useCustomComponents();
-  const definitions = visualDefinitions.filter((cur) => cur.category === 'background');
+
+  const definitions = visualDefinitions.filter((definitionCur) => {
+    return definitionCur.category === 'background';
+  });
 
   let componentId = '';
 
   if (component) {
-    componentId = customVisualDefinitionId('background', `${component.package}/${component.name}`);
+    const newId = `${component.package}/${component.name}`;
+
+    componentId = customVisualDefinitionId('background', newId);
   }
 
   const updateComponent = (id: string) => {

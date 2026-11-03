@@ -1,7 +1,4 @@
-
-import type { KeyboardEvent } from 'react';
-
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
 
@@ -13,17 +10,15 @@ import { compileVisualEffects, missingVisualDefinitions } from '@active-book/boo
 
 import { useBookLibraries } from '@project/useBookLibraries';
 
-
 import { importBrowserLibrary } from '@project/customComponents';
 
 import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
-import { VisualBookPreview } from '../components/VisualBookPreview';
+import { VisualBookPreview, Pages } from '../components';
 
 import { useBookPages } from '../book/useBookPages';
-import { Pages } from '../components/Pages';
 
 import type { BuildState, TextComponentName } from '../@types';
 
@@ -65,7 +60,6 @@ import {
 } from '../constants';
 
 export const EditorWorkspace = () => {
-
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
@@ -121,13 +115,26 @@ export const EditorWorkspace = () => {
   }, [showFrameEffects]);
 
   const flushStylesRef = useRef<() => boolean>(() => true);
-  const flushStyles = useCallback(() => flushStylesRef.current(), []);
+
+  const flushStyles = useCallback(() => {
+    return flushStylesRef.current();
+  }, []);
+
   const registerStylesFlusher = useCallback((flush: (() => boolean) | null) => {
     flushStylesRef.current = flush ?? (() => true);
   }, []);
-  const pages = useBookPages({ editor, flushStyles });
+
+  const pages = useBookPages({
+    editor,
+    flushStyles, 
+  });
+
   const pageScope = `${pages.session}:${pages.activePage.id}`;
-  const previewConfig = { ...editorConfig, pages: pages.book.pages.length };
+
+  const previewConfig = {
+    ...editorConfig,
+    pages: pages.book.pages.length,
+  };
 
   const autosave = useAutosave({
     editor,
@@ -145,7 +152,9 @@ export const EditorWorkspace = () => {
     setProjectMessage,
   });
 
-  const { clearAutosaveTimer, replaceDocument, saveCurrentProject, waitForSaves } = autosave;
+  const {
+    clearAutosaveTimer, replaceDocument, saveCurrentProject, waitForSaves, 
+  } = autosave;
 
   useProjectRestore({
     editor,
@@ -226,13 +235,17 @@ export const EditorWorkspace = () => {
     revision: librariesRevision,
     onError: setProjectMessage,
   });
+
   const customComponentDefinitions = libraries.registry.definitions;
 
   useEffect(() => {
     if (libraries.isLoading) {
       return;
     }
-    const missing = missingVisualDefinitions(compileVisualEffects(pages.book), libraries.definitions);
+
+    const compiledVisualEffects = compileVisualEffects(pages.book);
+    const missing = missingVisualDefinitions(compiledVisualEffects, libraries.definitions);
+
     if (missing.length) {
       setProjectMessage(`Не загружены определения эффектов: ${missing.join(', ')}`);
     }

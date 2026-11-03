@@ -26,11 +26,12 @@ export const createEmptyBook = (): BookDocument => {
 /** A fresh plugin state intentionally clears undo/redo when changing pages or projects. */
 export const replaceEditorDocument = (editor: Editor, document: JSONContent): void => {
   const pageEffects = normalizeSpecializedEffects(document.attrs?.pageEffects);
+  const visualEffects = document.attrs?.visualEffects ?? [];
 
   const attrs = {
     ...document.attrs,
     pageEffects,
-    visualEffects: document.attrs?.visualEffects ?? [],
+    visualEffects,
   };
 
   const normalized = {
@@ -46,6 +47,17 @@ export const replaceEditorDocument = (editor: Editor, document: JSONContent): vo
 
   editor.view.updateState(state);
 
-  editor.emit('transaction', { editor, transaction: state.tr, appendedTransactions: [] });
-  editor.emit('selectionUpdate', { editor, transaction: state.tr });
+  const emittingTransaction = {
+    editor,
+    transaction: state.tr,
+    appendedTransactions: [],
+  };
+
+  const emittingSelectionUpdate = {
+    editor,
+    transaction: state.tr,
+  };
+
+  editor.emit('transaction', emittingTransaction);
+  editor.emit('selectionUpdate', emittingSelectionUpdate);
 };

@@ -28,5 +28,10 @@ export const normalizePageEffects = (value: unknown): PageEffects => {
 
 export const normalizeSpecializedEffects = (value: unknown) => {
   const grouped = normalizePageEffects(value);
-  return { audio: grouped.audio, vibration: grouped.vibration, flashlight: grouped.flashlight };
+
+  return {
+    audio: grouped.audio,
+    vibration: grouped.vibration,
+    flashlight: grouped.flashlight,
+  };
 };

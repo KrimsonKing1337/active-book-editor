@@ -1,4 +1,3 @@
-
 import ReactDOM from 'react-dom/client';
 
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -13,18 +12,18 @@ import { missingVisualDefinitions } from '@active-book/book-builder/visualEffect
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
-import 'activeBook-core/styles/styles.scss';
-
 import type { BuiltBookDocument } from '@active-book/book-builder/bookPreparation/compileBookDocument';
 import { createCustomVisualDefinitions } from '@active-book/book-builder/components/custom/visual';
 
 import { BookPage, StartReading } from '@components';
 
 import { loadCustomComponents } from './utils/loadCustomComponents';
+
 import { AUDIO_UNLOCK_SRC, config } from './constants';
 
 import bookDocumentDefault from '../book.json';
 
+import 'activeBook-core/styles/styles.scss';
 import './styles.scss';
 
 const root = document.getElementById('root');
@@ -37,6 +36,7 @@ const bookRuntime = createBookRuntime('reader');
 
 const start = async (): Promise<void> => {
   const { components, libraries } = await loadCustomComponents();
+
   const definitions = createCustomVisualDefinitions(libraries, bookRuntime);
 
   const document = bookDocumentDefault as unknown as BuiltBookDocument;
@@ -44,7 +44,10 @@ const start = async (): Promise<void> => {
   const missing = missingVisualDefinitions(document.visualEffects, definitions);
   if (missing.length) {
     libraries.forEach((cur) => cur.dispose());
-    throw new Error(`Не загружены определения эффектов: ${missing.join(', ')}`);
+
+    const missingMessage = missing.join(', ');
+
+    throw new Error(`Не загружены определения эффектов: ${missingMessage}`);
   }
 
   const bookConfig = {
@@ -53,10 +56,13 @@ const start = async (): Promise<void> => {
   };
 
   const reactRoot = ReactDOM.createRoot(root);
+
   const dispose = () => {
     reactRoot.unmount();
+
     libraries.forEach((cur) => cur.dispose());
   };
+
   window.addEventListener('pagehide', (event) => {
     if (!event.persisted) {
       dispose();
@@ -87,14 +93,16 @@ const start = async (): Promise<void> => {
             />
 
             {document.pages.map((pageCur, index) => {
+              const { id, document } = pageCur;
+
               const path = `/page-${index + 1}`;
 
               const element = (
                 <BookPage
-                  key={pageCur.id}
-                  document={pageCur.document}
+                  key={id}
+                  document={document}
                   page={index + 1}
-                  pageId={pageCur.id}
+                  pageId={id}
                   customComponents={components}
                   bookRuntime={bookRuntime}
                 />
@@ -102,7 +110,7 @@ const start = async (): Promise<void> => {
 
               return (
                 <Route
-                  key={pageCur.id}
+                  key={id}
                   path={path}
                   element={element}
                 />

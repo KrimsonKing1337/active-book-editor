@@ -1,15 +1,11 @@
 import { type ComponentType } from 'react';
 
-
-
 import type { BookRuntime } from '@active-book/types';
 
 import { PageWrapper } from 'activeBook-core/components';
 import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
 
-
 import type { PageDocument } from '@types';
-
 
 import { renderNode } from '@utils/renderNode';
 
@@ -27,7 +23,13 @@ type BookPageProps = {
   bookRuntime: BookRuntime;
 };
 
-export const BookPage = ({ document, page, pageId, customComponents, bookRuntime }: BookPageProps) => {
+export const BookPage = ({
+  document,
+  page,
+  pageId,
+  customComponents,
+  bookRuntime,
+}: BookPageProps) => {
   const content = document.content ?? [];
 
   const audioEffects = getAudioEffects(document);
@@ -70,7 +72,6 @@ export const BookPage = ({ document, page, pageId, customComponents, bookRuntime
             />
           );
         })}
-
       </>
 
       {content.map((nodeCur, index) => {

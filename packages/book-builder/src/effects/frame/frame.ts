@@ -2,8 +2,12 @@ import type { CSSProperties } from 'react';
 
 import type { JsonObject } from '@active-book/types';
 
-
-import type { FrameMask, FrameLayer, FrameShadowItem, FrameTextItem } from 'activeBook-core/hooks/effects/frame/@types';
+import type {
+  FrameMask,
+  FrameLayer,
+  FrameShadowItem,
+  FrameTextItem,
+} from 'activeBook-core/hooks/effects/frame/@types';
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
@@ -121,7 +125,9 @@ export const normalizeFrameEffects = (value: unknown): FrameEffect[] => {
       continue;
     }
 
-    const kind = frameEffectKinds.find((cur) => cur === effectCur.kind);
+    const kind = frameEffectKinds.find((kindCur) => {
+      return kindCur === effectCur.kind;
+    });
 
     if (!kind) {
       continue;

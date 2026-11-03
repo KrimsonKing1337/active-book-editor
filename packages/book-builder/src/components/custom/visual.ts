@@ -12,31 +12,59 @@ export const createCustomVisualDefinitions = (
   libraries: readonly BrowserLibrary[],
   book: BookRuntime,
 ): VisualEffectDefinition[] => {
-  return libraries.flatMap((libraryCur) => libraryCur.visualDefinitions.map((definitionCur) => {
-    const Implementation = libraryCur.visualComponents[definitionCur.id];
-    const Presentation = definitionCur.category === 'background' ? BackgroundRenderer : FrameRenderer;
-    const Renderer = (props: VisualRendererProps) => {
-      const componentKey = props.params.componentKey;
-      const key = typeof componentKey === 'string' || typeof componentKey === 'number' ? componentKey : undefined;
+  const definitions: VisualEffectDefinition[] = [];
 
-      const content = createElement(Implementation, { ...props, book, key });
+  for (const libraryCur of libraries) {
+    for (const definitionCur of libraryCur.visualDefinitions) {
+      const Implementation = libraryCur.visualComponents[definitionCur.id];
 
-      const presentationParams = {
-        ...props.params,
-        kind: 'component',
+      let Presentation = FrameRenderer;
+
+      if (definitionCur.category === 'background') {
+        Presentation = BackgroundRenderer;
+      }
+
+      const Renderer = (props: VisualRendererProps) => {
+        const componentKey = props.params.componentKey;
+
+        const hasValidComponentKey = typeof componentKey === 'string' || typeof componentKey === 'number';
+
+        let key: string | number | undefined;
+
+        if (hasValidComponentKey) {
+          key = componentKey;
+        }
+
+        const implementationProps = {
+          ...props,
+          book,
+          key,
+        };
+
+        const content = createElement(Implementation, implementationProps);
+
+        const presentationParams = {
+          ...props.params,
+          kind: 'component',
+        };
+
+        const presentationProps = {
+          ...props,
+          params: presentationParams,
+        };
+
+        return createElement(Presentation, presentationProps, content);
       };
-      const presentationProps = {
-        ...props,
-        params: presentationParams,
+
+      const definition: VisualEffectDefinition = {
+        id: definitionCur.id,
+        defaultParams: definitionCur.defaultParams,
+        Renderer,
       };
 
-      return createElement(Presentation, presentationProps, content);
-    };
+      definitions.push(definition);
+    }
+  }
 
-    return {
-      id: definitionCur.id,
-      defaultParams: definitionCur.defaultParams,
-      Renderer,
-    };
-  }));
+  return definitions;
 };

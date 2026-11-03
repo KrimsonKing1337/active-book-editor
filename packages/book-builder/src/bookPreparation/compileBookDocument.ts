@@ -58,13 +58,14 @@ export const compilePageDocument = (document: unknown): Record<string, unknown> 
         audio,
         vibration,
         flashlight,
-
       },
     },
   };
 };
 
-export type BuiltBookDocument = Omit<BookDocument, 'visualEffects'> & { visualEffects: VisualEffectRegistration[] };
+export type BuiltBookDocument = Omit<BookDocument, 'visualEffects'> & {
+  visualEffects: VisualEffectRegistration[];
+};
 
 export const compileBookDocument = (book: unknown): BuiltBookDocument => {
   if (!isBookDocument(book)) {
@@ -80,9 +81,11 @@ export const compileBookDocument = (book: unknown): BuiltBookDocument => {
     };
   });
 
+  const visualEffects = compileVisualEffects(book);
+
   return {
     ...book,
     pages,
-    visualEffects: compileVisualEffects(book),
+    visualEffects,
   };
 };

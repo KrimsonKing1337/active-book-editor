@@ -1,1 +1,1 @@
-export { VisualBookPreview } from './VisualBookPreview';
+export * from './VisualBookPreview';

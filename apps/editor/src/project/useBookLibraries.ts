@@ -41,11 +41,18 @@ export const useBookLibraries = ({
 
     const load = async () => {
       try {
-        resources = project ? await loadProjectLibraries(project.storage, { signal: controller.signal }) : [];
+        resources = [];
+
+        if (project) {
+          resources = await loadProjectLibraries(project.storage, { signal: controller.signal });
+        }
+
         if (controller.signal.aborted) {
           resources.forEach((cur) => cur.dispose());
+
           return;
         }
+
         setLoaded({
           project,
           session,
@@ -58,28 +65,39 @@ export const useBookLibraries = ({
         }
       }
     };
+
     void load();
 
     return () => {
       controller.abort();
+
       resources.forEach((cur) => cur.dispose());
     };
   }, [project, session, revision, onError]);
 
-  const isCurrent = loaded?.project === project && loaded?.session === session && loaded?.revision === revision;
+  const isCurrent = loaded?.project === project
+    && loaded?.session === session
+    && loaded?.revision === revision;
+
   const libraries = isCurrent ? loaded.libraries : noLibraries;
 
   return useMemo(() => {
+    const components = Object.assign({}, ...libraries.map((cur) => cur.components));
+    const definitions = libraries.flatMap((cur) => cur.definitions);
+    const visualDefinitions = libraries.flatMap((cur) => cur.visualDefinitions);
+
     const registry = {
       ...emptyCustomComponents,
-      components: Object.assign({}, ...libraries.map((cur) => cur.components)),
-      definitions: libraries.flatMap((cur) => cur.definitions),
-      visualDefinitions: libraries.flatMap((cur) => cur.visualDefinitions),
+      components,
+      definitions,
+      visualDefinitions,
     };
+
+    const definitionsNonRegistry = createCustomVisualDefinitions(libraries, bookRuntime);
 
     return {
       registry,
-      definitions: createCustomVisualDefinitions(libraries, bookRuntime),
+      definitions: definitionsNonRegistry,
       isLoading: !isCurrent,
     };
   }, [libraries, isCurrent]);
