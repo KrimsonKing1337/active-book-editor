@@ -6,9 +6,9 @@ import type {
 } from '@active-book/types';
 
 export const VISUAL_REGIONS = [
-  'book',
-  'bookViewport',
-  'page',
+  'story',
+  'storyViewport',
+  'narrativeFrame',
   'frame',
   'narrativeViewport',
   'narrativeContent',
@@ -35,7 +35,7 @@ export const FRAME_SIDES = [
 
 export const VISUAL_PLANES = [
   'background',
-  'scene',
+  'belowNarrative',
   'aboveNarrative',
   'aboveControls',
 ] as const satisfies readonly VisualPlane[];

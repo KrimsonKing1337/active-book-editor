@@ -1,6 +1,6 @@
 import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
 
-import type { FilterOperation } from '@active-book/book-builder/effects';
+import type { FilterOperation, VisualDisplayRegion } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
@@ -17,6 +17,7 @@ import { DEFAULT_SHADOW_OPTIONS } from './constants';
 
 import { TextInput, Button } from '../EffectControls';
 import { StyleEditor } from '../StyleEditor';
+import { VisualRegionSettings } from '../VisualRegionSettings';
 
 import styles from './BackgroundSettings.module.scss';
 
@@ -214,6 +215,13 @@ export const BackgroundSettings = ({
     updateOptions({ component: val });
   };
 
+  const handleDisplayRegionChange = (displayRegion: VisualDisplayRegion) => {
+    onUpdate(effect.id, {
+      ...effect,
+      displayRegion,
+    });
+  };
+
   return (
     <BackgroundStyleProvider
       preview={updateStylePreviewForEffect}
@@ -242,6 +250,8 @@ export const BackgroundSettings = ({
             </Button>
           </div>
         </div>
+
+        <VisualRegionSettings value={effect.displayRegion} onChange={handleDisplayRegionChange} />
 
         {effect.kind === 'background' && (
           <Background style={options.style ?? {}} styleFilters={options.styleFilters} />

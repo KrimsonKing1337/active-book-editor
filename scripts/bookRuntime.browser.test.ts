@@ -87,7 +87,8 @@ test('production book reads all three positional routes with page-owned effects 
   })()`);
   const save = async () => {
     await editor.getByRole('button', { name: 'Сохранить', exact: true }).click();
-    await editor.getByText('Сохранено', { exact: true }).waitFor();
+    // The status stays in layout at opacity 0; wait for the completed-save state.
+    await editor.getByText('Сохранено', { exact: true }).and(editor.locator('[aria-hidden="false"]')).waitFor();
     return readSaved();
   };
   const initial = await readSaved();
@@ -117,7 +118,11 @@ test('production book reads all three positional routes with page-owned effects 
     await editor.getByRole('button', { name: new RegExp(`Категория ${category} `) }).click();
     await editor.getByRole('button', { name: category === 'Background' ? 'Добавить фон' : 'Добавить рамочную тень', exact: true }).click();
     await editor.getByRole('textbox', { name: 'Название эффекта', exact: true }).fill(`Создано в редакторе ${category}`);
+    const regionControl = editor.getByRole('combobox', { name: 'Область отображения эффекта' });
+    assert.equal(await regionControl.inputValue(), 'storyViewport');
+    await editor.locator('[data-visual-selection]').waitFor();
     if (category === 'Frame') {
+      await regionControl.selectOption('narrativeFrame');
       const thickness = editor.getByRole('textbox', { name: 'Толщина тени (px)', exact: true });
       await thickness.click();
       await editor.keyboard.press('Control+A');
@@ -125,6 +130,7 @@ test('production book reads all three positional routes with page-owned effects 
       await thickness.pressSequentially('45', { delay: 30 });
     }
     await editor.getByRole('dialog', { name: 'Эффекты страницы' }).getByRole('button', { name: 'Закрыть', exact: true }).click();
+    await editor.locator('[data-visual-selection]').waitFor({ state: 'detached' });
   }
   const authored = await save();
   assert.equal(authored.pages[0].document.attrs?.visualEffects.length, 4);
@@ -132,6 +138,8 @@ test('production book reads all three positional routes with page-owned effects 
   assert.equal(authored.pages[0].document.attrs?.pageEffects.frame, undefined);
   const newFrame = authored.pages[0].document.attrs?.visualEffects.find((cur: { slug: string }) => cur.slug === 'Создано в редакторе Frame');
   assert.equal(newFrame.effect.params.shadow.thickness, 45);
+  assert.equal(newFrame.effect.placement.coordinates, 'narrativeFrame');
+  assert.equal(newFrame.effect.visibility.region, 'narrativeFrame');
   const frameElement = await editor.locator(`[data-effect-id="${newFrame.effect.id}"]`).elementHandle();
   assert(frameElement);
   await editor.getByRole('button', { name: 'Добавить страницу', exact: true }).click();
@@ -182,7 +190,7 @@ test('production book reads all three positional routes with page-owned effects 
   await page.goto(`http://127.0.0.1:${address.port}/`);
   await page.getByRole('button', { name: 'Начать читать', exact: true }).waitFor();
   assert.equal(await page.locator('[data-page-id]').count(), 0, 'page 0 is a technical audio screen');
-  const book = await page.locator('[data-book-region="book"]').elementHandle();
+  const book = await page.locator('[data-story-region="story"]').elementHandle();
   assert(book);
   await page.getByRole('button', { name: 'Начать читать', exact: true }).click();
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
@@ -219,7 +227,7 @@ test('production book reads all three positional routes with page-owned effects 
       assert.equal(await page.locator('[data-effect-id="bg-alpha"]').count(), 0);
       assert.equal(await page.getByTestId('custom-badge').textContent(), 'Кастомная вставка: 0');
     }
-    assert.equal(await book.evaluate((element) => element === document.querySelector('[data-book-region="book"]')), true);
+    assert.equal(await book.evaluate((element) => element === document.querySelector('[data-story-region="story"]')), true);
   }
   await page.keyboard.press('ArrowRight');
   await page.getByText('3 из 3', { exact: true }).waitFor();

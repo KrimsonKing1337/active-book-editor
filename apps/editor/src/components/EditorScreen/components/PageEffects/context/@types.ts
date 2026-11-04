@@ -48,6 +48,8 @@ export type BackgroundStylePreviewUpdate = BackgroundPreviewKeyParams & {
 export type BackgroundStylePreviewUpdater = (update: BackgroundStylePreviewUpdate) => void;
 
 export type PageEffectsContextValue = {
+  selectedVisualEffectId: string | null;
+  setSelectedVisualEffectId: (id: string | null) => void;
   effects: EditorEffectDraft[];
   writeEffects: (effects: EditorEffectDraft[]) => void;
   getCurrentEffects: () => EditorEffectDraft[];

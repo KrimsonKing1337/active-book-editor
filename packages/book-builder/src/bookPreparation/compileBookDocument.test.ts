@@ -178,7 +178,7 @@ test('preserves independent frame layers, masks and component references in comp
   assert.deepEqual(built.visualEffects.map((cur) => cur.effect.id), ['shadow', 'text', 'component']);
   assert.deepEqual(built.visualEffects.map((cur) => cur.effect.depth), [
     {
-      plane: 'scene',
+      plane: 'belowNarrative',
       order: 3,
     },
     {

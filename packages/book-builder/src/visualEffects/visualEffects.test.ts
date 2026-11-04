@@ -73,7 +73,7 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
     pageId: 'owner',
   });
   const visibility: AuthoredVisualEffect['effect']['visibility'] = {
-    region: 'book',
+    region: 'story',
     mask: {
       type: 'circle',
       center: {
@@ -193,4 +193,177 @@ test('native instance parameters survive compilation alongside presentation opti
   expect(isBookDocument(book)).toBe(true);
   const built = compileBookDocument(book).visualEffects.find((cur) => cur.effect.id === 'range-native');
   expect(built?.effect.params).toEqual(native.effect.params);
+});
+
+test.each(['background', 'frame'] as const)('switching %s area replaces custom placement', (type) => {
+  const draft: VisualDraft = type === 'background'
+    ? {
+      id: 'region',
+      type,
+      kind: 'background',
+      slug: 'Region',
+      options: { style: {} },
+    }
+    : {
+      id: 'region',
+      type,
+      kind: 'component',
+      slug: 'Region',
+      options: { style: {} },
+    };
+  const initial = draftToVisual({
+    draft,
+    pageId: 'owner',
+  });
+  expect(initial.effect.placement.coordinates).toBe('storyViewport');
+  expect(initial.effect.visibility.region).toBe('storyViewport');
+  const previous: AuthoredVisualEffect = {
+    ...initial,
+    effect: {
+      ...initial.effect,
+      placement: {
+        ...initial.effect.placement,
+        coordinates: 'narrativeContent',
+        offset: {
+          x: {
+            value: 13,
+            unit: 'px',
+          },
+          y: {
+            value: 20,
+            unit: '%',
+          },
+        },
+      },
+      visibility: {
+        region: 'narrativeViewport',
+        mask: {
+          type: 'polygon',
+          points: [
+            {
+              x: {
+                value: 0,
+                unit: '%',
+              },
+              y: {
+                value: 0,
+                unit: '%',
+              },
+            },
+            {
+              x: {
+                value: 100,
+                unit: '%',
+              },
+              y: {
+                value: 0,
+                unit: '%',
+              },
+            },
+            {
+              x: {
+                value: 100,
+                unit: '%',
+              },
+              y: {
+                value: 100,
+                unit: '%',
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+  const custom = visualToDraft(previous);
+  expect(custom.displayRegion).toBe('custom');
+  expect(draftToVisual({
+    draft: custom,
+    pageId: 'owner',
+    previous,
+  })).toEqual(previous);
+
+  for (const displayRegion of ['narrativeFrame', 'storyViewport'] as const) {
+    const switched = draftToVisual({
+      draft: {
+        ...custom,
+        displayRegion,
+      },
+      pageId: 'owner',
+      previous,
+    });
+    expect(switched.effect.placement.coordinates).toBe(displayRegion);
+    expect(switched.effect.placement.anchor).toEqual({
+      region: displayRegion,
+      point: 'top-left',
+    });
+    expect(switched.effect.placement.offset).toEqual({
+      x: {
+        value: 0,
+        unit: 'px',
+      },
+      y: {
+        value: 0,
+        unit: 'px',
+      },
+    });
+    expect(switched.effect.visibility).toEqual({
+      region: displayRegion,
+      mask: previous.effect.visibility.mask,
+    });
+    expect(switched.effect.params).not.toHaveProperty('displayRegion');
+    expect(draftToVisual({
+      draft: visualToDraft(switched),
+      pageId: 'owner',
+      previous: switched,
+    })).toEqual(switched);
+  }
+});
+
+test('frame area switches keep the frame mask; disabling it retains the selected area', () => {
+  const draft: VisualDraft = {
+    id: 'masked-area',
+    type: 'frame',
+    kind: 'component',
+    slug: 'Mask',
+    options: {
+      frameMask: {
+        enabled: true,
+        sides: ['left', 'bottom'],
+      },
+    },
+  };
+  const previous = draftToVisual({
+    draft,
+    pageId: 'owner',
+  });
+  const panel = visualToDraft(previous);
+  const switched = draftToVisual({
+    draft: {
+      ...panel,
+      displayRegion: 'narrativeFrame',
+    },
+    previous,
+    pageId: 'owner',
+  });
+  expect(switched.effect.placement.coordinates).toBe('narrativeFrame');
+  expect(switched.effect.visibility).toEqual({
+    region: 'frame',
+    sides: ['left', 'bottom'],
+  });
+  const unmasked = visualToDraft(switched);
+  if (unmasked.type !== 'frame') {
+    throw new Error('Expected a frame');
+  }
+  unmasked.options.frameMask = {
+    enabled: false,
+    sides: ['left', 'bottom'],
+  };
+  const edited = draftToVisual({
+    draft: unmasked,
+    previous: switched,
+    pageId: 'owner',
+  });
+  expect(edited.effect.visibility.region).toBe('narrativeFrame');
+  expect(edited.effect.placement).toEqual(switched.effect.placement);
 });

@@ -11,6 +11,7 @@ import type {
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
+import type { VisualDisplayRegion } from '../@types';
 
 import { resolveStyle } from '../style';
 import { isRecord } from '../utils';
@@ -44,9 +45,10 @@ export type FrameEffect = {
   kind: FrameEffectKind;
   slug: string;
   options: FrameOptions;
+  displayRegion?: VisualDisplayRegion;
 };
 
-export type BuiltFrameEffect = Omit<FrameEffect, 'slug'>;
+export type BuiltFrameEffect = Omit<FrameEffect, 'slug' | 'displayRegion'>;
 
 type StyledItem = {
   style?: CSSProperties;

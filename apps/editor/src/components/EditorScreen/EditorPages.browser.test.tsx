@@ -81,7 +81,7 @@ test('edits, reorders, saves and reopens three independent pages with isolated h
   await saveBook();
   const firstBook = await project.readDocument();
   const firstId = firstBook.pages[0].id;
-  const root = document.querySelector('[data-book-region="book"]');
+  const root = document.querySelector('[data-story-region="story"]');
   await page.getByRole('button', {
     name: 'Добавить страницу',
     exact: true,
@@ -105,7 +105,7 @@ test('edits, reorders, saves and reopens three independent pages with isolated h
   }).click();
   await typeText('Третья история');
   await expect.element(page.getByText('3 из 3', { exact: true })).toBeVisible();
-  expect(document.querySelector('[data-book-region="book"]')).toBe(root);
+  expect(document.querySelector('[data-story-region="story"]')).toBe(root);
   const pageButtons = document.querySelectorAll<HTMLButtonElement>(
     'nav[aria-label="Страницы книги"] li > button:first-child',
   );
@@ -343,14 +343,14 @@ test('switching projects during a real TGZ import disposes resources and isolate
   }).click();
   await expect.element(editorText()).toHaveTextContent('Альфа: первая страница');
   await expect.poll(() => createUrl.mock.results.length).toBeGreaterThan(0);
-  const oldRoot = document.querySelector('[data-book-region="book"]');
+  const oldRoot = document.querySelector('[data-story-region="story"]');
   const oldUrls = createUrl.mock.results.map((cur) => cur.value);
   await page.getByRole('button', {
     name: 'Новый проект',
     exact: true,
   }).click();
   await expect.element(editorText()).not.toHaveTextContent('Альфа: первая страница');
-  expect(document.querySelector('[data-book-region="book"]')).not.toBe(oldRoot);
+  expect(document.querySelector('[data-story-region="story"]')).not.toBe(oldRoot);
   finishImport();
   const allOldUrlsRevoked = () => oldUrls.every((url) => revokeUrl.mock.calls.some((cur) => cur[0] === url));
   await expect.poll(allOldUrlsRevoked).toBe(true);

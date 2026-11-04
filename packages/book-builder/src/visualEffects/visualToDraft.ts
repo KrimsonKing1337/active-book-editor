@@ -8,6 +8,7 @@ import type {
 import type { AuthoredVisualEffect } from './@types';
 
 import { getVisualCategory, getVisualComponentId } from './definitions';
+import { getDisplayRegion } from './displayRegion';
 
 export type VisualDraft = BackgroundEffect | FrameEffect;
 
@@ -33,6 +34,19 @@ const getStyleTarget = (options: PanelOptions, kind: PanelOptions['kind']) => {
   }
 
   return options;
+};
+
+const restoreStyleZIndex = (
+  options: PanelOptions,
+  kind: PanelOptions['kind'],
+  zIndex: number,
+): void => {
+  const targetOptions = getStyleTarget(options, kind);
+
+  targetOptions.style = {
+    ...targetOptions.style,
+    zIndex,
+  };
 };
 
 /** A transient panel view. Depth and visibility remain authoritative in the description. */
@@ -66,7 +80,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
   if (type === 'frame') {
     let layer: FrameOptions['layer'] = 'above';
 
-    if (effect.depth.plane === 'scene') {
+    if (effect.depth.plane === 'belowNarrative') {
       layer = 'behind';
     }
 
@@ -87,13 +101,11 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
-  // Восстанавливаем zIndex для отображения в панели редактора
-  const styleTarget = getStyleTarget(options, kind);
+  // Восстанавливаем zIndex для отображения в панели редактора.
+  // Здесь мутируется объект options по ссылке и далее возвращается ниже
+  restoreStyleZIndex(options, kind, effect.depth.order);
 
-  styleTarget.style = {
-    ...styleTarget.style,
-    zIndex: effect.depth.order,
-  };
+  const displayRegion = getDisplayRegion(effect);
 
   return {
     id: effect.id,
@@ -101,5 +113,6 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     kind,
     slug,
     options,
+    displayRegion,
   } as VisualDraft;
 };

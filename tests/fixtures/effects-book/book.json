@@ -28,9 +28,9 @@
                   "kind": "image"
                 },
                 "placement": {
-                  "coordinates": "bookViewport",
+                  "coordinates": "storyViewport",
                   "anchor": {
-                    "region": "bookViewport",
+                    "region": "storyViewport",
                     "point": "top-left"
                   },
                   "origin": "top-left",
@@ -56,7 +56,7 @@
                   }
                 },
                 "visibility": {
-                  "region": "bookViewport"
+                  "region": "storyViewport"
                 },
                 "depth": {
                   "plane": "background",

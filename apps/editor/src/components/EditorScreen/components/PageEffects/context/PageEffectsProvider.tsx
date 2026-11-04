@@ -1,4 +1,4 @@
-import { type PropsWithChildren, useLayoutEffect, useMemo } from 'react';
+import { type PropsWithChildren, useLayoutEffect, useMemo, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
@@ -28,6 +28,7 @@ export const PageEffectsProvider = ({
   ownerPageId = pageId,
   onStylesFlusher,
 }: PageEffectsProviderProps) => {
+  const [selectedVisualEffectId, setSelectedVisualEffectId] = useState<string | null>(null);
   const {
     effects,
     writeEffects,
@@ -37,7 +38,7 @@ export const PageEffectsProvider = ({
   } = usePageEffectsState({
     editor,
     pageId,
-    ownerPageId, 
+    ownerPageId,
   });
 
   const {
@@ -65,6 +66,8 @@ export const PageEffectsProvider = ({
   }, [flushStylePreviews, onStylesFlusher]);
 
   const value = useMemo(() => ({
+    selectedVisualEffectId,
+    setSelectedVisualEffectId,
     effects,
     writeEffects,
     getCurrentEffects,
@@ -78,6 +81,7 @@ export const PageEffectsProvider = ({
     updateFrameItemPreview,
     updateFrameStylePreview,
   }), [
+    selectedVisualEffectId,
     effects,
     writeEffects,
     getCurrentEffects,

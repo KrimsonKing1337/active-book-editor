@@ -1,0 +1,1 @@
+export { VisualRegionSettings } from './VisualRegionSettings';
