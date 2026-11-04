@@ -77,7 +77,7 @@ const addComposition = async () => {
 
   await addEffect('Frame');
   await configureShadow();
-  await page.getByRole('combobox', { name: 'Область отображения эффекта' }).selectOptions('narrativeFrame');
+  await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions('narrativeFrame');
   const composed = await project.save();
 
   expect(composed.background).toEqual(withBackground.background);
@@ -186,7 +186,7 @@ test('deletes only the selected effect and supports undo and redo through the ed
 
 test('visual region controls persist canonical geometry and selection clears on back, close and delete', async () => {
   await addEffect('Frame');
-  const regionControl = page.getByRole('combobox', { name: 'Область отображения эффекта' });
+  const regionControl = page.getByRole('combobox', { name: 'Область размещения эффекта' });
   await expect.element(regionControl).toHaveValue('storyViewport');
   const outline = () => document.querySelector<HTMLElement>('[data-visual-selection]');
   await expect.poll(outline).not.toBeNull();

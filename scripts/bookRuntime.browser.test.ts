@@ -118,7 +118,7 @@ test('production book reads all three positional routes with page-owned effects 
     await editor.getByRole('button', { name: new RegExp(`Категория ${category} `) }).click();
     await editor.getByRole('button', { name: category === 'Background' ? 'Добавить фон' : 'Добавить рамочную тень', exact: true }).click();
     await editor.getByRole('textbox', { name: 'Название эффекта', exact: true }).fill(`Создано в редакторе ${category}`);
-    const regionControl = editor.getByRole('combobox', { name: 'Область отображения эффекта' });
+    const regionControl = editor.getByRole('combobox', { name: 'Область размещения эффекта' });
     assert.equal(await regionControl.inputValue(), 'storyViewport');
     await editor.locator('[data-visual-selection]').waitFor();
     if (category === 'Frame') {
