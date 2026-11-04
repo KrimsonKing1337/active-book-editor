@@ -23,7 +23,7 @@ export const VisualRegionSettings = ({ value = 'storyViewport', onChange }: Visu
   return (
     <label className={styles.Field}>
       <span>
-        Область отображения эффекта
+        Область размещения эффекта
       </span>
 
       <Select value={value} onChange={handleChange}>
@@ -43,7 +43,8 @@ export const VisualRegionSettings = ({ value = 'storyViewport', onChange }: Visu
       </Select>
 
       <small>
-        Выбор области заменяет позиционирование на её заполнение. Маски сохраняются; маска рамки относится к нарративу
+        Выбор области заменяет позиционирование на её заполнение.
+        Маски сохраняются. Маска рамки относится к нарративу
       </small>
     </label>
   );

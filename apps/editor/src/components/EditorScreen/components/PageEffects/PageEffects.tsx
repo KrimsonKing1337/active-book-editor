@@ -14,7 +14,6 @@ import type {
 } from './@types';
 
 import { usePageEffects } from './context';
-
 import { EffectsModal } from './components';
 
 import {
@@ -119,8 +118,9 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
 
   useLayoutEffect(() => {
     const isVisualEffect = selectedEffectType === 'background' || selectedEffectType === 'frame';
+    const effectId = (isOpen && isVisualEffect) ? selectedEffectId : null;
 
-    setSelectedVisualEffectId(isOpen && isVisualEffect ? selectedEffectId : null);
+    setSelectedVisualEffectId(effectId);
 
     return () => setSelectedVisualEffectId(null);
   }, [isOpen, selectedEffectId, selectedEffectType, setSelectedVisualEffectId]);

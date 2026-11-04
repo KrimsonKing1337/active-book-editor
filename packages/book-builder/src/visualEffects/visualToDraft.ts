@@ -88,13 +88,15 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
-  // Восстанавливаем zIndex для отображения в панели редактора
-  const styleTarget = getStyleTarget(options, kind);
+  // Восстанавливаем zIndex для отображения в панели редактора изменяя свойство, полученное по ссылке
+  const targetOptions = getStyleTarget(options, kind);
 
-  styleTarget.style = {
-    ...styleTarget.style,
+  targetOptions.style = {
+    ...targetOptions.style,
     zIndex: effect.depth.order,
   };
+
+  const displayRegion = getDisplayRegion(effect);
 
   return {
     id: effect.id,
@@ -102,6 +104,6 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     kind,
     slug,
     options,
-    displayRegion: getDisplayRegion(effect),
+    displayRegion,
   } as VisualDraft;
 };

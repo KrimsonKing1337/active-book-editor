@@ -10,7 +10,8 @@ export const getDisplayRegion = ({ placement, visibility }: VisualEffectInstance
     return 'custom';
   }
 
-  const fillsRegion = placement.anchor.region === region
+  const matchesRegionFillPreset =
+    placement.anchor.region === region
     && placement.anchor.point === 'top-left'
     && placement.origin === 'top-left'
     && placement.offset.x.value === 0
@@ -21,6 +22,7 @@ export const getDisplayRegion = ({ placement, visibility }: VisualEffectInstance
     && placement.size.height.unit === '%';
 
   const matchesVisibility = visibility.region === region || visibility.region === 'frame';
+  const matchesAll = matchesRegionFillPreset && matchesVisibility;
 
-  return fillsRegion && matchesVisibility ? region : 'custom';
+  return matchesAll ? region : 'custom';
 };

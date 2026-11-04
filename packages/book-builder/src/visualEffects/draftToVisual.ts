@@ -113,6 +113,7 @@ export const draftToVisual = ({
 
   // Проверяем, какие свойства предыдущей регистрации можно сохранить
   const previousDraft = previous ? visualToDraft(previous) : null;
+
   const hasDisplayRegionChange = displayRegion !== undefined
     && displayRegion !== 'custom'
     && displayRegion !== previousDraft?.displayRegion;
@@ -168,15 +169,14 @@ export const draftToVisual = ({
   // Собираем эффект
   // An explicit region switch replaces custom placement with a fill of that region.
   // Ordinary edits retain both independently authored placement and visibility.
-  const placement = hasDisplayRegionChange
-    ? defaultEffect.placement
-    : previous?.effect.placement ?? defaultEffect.placement;
+  const placement = hasDisplayRegionChange ? defaultEffect.placement : previous?.effect.placement;
+  const placementSafe = placement ?? defaultEffect.placement;
 
   const effect = {
     ...defaultEffect,
     definitionId,
     params,
-    placement,
+    placement: placementSafe,
     visibility,
     depth,
   };
