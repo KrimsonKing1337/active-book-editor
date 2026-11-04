@@ -36,6 +36,19 @@ const getStyleTarget = (options: PanelOptions, kind: PanelOptions['kind']) => {
   return options;
 };
 
+const restoreStyleZIndex = (
+  options: PanelOptions,
+  kind: PanelOptions['kind'],
+  zIndex: number,
+): void => {
+  const targetOptions = getStyleTarget(options, kind);
+
+  targetOptions.style = {
+    ...targetOptions.style,
+    zIndex,
+  };
+};
+
 /** A transient panel view. Depth and visibility remain authoritative in the description. */
 export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft => {
   const { effect, slug } = description;
@@ -88,13 +101,8 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
-  // Восстанавливаем zIndex для отображения в панели редактора изменяя свойство, полученное по ссылке
-  const targetOptions = getStyleTarget(options, kind);
-
-  targetOptions.style = {
-    ...targetOptions.style,
-    zIndex: effect.depth.order,
-  };
+  // Восстанавливаем zIndex для отображения в панели редактора
+  restoreStyleZIndex(options, kind, effect.depth.order);
 
   const displayRegion = getDisplayRegion(effect);
 
