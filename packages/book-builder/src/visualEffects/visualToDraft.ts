@@ -101,7 +101,8 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
-  // Восстанавливаем zIndex для отображения в панели редактора
+  // Восстанавливаем zIndex для отображения в панели редактора.
+  // Здесь мутируется объект options по ссылке и далее возвращается ниже
   restoreStyleZIndex(options, kind, effect.depth.order);
 
   const displayRegion = getDisplayRegion(effect);
