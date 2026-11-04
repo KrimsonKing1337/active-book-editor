@@ -6,6 +6,7 @@ import type {
 } from '@active-book/types';
 
 export const VISUAL_REGIONS = [
+  'application',
   'story',
   'storyViewport',
   'narrativeFrame',

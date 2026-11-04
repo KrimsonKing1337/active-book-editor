@@ -367,3 +367,18 @@ test('frame area switches keep the frame mask; disabling it retains the selected
   expect(edited.effect.visibility.region).toBe('narrativeFrame');
   expect(edited.effect.placement).toEqual(switched.effect.placement);
 });
+
+
+test('optional application coordinates survive authoring validation and compilation', () => {
+  const book = readFixture();
+  const registration = book.visualEffects[0];
+  registration.effect.placement.coordinates = 'application';
+  registration.effect.placement.anchor.region = 'application';
+  registration.effect.visibility = { region: 'application' };
+  expect(isBookDocument(book)).toBe(true);
+  const built = compileBookDocument(book).visualEffects.find((cur) => {
+    return cur.effect.id === registration.effect.id;
+  });
+  expect(built?.effect.visibility.region).toBe('application');
+  expect(built?.effect.placement.coordinates).toBe('application');
+});
