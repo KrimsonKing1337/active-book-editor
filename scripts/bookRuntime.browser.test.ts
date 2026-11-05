@@ -21,7 +21,7 @@ const mimeTypes: Record<string, string> = {
   '.webm': 'video/webm', '.tgz': 'application/gzip', '.wav': 'audio/wav', '.woff2': 'font/woff2', '.ttf': 'font/ttf',
 };
 
-test('production book reads all three positional routes with page-owned effects and custom components', async (context) => {
+test('production book selects stable page IDs in a persistent viewport with page-owned effects and custom components', async (context) => {
   const editorServer = await createViteServer({
     configFile: path.join(repoRoot, 'apps/editor/vite.config.ts'),
     configLoader: 'runner',
@@ -98,6 +98,11 @@ test('production book reads all three positional routes with page-owned effects 
   const image = await editor.locator('[data-effect-id="range-image"] img').elementHandle();
   const video = await editor.locator('[data-effect-id="range-video"] video').elementHandle();
   assert(native && image && video);
+  const editorViewport = await editor.locator('[data-story-region="storyViewport"]').elementHandle();
+  const editorNarrative = await editor.locator('#narrative').elementHandle();
+  const editorToolbar = await editor.locator('#Toolbar').elementHandle();
+  assert(editorViewport && editorNarrative && editorToolbar);
+  const editorUrl = editor.url();
   await editor.waitForFunction(() => (document.querySelector<HTMLVideoElement>('[data-effect-id="range-video"] video')?.currentTime ?? 0) > 0.2);
   await editor.getByRole('button', { name: 'Скрыть фон', exact: true }).click();
   assert(await video.evaluate((element) => element === document.querySelector('[data-effect-id="range-video"] video') && element instanceof HTMLVideoElement && !element.paused));
@@ -109,6 +114,10 @@ test('production book reads all three positional routes with page-owned effects 
   assert(await native.evaluate((element) => element === document.querySelector('[data-testid="native-visual"]')));
   assert(await image.evaluate((element) => element === document.querySelector('[data-effect-id="range-image"] img')));
   assert(await video.evaluate((element) => element === document.querySelector('[data-effect-id="range-video"] video')));
+  assert(await editorViewport.evaluate((element) => element === document.querySelector('[data-story-region="storyViewport"]')));
+  assert(await editorNarrative.evaluate((element) => element === document.querySelector('#narrative')));
+  assert(await editorToolbar.evaluate((element) => element === document.querySelector('#Toolbar')));
+  assert.equal(editor.url(), editorUrl);
   await editor.getByRole('button', { name: 'Страница 2', exact: true }).click();
   assert.equal(await native.evaluate((element) => element.isConnected), false);
   await editor.getByRole('button', { name: 'Страница 1', exact: true }).click();
@@ -192,6 +201,11 @@ test('production book reads all three positional routes with page-owned effects 
   assert.equal(await page.locator('[data-page-id]').count(), 0, 'page 0 is a technical audio screen');
   const book = await page.locator('[data-story-region="story"]').elementHandle();
   assert(book);
+  const viewport = await page.locator('[data-story-region="storyViewport"]').elementHandle();
+  const narrative = await page.locator('#narrative').elementHandle();
+  const toolbar = await page.locator('#Toolbar').elementHandle();
+  assert(viewport && narrative && toolbar);
+  const readerUrl = page.url();
   await page.getByRole('button', { name: 'Начать читать', exact: true }).click();
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
   await page.getByText('1 из 3', { exact: true }).waitFor();
@@ -228,6 +242,10 @@ test('production book reads all three positional routes with page-owned effects 
       assert.equal(await page.getByTestId('custom-badge').textContent(), 'Кастомная вставка: 0');
     }
     assert.equal(await book.evaluate((element) => element === document.querySelector('[data-story-region="story"]')), true);
+    assert(await viewport.evaluate((element) => element === document.querySelector('[data-story-region="storyViewport"]')));
+    assert(await narrative.evaluate((element) => element === document.querySelector('#narrative')));
+    assert(await toolbar.evaluate((element) => element === document.querySelector('#Toolbar')));
+    assert.equal(page.url(), readerUrl);
   }
   await page.keyboard.press('ArrowRight');
   await page.getByText('3 из 3', { exact: true }).waitFor();

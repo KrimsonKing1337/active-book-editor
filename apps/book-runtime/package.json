@@ -8,8 +8,7 @@
     "@active-book/book-builder": "^0.0.1",
     "activeBook-core": "*",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "react-router-dom": "^7.10.1"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@active-book/types": "*",

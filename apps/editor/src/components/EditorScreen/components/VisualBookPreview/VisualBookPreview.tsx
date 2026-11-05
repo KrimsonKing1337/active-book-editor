@@ -144,6 +144,11 @@ export const VisualBookPreview = ({
   return (
     <AppWrapper
       bookKey={session}
+      initialPageId={pageId}
+      storyPages={book.pages.map((pageCur) => ({
+        id: pageCur.id,
+        content: pageCur.id === pageId ? children : null,
+      }))}
       config={config}
       tableOfContents={[]}
       rangeEffects={[]}
@@ -152,8 +157,6 @@ export const VisualBookPreview = ({
       hiddenVisualEffects={hidden}
       selectedVisualEffectId={selectedVisualEffectId}
       editorTools={editorTools}
-    >
-      {children}
-    </AppWrapper>
+    />
   );
 };

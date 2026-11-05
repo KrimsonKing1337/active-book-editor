@@ -4,7 +4,6 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-import { PageWrapper } from 'activeBook-core/components';
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
@@ -446,9 +445,9 @@ export const EditorWorkspace = () => {
             >
               <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
 
-              <PageWrapper key={`page:${pageScope}`} data-page-id={pages.activePage.id}>
+              <div data-editor-page-id={pages.activePage.id}>
                 <EditorContent editor={editor} />
-              </PageWrapper>
+              </div>
             </VisualBookPreview>
           </main>
         </div>

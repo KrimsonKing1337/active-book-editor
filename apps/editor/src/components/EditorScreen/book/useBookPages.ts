@@ -118,7 +118,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
       pages,
     });
 
-    dispatch(mainActions.setPages(pages.length));
+    dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
 
     navigateRef.current(1);
   }, [editor, flushStyles, dispatch, publish]);
@@ -157,7 +157,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
       });
     }
 
-    dispatch(mainActions.setPages(book.pages.length));
+    dispatch(mainActions.setStoryPages(book.pages.map((cur) => cur.id)));
 
     if (position !== activePosition) {
       navigateRef.current(activePosition);
@@ -186,7 +186,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     const index = current.pages.findIndex((pageCur) => pageCur.id === id);
 
     if (index >= 0) {
-      navigateRef.current(index + 1);
+      navigateRef.current(id);
     }
   }, [getSnapshot]);
 
@@ -203,7 +203,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
     publish(next);
 
-    dispatch(mainActions.setPages(next.pages.length));
+    dispatch(mainActions.setStoryPages(next.pages.map((cur) => cur.id)));
 
     navigateRef.current(next.pages.length);
   }, [getSnapshot, publish, dispatch]);
@@ -230,7 +230,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
       pages,
     });
 
-    dispatch(mainActions.setPages(pages.length));
+    dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
 
     navigateRef.current(nextPosition);
   }, [getSnapshot, publish, dispatch]);
@@ -255,8 +255,10 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
     const selected = pages.findIndex((pageCur) => pageCur.id === activeIdRef.current);
 
-    navigateRef.current(selected + 1);
-  }, [getSnapshot, publish]);
+    dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
+
+    navigateRef.current(pages[selected].id);
+  }, [getSnapshot, publish, dispatch]);
 
   const getRevision = useCallback(() => revisionRef.current, []);
 

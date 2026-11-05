@@ -1,7 +1,5 @@
 import ReactDOM from 'react-dom/client';
 
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-
 import { Page0 } from 'activeBook-core/pages/Page0';
 
 import { StoreProvider } from 'activeBook-core/store';
@@ -71,54 +69,33 @@ const start = async (): Promise<void> => {
 
   reactRoot.render(
     <StoreProvider>
-      <MemoryRouter>
-        <AppWrapper
-          config={bookConfig}
-          tableOfContents={[]}
-          rangeEffects={[]}
-          registrations={document.visualEffects}
-          definitions={definitions}
-        >
-          <Routes>
-            <Route
-              path="/"
-              element={(
-                <Page0
-                  header="Добро пожаловать"
-                  audioSrcForInit={AUDIO_UNLOCK_SRC}
-                  showButton={false}
-                  Footer={StartReading}
-                />
-              )}
+      <AppWrapper
+        storyPages={document.pages.map((pageCur, index) => ({
+          id: pageCur.id,
+          content: (
+            <BookPage
+              document={pageCur.document}
+              page={index + 1}
+              pageId={pageCur.id}
+              customComponents={components}
+              bookRuntime={bookRuntime}
             />
+          ),
+        }))}
+        config={bookConfig}
+        tableOfContents={[]}
+        rangeEffects={[]}
+        registrations={document.visualEffects}
+        definitions={definitions}
+      >
+        <Page0
+          header="Добро пожаловать"
+          audioSrcForInit={AUDIO_UNLOCK_SRC}
+          showButton={false}
+          Footer={StartReading}
+        />
 
-            {document.pages.map((pageCur, index) => {
-              const { id, document } = pageCur;
-
-              const path = `/page-${index + 1}`;
-
-              const element = (
-                <BookPage
-                  key={id}
-                  document={document}
-                  page={index + 1}
-                  pageId={id}
-                  customComponents={components}
-                  bookRuntime={bookRuntime}
-                />
-              );
-
-              return (
-                <Route
-                  key={id}
-                  path={path}
-                  element={element}
-                />
-              );
-            })}
-          </Routes>
-        </AppWrapper>
-      </MemoryRouter>
+      </AppWrapper>
     </StoreProvider>,
   );
 };

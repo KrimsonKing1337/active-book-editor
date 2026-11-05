@@ -4,12 +4,11 @@ import { StrictMode } from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
 import { page } from 'vitest/browser';
-import { MemoryRouter } from 'react-router-dom';
 
 import { StoreProvider, store } from 'activeBook-core/store';
 import { mainActions } from 'activeBook-core/store/main';
 
-import { AppWrapper, PageWrapper } from 'activeBook-core/components';
+import { AppWrapper } from 'activeBook-core/components';
 
 import { type VisualEffects, useVisualEffects } from 'activeBook-core/controllers/visualEffects';
 
@@ -56,23 +55,25 @@ test('native identity and independent book sessions', async () => {
     const view = (registrations = initial, bookKey = 1) => (
       <StrictMode>
         <StoreProvider>
-          <MemoryRouter>
-            <AppWrapper
-              config={config}
-              rangeEffects={[]}
-              tableOfContents={[]}
-              definitions={definitions}
-              registrations={registrations}
-              bookKey={bookKey}
-            >
-              <Probe />
-              <PageWrapper>
-                <p>
-                  Native contract
-                </p>
-              </PageWrapper>
-            </AppWrapper>
-          </MemoryRouter>
+          <AppWrapper
+            storyPages={[{
+              id: 'first',
+              content: <p>Native contract</p>,
+            }, {
+              id: 'second',
+              content: null,
+            }, {
+              id: 'third',
+              content: null,
+            }]}
+            editorTools={<Probe />}
+            config={config}
+            rangeEffects={[]}
+            tableOfContents={[]}
+            definitions={definitions}
+            registrations={registrations}
+            bookKey={bookKey}
+          />
         </StoreProvider>
       </StrictMode>
     );

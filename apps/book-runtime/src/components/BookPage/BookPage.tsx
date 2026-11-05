@@ -2,7 +2,6 @@ import { type ComponentType } from 'react';
 
 import type { BookRuntime } from '@active-book/types';
 
-import { PageWrapper } from 'activeBook-core/components';
 import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
 
 import type { PageDocument } from '@types';
@@ -37,7 +36,7 @@ export const BookPage = ({
   const flashlightEffects = getFlashlightEffects(document);
 
   return (
-    <PageWrapper data-page-id={pageId}>
+    <div data-page-content-id={pageId}>
       { /* Эффекты */ }
       <>
         {audioEffects.map((effectCur) => {
@@ -82,6 +81,6 @@ export const BookPage = ({
           bookRuntime,
         });
       })}
-    </PageWrapper>
+    </div>
   );
 };
