@@ -679,6 +679,7 @@ export const FrameSettings = ({
 
             <Checkbox
               checked={componentMask.enabled}
+              disabled={effect.placement?.region === 'frame'}
               onChange={handleComponentMaskEnabledChange}
             >
               Ограничить рамкой

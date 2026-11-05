@@ -310,3 +310,32 @@ test('minimal application placement compiles and old coordinate descriptions are
   badTransform.visualEffects[0].effect.placement.scale = 'large';
   expect(isBookDocument(badTransform)).toBe(false);
 });
+
+
+test('choosing the frame region from an unmasked draft paints all four sides', () => {
+  const draft: VisualDraft = {
+    id: 'frame-choice',
+    type: 'frame',
+    kind: 'component',
+    slug: 'Frame',
+    options: {
+      frameMask: {
+        enabled: false,
+        sides: [],
+      },
+    },
+    placement: { region: 'frame' },
+  };
+  const authored = draftToVisual({
+    draft,
+    pageId: 'owner',
+  });
+  expect(authored.effect.visibility?.sides).toEqual(['top', 'right', 'bottom', 'left']);
+  const panel = visualToDraft(authored);
+  expect(panel.options).toHaveProperty('frameMask.enabled', true);
+  expect(draftToVisual({
+    draft: panel,
+    previous: authored,
+    pageId: 'owner',
+  })).toEqual(authored);
+});

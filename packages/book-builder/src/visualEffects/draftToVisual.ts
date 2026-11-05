@@ -107,16 +107,15 @@ export const draftToVisual = ({
 
   if (type === 'frame') {
     const frameMask = (options as FrameOptions).frameMask;
-    if (frameMask) {
+    if (frameMask || placement.region === 'frame') {
       visibility = { ...visibility };
-      if (frameMask.enabled) {
+      if (frameMask?.enabled) {
         visibility.sides = frameMask.sides;
+      } else if (placement.region === 'frame') {
+        // The frame region inherently consists of its sides, even after an unmasked draft.
+        visibility.sides = ['top', 'right', 'bottom', 'left'];
       } else {
-        // An empty list explicitly disables the default side mask of the frame region.
-        visibility.sides = placement.region === 'frame' ? [] : undefined;
-        if (visibility.sides === undefined) {
-          delete visibility.sides;
-        }
+        delete visibility.sides;
       }
     }
   }
