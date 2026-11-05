@@ -143,9 +143,9 @@ test('edits independent effects and restores their data and rendered composition
   expect(composed.frame).toEqual(originalComposition.frame);
   expect(composed.background?.[0]).toEqual(originalComposition.background?.[0]);
   await checkComposition('rgb(48, 80, 112)');
-  const pageWrapper = document.querySelector<HTMLElement>('#page-wrapper');
+  const storyShell = document.querySelector<HTMLElement>('#story-shell');
 
-  await expect.element(pageWrapper).toMatchScreenshot('effects-composition');
+  await expect.element(storyShell).toMatchScreenshot('effects-composition');
   cleanup();
   render(<EditorScreen />);
 
@@ -153,7 +153,7 @@ test('edits independent effects and restores their data and rendered composition
   expect(project.pickDirectory).toHaveBeenCalledTimes(1);
   expect(await project.readEffects()).toEqual(composed);
   await checkComposition('rgb(48, 80, 112)');
-  await expect.element(document.querySelector<HTMLElement>('#page-wrapper')).toMatchScreenshot('effects-composition');
+  await expect.element(document.querySelector<HTMLElement>('#story-shell')).toMatchScreenshot('effects-composition');
 }, 60_000);
 
 test('deletes only the selected effect and supports undo and redo through the editor', async () => {

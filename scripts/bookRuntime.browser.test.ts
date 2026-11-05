@@ -228,7 +228,7 @@ test('production book selects stable page IDs in a persistent viewport with page
     if (number > 1) await page.keyboard.press('ArrowRight');
     await page.getByText(title, { exact: true }).waitFor();
     await page.getByText(`${number} из 3`, { exact: true }).waitFor();
-    assert.equal(await page.locator('#page-wrapper').getAttribute('data-page-id'), `stable-${id}`);
+    assert.equal(await page.locator('#story-shell').getAttribute('data-page-id'), `stable-${id}`);
     await page.locator(`[data-effect-id="bg-${id}"]`).waitFor({ state: 'attached' });
     await page.locator(`[data-effect-id="frame-${id}"]`).waitFor({ state: 'attached' });
     await page.waitForFunction((id) => {

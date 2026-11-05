@@ -27,7 +27,7 @@ const getDefaultGeometry = (): PanelGeometry => {
   const availableHeight = window.innerHeight - 32;
   const height = Math.min(680, Math.max(240, availableHeight));
 
-  const pageBounds = document.querySelector('#main-content-wrapper')?.getBoundingClientRect();
+  const pageBounds = document.querySelector('#story-viewport')?.getBoundingClientRect();
 
   const preferredX = pageBounds ? pageBounds.right + 20 : window.innerWidth - width - 20;
   const x = Math.max(16, Math.min(window.innerWidth - width - 16, preferredX));
