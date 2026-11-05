@@ -1,11 +1,15 @@
+import type { VisualDepth, VisualPlacement } from '@active-book/types';
+
 import type { AudioEffect, BuiltAudioEffect } from './audio';
 import type { BuiltVibrationEffect, VibrationEffect } from './vibration';
 import type { BuiltFlashlightEffect, FlashlightEffect } from './flashlight';
 import type { BackgroundEffect, BuiltBackgroundEffect } from './background';
 import type { FrameEffect, BuiltFrameEffect } from './frame';
 
-/** Transient panel choice; authored placement and visibility remain authoritative. */
-export type VisualDisplayRegion = 'storyViewport' | 'narrativeFrame' | 'custom';
+export type VisualLayout = {
+  placement?: VisualPlacement;
+  depth?: VisualDepth;
+};
 
 export type EditorEffect =
   | AudioEffect

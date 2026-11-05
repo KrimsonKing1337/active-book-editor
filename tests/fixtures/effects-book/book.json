@@ -28,11 +28,7 @@
                   "kind": "image"
                 },
                 "placement": {
-                  "coordinates": "storyViewport",
-                  "anchor": {
-                    "region": "storyViewport",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -53,11 +49,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "storyViewport"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "background",
                   "order": 0

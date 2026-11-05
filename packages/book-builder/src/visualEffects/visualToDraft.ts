@@ -8,45 +8,10 @@ import type {
 import type { AuthoredVisualEffect } from './@types';
 
 import { getVisualCategory, getVisualComponentId } from './definitions';
-import { getDisplayRegion } from './displayRegion';
-
 export type VisualDraft = BackgroundEffect | FrameEffect;
 
 type PanelOptions = BackgroundOptions & FrameOptions & {
   kind?: VisualDraft['kind'];
-};
-
-const getStyleTarget = (options: PanelOptions, kind: PanelOptions['kind']) => {
-  if (kind === 'shadow' && options.shadow) {
-    return options.shadow;
-  }
-
-  if (kind === 'text' && options.text) {
-    return options.text;
-  }
-
-  if (kind === 'image' && options.image) {
-    return options.image;
-  }
-
-  if (kind === 'video' && options.video) {
-    return options.video;
-  }
-
-  return options;
-};
-
-const restoreStyleZIndex = (
-  options: PanelOptions,
-  kind: PanelOptions['kind'],
-  zIndex: number,
-): void => {
-  const targetOptions = getStyleTarget(options, kind);
-
-  targetOptions.style = {
-    ...targetOptions.style,
-    zIndex,
-  };
 };
 
 /** A transient panel view. Depth and visibility remain authoritative in the description. */
@@ -78,34 +43,12 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
 
   // Восстанавливаем настройки рамочного эффекта
   if (type === 'frame') {
-    let layer: FrameOptions['layer'] = 'above';
-
-    if (effect.depth.plane === 'belowNarrative') {
-      layer = 'behind';
-    }
-
-    const visibility = effect.visibility;
-    const isFrameMaskEnabled = visibility.region === 'frame';
-
-    let frameSides: NonNullable<FrameOptions['frameMask']>['sides'] = [];
-
-    if (visibility.region === 'frame') {
-      frameSides = [...visibility.sides];
-    }
-
-    options.layer = layer;
-
+    const sides = effect.visibility?.sides;
     options.frameMask = {
-      enabled: isFrameMaskEnabled,
-      sides: frameSides,
+      enabled: sides !== undefined || effect.placement.region === 'frame',
+      sides: sides ? [...sides] : ['top', 'right', 'bottom', 'left'],
     };
   }
-
-  // Восстанавливаем zIndex для отображения в панели редактора.
-  // Здесь мутируется объект options по ссылке и далее возвращается ниже
-  restoreStyleZIndex(options, kind, effect.depth.order);
-
-  const displayRegion = getDisplayRegion(effect);
 
   return {
     id: effect.id,
@@ -113,6 +56,7 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     kind,
     slug,
     options,
-    displayRegion,
+    placement: structuredClone(effect.placement),
+    depth: structuredClone(effect.depth),
   } as VisualDraft;
 };

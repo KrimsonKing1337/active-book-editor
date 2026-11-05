@@ -38,5 +38,5 @@ export const VISUAL_PLANES = [
   'background',
   'belowNarrative',
   'aboveNarrative',
-  'aboveControls',
+  'aboveStoryControls',
 ] as const satisfies readonly VisualPlane[];

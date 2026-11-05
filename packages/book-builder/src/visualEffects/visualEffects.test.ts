@@ -73,7 +73,6 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
     pageId: 'owner',
   });
   const visibility: AuthoredVisualEffect['effect']['visibility'] = {
-    region: 'story',
     mask: {
       type: 'circle',
       center: {
@@ -90,11 +89,11 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
         value: 40,
         unit: '%',
       },
-    },
+    }, 
   };
   const placement = {
     ...original.effect.placement,
-    coordinates: 'narrativeContent' as const,
+    region: 'narrativeContent' as const,
   };
   const previous = {
     ...original,
@@ -103,7 +102,7 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
       placement,
       visibility,
       depth: {
-        plane: 'aboveControls' as const,
+        plane: 'aboveStoryControls' as const,
         order: 7,
       },
     },
@@ -121,7 +120,7 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
   expect(edited.effect.depth).toEqual(previous.effect.depth);
   expect(edited.effect.params).not.toHaveProperty('layer');
   expect(edited.effect.params).not.toHaveProperty('frameMask');
-  expect(edited.effect.params.style).not.toHaveProperty('zIndex');
+  expect(edited.effect.params.style ?? {}).not.toHaveProperty('zIndex');
 });
 
 test('custom frame panel round trips retain native params and component identity', () => {
@@ -195,190 +194,119 @@ test('native instance parameters survive compilation alongside presentation opti
   expect(built?.effect.params).toEqual(native.effect.params);
 });
 
-test.each(['background', 'frame'] as const)('switching %s area replaces custom placement', (type) => {
+test.each(['background', 'frame'] as const)('shared %s placement metadata round trips all regions', (type) => {
   const draft: VisualDraft = type === 'background'
     ? {
       id: 'region',
       type,
       kind: 'background',
       slug: 'Region',
-      options: { style: {} },
+      options: {}, 
     }
     : {
       id: 'region',
       type,
       kind: 'component',
       slug: 'Region',
-      options: { style: {} },
+      options: {}, 
     };
   const initial = draftToVisual({
     draft,
-    pageId: 'owner',
+    pageId: 'owner', 
   });
-  expect(initial.effect.placement.coordinates).toBe('storyViewport');
-  expect(initial.effect.visibility.region).toBe('storyViewport');
-  const previous: AuthoredVisualEffect = {
-    ...initial,
-    effect: {
-      ...initial.effect,
-      placement: {
-        ...initial.effect.placement,
-        coordinates: 'narrativeContent',
-        offset: {
-          x: {
-            value: 13,
-            unit: 'px',
-          },
-          y: {
-            value: 20,
-            unit: '%',
-          },
+  expect(initial.effect.placement).toEqual({ region: 'storyViewport' });
+  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'frame',
+    'narrativeViewport', 'narrativeContent'] as const) {
+    const panel = visualToDraft(initial);
+    panel.placement = {
+      region,
+      anchor: 'bottom-right',
+      offset: {
+        x: {
+          value: -12,
+          unit: 'px', 
         },
+        y: {
+          value: 5,
+          unit: '%', 
+        }, 
       },
-      visibility: {
-        region: 'narrativeViewport',
-        mask: {
-          type: 'polygon',
-          points: [
-            {
-              x: {
-                value: 0,
-                unit: '%',
-              },
-              y: {
-                value: 0,
-                unit: '%',
-              },
-            },
-            {
-              x: {
-                value: 100,
-                unit: '%',
-              },
-              y: {
-                value: 0,
-                unit: '%',
-              },
-            },
-            {
-              x: {
-                value: 100,
-                unit: '%',
-              },
-              y: {
-                value: 100,
-                unit: '%',
-              },
-            },
-          ],
-        },
-      },
-    },
-  };
-  const custom = visualToDraft(previous);
-  expect(custom.displayRegion).toBe('custom');
-  expect(draftToVisual({
-    draft: custom,
-    pageId: 'owner',
-    previous,
-  })).toEqual(previous);
-
-  for (const displayRegion of ['narrativeFrame', 'storyViewport'] as const) {
-    const switched = draftToVisual({
-      draft: {
-        ...custom,
-        displayRegion,
-      },
-      pageId: 'owner',
-      previous,
+      scale: 0.8,
+      rotate: 12,
+    };
+    panel.depth = {
+      plane: 'aboveStoryControls',
+      order: -4, 
+    };
+    const edited = draftToVisual({
+      draft: panel,
+      previous: initial,
+      pageId: 'owner', 
     });
-    expect(switched.effect.placement.coordinates).toBe(displayRegion);
-    expect(switched.effect.placement.anchor).toEqual({
-      region: displayRegion,
-      point: 'top-left',
-    });
-    expect(switched.effect.placement.offset).toEqual({
-      x: {
-        value: 0,
-        unit: 'px',
-      },
-      y: {
-        value: 0,
-        unit: 'px',
-      },
-    });
-    expect(switched.effect.visibility).toEqual({
-      region: displayRegion,
-      mask: previous.effect.visibility.mask,
-    });
-    expect(switched.effect.params).not.toHaveProperty('displayRegion');
+    expect(edited.effect.placement).toEqual(panel.placement);
+    expect(edited.effect.depth).toEqual(panel.depth);
+    expect(edited.effect.params).not.toHaveProperty('placement');
     expect(draftToVisual({
-      draft: visualToDraft(switched),
-      pageId: 'owner',
-      previous: switched,
-    })).toEqual(switched);
+      draft: visualToDraft(edited),
+      previous: edited,
+      pageId: 'owner', 
+    })).toEqual(edited);
   }
 });
 
-test('frame area switches keep the frame mask; disabling it retains the selected area', () => {
+test('frame mask controls retain custom masks and authored placement', () => {
   const draft: VisualDraft = {
-    id: 'masked-area',
+    id: 'mask',
     type: 'frame',
     kind: 'component',
     slug: 'Mask',
     options: {
       frameMask: {
         enabled: true,
-        sides: ['left', 'bottom'],
-      },
+        sides: ['left', 'bottom'], 
+      }, 
     },
   };
   const previous = draftToVisual({
     draft,
-    pageId: 'owner',
+    pageId: 'owner', 
   });
+  expect(previous.effect.placement.region).toBe('frame');
   const panel = visualToDraft(previous);
-  const switched = draftToVisual({
-    draft: {
-      ...panel,
-      displayRegion: 'narrativeFrame',
-    },
-    previous,
-    pageId: 'owner',
-  });
-  expect(switched.effect.placement.coordinates).toBe('narrativeFrame');
-  expect(switched.effect.visibility).toEqual({
-    region: 'frame',
-    sides: ['left', 'bottom'],
-  });
-  const unmasked = visualToDraft(switched);
-  if (unmasked.type !== 'frame') {
-    throw new Error('Expected a frame');
-  }
-  unmasked.options.frameMask = {
-    enabled: false,
-    sides: ['left', 'bottom'],
-  };
+  panel.placement = { region: 'narrativeFrame' };
   const edited = draftToVisual({
-    draft: unmasked,
-    previous: switched,
-    pageId: 'owner',
+    draft: panel,
+    previous,
+    pageId: 'owner', 
   });
-  expect(edited.effect.visibility.region).toBe('narrativeFrame');
-  expect(edited.effect.placement).toEqual(switched.effect.placement);
+  expect(edited.effect.visibility).toEqual({ sides: ['left', 'bottom'] });
+  if (panel.type !== 'frame') {
+    throw new Error('Expected frame');
+  }
+  panel.options.frameMask = {
+    enabled: false,
+    sides: [], 
+  };
+  expect(draftToVisual({
+    draft: panel,
+    previous: edited,
+    pageId: 'owner', 
+  }).effect.visibility).toEqual({});
 });
 
-
-test('optional application coordinates survive authoring validation and compilation', () => {
+test('minimal application placement compiles and old coordinate descriptions are rejected', () => {
   const book = readFixture();
   const registration = book.visualEffects[0];
-  registration.effect.placement.coordinates = 'application';
-  registration.effect.placement.anchor.region = 'application';
-  registration.effect.visibility = { region: 'application' };
+  registration.effect.placement = { region: 'application' };
+  delete registration.effect.visibility;
+  registration.effect.depth = { plane: 'aboveStoryControls' };
   expect(isBookDocument(book)).toBe(true);
-  const built = compileBookDocument(book).visualEffects.find((cur) => {
-    return cur.effect.id === registration.effect.id;
-  });
-  expect(built?.effect.visibility.region).toBe('application');
-  expect(built?.effect.placement.coordinates).toBe('application');
+  const built = compileBookDocument(book).visualEffects.find((cur) => cur.effect.id === registration.effect.id);
+  expect(built?.effect.placement).toEqual({ region: 'application' });
+  const bad = JSON.parse(JSON.stringify(book));
+  bad.visualEffects[0].effect.placement.coordinates = 'story';
+  expect(isBookDocument(bad)).toBe(false);
+  const badTransform = JSON.parse(JSON.stringify(book));
+  badTransform.visualEffects[0].effect.placement.scale = 'large';
+  expect(isBookDocument(badTransform)).toBe(false);
 });

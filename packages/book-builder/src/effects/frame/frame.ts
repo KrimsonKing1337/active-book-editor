@@ -11,7 +11,7 @@ import type {
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
-import type { VisualDisplayRegion } from '../@types';
+import type { VisualLayout } from '../@types';
 
 import { resolveStyle } from '../style';
 import { isRecord } from '../utils';
@@ -39,16 +39,15 @@ export type FrameOptions = {
   frameMask?: FrameMask;
 };
 
-export type FrameEffect = {
+export type FrameEffect = VisualLayout & {
   id: string;
   type: 'frame';
   kind: FrameEffectKind;
   slug: string;
   options: FrameOptions;
-  displayRegion?: VisualDisplayRegion;
 };
 
-export type BuiltFrameEffect = Omit<FrameEffect, 'slug' | 'displayRegion'>;
+export type BuiltFrameEffect = Omit<FrameEffect, 'slug' | 'placement' | 'depth'>;
 
 type StyledItem = {
   style?: CSSProperties;

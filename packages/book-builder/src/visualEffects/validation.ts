@@ -66,33 +66,27 @@ const isValidPlacement = (value: unknown): boolean => {
   }
 
   const {
-    coordinates,
+    region,
     anchor,
     origin,
     offset,
     size,
+    scale,
+    rotate,
   } = value;
-
-  if (!isRecord(anchor) || !isRecord(size)) {
+  if ('coordinates' in value || !regions.has(String(region))) {
     return false;
   }
 
-  const hasValidCoordinates = regions.has(String(coordinates));
-  const hasValidAnchorRegion = regions.has(String(anchor.region));
-  const hasValidAnchorPoint = anchors.has(String(anchor.point));
-  const hasValidOrigin = anchors.has(String(origin));
+  const hasValidAnchor = anchor === undefined || anchors.has(String(anchor));
+  const hasValidOrigin = origin === undefined || anchors.has(String(origin));
+  const hasValidOffset = offset === undefined || isValidPoint(offset);
+  const hasValidSize = size === undefined || (isRecord(size)
+    && isNonnegativeLength(size.width) && isNonnegativeLength(size.height));
+  const hasValidScale = scale === undefined || (typeof scale === 'number' && Number.isFinite(scale));
+  const hasValidRotate = rotate === undefined || (typeof rotate === 'number' && Number.isFinite(rotate));
 
-  const hasValidOffset = isValidPoint(offset);
-  const hasValidWidth = isNonnegativeLength(size.width);
-  const hasValidHeight = isNonnegativeLength(size.height);
-
-  return hasValidCoordinates
-    && hasValidAnchorRegion
-    && hasValidAnchorPoint
-    && hasValidOrigin
-    && hasValidOffset
-    && hasValidWidth
-    && hasValidHeight;
+  return hasValidAnchor && hasValidOrigin && hasValidOffset && hasValidSize && hasValidScale && hasValidRotate;
 };
 
 const isValidMask = (value: unknown): boolean => {
@@ -126,28 +120,16 @@ const isValidMask = (value: unknown): boolean => {
 };
 
 const isValidVisibility = (value: unknown): boolean => {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  const hasValidRegion = regions.has(String(value.region));
-  const hasValidMask = isValidMask(value.mask);
-
-  if (!hasValidRegion || !hasValidMask) {
-    return false;
-  }
-
-  if (value.region !== 'frame') {
+  if (value === undefined) {
     return true;
   }
 
-  if (!Array.isArray(value.sides)) {
+  if (!isRecord(value) || 'region' in value || !isValidMask(value.mask)) {
     return false;
   }
 
-  return value.sides.every((side) => {
-    return sides.has(String(side));
-  });
+  return value.sides === undefined || (Array.isArray(value.sides)
+    && value.sides.every((side) => sides.has(String(side))));
 };
 
 const isValidRange = (value: unknown): boolean => {
@@ -200,7 +182,7 @@ const isValidDepth = (value: unknown): boolean => {
   }
 
   const hasValidPlane = planes.has(String(value.plane));
-  const hasValidOrder = typeof value.order === 'number' && Number.isInteger(value.order);
+  const hasValidOrder = value.order === undefined || (typeof value.order === 'number' && Number.isInteger(value.order));
 
   return hasValidPlane && hasValidOrder;
 };

@@ -1,6 +1,6 @@
 import type { JsonValue } from '@active-book/types';
 
-import { createBuiltinRegistration, fillRegion } from 'activeBook-core/controllers/visualEffects/utils/declarations';
+import { createBuiltinRegistration } from 'activeBook-core/controllers/visualEffects/utils/declarations';
 
 import type { FrameOptions } from '../effects';
 import { resolveBackgroundOptions, resolveFrameOptions } from '../effects';
@@ -9,7 +9,6 @@ import type { AuthoredVisualEffect } from './@types';
 import type { VisualDraft } from './visualToDraft';
 
 import { customVisualDefinitionId } from './definitions';
-import { visualToDraft } from './visualToDraft';
 
 type DraftToVisualOptions = {
   draft: VisualDraft;
@@ -65,16 +64,6 @@ export const draftToVisual = ({
   });
 
   const defaultEffect = registration.effect;
-  const displayRegion = draft.displayRegion;
-
-  if (displayRegion && displayRegion !== 'custom') {
-    defaultEffect.placement = fillRegion(displayRegion);
-
-    if (defaultEffect.visibility.region !== 'frame') {
-      defaultEffect.visibility = { region: displayRegion };
-    }
-  }
-
   // Определяем реализацию компонента
   let definitionId = defaultEffect.definitionId;
 
@@ -111,72 +100,32 @@ export const draftToVisual = ({
     }
   }
 
-  // Проверяем, какие свойства предыдущей регистрации можно сохранить
-  const previousDraft = previous ? visualToDraft(previous) : null;
+  // Placement and depth are authored metadata, shared by all visual implementations.
+  const placement = draft.placement ?? previous?.effect.placement ?? defaultEffect.placement;
+  const depth = draft.depth ?? previous?.effect.depth ?? defaultEffect.depth;
+  let visibility = previous?.effect.visibility ?? defaultEffect.visibility;
 
-  const hasDisplayRegionChange = displayRegion !== undefined
-    && displayRegion !== 'custom'
-    && displayRegion !== previousDraft?.displayRegion;
-
-  let shouldPreservePlane = previousDraft?.type === 'background';
-  let shouldPreserveVisibility = shouldPreservePlane;
-
-  if (previousDraft?.type === 'frame') {
-    const previousFrameOptions = previousDraft.options as FrameOptions;
-    const currentFrameOptions = options as FrameOptions;
-
-    const hasSameLayer = previousFrameOptions.layer === currentFrameOptions.layer;
-
-    const frameMaskPrev = previousFrameOptions.frameMask;
-    const frameMaskCur = currentFrameOptions.frameMask;
-
-    const hasSameMask = JSON.stringify(frameMaskPrev) === JSON.stringify(frameMaskCur);
-
-    shouldPreservePlane = hasSameLayer;
-    shouldPreserveVisibility = hasSameMask;
-  }
-
-  // Восстанавливаем глубину
-  let plane = defaultEffect.depth.plane;
-
-  if (shouldPreservePlane && previous) {
-    plane = previous.effect.depth.plane;
-  }
-
-  const depth = {
-    ...defaultEffect.depth,
-    plane,
-  };
-
-  // Восстанавливаем видимость и пользовательскую маску
-  let visibility = {
-    ...defaultEffect.visibility,
-  };
-
-  if (shouldPreserveVisibility && previous && !hasDisplayRegionChange) {
-    visibility = previous.effect.visibility;
-  } else {
-    const previousMask = previous?.effect.visibility.mask;
-
-    if (previousMask) {
-      visibility = {
-        ...visibility,
-        mask: previousMask,
-      };
+  if (type === 'frame') {
+    const frameMask = (options as FrameOptions).frameMask;
+    if (frameMask) {
+      visibility = { ...visibility };
+      if (frameMask.enabled) {
+        visibility.sides = frameMask.sides;
+      } else {
+        // An empty list explicitly disables the default side mask of the frame region.
+        visibility.sides = placement.region === 'frame' ? [] : undefined;
+        if (visibility.sides === undefined) {
+          delete visibility.sides;
+        }
+      }
     }
   }
-
-  // Собираем эффект
-  // An explicit region switch replaces custom placement with a fill of that region.
-  // Ordinary edits retain both independently authored placement and visibility.
-  const placement = hasDisplayRegionChange ? defaultEffect.placement : previous?.effect.placement;
-  const placementSafe = placement ?? defaultEffect.placement;
 
   const effect = {
     ...defaultEffect,
     definitionId,
     params,
-    placement: placementSafe,
+    placement,
     visibility,
     depth,
   };

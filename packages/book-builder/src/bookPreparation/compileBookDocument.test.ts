@@ -191,7 +191,6 @@ test('preserves independent frame layers, masks and component references in comp
     },
   ]);
   assert.deepEqual(built.visualEffects[2].effect.visibility, {
-    region: 'frame',
     sides: ['top', 'bottom'],
   });
   assert.equal(built.visualEffects[2].effect.definitionId, 'custom.frame/custom-effects/Smoke');

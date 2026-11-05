@@ -54,11 +54,7 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "storyViewport",
-                  "anchor": {
-                    "region": "storyViewport",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -79,11 +75,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "storyViewport"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "background",
                   "order": 0
@@ -114,11 +109,7 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "narrativeFrame",
-                  "anchor": {
-                    "region": "narrativeFrame",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -139,11 +130,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "narrativeFrame"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "aboveNarrative",
                   "order": 0
@@ -211,11 +201,7 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "storyViewport",
-                  "anchor": {
-                    "region": "storyViewport",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -236,11 +222,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "storyViewport"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "background",
                   "order": 0
@@ -271,11 +256,7 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "narrativeFrame",
-                  "anchor": {
-                    "region": "narrativeFrame",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -296,11 +277,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "narrativeFrame"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "aboveNarrative",
                   "order": 0
@@ -356,11 +336,7 @@
                   "kind": "background"
                 },
                 "placement": {
-                  "coordinates": "storyViewport",
-                  "anchor": {
-                    "region": "storyViewport",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -381,11 +357,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "storyViewport"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "background",
                   "order": 0
@@ -405,11 +380,7 @@
                   "kind": "component"
                 },
                 "placement": {
-                  "coordinates": "storyViewport",
-                  "anchor": {
-                    "region": "storyViewport",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -430,11 +401,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "storyViewport"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "background",
                   "order": 0
@@ -465,11 +435,7 @@
                   "kind": "shadow"
                 },
                 "placement": {
-                  "coordinates": "narrativeFrame",
-                  "anchor": {
-                    "region": "narrativeFrame",
-                    "point": "top-left"
-                  },
+                  "anchor": "top-left",
                   "origin": "top-left",
                   "offset": {
                     "x": {
@@ -490,11 +456,10 @@
                       "value": 100,
                       "unit": "%"
                     }
-                  }
-                },
-                "visibility": {
+                  },
                   "region": "narrativeFrame"
                 },
+                "visibility": {},
                 "depth": {
                   "plane": "aboveNarrative",
                   "order": 0
@@ -552,11 +517,7 @@
           "kind": "image"
         },
         "placement": {
-          "coordinates": "storyViewport",
-          "anchor": {
-            "region": "storyViewport",
-            "point": "top-left"
-          },
+          "anchor": "top-left",
           "origin": "top-left",
           "offset": {
             "x": {
@@ -577,11 +538,10 @@
               "value": 100,
               "unit": "%"
             }
-          }
-        },
-        "visibility": {
+          },
           "region": "storyViewport"
         },
+        "visibility": {},
         "depth": {
           "plane": "background",
           "order": 0
@@ -619,11 +579,7 @@
           "kind": "video"
         },
         "placement": {
-          "coordinates": "storyViewport",
-          "anchor": {
-            "region": "storyViewport",
-            "point": "top-left"
-          },
+          "anchor": "top-left",
           "origin": "top-left",
           "offset": {
             "x": {
@@ -644,11 +600,10 @@
               "value": 100,
               "unit": "%"
             }
-          }
-        },
-        "visibility": {
+          },
           "region": "storyViewport"
         },
+        "visibility": {},
         "depth": {
           "plane": "background",
           "order": 0
@@ -693,11 +648,7 @@
           "kind": "shadow"
         },
         "placement": {
-          "coordinates": "narrativeFrame",
-          "anchor": {
-            "region": "narrativeFrame",
-            "point": "top-left"
-          },
+          "anchor": "top-left",
           "origin": "top-left",
           "offset": {
             "x": {
@@ -718,11 +669,10 @@
               "value": 100,
               "unit": "%"
             }
-          }
-        },
-        "visibility": {
+          },
           "region": "narrativeFrame"
         },
+        "visibility": {},
         "depth": {
           "plane": "belowNarrative",
           "order": 0
@@ -758,11 +708,7 @@
           "kind": "component"
         },
         "placement": {
-          "coordinates": "narrativeFrame",
-          "anchor": {
-            "region": "narrativeFrame",
-            "point": "top-left"
-          },
+          "anchor": "top-left",
           "origin": "top-left",
           "offset": {
             "x": {
@@ -783,11 +729,10 @@
               "value": 100,
               "unit": "%"
             }
-          }
-        },
-        "visibility": {
+          },
           "region": "narrativeFrame"
         },
+        "visibility": {},
         "depth": {
           "plane": "aboveNarrative",
           "order": 0

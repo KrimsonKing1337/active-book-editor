@@ -9,7 +9,7 @@ import type {
 } from 'activeBook-core/hooks/effects/background/@types';
 
 import type { FilterOperation } from '../style';
-import type { VisualDisplayRegion } from '../@types';
+import type { VisualLayout } from '../@types';
 
 import { resolveStyle } from '../style';
 import { isRecord } from '../utils';
@@ -46,16 +46,15 @@ export type BackgroundOptions = {
   component?: BackgroundComponentReference;
 };
 
-export type BackgroundEffect = {
+export type BackgroundEffect = VisualLayout & {
   id: string;
   type: 'background';
   kind: BackgroundEffectKind;
   slug: string;
   options: BackgroundOptions;
-  displayRegion?: VisualDisplayRegion;
 };
 
-export type BuiltBackgroundEffect = Omit<BackgroundEffect, 'slug' | 'displayRegion'>;
+export type BuiltBackgroundEffect = Omit<BackgroundEffect, 'slug' | 'placement' | 'depth'>;
 
 type StyledLayer = {
   style?: CSSProperties;
