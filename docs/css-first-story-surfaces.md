@@ -10,7 +10,8 @@
 2. `484e1fe`: builder, canonical placement/depth, валидация и JSON fixtures. Без новой панели.
 3. `2f829f4`: одна общая панель Background/Frame, native TGZ handles, проверки UI; установлен окончательный core 0.0.50.
 4. `2f72e49`: только удаление trailing whitespace, добавленного lint-staged.
-5. Последний коммит: документация и результаты проверок.
+5. `ec57d98`: отдельный фикс перехода из unmasked draft в frame — четыре стороны видны по умолчанию. Регион frame имеет присущую ему маску, поэтому её включение не отключается отдельным чекбоксом.
+6. Документация и результаты проверок.
 
 ## Контракт и панель
 
@@ -27,7 +28,7 @@ Renderer из реального TGZ получает разрешённые `re
 ## Проверки
 
 - `npm run typecheck`: workspaces и test TS — проходят.
-- `npm run test:unit`: 60 tests — проходят. Четыре теста удалённого style-layer helper больше не применимы; round-trip и validation нового контракта проверены.
+- `npm run test:unit`: 61 tests — проходят. Четыре теста удалённого style-layer helper больше не применимы; round-trip и validation нового контракта проверены.
 - `npm run test:component`: 4 tests — проходят.
 - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:browser`: 13 tests — проходят. Старые composition screenshot goldens не менялись.
 - `npm run test:runtime`: production edit/save/reopen/reorder/add/delete/build + native TGZ + собранный reader — проходит.
