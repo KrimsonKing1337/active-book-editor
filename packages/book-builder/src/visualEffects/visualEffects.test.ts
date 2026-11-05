@@ -89,7 +89,7 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
         value: 40,
         unit: '%',
       },
-    }, 
+    },
   };
   const placement = {
     ...original.effect.placement,
@@ -201,18 +201,18 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
       type,
       kind: 'background',
       slug: 'Region',
-      options: {}, 
+      options: {},
     }
     : {
       id: 'region',
       type,
       kind: 'component',
       slug: 'Region',
-      options: {}, 
+      options: {},
     };
   const initial = draftToVisual({
     draft,
-    pageId: 'owner', 
+    pageId: 'owner',
   });
   expect(initial.effect.placement).toEqual({ region: 'storyViewport' });
   for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'frame',
@@ -224,24 +224,24 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
       offset: {
         x: {
           value: -12,
-          unit: 'px', 
+          unit: 'px',
         },
         y: {
           value: 5,
-          unit: '%', 
-        }, 
+          unit: '%',
+        },
       },
       scale: 0.8,
       rotate: 12,
     };
     panel.depth = {
       plane: 'aboveStoryControls',
-      order: -4, 
+      order: -4,
     };
     const edited = draftToVisual({
       draft: panel,
       previous: initial,
-      pageId: 'owner', 
+      pageId: 'owner',
     });
     expect(edited.effect.placement).toEqual(panel.placement);
     expect(edited.effect.depth).toEqual(panel.depth);
@@ -249,7 +249,7 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
     expect(draftToVisual({
       draft: visualToDraft(edited),
       previous: edited,
-      pageId: 'owner', 
+      pageId: 'owner',
     })).toEqual(edited);
   }
 });
@@ -263,13 +263,13 @@ test('frame mask controls retain custom masks and authored placement', () => {
     options: {
       frameMask: {
         enabled: true,
-        sides: ['left', 'bottom'], 
-      }, 
+        sides: ['left', 'bottom'],
+      },
     },
   };
   const previous = draftToVisual({
     draft,
-    pageId: 'owner', 
+    pageId: 'owner',
   });
   expect(previous.effect.placement.region).toBe('frame');
   const panel = visualToDraft(previous);
@@ -277,7 +277,7 @@ test('frame mask controls retain custom masks and authored placement', () => {
   const edited = draftToVisual({
     draft: panel,
     previous,
-    pageId: 'owner', 
+    pageId: 'owner',
   });
   expect(edited.effect.visibility).toEqual({ sides: ['left', 'bottom'] });
   if (panel.type !== 'frame') {
@@ -285,12 +285,12 @@ test('frame mask controls retain custom masks and authored placement', () => {
   }
   panel.options.frameMask = {
     enabled: false,
-    sides: [], 
+    sides: [],
   };
   expect(draftToVisual({
     draft: panel,
     previous: edited,
-    pageId: 'owner', 
+    pageId: 'owner',
   }).effect.visibility).toEqual({});
 });
 
