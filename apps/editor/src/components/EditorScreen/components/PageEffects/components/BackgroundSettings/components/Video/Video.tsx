@@ -94,7 +94,6 @@ export const Video = ({
         </summary>
 
         <StyleEditor
-          defaultZIndex={1}
           value={style ?? {}}
           styleFilters={styleFilters}
           layer="video"

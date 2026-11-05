@@ -147,8 +147,7 @@ test('production book selects stable page IDs in a persistent viewport with page
   assert.equal(authored.pages[0].document.attrs?.pageEffects.frame, undefined);
   const newFrame = authored.pages[0].document.attrs?.visualEffects.find((cur: { slug: string }) => cur.slug === 'Создано в редакторе Frame');
   assert.equal(newFrame.effect.params.shadow.thickness, 45);
-  assert.equal(newFrame.effect.placement.coordinates, 'narrativeFrame');
-  assert.equal(newFrame.effect.visibility.region, 'narrativeFrame');
+  assert.equal(newFrame.effect.placement.region, 'narrativeFrame');
   const frameElement = await editor.locator(`[data-effect-id="${newFrame.effect.id}"]`).elementHandle();
   assert(frameElement);
   await editor.getByRole('button', { name: 'Добавить страницу', exact: true }).click();

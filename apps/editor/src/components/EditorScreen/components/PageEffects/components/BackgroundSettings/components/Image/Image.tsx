@@ -52,7 +52,6 @@ export const Image = ({
         </summary>
 
         <StyleEditor
-          defaultZIndex={1}
           value={style ?? {}}
           styleFilters={styleFilters}
           layer="image"

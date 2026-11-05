@@ -43,7 +43,6 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
       </Checkbox>
 
       <StyleEditor
-        defaultZIndex={2}
         value={style ?? {}}
         styleFilters={shadow.styleFilters}
         layer="shadow"

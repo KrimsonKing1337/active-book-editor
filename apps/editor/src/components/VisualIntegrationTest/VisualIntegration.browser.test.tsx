@@ -1,9 +1,12 @@
 
-import { StrictMode } from 'react';
+
+import { createElement, StrictMode } from 'react';
 
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, expect, test, vi } from 'vitest';
 import { page } from 'vitest/browser';
+
+import type { BookRuntime, VisualRendererProps } from '@active-book/types';
 
 import { StoreProvider, store } from 'activeBook-core/store';
 import { mainActions } from 'activeBook-core/store/main';
@@ -39,6 +42,14 @@ afterEach(() => {
 test('native identity and independent book sessions', async () => {
   const library = await loadBrowserLibrary(await (await fetch(archiveUrl)).blob());
   try {
+    const implementations = Object.entries(library.visualComponents).map(([id, Implementation]) => {
+      const renderer = vi.fn((props: VisualRendererProps & {
+        book: BookRuntime
+      }) => createElement(Implementation, props));
+      library.visualComponents[id] = renderer;
+
+      return renderer;
+    });
     const definitions = createCustomVisualDefinitions([library], createBookRuntime('editor'));
     const book: unknown = fixture;
     if (!isBookDocument(book)) {
@@ -82,6 +93,16 @@ test('native identity and independent book sessions', async () => {
     const native = page.getByTestId('native-visual');
     await expect.element(native).toBeInTheDocument();
     const firstElement = native.element();
+    const props = implementations.flatMap((renderer) => renderer.mock.calls).at(-1)?.[0];
+    expect(props).toBeDefined();
+    for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame',
+      'narrativeViewport', 'narrativeContent'] as const) {
+      const selector = region === 'application' ? '[data-book-application]' : `[data-story-region="${region}"]`;
+      expect(props?.regions[region]).toBe(document.querySelector(selector));
+    }
+    expect(props?.regions.frame).toBe(props?.regions.narrativeFrame);
+    expect(props).not.toHaveProperty('geometry');
+    expect(document.querySelectorAll('[data-book-application]')).toHaveLength(1);
     const wrapper = document.querySelector('[data-effect-id="range-native"]');
     const firstSession = session;
     const generation = session.getGeneration('range-native');

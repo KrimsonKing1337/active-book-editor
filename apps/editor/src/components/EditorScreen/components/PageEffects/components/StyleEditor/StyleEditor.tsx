@@ -4,15 +4,14 @@ import classNames from 'classnames';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
-import { type BackgroundPreviewLayer, usePageEffects } from '../../context';
+import { type BackgroundPreviewLayer } from '../../context';
 
 
 import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyleContext';
 
 import { type StyleEditorController, useStyleEditor } from './hooks';
 
-import { AdvancedStyles, ColorSettings, FilterSettings, LayerSettings } from './components';
-import { getLayerZIndexData } from './utils';
+import { AdvancedStyles, ColorSettings, FilterSettings } from './components';
 
 import styles from './StyleEditor.module.scss';
 
@@ -23,7 +22,6 @@ export type StyleEditorProps = {
   layer: BackgroundPreviewLayer;
   styleFilters?: FilterOperation[];
   mediaId?: string;
-  defaultZIndex?: number;
   colorProperty?: ColorProperty;
   additionalColorProperty?: ColorProperty;
   colorLabel?: string;
@@ -43,7 +41,6 @@ export const StyleEditor = ({
   layer,
   styleFilters,
   mediaId,
-  defaultZIndex = 0,
   colorProperty = 'backgroundColor',
   additionalColorProperty,
   colorLabel,
@@ -64,24 +61,6 @@ export const StyleEditor = ({
   });
 
   const backgroundStyle = useOptionalBackgroundStyle();
-  const { effects } = usePageEffects();
-
-  const {
-    zIndex,
-    minimumZIndex,
-    maximumZIndex,
-    otherLayersAtSameIndex,
-  } = getLayerZIndexData({
-    effects,
-    currentStyle,
-    defaultZIndex,
-    isFrame: Boolean(controller),
-  });
-
-  const handleLayerChange = (val: number) => {
-    setProperty('zIndex', val);
-  };
-
   const handleApplyFilters = (operations: FilterOperation[]) => {
     commitStyle();
 
@@ -145,15 +124,6 @@ export const StyleEditor = ({
           </fieldset>
         );
       })}
-
-      <LayerSettings
-        zIndex={zIndex}
-        minimumZIndex={minimumZIndex}
-        maximumZIndex={maximumZIndex}
-        otherLayersAtSameIndex={otherLayersAtSameIndex}
-        onChange={handleLayerChange}
-        onCommit={commitStyle}
-      />
 
       <FilterSettings
         operations={styleFilters}

@@ -1,6 +1,6 @@
 import { cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 
 import { pageVisualEffects } from '@active-book/book-builder/visualEffects';
 
@@ -63,7 +63,6 @@ const addComposition = async () => {
   expect(withBackground.background?.[1].options).toMatchObject({
     style: {
       backgroundColor: '#204060ff',
-      zIndex: 1,
       opacity: '0.6',
     },
     styleFilters: [
@@ -73,6 +72,11 @@ const addComposition = async () => {
         value: '120%',
       },
     ],
+  });
+
+  expect(withBackground.background?.[1].depth).toEqual({
+    plane: 'background',
+    order: 1,
   });
 
   await addEffect('Frame');
@@ -85,9 +89,13 @@ const addComposition = async () => {
     thickness: 70,
     style: {
       color: '#e08020ff',
-      zIndex: 2,
       opacity: '0.75',
     },
+  });
+
+  expect(composed.frame?.[0].depth).toEqual({
+    plane: 'belowNarrative',
+    order: 2,
   });
 
   return composed;
@@ -136,7 +144,8 @@ test('edits independent effects and restores their data and rendered composition
   const originalComposition = await addComposition();
 
   await selectEffect('Тестовый фон');
-  await page.getByText('Фон', { exact: true }).click();
+  const backgroundSection = [...document.querySelectorAll('summary')].find((element) => element.textContent === 'Фон');
+  await page.elementLocator(backgroundSection!).click();
   await setColor('#305070ff');
   const composed = await project.save();
 
@@ -202,7 +211,7 @@ test('visual region controls persist canonical geometry and selection clears on 
   await regionControl.selectOptions('narrativeFrame');
   await expect.poll(() => visibility()?.getBoundingClientRect().toJSON())
     .toEqual(region('narrativeFrame')?.getBoundingClientRect().toJSON());
-  expect(document.querySelector(`[data-effect-id="${id}"]`)).toBe(renderer);
+  expect(document.querySelector(`[data-effect-id="${id}"]`)).not.toBe(renderer);
   await expect.poll(() => outline()?.getBoundingClientRect().toJSON())
     .toEqual(visibility()?.getBoundingClientRect().toJSON());
   await page.getByRole('textbox', {
@@ -223,11 +232,10 @@ test('visual region controls persist canonical geometry and selection clears on 
   }).click();
   await expect.poll(outline).toBeNull();
   const saved = await project.save();
-  expect(saved.frame?.[0].displayRegion).toBe('narrativeFrame');
+  expect(saved.frame?.[0].placement?.region).toBe('narrativeFrame');
   const savedDocument = await project.readDocument();
   const authored = pageVisualEffects(savedDocument.pages[0].document).find((cur) => cur.effect.id === id);
-  expect(authored?.effect.placement.coordinates).toBe('narrativeFrame');
-  expect(authored?.effect.visibility.region).toBe('narrativeFrame');
+  expect(authored?.effect.placement.region).toBe('narrativeFrame');
   expect(authored?.effect.params).not.toHaveProperty('displayRegion');
   await selectEffect('Область нарратива');
   await expect.poll(outline).not.toBeNull();
@@ -236,4 +244,66 @@ test('visual region controls persist canonical geometry and selection clears on 
     exact: true,
   }).click();
   await expect.poll(outline).toBeNull();
+});
+
+
+test('shared placement controls save transforms, layer and mixed units while focused', async () => {
+  await addEffect('Background');
+  const region = page.getByRole('combobox', { name: 'Область размещения эффекта' });
+  expect(region.query()?.querySelectorAll('option').length).toBe(7);
+  await region.selectOptions('narrativeViewport');
+  await page.getByRole('combobox', {
+    name: 'Якорь поверхности',
+    exact: true,
+  }).selectOptions('bottom-right');
+  await page.getByRole('combobox', {
+    name: 'Слой эффекта',
+    exact: true,
+  }).selectOptions('aboveStoryControls');
+  await page.getByRole('combobox', {
+    name: 'Единица смещения X',
+    exact: true,
+  }).selectOptions('%');
+  await page.getByRole('spinbutton', {
+    name: 'Смещение X',
+    exact: true,
+  }).fill('-5');
+  await page.getByRole('spinbutton', {
+    name: 'Масштаб поверхности',
+    exact: true,
+  }).fill('0.8');
+  await page.getByRole('spinbutton', {
+    name: 'Поворот поверхности',
+    exact: true,
+  }).fill('15');
+  await userEvent.keyboard('{Control>}s{/Control}');
+  await expect.poll(async () => (await project.readEffects()).background?.at(-1)?.placement?.rotate).toBe(15);
+  const saved = await project.readEffects();
+  const effect = saved.background?.at(-1);
+  expect(effect?.placement).toMatchObject({
+    region: 'narrativeViewport',
+    anchor: 'bottom-right',
+    offset: {
+      x: {
+        value: -5,
+        unit: '%',
+      },
+      y: {
+        value: 0,
+        unit: 'px',
+      },
+    },
+    scale: 0.8,
+    rotate: 15,
+  });
+  expect(effect?.depth?.plane).toBe('aboveStoryControls');
+  const content = document.querySelector<HTMLElement>(`[data-visual-content="${effect?.id}"]`)!;
+  expect(getComputedStyle(content).scale).toBe('0.8');
+  expect(getComputedStyle(content).rotate).toBe('15deg');
+  await page.getByRole('button', {
+    name: 'Заполнить область',
+    exact: true,
+  }).click();
+  const reset = await project.save();
+  expect(reset.background?.at(-1)?.placement).toEqual({ region: 'narrativeViewport' });
 });

@@ -1,10 +1,13 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
+import type { VisualDepth, VisualPlacement } from '@active-book/types';
+
+
 import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
-import type { FilterOperation, FrameOptions, VisualDisplayRegion } from '@active-book/book-builder/effects';
+import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
@@ -326,20 +329,11 @@ export const FrameSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const handleLayerChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const layer = e.target.value;
-
-    if (layer !== 'above' && layer !== 'behind') {
-      return;
-    }
-
-    updateOptions({ layer });
-  };
-
-  const handleDisplayRegionChange = (displayRegion: VisualDisplayRegion) => {
+  const handleLayoutChange = (placement: VisualPlacement, depth: VisualDepth) => {
     onUpdate(effect.id, {
       ...effect,
-      displayRegion,
+      placement,
+      depth,
     });
   };
 
@@ -516,23 +510,12 @@ export const FrameSettings = ({
         />
       </label>
 
-      <label className={styles.Field}>
-        <span>
-          Расположение относительно текста
-        </span>
-
-        <Select value={effect.options.layer ?? 'behind'} onChange={handleLayerChange}>
-          <option value="behind">
-            Под текстом
-          </option>
-
-          <option value="above">
-            Поверх текста
-          </option>
-        </Select>
-      </label>
-
-      <VisualRegionSettings value={effect.displayRegion} onChange={handleDisplayRegionChange} />
+      <VisualRegionSettings
+        placement={effect.placement}
+        depth={effect.depth}
+        defaultPlane="belowNarrative"
+        onChange={handleLayoutChange}
+      />
 
       {effect.kind === 'shadow' && shadow && (
         <>
@@ -577,7 +560,6 @@ export const FrameSettings = ({
               colorProperty="color"
               colorLabel="Цвет тени (color)"
               colorDisabledReason={colorDisabledReason}
-              defaultZIndex={1}
               value={styleEditorShadowStyle}
               styleFilters={shadow.styleFilters}
               controller={shadowController}
@@ -651,7 +633,6 @@ export const FrameSettings = ({
               colorProperty="color"
               colorLabel="Цвет текста (color)"
               additionalColorProperty="backgroundColor"
-              defaultZIndex={1}
               value={styleEditorTextStyle}
               styleFilters={text.styleFilters}
               controller={textController}
@@ -718,7 +699,6 @@ export const FrameSettings = ({
 
             <StyleEditor
               layer="background"
-              defaultZIndex={1}
               value={styleEditorComponentStyle}
               styleFilters={effect.options.styleFilters}
               controller={componentController}

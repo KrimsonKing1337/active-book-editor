@@ -1,6 +1,9 @@
 import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
 
-import type { FilterOperation, VisualDisplayRegion } from '@active-book/book-builder/effects';
+import type { VisualDepth, VisualPlacement } from '@active-book/types';
+
+
+import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/fileSystemAccess';
@@ -215,10 +218,11 @@ export const BackgroundSettings = ({
     updateOptions({ component: val });
   };
 
-  const handleDisplayRegionChange = (displayRegion: VisualDisplayRegion) => {
+  const handleLayoutChange = (placement: VisualPlacement, depth: VisualDepth) => {
     onUpdate(effect.id, {
       ...effect,
-      displayRegion,
+      placement,
+      depth,
     });
   };
 
@@ -251,7 +255,12 @@ export const BackgroundSettings = ({
           </div>
         </div>
 
-        <VisualRegionSettings value={effect.displayRegion} onChange={handleDisplayRegionChange} />
+        <VisualRegionSettings
+          placement={effect.placement}
+          depth={effect.depth}
+          defaultPlane="background"
+          onChange={handleLayoutChange}
+        />
 
         {effect.kind === 'background' && (
           <Background style={options.style ?? {}} styleFilters={options.styleFilters} />
@@ -296,7 +305,6 @@ export const BackgroundSettings = ({
 
               <StyleEditor
                 layer="background"
-                defaultZIndex={1}
                 value={options.style ?? {}}
                 styleFilters={options.styleFilters}
               />
