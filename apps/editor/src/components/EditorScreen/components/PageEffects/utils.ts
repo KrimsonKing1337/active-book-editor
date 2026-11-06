@@ -81,7 +81,7 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
 
   let slug = 'Новый фон';
   let options: BackgroundEffectDraft['options'] = {
-    style: { zIndex: 0 },
+    style: {},
   };
 
   if (kind === 'image') {
@@ -90,7 +90,7 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
       image: {
         id: crypto.randomUUID(),
         src: '',
-        style: { zIndex: 1 },
+        style: {},
       },
     };
   } else if (kind === 'video') {
@@ -99,7 +99,7 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
       video: {
         id: crypto.randomUUID(),
         src: '',
-        style: { zIndex: 1 },
+        style: {},
       },
     };
   } else if (kind === 'shadow') {
@@ -107,20 +107,33 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
     options = {
       shadow: {
         show: true,
-        style: { zIndex: 2 },
+        style: {},
         styleFilters: createDefaultShadowFilters(),
       },
     };
   } else if (kind === 'component') {
     slug = 'Новый фоновый компонент';
     options = {
-      style: { zIndex: 1 },
+      style: {},
     };
+  }
+
+  let order = 1;
+  if (kind === 'shadow') {
+    order = 2;
+  }
+  else if (kind === 'background') {
+    order = 0;
   }
 
   return {
     id,
     type: 'background',
+    depth: {
+      plane: 'background',
+      order, 
+    },
+    placement: { region: 'storyViewport' },
     kind,
     slug,
     options,
@@ -132,7 +145,7 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
 
   let slug = 'Новый рамочный компонент';
   let options: FrameEffectDraft['options'] = {
-    style: { zIndex: 1 },
+    style: {},
   };
 
   if (kind === 'shadow') {
@@ -144,7 +157,6 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
         position: 'top-left',
         style: {
           color: '#ff0000',
-          zIndex: 1,
         },
         thickness: 30,
         animation: {
@@ -156,11 +168,8 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
     };
   } else if (kind === 'component') {
     options = {
-      style: { zIndex: 1 },
-      frameMask: {
-        enabled: false,
-        sides: ['top', 'right', 'bottom', 'left'],
-      },
+      style: {},
+
     };
   } else if (kind === 'text') {
     slug = 'Новый рамочный текст';
@@ -171,7 +180,6 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
         rightText: 'Правая сторона',
         style: {
           color: '#a3a3a3',
-          zIndex: 1,
           fontSize: '12px',
         },
         animation: {
@@ -186,11 +194,13 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
   return {
     id,
     type: 'frame',
+    depth: {
+      plane: 'belowNarrative',
+      order: 1, 
+    },
+    placement: { region: 'storyViewportFrame' },
     kind,
     slug,
-    options: {
-      ...options,
-      layer: 'behind',
-    },
+    options,
   };
 };

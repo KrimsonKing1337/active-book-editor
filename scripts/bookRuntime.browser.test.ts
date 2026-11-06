@@ -128,10 +128,11 @@ test('production book selects stable page IDs in a persistent viewport with page
     await editor.getByRole('button', { name: category === 'Background' ? 'Добавить фон' : 'Добавить рамочную тень', exact: true }).click();
     await editor.getByRole('textbox', { name: 'Название эффекта', exact: true }).fill(`Создано в редакторе ${category}`);
     const regionControl = editor.getByRole('combobox', { name: 'Область размещения эффекта' });
-    assert.equal(await regionControl.inputValue(), 'storyViewport');
+    assert.equal(await regionControl.inputValue(), category === 'Frame' ? 'storyViewportFrame' : 'storyViewport');
     await editor.locator('[data-visual-selection]').waitFor();
     if (category === 'Frame') {
-      await regionControl.selectOption('narrativeFrame');
+      await regionControl.selectOption('toolbarFrame');
+      await editor.getByRole('spinbutton', { name: 'Толщина рамочной маски', exact: true }).fill('8');
       const thickness = editor.getByRole('textbox', { name: 'Толщина тени (px)', exact: true });
       await thickness.click();
       await editor.keyboard.press('Control+A');
@@ -147,7 +148,9 @@ test('production book selects stable page IDs in a persistent viewport with page
   assert.equal(authored.pages[0].document.attrs?.pageEffects.frame, undefined);
   const newFrame = authored.pages[0].document.attrs?.visualEffects.find((cur: { slug: string }) => cur.slug === 'Создано в редакторе Frame');
   assert.equal(newFrame.effect.params.shadow.thickness, 45);
-  assert.equal(newFrame.effect.placement.region, 'narrativeFrame');
+  assert.equal(newFrame.effect.placement.region, 'toolbarFrame');
+  assert.equal(newFrame.effect.visibility.frameWidth.value, 8);
+  assert.equal(newFrame.effect.visibility.sides.length, 4);
   const frameElement = await editor.locator(`[data-effect-id="${newFrame.effect.id}"]`).elementHandle();
   assert(frameElement);
   await editor.getByRole('button', { name: 'Добавить страницу', exact: true }).click();
@@ -236,6 +239,13 @@ test('production book selects stable page IDs in a persistent viewport with page
         && badge?.getAttribute('data-audio-beta') === String(id === 'beta');
     }, id);
     if (id === 'gamma') await page.getByTestId('custom-effect').waitFor({ state: 'attached' });
+    if (id === 'alpha') {
+      const surface = page.locator(`[data-visual-surface="${newFrame.effect.id}"]`);
+      await surface.waitFor();
+      assert.equal(await surface.evaluate((node) => node.parentElement?.dataset.visualHost), 'toolbarFrame');
+      assert.deepEqual(await surface.boundingBox(), await page.locator('[data-story-region="toolbarFrame"]').boundingBox());
+      assert((await surface.evaluate((node) => getComputedStyle(node).maskImage)).includes('8px'));
+    }
     if (number > 1) {
       assert.equal(await page.locator('[data-effect-id="bg-alpha"]').count(), 0);
       assert.equal(await page.getByTestId('custom-badge').textContent(), 'Кастомная вставка: 0');

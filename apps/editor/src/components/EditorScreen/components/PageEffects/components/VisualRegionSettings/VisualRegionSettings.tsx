@@ -1,6 +1,8 @@
-import type { VisualDepth, VisualPlacement } from '@active-book/types';
+import type { FrameSide, VisualDepth, VisualPlacement, VisualVisibility } from '@active-book/types';
 
-import { Select, Button } from '../EffectControls';
+import type { VisualLayout } from '@active-book/book-builder/effects';
+
+import { Select, Button, Checkbox } from '../EffectControls';
 
 import { PlacementNumber } from './components/PlacementNumber';
 
@@ -9,9 +11,11 @@ import styles from './VisualRegionSettings.module.scss';
 const regions = {
   application: 'Всё приложение',
   story: 'Произведение',
-  storyViewport: 'Поверхность произведения',
-  narrativeFrame: 'Нарратив с рамкой',
-  frame: 'Только стороны рамки',
+  storyViewport: 'Весь вьюпорт',
+  storyViewportFrame: 'Рамка всего вьюпорта',
+  narrativeFrame: 'Нарратив',
+  toolbar: 'Toolbar',
+  toolbarFrame: 'Рамка Toolbar',
   narrativeViewport: 'Видимая область текста',
   narrativeContent: 'Прокручиваемое содержимое',
 } as const;
@@ -36,21 +40,49 @@ const planes = {
 type VisualRegionSettingsProps = {
   placement?: VisualPlacement;
   depth?: VisualDepth;
+  visibility?: VisualVisibility;
   defaultPlane: VisualDepth['plane'];
-  onChange: (placement: VisualPlacement, depth: VisualDepth) => void;
+  onChange: (layout: VisualLayout) => void;
 };
 
 export const VisualRegionSettings = ({
   placement = { region: 'storyViewport' },
   depth,
+  visibility = {},
   defaultPlane,
   onChange,
 }: VisualRegionSettingsProps) => {
   const currentDepth = depth ?? { plane: defaultPlane };
-  const updatePlacement = (patch: Partial<VisualPlacement>) => onChange({
-    ...placement,
-    ...patch,
-  }, currentDepth);
+  const updateLayout = (patch: VisualLayout) => onChange({
+    placement,
+    depth: currentDepth,
+    visibility,
+    ...patch, 
+  });
+  const updatePlacement = (patch: Partial<VisualPlacement>) => updateLayout({
+    placement: {
+      ...placement,
+      ...patch, 
+    }, 
+  });
+  const updateVisibility = (patch: Partial<VisualVisibility>) => updateLayout({
+    visibility: {
+      ...visibility,
+      ...patch, 
+    }, 
+  });
+  const allSides: FrameSide[] = ['top', 'right', 'bottom', 'left'];
+  const maskEnabled = visibility.sides !== undefined;
+  const handleMaskChange = (enabled: boolean) => {
+    const next = { ...visibility };
+    if (enabled) {
+      next.sides = allSides;
+    }
+    else {
+      delete next.sides;
+    }
+    updateLayout({ visibility: next });
+  };
   const offset = placement.offset ?? {
     x: {
       value: 0,
@@ -86,7 +118,18 @@ export const VisualRegionSettings = ({
         <Select
           value={placement.region}
           onChange={(event) => {
-            updatePlacement({ region: event.target.value as VisualPlacement['region'] });
+            const region = event.target.value as VisualPlacement['region'];
+            const preset = region === 'storyViewportFrame' || region === 'toolbarFrame';
+            updateLayout({
+              placement: {
+                ...placement,
+                region, 
+              },
+              visibility: preset ? {
+                ...visibility,
+                sides: allSides, 
+              } : visibility, 
+            });
           }}
         >
           {Object.entries(regions).map(([value, label]) => (
@@ -105,9 +148,11 @@ export const VisualRegionSettings = ({
         <Select
           value={currentDepth.plane}
           onChange={(event) => {
-            onChange(placement, {
-              ...currentDepth,
-              plane: event.target.value as VisualDepth['plane'],
+            updateLayout({
+              depth: {
+                ...currentDepth,
+                plane: event.target.value as VisualDepth['plane'], 
+              }, 
             });
           }}
         >
@@ -236,14 +281,82 @@ export const VisualRegionSettings = ({
           label="Порядок в слое"
           value={currentDepth.order ?? 0}
           integer
-          onChange={(order) => onChange(placement, {
-            ...currentDepth,
-            order,
+          onChange={(order) => updateLayout({
+            depth: {
+              ...currentDepth,
+              order, 
+            }, 
           })}
         />
       </div>
 
-      <Button onClick={() => onChange({ region: placement.region }, currentDepth)}>
+
+      <fieldset className={styles.Settings}>
+        <legend>
+          Маска сторон
+        </legend>
+
+        <Checkbox checked={maskEnabled} onChange={(event) => handleMaskChange(event.target.checked)}>
+          Ограничить сторонами рамки
+        </Checkbox>
+
+        {maskEnabled && (
+          <>
+            <div className={styles.Grid}>
+              {allSides.map((side) => (
+                <Checkbox
+                  key={side}
+                  checked={visibility.sides?.includes(side) ?? false}
+                  onChange={(event) => updateVisibility({
+                    sides: event.target.checked
+                      ? [...(visibility.sides ?? []), side] : visibility.sides?.filter((cur) => cur !== side), 
+                  })}
+                >
+                  {{
+                    top: 'Сверху',
+                    right: 'Справа',
+                    bottom: 'Снизу',
+                    left: 'Слева', 
+                  }[side]}
+                </Checkbox>
+              ))}
+            </div>
+
+            <PlacementNumber
+              label="Толщина рамочной маски"
+              value={visibility.frameWidth?.value ?? 12}
+              min={0}
+              onChange={(value) => updateVisibility({
+                frameWidth: {
+                  value,
+                  unit: visibility.frameWidth?.unit ?? 'px', 
+                }, 
+              })}
+            />
+
+            <Select
+              aria-label="Единица толщины маски"
+              value={visibility.frameWidth?.unit ?? 'px'}
+              onChange={(event) => updateVisibility({
+                frameWidth: {
+                  value: visibility.frameWidth?.value ?? 12,
+                  unit: event.target.value as 'px' | '%',
+                }, 
+              })}
+            >
+              <option value="px">
+                px
+              </option>
+
+              <option value="%">
+                %
+              </option>
+            </Select>
+          </>
+        )}
+      </fieldset>
+
+      <Button onClick={() => updateLayout({ placement: { region: placement.region } })}>
         Заполнить область
       </Button>
     </fieldset>

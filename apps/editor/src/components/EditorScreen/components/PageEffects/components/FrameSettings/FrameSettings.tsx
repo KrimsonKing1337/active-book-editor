@@ -1,9 +1,10 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
-import type { VisualDepth, VisualPlacement } from '@active-book/types';
+import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
+
+import type { VisualLayout } from '@active-book/book-builder/effects';
 
 
-import type { FrameMask, FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
@@ -179,17 +180,7 @@ export const FrameSettings = ({
     shadow,
     text,
     component,
-    frameMask,
   } = effect.options;
-
-  let componentMask = frameMask as FrameMask;
-
-  if (!frameMask) {
-    componentMask = {
-      enabled: false,
-      sides: ['top', 'right', 'bottom', 'left'],
-    };
-  }
 
   const item = effect.kind === 'shadow' ? shadow : text;
   const previewKey = item ? getFramePreviewKey(effect.id, item.id) : '';
@@ -329,35 +320,10 @@ export const FrameSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const handleLayoutChange = (placement: VisualPlacement, depth: VisualDepth) => {
+  const handleLayoutChange = (layout: VisualLayout) => {
     onUpdate(effect.id, {
       ...effect,
-      placement,
-      depth,
-    });
-  };
-
-  const handleComponentMaskEnabledChange = (e: ChangeEvent<HTMLInputElement>) => {
-    updateOptions({
-      frameMask: {
-        ...componentMask,
-        enabled: e.target.checked,
-      },
-    });
-  };
-
-  const handleComponentMaskSideChange = (side: FrameSide, isEnabled: boolean) => {
-    let sides = [...componentMask.sides, side];
-
-    if (!isEnabled) {
-      sides = componentMask.sides.filter((cur) => cur !== side);
-    }
-
-    updateOptions({
-      frameMask: {
-        ...componentMask,
-        sides,
-      },
+      ...layout,
     });
   };
 
@@ -513,6 +479,7 @@ export const FrameSettings = ({
       <VisualRegionSettings
         placement={effect.placement}
         depth={effect.depth}
+        visibility={effect.visibility}
         defaultPlane="belowNarrative"
         onChange={handleLayoutChange}
       />
@@ -671,27 +638,6 @@ export const FrameSettings = ({
               );
             })}
           </Select>
-
-          <div className={styles.Field}>
-            <span>
-              Область отображения
-            </span>
-
-            <Checkbox
-              checked={componentMask.enabled}
-              disabled={effect.placement?.region === 'frame'}
-              onChange={handleComponentMaskEnabledChange}
-            >
-              Ограничить рамкой
-            </Checkbox>
-
-            {componentMask.enabled && (
-              <FrameSideCheckboxes
-                selectedSides={componentMask.sides}
-                onChange={handleComponentMaskSideChange}
-              />
-            )}
-          </div>
 
           <details>
             <summary>

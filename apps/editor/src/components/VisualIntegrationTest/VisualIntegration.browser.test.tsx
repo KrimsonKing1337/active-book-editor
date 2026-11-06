@@ -96,11 +96,10 @@ test('native identity and independent book sessions', async () => {
     const props = implementations.flatMap((renderer) => renderer.mock.calls).at(-1)?.[0];
     expect(props).toBeDefined();
     for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame',
-      'narrativeViewport', 'narrativeContent'] as const) {
+      'narrativeViewport', 'narrativeContent', 'storyViewportFrame', 'toolbar', 'toolbarFrame'] as const) {
       const selector = region === 'application' ? '[data-book-application]' : `[data-story-region="${region}"]`;
       expect(props?.regions[region]).toBe(document.querySelector(selector));
     }
-    expect(props?.regions.frame).toBe(props?.regions.narrativeFrame);
     expect(props).not.toHaveProperty('geometry');
     expect(document.querySelectorAll('[data-book-application]')).toHaveLength(1);
     const wrapper = document.querySelector('[data-effect-id="range-native"]');
