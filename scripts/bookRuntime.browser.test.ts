@@ -11,7 +11,6 @@ import type { BookDocument } from '../packages/book-builder/src/book';
 import { chromium } from 'playwright';
 import { createServer as createViteServer } from 'vite';
 
-
 const repoRoot = fileURLToPath(new URL('../', import.meta.url));
 const projectRoot = path.join(repoRoot, 'tests/fixtures/multipage-book');
 const outDir = path.join(repoRoot, 'dist-book');

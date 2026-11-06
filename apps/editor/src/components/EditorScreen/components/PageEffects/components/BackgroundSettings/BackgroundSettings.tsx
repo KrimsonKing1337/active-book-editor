@@ -2,7 +2,6 @@ import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 
-
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';

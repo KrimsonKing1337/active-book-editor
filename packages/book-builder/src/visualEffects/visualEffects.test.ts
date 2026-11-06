@@ -181,7 +181,6 @@ test('book validation rejects duplicate effect IDs and orphaned page owners', ()
   expect(isBookDocument(book)).toBe(false);
 });
 
-
 test('native instance parameters survive compilation alongside presentation options', () => {
   const book = readFixture();
   const native = book.visualEffects.find((cur) => cur.effect.id === 'range-native')!;
@@ -214,8 +213,10 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
     draft,
     pageId: 'owner',
   });
-  expect(initial.effect.placement).toEqual({ region: type === 'frame' ? 'storyViewportFrame' : 'storyViewport' });
-  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'storyViewportFrame', 'toolbar', 'toolbarFrame',
+  const defaultRegion = type === 'frame' ? 'storyViewportFrame' : 'storyViewport';
+  expect(initial.effect.placement).toEqual({ region: defaultRegion });
+  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'storyViewportFrame',
+    'toolbar', 'toolbarFrame',
     'narrativeViewport', 'narrativeContent'] as const) {
     const panel = visualToDraft(initial);
     panel.placement = {
@@ -313,7 +314,6 @@ test('minimal application placement compiles and old coordinate descriptions are
   badTransform.visualEffects[0].effect.placement.scale = 'large';
   expect(isBookDocument(badTransform)).toBe(false);
 });
-
 
 test('every frame region is a rectangle without implicit masks or legacy aliases', () => {
   const book = readFixture();

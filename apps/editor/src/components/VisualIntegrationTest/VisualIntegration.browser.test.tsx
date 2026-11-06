@@ -1,5 +1,3 @@
-
-
 import { createElement, StrictMode } from 'react';
 
 import { act, cleanup, render } from '@testing-library/react';

@@ -246,7 +246,6 @@ test('visual region controls persist canonical geometry and selection clears on 
   await expect.poll(outline).toBeNull();
 });
 
-
 test('shared placement controls save transforms, layer and mixed units while focused', async () => {
   await addEffect('Background');
   const region = page.getByRole('combobox', { name: 'Область размещения эффекта' });
@@ -312,28 +311,28 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
   await addEffect('Background');
   await page.getByRole('textbox', {
     name: 'Название эффекта',
-    exact: true, 
+    exact: true,
   }).fill('Панель и рамка');
   await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions('toolbarFrame');
   await expect.element(page.getByRole('checkbox', {
     name: 'Ограничить сторонами рамки',
-    exact: true, 
+    exact: true,
   })).toBeChecked();
   await page.getByRole('spinbutton', {
     name: 'Толщина рамочной маски',
-    exact: true, 
+    exact: true,
   }).fill('18');
   await page.getByRole('checkbox', {
     name: 'Снизу',
-    exact: true, 
+    exact: true,
   }).click();
   await page.getByRole('combobox', {
     name: 'Слой эффекта',
-    exact: true, 
+    exact: true,
   }).selectOptions('aboveStoryControls');
   await page.getByRole('button', {
     name: 'Дублировать',
-    exact: true, 
+    exact: true,
   }).click();
   const saved = await project.save();
   const effects = saved.background?.filter((effect) => effect.slug.startsWith('Панель и рамка'));
@@ -346,23 +345,23 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
       sides: ['top', 'right', 'left'],
       frameWidth: {
         value: 18,
-        unit: 'px', 
-      }, 
+        unit: 'px',
+      },
     });
   }
   await page.getByRole('button', {
     name: 'Эффекты страницы',
-    exact: true, 
+    exact: true,
   }).click();
   await page.getByRole('searchbox', { name: 'Поиск эффектов' }).fill('Панель и рамка');
   await page.getByRole('button', { name: /Панель и рамка/ }).first().click();
   await expect.element(page.getByRole('spinbutton', {
     name: 'Толщина рамочной маски',
-    exact: true, 
+    exact: true,
   })).toHaveValue(18);
   await page.getByRole('checkbox', {
     name: 'Ограничить сторонами рамки',
-    exact: true, 
+    exact: true,
   }).click();
   const unmasked = await project.save();
   expect(unmasked.background?.find((effect) => effect.id === effects?.[0].id)?.placement?.region).toBe('toolbarFrame');

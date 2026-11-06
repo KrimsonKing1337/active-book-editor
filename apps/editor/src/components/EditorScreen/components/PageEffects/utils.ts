@@ -131,7 +131,7 @@ export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEf
     type: 'background',
     depth: {
       plane: 'background',
-      order, 
+      order,
     },
     placement: { region: 'storyViewport' },
     kind,
@@ -196,7 +196,7 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
     type: 'frame',
     depth: {
       plane: 'belowNarrative',
-      order: 1, 
+      order: 1,
     },
     placement: { region: 'storyViewportFrame' },
     kind,

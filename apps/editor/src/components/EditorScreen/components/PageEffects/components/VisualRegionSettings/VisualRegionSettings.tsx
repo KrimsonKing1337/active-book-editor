@@ -57,19 +57,19 @@ export const VisualRegionSettings = ({
     placement,
     depth: currentDepth,
     visibility,
-    ...patch, 
+    ...patch,
   });
   const updatePlacement = (patch: Partial<VisualPlacement>) => updateLayout({
     placement: {
       ...placement,
-      ...patch, 
-    }, 
+      ...patch,
+    },
   });
   const updateVisibility = (patch: Partial<VisualVisibility>) => updateLayout({
     visibility: {
       ...visibility,
-      ...patch, 
-    }, 
+      ...patch,
+    },
   });
   const allSides: FrameSide[] = ['top', 'right', 'bottom', 'left'];
   const maskEnabled = visibility.sides !== undefined;
@@ -123,12 +123,12 @@ export const VisualRegionSettings = ({
             updateLayout({
               placement: {
                 ...placement,
-                region, 
+                region,
               },
               visibility: preset ? {
                 ...visibility,
-                sides: allSides, 
-              } : visibility, 
+                sides: allSides,
+              } : visibility,
             });
           }}
         >
@@ -151,8 +151,8 @@ export const VisualRegionSettings = ({
             updateLayout({
               depth: {
                 ...currentDepth,
-                plane: event.target.value as VisualDepth['plane'], 
-              }, 
+                plane: event.target.value as VisualDepth['plane'],
+              },
             });
           }}
         >
@@ -284,12 +284,11 @@ export const VisualRegionSettings = ({
           onChange={(order) => updateLayout({
             depth: {
               ...currentDepth,
-              order, 
-            }, 
+              order,
+            },
           })}
         />
       </div>
-
 
       <fieldset className={styles.Settings}>
         <legend>
@@ -309,14 +308,14 @@ export const VisualRegionSettings = ({
                   checked={visibility.sides?.includes(side) ?? false}
                   onChange={(event) => updateVisibility({
                     sides: event.target.checked
-                      ? [...(visibility.sides ?? []), side] : visibility.sides?.filter((cur) => cur !== side), 
+                      ? [...(visibility.sides ?? []), side] : visibility.sides?.filter((cur) => cur !== side),
                   })}
                 >
                   {{
                     top: 'Сверху',
                     right: 'Справа',
                     bottom: 'Снизу',
-                    left: 'Слева', 
+                    left: 'Слева',
                   }[side]}
                 </Checkbox>
               ))}
@@ -329,8 +328,8 @@ export const VisualRegionSettings = ({
               onChange={(value) => updateVisibility({
                 frameWidth: {
                   value,
-                  unit: visibility.frameWidth?.unit ?? 'px', 
-                }, 
+                  unit: visibility.frameWidth?.unit ?? 'px',
+                },
               })}
             />
 
@@ -341,7 +340,7 @@ export const VisualRegionSettings = ({
                 frameWidth: {
                   value: visibility.frameWidth?.value ?? 12,
                   unit: event.target.value as 'px' | '%',
-                }, 
+                },
               })}
             >
               <option value="px">

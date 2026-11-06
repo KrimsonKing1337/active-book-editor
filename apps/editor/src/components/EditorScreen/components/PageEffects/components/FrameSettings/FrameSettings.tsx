@@ -4,13 +4,14 @@ import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 
-
-
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
 import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
 import { useCustomComponents } from '@project/customComponentRegistry';
+
+import { FrameSideCheckboxes } from './components/FrameSideCheckboxes';
+import { LayoutSettings } from './components/LayoutSettings';
 
 import type { FrameEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
@@ -20,19 +21,18 @@ import { getFramePreviewKey, getFrameStylePreviewKey, usePageEffects } from '../
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
-import { TextInput, Select, Checkbox, Button } from '../EffectControls';
+import { TextInput, Select, Button } from '../EffectControls';
 import { VisualRegionSettings } from '../VisualRegionSettings';
 
 import { AnimationSettings } from './components';
 
-import { frameSides, positions, shadowPresets, textPresets } from './constants';
+import { shadowPresets, textPresets } from './constants';
 
 import styles from './FrameSettings.module.scss';
 
 type ShadowItem = NonNullable<FrameOptions['shadow']>;
 type TextItem = NonNullable<FrameOptions['text']>;
 type FrameAnimation = NonNullable<ShadowItem['animation']>;
-type ItemLayout = Pick<ShadowItem, 'position' | 'offsetX' | 'offsetY' | 'hidden'>;
 type Kind = 'shadow' | 'text' | 'component';
 
 export type FrameSettingsProps = {
@@ -40,119 +40,6 @@ export type FrameSettingsProps = {
   onUpdate: (previousId: string, effect: FrameEffectDraft) => void;
   onDuplicate: () => void;
   onDelete: () => void;
-};
-
-type LayoutSettingsProps = {
-  item: ItemLayout;
-  hidden: boolean;
-  onChange: (changes: Partial<ItemLayout>) => void;
-  onHiddenChange: (hidden: boolean) => void;
-};
-
-const LayoutSettings = ({
-  item,
-  hidden,
-  onChange,
-  onHiddenChange,
-}: LayoutSettingsProps) => {
-  const handlePositionChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    onChange({ position: e.target.value as ItemLayout['position'] });
-  };
-
-  const handleOffsetXChange = (val: string) => {
-    onChange({ offsetX: val });
-  };
-
-  const handleOffsetYChange = (val: string) => {
-    onChange({ offsetY: val });
-  };
-
-  const handleHiddenChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onHiddenChange(e.target.checked);
-  };
-
-  return (
-    <>
-      <div className={styles.Layout}>
-        <label className={styles.Field}>
-          <span>
-            Точка привязки
-          </span>
-
-          <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
-            {positions.map((positionCur) => {
-              const { value, label } = positionCur;
-
-              return (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              );
-            })}
-          </Select>
-        </label>
-
-        <div className={styles.Field}>
-          <span>
-            Смещение X
-          </span>
-
-          <CssLengthInput
-            label="Смещение X"
-            value={item.offsetX ?? '0px'}
-            onChange={handleOffsetXChange}
-          />
-        </div>
-
-        <div className={styles.Field}>
-          <span>
-            Смещение Y
-          </span>
-
-          <CssLengthInput
-            label="Смещение Y"
-            value={item.offsetY ?? '0px'}
-            onChange={handleOffsetYChange}
-          />
-        </div>
-      </div>
-
-      <div className={styles.Controls}>
-        <Checkbox checked={hidden} onChange={handleHiddenChange}>
-          Скрыть элемент
-        </Checkbox>
-      </div>
-    </>
-  );
-};
-
-type FrameSideCheckboxesProps = {
-  selectedSides: FrameSide[];
-  onChange: (side: FrameSide, isEnabled: boolean) => void;
-};
-
-const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckboxesProps) => {
-  const checkboxes = frameSides.map((sideCur) => {
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      onChange(sideCur.value, e.target.checked);
-    };
-
-    return (
-      <Checkbox
-        key={sideCur.value}
-        checked={selectedSides.includes(sideCur.value)}
-        onChange={handleChange}
-      >
-        {sideCur.label}
-      </Checkbox>
-    );
-  });
-
-  return (
-    <div className={styles.Sides}>
-      {checkboxes}
-    </div>
-  );
 };
 
 export const FrameSettings = ({

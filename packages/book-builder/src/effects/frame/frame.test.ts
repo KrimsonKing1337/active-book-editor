@@ -93,7 +93,6 @@ test('resolves custom frame layer styles on the wrapper', () => {
     }],
   });
 
-
   assert.equal(result.style.zIndex, 7);
   assert.equal(result.style.opacity, 0.8);
   assert.equal(result.style.backdropFilter, 'blur(3px)');
