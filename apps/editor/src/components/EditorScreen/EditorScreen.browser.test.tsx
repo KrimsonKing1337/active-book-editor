@@ -300,7 +300,7 @@ test('shared placement controls save transforms, layer and mixed units while foc
   expect(getComputedStyle(content).scale).toBe('0.8');
   expect(getComputedStyle(content).rotate).toBe('15deg');
   await page.getByRole('button', {
-    name: 'Заполнить область',
+    name: 'Сбросить размещение',
     exact: true,
   }).click();
   const reset = await project.save();
