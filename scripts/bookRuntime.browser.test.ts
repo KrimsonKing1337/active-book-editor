@@ -131,7 +131,42 @@ test('production book selects stable page IDs in a persistent viewport with page
     await editor.locator('[data-visual-selection]').waitFor();
     if (category === 'Frame') {
       await regionControl.selectOption('toolbarFrame');
-      await editor.getByRole('spinbutton', { name: 'Толщина рамочной маски', exact: true }).fill('8');
+      const maskSettings = editor.getByRole('group', {
+        name: 'Маска сторон',
+        exact: true,
+      });
+      await maskSettings.getByRole('checkbox', {
+        name: 'Ограничить сторонами рамки',
+        exact: true,
+      }).check();
+      await maskSettings.getByRole('spinbutton', {
+        name: 'Толщина рамочной маски',
+        exact: true,
+      }).fill('8');
+      await maskSettings.getByRole('checkbox', {
+        name: 'Раздельная толщина сторон',
+        exact: true,
+      }).check();
+      await maskSettings.getByRole('spinbutton', {
+        name: 'Толщина: справа',
+        exact: true,
+      }).fill('16');
+      await maskSettings.getByRole('spinbutton', {
+        name: 'Толщина: снизу',
+        exact: true,
+      }).fill('11');
+      await maskSettings.getByRole('spinbutton', {
+        name: 'Толщина: слева',
+        exact: true,
+      }).fill('4');
+      await maskSettings.getByRole('combobox', {
+        name: 'Единица толщины: слева',
+        exact: true,
+      }).selectOption('%');
+      await maskSettings.getByRole('checkbox', {
+        name: 'Снизу',
+        exact: true,
+      }).uncheck();
       const thickness = editor.getByRole('textbox', { name: 'Толщина тени (px)', exact: true });
       await thickness.click();
       await editor.keyboard.press('Control+A');
@@ -148,8 +183,27 @@ test('production book selects stable page IDs in a persistent viewport with page
   const newFrame = authored.pages[0].document.attrs?.visualEffects.find((cur: { slug: string }) => cur.slug === 'Создано в редакторе Frame');
   assert.equal(newFrame.effect.params.shadow.thickness, 45);
   assert.equal(newFrame.effect.placement.region, 'toolbarFrame');
-  assert.equal(newFrame.effect.visibility.frameWidth.value, 8);
-  assert.equal(newFrame.effect.visibility.sides.length, 4);
+  assert.deepEqual(newFrame.effect.visibility, {
+    sides: ['top', 'right', 'left'],
+    frameWidth: {
+      top: {
+        value: 8,
+        unit: 'px',
+      },
+      right: {
+        value: 16,
+        unit: 'px',
+      },
+      bottom: {
+        value: 11,
+        unit: 'px',
+      },
+      left: {
+        value: 4,
+        unit: '%',
+      },
+    },
+  });
   const frameElement = await editor.locator(`[data-effect-id="${newFrame.effect.id}"]`).elementHandle();
   assert(frameElement);
   await editor.getByRole('button', { name: 'Добавить страницу', exact: true }).click();
@@ -243,7 +297,9 @@ test('production book selects stable page IDs in a persistent viewport with page
       await surface.waitFor();
       assert.equal(await surface.evaluate((node) => node.parentElement?.dataset.visualHost), 'toolbarFrame');
       assert.deepEqual(await surface.boundingBox(), await page.locator('[data-story-region="toolbarFrame"]').boundingBox());
-      assert((await surface.evaluate((node) => getComputedStyle(node).maskImage)).includes('8px'));
+      const mask = await surface.evaluate((node) => getComputedStyle(node).maskImage);
+      assert(mask.includes('8px') && mask.includes('16px') && mask.includes('4%'), mask);
+      assert(!mask.includes('11px'), 'the disabled bottom side does not contribute a gradient');
     }
     if (number > 1) {
       assert.equal(await page.locator('[data-effect-id="bg-alpha"]').count(), 0);
