@@ -342,8 +342,14 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
   }).selectOptions('aboveStoryControls');
   for (const region of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame']) {
     await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions(region);
-    await expect.element(page.getByRole('checkbox', { name: 'Снизу', exact: true })).not.toBeChecked();
-    await expect.element(page.getByRole('spinbutton', { name: 'Толщина: справа', exact: true })).toHaveValue(24);
+    await expect.element(page.getByRole('checkbox', {
+      name: 'Снизу',
+      exact: true,
+    })).not.toBeChecked();
+    await expect.element(page.getByRole('spinbutton', {
+      name: 'Толщина: справа',
+      exact: true,
+    })).toHaveValue(24);
   }
   await page.getByRole('button', {
     name: 'Дублировать',
