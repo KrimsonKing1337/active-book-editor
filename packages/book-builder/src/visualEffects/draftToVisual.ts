@@ -2,7 +2,6 @@ import type { JsonValue } from '@active-book/types';
 
 import { createBuiltinRegistration } from 'activeBook-core/controllers/visualEffects/utils/declarations';
 
-import type { FrameOptions } from '../effects';
 import { resolveBackgroundOptions, resolveFrameOptions } from '../effects';
 
 import type { AuthoredVisualEffect } from './@types';
@@ -82,8 +81,6 @@ export const draftToVisual = ({
   }));
 
   delete params.component;
-  delete params.layer;
-  delete params.frameMask;
 
   // Удаляем дублирующий zIndex: порядок хранится в depth.order
   for (const propertyCur of Z_INDEX_STYLE_PROPERTIES) {
@@ -103,22 +100,7 @@ export const draftToVisual = ({
   // Placement and depth are authored metadata, shared by all visual implementations.
   const placement = draft.placement ?? previous?.effect.placement ?? defaultEffect.placement;
   const depth = draft.depth ?? previous?.effect.depth ?? defaultEffect.depth;
-  let visibility = previous?.effect.visibility ?? defaultEffect.visibility;
-
-  if (type === 'frame') {
-    const frameMask = (options as FrameOptions).frameMask;
-    if (frameMask || placement.region === 'frame') {
-      visibility = { ...visibility };
-      if (frameMask?.enabled) {
-        visibility.sides = frameMask.sides;
-      } else if (placement.region === 'frame') {
-        // The frame region inherently consists of its sides, even after an unmasked draft.
-        visibility.sides = ['top', 'right', 'bottom', 'left'];
-      } else {
-        delete visibility.sides;
-      }
-    }
-  }
+  const visibility = draft.visibility ?? previous?.effect.visibility ?? defaultEffect.visibility;
 
   const effect = {
     ...defaultEffect,

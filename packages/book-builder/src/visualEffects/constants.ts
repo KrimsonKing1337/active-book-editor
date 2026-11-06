@@ -10,7 +10,9 @@ export const VISUAL_REGIONS = [
   'story',
   'storyViewport',
   'narrativeFrame',
-  'frame',
+  'storyViewportFrame',
+  'toolbar',
+  'toolbarFrame',
   'narrativeViewport',
   'narrativeContent',
 ] as const satisfies readonly VisualRegion[];

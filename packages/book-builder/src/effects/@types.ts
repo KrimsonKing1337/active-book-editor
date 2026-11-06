@@ -1,4 +1,4 @@
-import type { VisualDepth, VisualPlacement } from '@active-book/types';
+import type { VisualDepth, VisualPlacement, VisualVisibility } from '@active-book/types';
 
 import type { AudioEffect, BuiltAudioEffect } from './audio';
 import type { BuiltVibrationEffect, VibrationEffect } from './vibration';
@@ -9,6 +9,7 @@ import type { FrameEffect, BuiltFrameEffect } from './frame';
 export type VisualLayout = {
   placement?: VisualPlacement;
   depth?: VisualDepth;
+  visibility?: VisualVisibility;
 };
 
 export type EditorEffect =

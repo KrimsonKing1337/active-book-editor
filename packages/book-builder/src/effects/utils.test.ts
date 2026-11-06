@@ -13,7 +13,6 @@ const frame: FrameEffect[] = [
     kind: 'shadow',
     slug: 'Shadow',
     options: {
-      layer: 'behind',
       shadow: {
         id: 'shadow-1',
         sides: ['left', 'right'],
@@ -27,7 +26,6 @@ const frame: FrameEffect[] = [
     kind: 'text',
     slug: 'Text',
     options: {
-      layer: 'above',
       text: {
         id: 'text-1',
         leftText: 'Left',
@@ -42,14 +40,9 @@ const frame: FrameEffect[] = [
     kind: 'component',
     slug: 'Component',
     options: {
-      layer: 'above',
       component: {
         package: 'custom-effects',
         name: 'Smoke',
-      },
-      frameMask: {
-        enabled: true,
-        sides: ['top', 'bottom'],
       },
       style: { zIndex: 5 },
     },

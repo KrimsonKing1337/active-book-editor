@@ -110,11 +110,14 @@ test('preserves independent frame layers, masks and component references in comp
   const frame: FrameEffect[] = [
     {
       id: 'shadow',
+      depth: {
+        plane: 'belowNarrative',
+        order: 3,
+      },
       type: 'frame',
       kind: 'shadow',
       slug: 'Shadow',
       options: {
-        layer: 'behind',
         shadow: {
           id: 'shadow-1',
           sides: ['left', 'right'],
@@ -124,11 +127,14 @@ test('preserves independent frame layers, masks and component references in comp
     },
     {
       id: 'text',
+      depth: {
+        plane: 'aboveNarrative',
+        order: 7,
+      },
       type: 'frame',
       kind: 'text',
       slug: 'Text',
       options: {
-        layer: 'above',
         text: {
           id: 'text-1',
           leftText: 'Left',
@@ -139,18 +145,18 @@ test('preserves independent frame layers, masks and component references in comp
     },
     {
       id: 'component',
+      visibility: { sides: ['top', 'bottom'] },
+      depth: {
+        plane: 'aboveNarrative',
+        order: 5,
+      },
       type: 'frame',
       kind: 'component',
       slug: 'Component',
       options: {
-        layer: 'above',
         component: {
           package: 'custom-effects',
           name: 'Smoke',
-        },
-        frameMask: {
-          enabled: true,
-          sides: ['top', 'bottom'],
         },
         style: { zIndex: 5 },
       },

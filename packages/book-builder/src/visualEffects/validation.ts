@@ -124,7 +124,8 @@ const isValidVisibility = (value: unknown): boolean => {
     return true;
   }
 
-  if (!isRecord(value) || 'region' in value || !isValidMask(value.mask)) {
+  if (!isRecord(value) || 'region' in value || !isValidMask(value.mask)
+    || (value.frameWidth !== undefined && !isNonnegativeLength(value.frameWidth))) {
     return false;
   }
 

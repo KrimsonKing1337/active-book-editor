@@ -41,15 +41,6 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
-  // Восстанавливаем настройки рамочного эффекта
-  if (type === 'frame') {
-    const sides = effect.visibility?.sides;
-    options.frameMask = {
-      enabled: sides !== undefined || effect.placement.region === 'frame',
-      sides: sides ? [...sides] : ['top', 'right', 'bottom', 'left'],
-    };
-  }
-
   return {
     id: effect.id,
     type,
@@ -58,5 +49,6 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     options,
     placement: structuredClone(effect.placement),
     depth: structuredClone(effect.depth),
+    visibility: structuredClone(effect.visibility ?? {}),
   } as VisualDraft;
 };

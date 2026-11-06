@@ -3,8 +3,6 @@ import type { CSSProperties } from 'react';
 import type { JsonObject } from '@active-book/types';
 
 import type {
-  FrameMask,
-  FrameLayer,
   FrameShadowItem,
   FrameTextItem,
 } from 'activeBook-core/hooks/effects/frame/@types';
@@ -30,13 +28,11 @@ export type FrameEffectKind = (typeof frameEffectKinds)[number];
 export type FrameOptions = {
   custom?: JsonObject;
   componentKey?: string | number;
-  layer?: FrameLayer;
   style?: CSSProperties;
   styleFilters?: FilterOperation[];
   shadow?: StyledFrameShadow;
   text?: StyledFrameText;
   component?: BackgroundComponentReference;
-  frameMask?: FrameMask;
 };
 
 export type FrameEffect = VisualLayout & {
@@ -71,10 +67,8 @@ const resolveItemStyle = <T extends StyledItem>(item: T) => {
 
 export const resolveFrameOptions = (options: FrameOptions) => {
   const {
-    layer,
     shadow,
     text,
-    frameMask,
     style,
     styleFilters,
   } = options;
@@ -84,10 +78,8 @@ export const resolveFrameOptions = (options: FrameOptions) => {
   const resolvedStyle = resolveStyle(style, styleFilters);
 
   return {
-    layer,
     shadow: resolvedShadow,
     text: resolvedText,
-    frameMask,
     style: resolvedStyle,
   };
 };

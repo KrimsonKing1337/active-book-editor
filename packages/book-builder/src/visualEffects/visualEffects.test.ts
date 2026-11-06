@@ -66,7 +66,7 @@ test.each(['background', 'frame'] as const)('ordinary %s edits preserve placemen
       type,
       kind: 'component' as const,
       slug: 'Panel',
-      options: { layer: 'above' as const },
+      options: {},
     };
   const original = draftToVisual({
     draft,
@@ -214,8 +214,8 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
     draft,
     pageId: 'owner',
   });
-  expect(initial.effect.placement).toEqual({ region: 'storyViewport' });
-  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'frame',
+  expect(initial.effect.placement).toEqual({ region: type === 'frame' ? 'storyViewportFrame' : 'storyViewport' });
+  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'storyViewportFrame', 'toolbar', 'toolbarFrame',
     'narrativeViewport', 'narrativeContent'] as const) {
     const panel = visualToDraft(initial);
     panel.placement = {
@@ -254,44 +254,47 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
   }
 });
 
-test('frame mask controls retain custom masks and authored placement', () => {
+test('rectangle, mask and plane are independent and removing sides never changes region', () => {
   const draft: VisualDraft = {
     id: 'mask',
     type: 'frame',
     kind: 'component',
     slug: 'Mask',
-    options: {
-      frameMask: {
-        enabled: true,
-        sides: ['left', 'bottom'],
+    options: {},
+    placement: { region: 'storyViewportFrame' },
+    visibility: {
+      sides: ['left', 'bottom'],
+      frameWidth: {
+        value: 20,
+        unit: 'px',
       },
+    },
+    depth: {
+      plane: 'aboveNarrative',
+      order: 4,
     },
   };
   const previous = draftToVisual({
     draft,
     pageId: 'owner',
   });
-  expect(previous.effect.placement.region).toBe('frame');
   const panel = visualToDraft(previous);
-  panel.placement = { region: 'narrativeFrame' };
+  panel.placement = { region: 'toolbarFrame' };
   const edited = draftToVisual({
     draft: panel,
     previous,
     pageId: 'owner',
   });
-  expect(edited.effect.visibility).toEqual({ sides: ['left', 'bottom'] });
-  if (panel.type !== 'frame') {
-    throw new Error('Expected frame');
-  }
-  panel.options.frameMask = {
-    enabled: false,
-    sides: [],
-  };
-  expect(draftToVisual({
+  expect(edited.effect.visibility).toEqual(draft.visibility);
+  expect(edited.effect.depth).toEqual(draft.depth);
+  panel.visibility = {};
+  const unmasked = draftToVisual({
     draft: panel,
     previous: edited,
     pageId: 'owner',
-  }).effect.visibility).toEqual({});
+  });
+  expect(unmasked.effect.placement.region).toBe('toolbarFrame');
+  expect(unmasked.effect.visibility).toEqual({});
 });
 
 test('minimal application placement compiles and old coordinate descriptions are rejected', () => {
@@ -312,30 +315,29 @@ test('minimal application placement compiles and old coordinate descriptions are
 });
 
 
-test('choosing the frame region from an unmasked draft paints all four sides', () => {
-  const draft: VisualDraft = {
-    id: 'frame-choice',
-    type: 'frame',
-    kind: 'component',
-    slug: 'Frame',
-    options: {
-      frameMask: {
-        enabled: false,
-        sides: [],
-      },
+test('every frame region is a rectangle without implicit masks or legacy aliases', () => {
+  const book = readFixture();
+  for (const region of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame', 'toolbar'] as const) {
+    const authored = book.visualEffects[0];
+    authored.effect.placement = { region };
+    authored.effect.visibility = {};
+    expect(isBookDocument(book)).toBe(true);
+    expect(draftToVisual({
+      draft: visualToDraft(authored),
+      previous: authored,
+      pageId: 'owner',
+    })).toEqual(authored);
+  }
+  const invalid = JSON.parse(JSON.stringify(book));
+  invalid.visualEffects[0].effect.placement.region = 'frame';
+  expect(isBookDocument(invalid)).toBe(false);
+  const badWidth = JSON.parse(JSON.stringify(book));
+  badWidth.visualEffects[0].effect.visibility = {
+    sides: ['left'],
+    frameWidth: {
+      value: -1,
+      unit: 'px',
     },
-    placement: { region: 'frame' },
   };
-  const authored = draftToVisual({
-    draft,
-    pageId: 'owner',
-  });
-  expect(authored.effect.visibility?.sides).toEqual(['top', 'right', 'bottom', 'left']);
-  const panel = visualToDraft(authored);
-  expect(panel.options).toHaveProperty('frameMask.enabled', true);
-  expect(draftToVisual({
-    draft: panel,
-    previous: authored,
-    pageId: 'owner',
-  })).toEqual(authored);
+  expect(isBookDocument(badWidth)).toBe(false);
 });
