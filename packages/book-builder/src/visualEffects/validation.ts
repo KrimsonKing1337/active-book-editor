@@ -49,6 +49,22 @@ const isNonnegativeLength = (value: unknown): boolean => {
   return value.value >= 0;
 };
 
+const isValidFrameWidth = (value: unknown): boolean => {
+  if (isNonnegativeLength(value)) {
+    return true;
+  }
+
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const keys = Object.keys(value);
+  const hasAllSides = FRAME_SIDES.every((side) => isNonnegativeLength(value[side]));
+  const hasOnlySides = keys.length === FRAME_SIDES.length && keys.every((key) => sides.has(key));
+
+  return hasAllSides && hasOnlySides;
+};
+
 const isValidPoint = (value: unknown): boolean => {
   if (!isRecord(value)) {
     return false;
@@ -125,7 +141,7 @@ const isValidVisibility = (value: unknown): boolean => {
   }
 
   if (!isRecord(value) || 'region' in value || !isValidMask(value.mask)
-    || (value.frameWidth !== undefined && !isNonnegativeLength(value.frameWidth))) {
+    || (value.frameWidth !== undefined && !isValidFrameWidth(value.frameWidth))) {
     return false;
   }
 
