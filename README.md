@@ -113,14 +113,14 @@ Use Node.js 24.19.0 (the verified version; jsdom requires Node 24.15+ on the
 24.x line). Keep `activeBook-types`, `activeBook-react-core-next` and this
 repository in sibling directories. The editor still depends on a local core
 archive; it is not downloaded from npm. For an unchanged lockfile, provide the
-exact `activebook-react-core-next-0.0.50.tgz` at the path in `package.json`.
+exact `activebook-react-core-next-0.0.52.tgz` at the path in `package.json`.
 
 If that exact archive is unavailable, first run `npm ci` in the types and core
 repositories, then run the existing `npm run core:package` from the editor root.
 That command builds a new core archive, increments its version, updates the
 editor dependency and installs it with a new lockfile integrity. This is a
 local dependency refresh, so expect manifest/lockfile changes in both repos;
-do not disable integrity checks or rename a different archive to version 0.0.50.
+do not disable integrity checks or rename a different archive to version 0.0.52.
 
 Once the local core dependency is available, run from the editor root:
 
@@ -168,3 +168,5 @@ reference commands. The local test book and 1.8 KB graphic live in
 See [Multiple-page books](docs/multipage-books.md) for the current book.json model, page/history behavior and browser checks.
 
 Current CSS-first experiment: [contract, controls, commits and validation](docs/css-first-story-surfaces.md).
+
+Final story regions: [contract, Toolbar, masks and validation](docs/story-regions-finalization.md).
