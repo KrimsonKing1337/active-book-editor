@@ -323,6 +323,14 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     exact: true,
   }).fill('18');
   await page.getByRole('checkbox', {
+    name: 'Раздельная толщина сторон',
+    exact: true,
+  }).click();
+  await page.getByRole('spinbutton', {
+    name: 'Толщина: справа',
+    exact: true,
+  }).fill('24');
+  await page.getByRole('checkbox', {
     name: 'Снизу',
     exact: true,
   }).click();
@@ -344,8 +352,10 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     expect(effect.visibility).toEqual({
       sides: ['top', 'right', 'left'],
       frameWidth: {
-        value: 18,
-        unit: 'px',
+        top: { value: 18, unit: 'px' },
+        right: { value: 24, unit: 'px' },
+        bottom: { value: 18, unit: 'px' },
+        left: { value: 18, unit: 'px' },
       },
     });
   }
@@ -355,10 +365,14 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
   }).click();
   await page.getByRole('searchbox', { name: 'Поиск эффектов' }).fill('Панель и рамка');
   await page.getByRole('button', { name: /Панель и рамка/ }).first().click();
-  await expect.element(page.getByRole('spinbutton', {
-    name: 'Толщина рамочной маски',
+  await expect.element(page.getByRole('checkbox', {
+    name: 'Раздельная толщина сторон',
     exact: true,
-  })).toHaveValue(18);
+  })).toBeChecked();
+  await expect.element(page.getByRole('spinbutton', {
+    name: 'Толщина: справа',
+    exact: true,
+  })).toHaveValue(24);
   await page.getByRole('checkbox', {
     name: 'Ограничить сторонами рамки',
     exact: true,
