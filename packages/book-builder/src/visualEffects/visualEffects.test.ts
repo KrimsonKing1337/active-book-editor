@@ -341,3 +341,38 @@ test('every frame region is a rectangle without implicit masks or legacy aliases
   };
   expect(isBookDocument(badWidth)).toBe(false);
 });
+
+test('asymmetric side widths survive editing, serialization and builder validation', () => {
+  const book = readFixture();
+  const authored = book.visualEffects[0];
+  const width = {
+    top: { value: 12, unit: 'px' as const },
+    right: { value: 24, unit: 'px' as const },
+    bottom: { value: 8, unit: 'px' as const },
+    left: { value: 5, unit: '%' as const },
+  };
+  authored.effect.placement = { region: 'toolbarFrame' };
+  authored.effect.visibility = {
+    sides: ['top', 'right', 'bottom', 'left'],
+    frameWidth: width,
+  };
+
+  expect(isBookDocument(book)).toBe(true);
+  const draft = visualToDraft(authored);
+  const saved = draftToVisual({
+    draft,
+    previous: authored,
+    pageId: 'owner',
+  });
+  expect(saved.effect.visibility?.frameWidth).toEqual(width);
+  expect(compileBookDocument(book).visualEffects.find((cur) => cur.effect.id === authored.effect.id)
+    ?.effect.visibility?.frameWidth).toEqual(width);
+
+  const invalid = JSON.parse(JSON.stringify(book));
+  invalid.visualEffects[0].effect.visibility.frameWidth.left.value = -1;
+  expect(isBookDocument(invalid)).toBe(false);
+
+  const missingSide = JSON.parse(JSON.stringify(book));
+  delete missingSide.visualEffects[0].effect.visibility.frameWidth.bottom;
+  expect(isBookDocument(missingSide)).toBe(false);
+});
