@@ -382,3 +382,117 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
   expect(unmasked.background?.find((effect) => effect.id === effects?.[0].id)?.visibility?.sides).toBeUndefined();
   expect(unmasked.background?.find((effect) => effect.id === effects?.[1].id)?.visibility?.sides).toHaveLength(3);
 });
+
+test('frame mask widths switch between uniform and individual values without losing the top width', async () => {
+  await addEffect('Background');
+  await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions('toolbarFrame');
+
+  const uniformWidth = page.getByRole('spinbutton', {
+    name: 'Толщина рамочной маски',
+    exact: true,
+  });
+  await expect.element(uniformWidth).toHaveValue(12);
+  await uniformWidth.fill('18');
+
+  const separateWidths = page.getByRole('checkbox', {
+    name: 'Раздельная толщина сторон',
+    exact: true,
+  });
+  await separateWidths.click();
+
+  for (const side of ['сверху', 'справа', 'снизу', 'слева']) {
+    await expect.element(page.getByRole('spinbutton', {
+      name: `Толщина: ${side}`,
+      exact: true,
+    })).toHaveValue(18);
+  }
+
+  await page.getByRole('spinbutton', {
+    name: 'Толщина: справа',
+    exact: true,
+  }).fill('24');
+  await page.getByRole('spinbutton', {
+    name: 'Толщина: снизу',
+    exact: true,
+  }).fill('6');
+
+  await separateWidths.click();
+  await expect.element(uniformWidth).toHaveValue(18);
+  await expect.element(page.getByRole('checkbox', {
+    name: 'Ограничить сторонами рамки',
+    exact: true,
+  })).toBeChecked();
+
+  const saved = await project.save();
+  expect(saved.background?.at(-1)?.visibility).toEqual({
+    sides: ['top', 'right', 'bottom', 'left'],
+    frameWidth: {
+      value: 18,
+      unit: 'px',
+    },
+  });
+});
+
+test('switching frame regions preserves custom side widths and the selected sides', async () => {
+  await addEffect('Background');
+
+  const regionControl = page.getByRole('combobox', {
+    name: 'Область размещения эффекта',
+    exact: true,
+  });
+  await regionControl.selectOptions('toolbarFrame');
+
+  await page.getByRole('checkbox', {
+    name: 'Раздельная толщина сторон',
+    exact: true,
+  }).click();
+
+  const widths = {
+    сверху: 14,
+    справа: 24,
+    снизу: 8,
+    слева: 31,
+  };
+
+  for (const [side, value] of Object.entries(widths)) {
+    await page.getByRole('spinbutton', {
+      name: `Толщина: ${side}`,
+      exact: true,
+    }).fill(String(value));
+  }
+
+  const bottomSide = page.getByRole('checkbox', {
+    name: 'Снизу',
+    exact: true,
+  });
+  await bottomSide.click();
+  await expect.element(bottomSide).not.toBeChecked();
+
+  for (const region of ['storyViewportFrame', 'toolbarFrame']) {
+    await regionControl.selectOptions(region);
+    await expect.element(page.getByRole('checkbox', {
+      name: 'Раздельная толщина сторон',
+      exact: true,
+    })).toBeChecked();
+    await expect.element(bottomSide).not.toBeChecked();
+
+    for (const [side, value] of Object.entries(widths)) {
+      await expect.element(page.getByRole('spinbutton', {
+        name: `Толщина: ${side}`,
+        exact: true,
+      })).toHaveValue(value);
+    }
+  }
+
+  const saved = await project.save();
+  expect(saved.background?.at(-1)?.placement?.region).toBe('toolbarFrame');
+  expect(saved.background?.at(-1)?.visibility).toEqual({
+    sides: ['top', 'right', 'left'],
+    frameWidth: {
+      top: { value: 14, unit: 'px' },
+      right: { value: 24, unit: 'px' },
+      bottom: { value: 8, unit: 'px' },
+      left: { value: 31, unit: 'px' },
+    },
+  });
+});
