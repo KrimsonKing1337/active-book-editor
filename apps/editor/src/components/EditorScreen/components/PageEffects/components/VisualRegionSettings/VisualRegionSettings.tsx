@@ -104,20 +104,7 @@ export const VisualRegionSettings = ({
 
         <Select
           value={placement.region}
-          onChange={(event) => {
-            const region = event.target.value as VisualPlacement['region'];
-            const preset = region === 'storyViewportFrame' || region === 'toolbarFrame';
-            updateLayout({
-              placement: {
-                ...placement,
-                region,
-              },
-              visibility: preset ? {
-                ...visibility,
-                sides: ['top', 'right', 'bottom', 'left'],
-              } : visibility,
-            });
-          }}
+          onChange={(event) => updatePlacement({ region: event.target.value as VisualPlacement['region'] })}
         >
           {Object.entries(regions).map(([value, label]) => (
             <option key={value} value={value}>

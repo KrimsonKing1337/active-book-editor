@@ -314,10 +314,12 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     exact: true,
   }).fill('Панель и рамка');
   await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions('toolbarFrame');
-  await expect.element(page.getByRole('checkbox', {
+  const maskToggle = page.getByRole('checkbox', {
     name: 'Ограничить сторонами рамки',
     exact: true,
-  })).toBeChecked();
+  });
+  await expect.element(maskToggle).not.toBeChecked();
+  await maskToggle.click();
   await page.getByRole('spinbutton', {
     name: 'Толщина рамочной маски',
     exact: true,
@@ -338,6 +340,11 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     name: 'Слой эффекта',
     exact: true,
   }).selectOptions('aboveStoryControls');
+  for (const region of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame']) {
+    await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions(region);
+    await expect.element(page.getByRole('checkbox', { name: 'Снизу', exact: true })).not.toBeChecked();
+    await expect.element(page.getByRole('spinbutton', { name: 'Толщина: справа', exact: true })).toHaveValue(24);
+  }
   await page.getByRole('button', {
     name: 'Дублировать',
     exact: true,
@@ -352,10 +359,22 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     expect(effect.visibility).toEqual({
       sides: ['top', 'right', 'left'],
       frameWidth: {
-        top: { value: 18, unit: 'px' },
-        right: { value: 24, unit: 'px' },
-        bottom: { value: 18, unit: 'px' },
-        left: { value: 18, unit: 'px' },
+        top: {
+          value: 18,
+          unit: 'px',
+        },
+        right: {
+          value: 24,
+          unit: 'px',
+        },
+        bottom: {
+          value: 18,
+          unit: 'px',
+        },
+        left: {
+          value: 18,
+          unit: 'px',
+        },
       },
     });
   }
@@ -377,6 +396,13 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     name: 'Ограничить сторонами рамки',
     exact: true,
   }).click();
+  for (const region of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame']) {
+    await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions(region);
+    await expect.element(page.getByRole('checkbox', {
+      name: 'Ограничить сторонами рамки',
+      exact: true,
+    })).not.toBeChecked();
+  }
   const unmasked = await project.save();
   expect(unmasked.background?.find((effect) => effect.id === effects?.[0].id)?.placement?.region).toBe('toolbarFrame');
   expect(unmasked.background?.find((effect) => effect.id === effects?.[0].id)?.visibility?.sides).toBeUndefined();
