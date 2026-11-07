@@ -135,8 +135,8 @@ export const FrameSettings = ({
       return;
     }
 
-    const currentEffect = getCurrentEffects().find((current): current is FrameEffectDraft => {
-      return current.type === 'frame' && current.id === effect.id;
+    const currentEffect = getCurrentEffects().find((effectCur): effectCur is FrameEffectDraft => {
+      return effectCur.type === 'frame' && effectCur.id === effect.id;
     });
 
     if (!currentEffect) {
@@ -215,7 +215,9 @@ export const FrameSettings = ({
   };
 
   const handleComponentChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const definition = definitions.find((current) => current.id === e.target.value);
+    const definition = definitions.find((definitionCur) => {
+      return definitionCur.id === e.target.value;
+    });
 
     if (!definition) {
       updateOptions({ component: undefined });

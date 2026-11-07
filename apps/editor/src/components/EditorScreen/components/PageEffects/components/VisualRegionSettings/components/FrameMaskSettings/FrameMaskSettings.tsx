@@ -1,4 +1,6 @@
-import type { FrameSide, VisualVisibility } from '@active-book/types';
+import type { ChangeEvent, ReactNode } from 'react';
+
+import type { FrameSide, VisualVisibility, VisualFrameWidth } from '@active-book/types';
 
 import { Checkbox, Select } from '../../../EffectControls';
 import { PlacementNumber } from '../PlacementNumber';
@@ -16,6 +18,8 @@ const sideLabels: Record<FrameSide, string> = {
 
 const defaultFrameWidth = { value: 12, unit: 'px' } as const;
 
+type Unit = 'px' | '%';
+
 type FrameMaskSettingsProps = {
   visibility: VisualVisibility;
   onChange: (visibility: VisualVisibility) => void;
@@ -24,14 +28,20 @@ type FrameMaskSettingsProps = {
 export const FrameMaskSettings = ({ visibility, onChange }: FrameMaskSettingsProps) => {
   const isEnabled = visibility.sides !== undefined;
   const frameWidth = visibility.frameWidth ?? defaultFrameWidth;
+
   const isPerSideWidth = !('value' in frameWidth);
   const uniformWidth = 'value' in frameWidth ? frameWidth : frameWidth.top;
-  const sideWidths = 'value' in frameWidth ? {
-    top: frameWidth,
-    right: frameWidth,
-    bottom: frameWidth,
-    left: frameWidth,
-  } : frameWidth;
+
+  let sideWidths: Record<FrameSide, typeof uniformWidth> = {
+    top: uniformWidth,
+    right: uniformWidth,
+    bottom: uniformWidth,
+    left: uniformWidth,
+  };
+
+  if (!('value' in frameWidth)) {
+    sideWidths = frameWidth;
+  }
 
   const updateVisibility = (patch: Partial<VisualVisibility>) => {
     onChange({ ...visibility, ...patch });
@@ -50,12 +60,16 @@ export const FrameMaskSettings = ({ visibility, onChange }: FrameMaskSettingsPro
   };
 
   const handleWidthModeChange = (perSide: boolean) => {
-    const nextWidth = perSide ? {
-      top: { ...uniformWidth },
-      right: { ...uniformWidth },
-      bottom: { ...uniformWidth },
-      left: { ...uniformWidth },
-    } : { ...uniformWidth };
+    let nextWidth: VisualFrameWidth = { ...uniformWidth };
+
+    if (perSide) {
+      nextWidth = {
+        top: { ...uniformWidth },
+        right: { ...uniformWidth },
+        bottom: { ...uniformWidth },
+        left: { ...uniformWidth },
+      };
+    }
 
     updateVisibility({ frameWidth: nextWidth });
   };
@@ -70,105 +84,59 @@ export const FrameMaskSettings = ({ visibility, onChange }: FrameMaskSettingsPro
   };
 
   const handleSideWidthChange = (side: FrameSide, value: number) => {
-    updateVisibility({
-      frameWidth: {
-        ...sideWidths,
-        [side]: {
-          ...sideWidths[side],
-          value,
-        },
-      },
-    });
+    const frameWidthSide = {
+      ...sideWidths[side],
+      value,
+    };
+
+    const frameWidth = {
+      ...sideWidths,
+      [side]: frameWidthSide,
+    };
+
+    updateVisibility({ frameWidth });
   };
 
-  const handleSideWidthUnitChange = (side: FrameSide, unit: 'px' | '%') => {
-    updateVisibility({
-      frameWidth: {
-        ...sideWidths,
-        [side]: {
-          ...sideWidths[side],
-          unit,
-        },
-      },
-    });
+  const handleSideWidthUnitChange = (side: FrameSide, unit: Unit) => {
+    const frameWidthSide = {
+      ...sideWidths[side],
+      unit,
+    };
+
+    const frameWidth = {
+      ...sideWidths,
+      [side]: frameWidthSide,
+    };
+
+    updateVisibility({ frameWidth });
   };
 
-  return (
-    <fieldset className={styles.Settings}>
-      <legend>
-        Маска сторон
-      </legend>
+  let widthControls: ReactNode;
 
-      <Checkbox checked={isEnabled} onChange={(event) => handleEnabledChange(event.target.checked)}>
-        Ограничить сторонами рамки
-      </Checkbox>
+  if (isPerSideWidth) {
+    widthControls = (
+      <div className={styles.Grid}>
+        {frameSides.map((sideCur) => {
+          const sideLabel = sideLabels[sideCur].toLowerCase();
 
-      {isEnabled && (
-        <>
-          <div className={styles.Grid}>
-            {frameSides.map((side) => (
-              <Checkbox
-                key={side}
-                checked={visibility.sides?.includes(side) ?? false}
-                onChange={(event) => updateVisibility({
-                  sides: event.target.checked
-                    ? [...(visibility.sides ?? []), side] : visibility.sides?.filter((cur) => cur !== side),
-                })}
-              >
-                {sideLabels[side]}
-              </Checkbox>
-            ))}
-          </div>
+          const placementNumberLabel = `Толщина: ${sideLabel}`;
+          const selectAriaLabel = `Единица толщины: ${sideLabel}`;
 
-          <Checkbox checked={isPerSideWidth} onChange={(event) => handleWidthModeChange(event.target.checked)}>
-            Раздельная толщина сторон
-          </Checkbox>
+          const { value, unit } = sideWidths[sideCur];
 
-          {isPerSideWidth ? (
-            <div className={styles.Grid}>
-              {frameSides.map((side) => (
-                <div key={side} className={styles.Field}>
-                  <PlacementNumber
-                    label={`Толщина: ${sideLabels[side].toLowerCase()}`}
-                    value={sideWidths[side].value}
-                    min={0}
-                    onChange={(value) => handleSideWidthChange(side, value)}
-                  />
-
-                  <Select
-                    aria-label={`Единица толщины: ${sideLabels[side].toLowerCase()}`}
-                    value={sideWidths[side].unit}
-                    onChange={(event) => handleSideWidthUnitChange(side, event.target.value as 'px' | '%')}
-                  >
-                    <option value="px">
-                      px
-                    </option>
-
-                    <option value="%">
-                      %
-                    </option>
-                  </Select>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
+          return (
+            <div key={sideCur} className={styles.Field}>
               <PlacementNumber
-                label="Толщина рамочной маски"
-                value={uniformWidth.value}
+                label={placementNumberLabel}
+                value={value}
                 min={0}
-                onChange={handleUniformWidthChange}
+                onChange={(val) => handleSideWidthChange(sideCur, val)}
               />
 
               <Select
-                aria-label="Единица толщины маски"
-                value={uniformWidth.unit}
-                onChange={(event) => updateVisibility({
-                  frameWidth: {
-                    ...uniformWidth,
-                    unit: event.target.value as 'px' | '%',
-                  },
-                })}
+                aria-label={selectAriaLabel}
+                value={unit}
+                onChange={(e) => handleSideWidthUnitChange(sideCur, e.target.value as Unit)}
               >
                 <option value="px">
                   px
@@ -178,8 +146,97 @@ export const FrameMaskSettings = ({ visibility, onChange }: FrameMaskSettingsPro
                   %
                 </option>
               </Select>
-            </>
-          )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  } else {
+    widthControls = (
+      <>
+        <PlacementNumber
+          label="Толщина рамочной маски"
+          value={uniformWidth.value}
+          min={0}
+          onChange={handleUniformWidthChange}
+        />
+
+        <Select
+          aria-label="Единица толщины маски"
+          value={uniformWidth.unit}
+          onChange={(e) => updateVisibility({
+            frameWidth: {
+              ...uniformWidth,
+              unit: e.target.value as Unit,
+            },
+          })}
+        >
+          <option value="px">
+            px
+          </option>
+
+          <option value="%">
+            %
+          </option>
+        </Select>
+      </>
+    );
+  }
+
+  return (
+    <fieldset className={styles.Settings}>
+      <legend>
+        Маска сторон
+      </legend>
+
+      <Checkbox
+        checked={isEnabled}
+        onChange={(e) => handleEnabledChange(e.target.checked)}
+      >
+        Ограничить сторонами рамки
+      </Checkbox>
+
+      {isEnabled && (
+        <>
+          <div className={styles.Grid}>
+            {frameSides.map((sideCur) => {
+              const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+                const selectedSides = visibility.sides ?? [];
+
+                const nextSides = selectedSides.filter((selectedSideCur) => {
+                  return selectedSideCur !== sideCur;
+                });
+
+                if (e.target.checked) {
+                  nextSides.push(sideCur);
+                }
+
+                updateVisibility({ sides: nextSides });
+              };
+
+              const sideIsVisible = visibility.sides?.includes(sideCur);
+              const checkBoxChecked = sideIsVisible ?? false;
+
+              return (
+                <Checkbox
+                  key={sideCur}
+                  checked={checkBoxChecked}
+                  onChange={handleChange}
+                >
+                  {sideLabels[sideCur]}
+                </Checkbox>
+              );
+            })}
+          </div>
+
+          <Checkbox
+            checked={isPerSideWidth}
+            onChange={(e) => handleWidthModeChange(e.target.checked)}
+          >
+            Раздельная толщина сторон
+          </Checkbox>
+
+          {widthControls}
         </>
       )}
     </fieldset>

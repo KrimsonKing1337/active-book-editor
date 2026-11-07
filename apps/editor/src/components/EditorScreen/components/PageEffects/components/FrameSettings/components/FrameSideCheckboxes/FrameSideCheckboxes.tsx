@@ -18,10 +18,12 @@ export const FrameSideCheckboxes = ({ selectedSides, onChange }: FrameSideCheckb
       onChange(sideCur.value, e.target.checked);
     };
 
+    const checked = selectedSides.includes(sideCur.value);
+
     return (
       <Checkbox
         key={sideCur.value}
-        checked={selectedSides.includes(sideCur.value)}
+        checked={checked}
         onChange={handleChange}
       >
         {sideCur.label}

@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 import type { VisualDepth, VisualPlacement, VisualVisibility } from '@active-book/types';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
@@ -20,6 +22,7 @@ const regions = {
   narrativeViewport: 'Видимая область текста',
   narrativeContent: 'Прокручиваемое содержимое',
 } as const;
+
 const anchors = {
   'top-left': 'Слева сверху',
   top: 'Сверху',
@@ -31,6 +34,7 @@ const anchors = {
   bottom: 'Снизу',
   'bottom-right': 'Справа снизу',
 } as const;
+
 const planes = {
   background: 'Фон',
   belowNarrative: 'Под текстом',
@@ -38,11 +42,75 @@ const planes = {
   aboveStoryControls: 'Поверх кнопок произведения',
 } as const;
 
+const anchorProperties = ['anchor', 'origin'] as const;
+const offsetAxes = ['x', 'y'] as const;
+const sizeAxes = ['width', 'height'] as const;
+const lengthUnits = ['px', '%'] as const;
+
+const anchorLabels = {
+  anchor: 'Якорь поверхности',
+  origin: 'Точка поверхности у якоря',
+};
+
+const sizeLabels = {
+  width: 'Ширина поверхности',
+  height: 'Высота поверхности',
+};
+
+const sizeUnitLabels = {
+  width: 'Единица ширины',
+  height: 'Единица высоты',
+};
+
+const regionOptions = Object.entries(regions).map(([value, label]) => {
+  return (
+    <option key={value} value={value}>
+      {label}
+    </option>
+  );
+});
+
+const planeOptions = Object.entries(planes).map(([value, label]) => {
+  return (
+    <option key={value} value={value}>
+      {label}
+    </option>
+  );
+});
+
+const anchorOptions = Object.entries(anchors).map(([value, label]) => {
+  return (
+    <option key={value} value={value}>
+      {label}
+    </option>
+  );
+});
+
+const lengthUnitOptions = lengthUnits.map((unitCur) => {
+  return (
+    <option key={unitCur} value={unitCur}>
+      {unitCur}
+    </option>
+  );
+});
+
+type Region = VisualPlacement['region'];
+type Plane = VisualDepth['plane'];
+type AnchorProperty = (typeof anchorProperties)[number];
+type OffsetAxis = (typeof offsetAxes)[number];
+type SizeAxis = (typeof sizeAxes)[number];
+type LengthUnit = (typeof lengthUnits)[number];
+
+type LengthPatch = {
+  value?: number;
+  unit?: LengthUnit;
+};
+
 type VisualRegionSettingsProps = {
   placement?: VisualPlacement;
   depth?: VisualDepth;
   visibility?: VisualVisibility;
-  defaultPlane: VisualDepth['plane'];
+  defaultPlane: Plane;
   onChange: (layout: VisualLayout) => void;
 };
 
@@ -54,42 +122,189 @@ export const VisualRegionSettings = ({
   onChange,
 }: VisualRegionSettingsProps) => {
   const currentDepth = depth ?? { plane: defaultPlane };
-  const updateLayout = (patch: VisualLayout) => onChange({
-    placement,
-    depth: currentDepth,
-    visibility,
-    ...patch,
-  });
-  const updatePlacement = (patch: Partial<VisualPlacement>) => updateLayout({
-    placement: {
-      ...placement,
+
+  const anchor = placement.anchor ?? 'top-left';
+  const origin = placement.origin ?? anchor;
+  const anchorValues = { anchor, origin };
+
+  const offset: NonNullable<VisualPlacement['offset']> = placement.offset ?? {
+    x: { value: 0, unit: 'px' },
+    y: { value: 0, unit: 'px' },
+  };
+
+  const size: NonNullable<VisualPlacement['size']> = placement.size ?? {
+    width: { value: 100, unit: '%' },
+    height: { value: 100, unit: '%' },
+  };
+
+  const updateLayout = (patch: VisualLayout) => {
+    onChange({
+      placement,
+      depth: currentDepth,
+      visibility,
       ...patch,
-    },
-  });
+    });
+  };
+
+  const updatePlacement = (patch: Partial<VisualPlacement>) => {
+    updateLayout({
+      placement: {
+        ...placement,
+        ...patch,
+      },
+    });
+  };
+
+  const updateDepth = (patch: Partial<VisualDepth>) => {
+    updateLayout({
+      depth: {
+        ...currentDepth,
+        ...patch,
+      },
+    });
+  };
+
+  const updateOffset = (axis: OffsetAxis, patch: LengthPatch) => {
+    updatePlacement({
+      offset: {
+        ...offset,
+        [axis]: {
+          ...offset[axis],
+          ...patch,
+        },
+      },
+    });
+  };
+
+  const updateSize = (axis: SizeAxis, patch: LengthPatch) => {
+    updatePlacement({
+      size: {
+        ...size,
+        [axis]: {
+          ...size[axis],
+          ...patch,
+        },
+      },
+    });
+  };
+
+  const handleRegionChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    updatePlacement({ region: event.target.value as Region });
+  };
+
+  const handlePlaneChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    updateDepth({ plane: event.target.value as Plane });
+  };
+
+  const handleAnchorChange = (property: AnchorProperty, value: string) => {
+    updatePlacement({ [property]: value });
+  };
+
   const handleVisibilityChange = (nextVisibility: VisualVisibility) => {
     updateLayout({ visibility: nextVisibility });
   };
 
-  const offset = placement.offset ?? {
-    x: {
-      value: 0,
-      unit: 'px',
-    },
-    y: {
-      value: 0,
-      unit: 'px',
-    },
+  const handleScaleChange = (scale: number) => {
+    updatePlacement({ scale });
   };
-  const size = placement.size ?? {
-    width: {
-      value: 100,
-      unit: '%',
-    },
-    height: {
-      value: 100,
-      unit: '%',
-    },
+
+  const handleRotateChange = (rotate: number) => {
+    updatePlacement({ rotate });
   };
+
+  const handleOrderChange = (order: number) => {
+    updateDepth({ order });
+  };
+
+  const handleResetPlacement = () => {
+    const layoutPlacement = { region: placement.region };
+
+    updateLayout({ placement: layoutPlacement });
+  };
+
+  const anchorControls = anchorProperties.map((propCur) => {
+    const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+      handleAnchorChange(propCur, e.target.value);
+    };
+
+    return (
+      <label key={propCur} className={styles.Field}>
+        <span>
+          {anchorLabels[propCur]}
+        </span>
+
+        <Select value={anchorValues[propCur]} onChange={handleChange}>
+          {anchorOptions}
+        </Select>
+      </label>
+    );
+  });
+
+  const offsetControls = offsetAxes.map((axis) => {
+    const axisU = axis.toUpperCase();
+
+    const label = `Смещение ${axisU}`;
+    const unitLabel = `Единица смещения ${axisU}`;
+
+    const { value, unit } = offset[axis];
+
+    const handleValueChange = (nextValue: number) => {
+      updateOffset(axis, { value: nextValue });
+    };
+
+    const handleUnitChange = (event: ChangeEvent<HTMLSelectElement>) => {
+      updateOffset(axis, { unit: event.target.value as LengthUnit });
+    };
+
+    return (
+      <div key={axis} className={styles.Field}>
+        <PlacementNumber
+          label={label}
+          value={value}
+          onChange={handleValueChange}
+        />
+
+        <Select
+          aria-label={unitLabel}
+          value={unit}
+          onChange={handleUnitChange}
+        >
+          {lengthUnitOptions}
+        </Select>
+      </div>
+    );
+  });
+
+  const sizeControls = sizeAxes.map((axis) => {
+    const { value, unit } = size[axis];
+
+    const handleValueChange = (nextValue: number) => {
+      updateSize(axis, { value: nextValue });
+    };
+
+    const handleUnitChange = (event: ChangeEvent<HTMLSelectElement>) => {
+      updateSize(axis, { unit: event.target.value as LengthUnit });
+    };
+
+    return (
+      <div key={axis} className={styles.Field}>
+        <PlacementNumber
+          label={sizeLabels[axis]}
+          value={value}
+          min={0}
+          onChange={handleValueChange}
+        />
+
+        <Select
+          aria-label={sizeUnitLabels[axis]}
+          value={unit}
+          onChange={handleUnitChange}
+        >
+          {lengthUnitOptions}
+        </Select>
+      </div>
+    );
+  });
 
   return (
     <fieldset className={styles.Settings}>
@@ -102,15 +317,8 @@ export const VisualRegionSettings = ({
           Область размещения эффекта
         </span>
 
-        <Select
-          value={placement.region}
-          onChange={(event) => updatePlacement({ region: event.target.value as VisualPlacement['region'] })}
-        >
-          {Object.entries(regions).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
+        <Select value={placement.region} onChange={handleRegionChange}>
+          {regionOptions}
         </Select>
       </label>
 
@@ -119,154 +327,40 @@ export const VisualRegionSettings = ({
           Слой эффекта
         </span>
 
-        <Select
-          value={currentDepth.plane}
-          onChange={(event) => {
-            updateLayout({
-              depth: {
-                ...currentDepth,
-                plane: event.target.value as VisualDepth['plane'],
-              },
-            });
-          }}
-        >
-          {Object.entries(planes).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
+        <Select value={currentDepth.plane} onChange={handlePlaneChange}>
+          {planeOptions}
         </Select>
       </label>
 
-      {(['anchor', 'origin'] as const).map((property) => (
-        <label key={property} className={styles.Field}>
-          <span>
-            {property === 'anchor' ? 'Якорь поверхности' : 'Точка поверхности у якоря'}
-          </span>
-
-          <Select
-            value={placement[property] ?? (property === 'origin' ? placement.anchor : undefined) ?? 'top-left'}
-            onChange={(event) => updatePlacement({ [property]: event.target.value })}
-          >
-            {Object.entries(anchors).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Select>
-        </label>
-      ))}
+      {anchorControls}
 
       <div className={styles.Grid}>
-        {(['x', 'y'] as const).map((axis) => (
-          <div key={axis} className={styles.Field}>
-            <PlacementNumber
-              label={`Смещение ${axis.toUpperCase()}`}
-              value={offset[axis].value}
-              onChange={(value) => updatePlacement({
-                offset: {
-                  ...offset,
-                  [axis]: {
-                    ...offset[axis],
-                    value,
-                  },
-                },
-              })}
-            />
-
-            <Select
-              aria-label={`Единица смещения ${axis.toUpperCase()}`}
-              value={offset[axis].unit}
-              onChange={(event) => updatePlacement({
-                offset: {
-                  ...offset,
-                  [axis]: {
-                    ...offset[axis],
-                    unit: event.target.value,
-                  },
-                },
-              })}
-            >
-              <option value="px">
-                px
-              </option>
-
-              <option value="%">
-                %
-              </option>
-            </Select>
-          </div>
-        ))}
-
-        {(['width', 'height'] as const).map((axis) => (
-          <div key={axis} className={styles.Field}>
-            <PlacementNumber
-              label={axis === 'width' ? 'Ширина поверхности' : 'Высота поверхности'}
-              value={size[axis].value}
-              min={0}
-              onChange={(value) => updatePlacement({
-                size: {
-                  ...size,
-                  [axis]: {
-                    ...size[axis],
-                    value,
-                  },
-                },
-              })}
-            />
-
-            <Select
-              aria-label={axis === 'width' ? 'Единица ширины' : 'Единица высоты'}
-              value={size[axis].unit}
-              onChange={(event) => updatePlacement({
-                size: {
-                  ...size,
-                  [axis]: {
-                    ...size[axis],
-                    unit: event.target.value,
-                  },
-                },
-              })}
-            >
-              <option value="px">
-                px
-              </option>
-
-              <option value="%">
-                %
-              </option>
-            </Select>
-          </div>
-        ))}
+        {offsetControls}
+        {sizeControls}
 
         <PlacementNumber
           label="Масштаб поверхности"
           value={placement.scale ?? 1}
-          onChange={(scale) => updatePlacement({ scale })}
+          onChange={handleScaleChange}
         />
 
         <PlacementNumber
           label="Поворот поверхности"
           value={placement.rotate ?? 0}
-          onChange={(rotate) => updatePlacement({ rotate })}
+          onChange={handleRotateChange}
         />
 
         <PlacementNumber
           label="Порядок в слое"
           value={currentDepth.order ?? 0}
           integer
-          onChange={(order) => updateLayout({
-            depth: {
-              ...currentDepth,
-              order,
-            },
-          })}
+          onChange={handleOrderChange}
         />
       </div>
 
       <FrameMaskSettings visibility={visibility} onChange={handleVisibilityChange} />
 
-      <Button onClick={() => updateLayout({ placement: { region: placement.region } })}>
+      <Button onClick={handleResetPlacement}>
         Сбросить размещение
       </Button>
     </fieldset>

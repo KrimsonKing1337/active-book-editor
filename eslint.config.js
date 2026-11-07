@@ -124,7 +124,10 @@ export default defineConfig([
       '@stylistic/indent': ['error', 2],
       '@stylistic/quotes': ['error', 'single'],
       '@stylistic/object-curly-spacing': ['error', 'always'],
-      '@stylistic/object-property-newline': ['error'],
+
+      '@stylistic/object-property-newline': ['error',  {
+        allowAllPropertiesOnSameLine: true,
+      }],
 
       '@stylistic/object-curly-newline': ['error', {
         ObjectExpression: {

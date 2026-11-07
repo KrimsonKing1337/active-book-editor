@@ -4,6 +4,7 @@ import type { FrameElementLayout } from 'activeBook-core/hooks/effects/frame/@ty
 
 import { Select, Checkbox } from '../../../EffectControls';
 import { CssLengthInput } from '../../../CssLengthInput';
+
 import { positions } from '../../constants';
 
 import styles from '../../FrameSettings.module.scss';
@@ -39,6 +40,10 @@ export const LayoutSettings = ({
     onHiddenChange(e.target.checked);
   };
 
+  const itemPosition = item.position ?? 'top-left';
+  const itemOffsetX = item.offsetX ?? '0px';
+  const itemOffsetY = item.offsetY ?? '0px';
+
   return (
     <>
       <div className={styles.Layout}>
@@ -47,7 +52,7 @@ export const LayoutSettings = ({
             Точка привязки
           </span>
 
-          <Select value={item.position ?? 'top-left'} onChange={handlePositionChange}>
+          <Select value={itemPosition} onChange={handlePositionChange}>
             {positions.map((positionCur) => {
               const { value, label } = positionCur;
 
@@ -67,7 +72,7 @@ export const LayoutSettings = ({
 
           <CssLengthInput
             label="Смещение X"
-            value={item.offsetX ?? '0px'}
+            value={itemOffsetX}
             onChange={handleOffsetXChange}
           />
         </div>
@@ -79,7 +84,7 @@ export const LayoutSettings = ({
 
           <CssLengthInput
             label="Смещение Y"
-            value={item.offsetY ?? '0px'}
+            value={itemOffsetY}
             onChange={handleOffsetYChange}
           />
         </div>

@@ -2,10 +2,7 @@ import type { CSSProperties } from 'react';
 
 import type { JsonObject } from '@active-book/types';
 
-import type {
-  FrameShadowItem,
-  FrameTextItem,
-} from 'activeBook-core/hooks/effects/frame/@types';
+import type { FrameShadowItem, FrameTextItem } from 'activeBook-core/hooks/effects/frame/@types';
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';
@@ -164,13 +161,14 @@ export const normalizeFrameEffects = (value: unknown): FrameEffect[] => {
     }
 
     const slug = typeof effectCur.slug === 'string' ? effectCur.slug : 'Новый рамочный эффект';
+    const resultOptions = options as FrameOptions;
 
     result.push({
       id,
       type: 'frame',
       kind,
       slug,
-      options: options as FrameOptions,
+      options: resultOptions,
     });
   }
 

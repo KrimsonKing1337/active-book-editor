@@ -8,6 +8,7 @@ import type {
 import type { AuthoredVisualEffect } from './@types';
 
 import { getVisualCategory, getVisualComponentId } from './definitions';
+
 export type VisualDraft = BackgroundEffect | FrameEffect;
 
 type PanelOptions = BackgroundOptions & FrameOptions & {
@@ -41,14 +42,18 @@ export const visualToDraft = (description: AuthoredVisualEffect): VisualDraft =>
     };
   }
 
+  const placement = structuredClone(effect.placement);
+  const depth = structuredClone(effect.depth);
+  const visibility = structuredClone(effect.visibility ?? {});
+
   return {
     id: effect.id,
     type,
     kind,
     slug,
     options,
-    placement: structuredClone(effect.placement),
-    depth: structuredClone(effect.depth),
-    visibility: structuredClone(effect.visibility ?? {}),
+    placement,
+    depth,
+    visibility,
   } as VisualDraft;
 };

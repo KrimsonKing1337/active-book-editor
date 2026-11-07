@@ -1,3 +1,4 @@
+
 import type { JsonObject, VisualLength } from '@active-book/types';
 
 import { copyVisualData } from 'activeBook-core/controllers/visualEffects/utils/serialization';
@@ -13,6 +14,7 @@ import {
   VISUAL_PLANES,
   VISUAL_REGIONS,
 } from './constants';
+
 import { getVisualCategory } from './definitions';
 
 const regions = new Set<string>(VISUAL_REGIONS);
@@ -27,16 +29,17 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
+const isFiniteNumber = (value: unknown): value is number => {
+  return typeof value === 'number' && Number.isFinite(value);
+};
+
 const isValidLength = (value: unknown): value is VisualLength => {
   if (!isRecord(value)) {
     return false;
   }
 
-  const length = value.value;
-  const unit = value.unit;
-
-  const isValidNumber = typeof length === 'number' && Number.isFinite(length);
-  const isValidUnit = unit === 'px' || unit === '%';
+  const isValidNumber = isFiniteNumber(value.value);
+  const isValidUnit = value.unit === 'px' || value.unit === '%';
 
   return isValidNumber && isValidUnit;
 };
@@ -59,10 +62,18 @@ const isValidFrameWidth = (value: unknown): boolean => {
   }
 
   const keys = Object.keys(value);
-  const hasAllSides = FRAME_SIDES.every((side) => isNonnegativeLength(value[side]));
-  const hasOnlySides = keys.length === FRAME_SIDES.length && keys.every((key) => sides.has(key));
 
-  return hasAllSides && hasOnlySides;
+  if (keys.length !== FRAME_SIDES.length) {
+    return false;
+  }
+
+  const hasOnlySides = keys.every((key) => sides.has(key));
+
+  if (!hasOnlySides) {
+    return false;
+  }
+
+  return FRAME_SIDES.every((side) => isNonnegativeLength(value[side]));
 };
 
 const isValidPoint = (value: unknown): boolean => {
@@ -74,6 +85,17 @@ const isValidPoint = (value: unknown): boolean => {
   const hasValidY = isValidLength(value.y);
 
   return hasValidX && hasValidY;
+};
+
+const isValidSize = (value: unknown): boolean => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const hasValidWidth = isNonnegativeLength(value.width);
+  const hasValidHeight = isNonnegativeLength(value.height);
+
+  return hasValidWidth && hasValidHeight;
 };
 
 const isValidPlacement = (value: unknown): boolean => {
@@ -90,19 +112,40 @@ const isValidPlacement = (value: unknown): boolean => {
     scale,
     rotate,
   } = value;
-  if ('coordinates' in value || !regions.has(String(region))) {
+
+  if ('coordinates' in value) {
     return false;
   }
 
-  const hasValidAnchor = anchor === undefined || anchors.has(String(anchor));
-  const hasValidOrigin = origin === undefined || anchors.has(String(origin));
-  const hasValidOffset = offset === undefined || isValidPoint(offset);
-  const hasValidSize = size === undefined || (isRecord(size)
-    && isNonnegativeLength(size.width) && isNonnegativeLength(size.height));
-  const hasValidScale = scale === undefined || (typeof scale === 'number' && Number.isFinite(scale));
-  const hasValidRotate = rotate === undefined || (typeof rotate === 'number' && Number.isFinite(rotate));
+  if (!regions.has(String(region))) {
+    return false;
+  }
 
-  return hasValidAnchor && hasValidOrigin && hasValidOffset && hasValidSize && hasValidScale && hasValidRotate;
+  if (anchor !== undefined && !anchors.has(String(anchor))) {
+    return false;
+  }
+
+  if (origin !== undefined && !anchors.has(String(origin))) {
+    return false;
+  }
+
+  if (offset !== undefined && !isValidPoint(offset)) {
+    return false;
+  }
+
+  if (size !== undefined && !isValidSize(size)) {
+    return false;
+  }
+
+  if (scale !== undefined && !isFiniteNumber(scale)) {
+    return false;
+  }
+
+  if (rotate !== undefined && !isFiniteNumber(rotate)) {
+    return false;
+  }
+
+  return true;
 };
 
 const isValidMask = (value: unknown): boolean => {
@@ -140,13 +183,31 @@ const isValidVisibility = (value: unknown): boolean => {
     return true;
   }
 
-  if (!isRecord(value) || 'region' in value || !isValidMask(value.mask)
-    || (value.frameWidth !== undefined && !isValidFrameWidth(value.frameWidth))) {
+  if (!isRecord(value)) {
     return false;
   }
 
-  return value.sides === undefined || (Array.isArray(value.sides)
-    && value.sides.every((side) => sides.has(String(side))));
+  if ('region' in value) {
+    return false;
+  }
+
+  if (!isValidMask(value.mask)) {
+    return false;
+  }
+
+  if (value.frameWidth !== undefined && !isValidFrameWidth(value.frameWidth)) {
+    return false;
+  }
+
+  if (value.sides === undefined) {
+    return true;
+  }
+
+  if (!Array.isArray(value.sides)) {
+    return false;
+  }
+
+  return value.sides.every((side) => sides.has(String(side)));
 };
 
 const isValidRange = (value: unknown): boolean => {
@@ -156,17 +217,16 @@ const isValidRange = (value: unknown): boolean => {
 
   const { from, to } = value;
 
-  const hasIntegerBounds = Number.isInteger(from) && Number.isInteger(to);
-
-  if (!hasIntegerBounds) {
+  if (typeof from !== 'number' || !Number.isInteger(from)) {
     return false;
   }
 
-  const start = Number(from);
-  const end = Number(to);
+  if (typeof to !== 'number' || !Number.isInteger(to)) {
+    return false;
+  }
 
-  const hasValidStart = start >= 1;
-  const hasValidEnd = end >= start;
+  const hasValidStart = from >= 1;
+  const hasValidEnd = to >= from;
 
   return hasValidStart && hasValidEnd;
 };
@@ -199,9 +259,16 @@ const isValidDepth = (value: unknown): boolean => {
   }
 
   const hasValidPlane = planes.has(String(value.plane));
-  const hasValidOrder = value.order === undefined || (typeof value.order === 'number' && Number.isInteger(value.order));
 
-  return hasValidPlane && hasValidOrder;
+  if (!hasValidPlane) {
+    return false;
+  }
+
+  if (value.order === undefined) {
+    return true;
+  }
+
+  return typeof value.order === 'number' && Number.isInteger(value.order);
 };
 
 const isValidEffectKind = (definitionId: string, kind: unknown): boolean => {
