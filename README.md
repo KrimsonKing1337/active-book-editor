@@ -1,30 +1,37 @@
-# activeBook-editor
+# active-book-editor
 
 Prototype monorepo for the Active Book visual editor and book build pipeline.
 
 ## Layout
 
-- `apps/editor` — Vite + React + TipTap editor. The editable TipTap document is rendered inside the real `activeBook-core` `App` and `PageWrapper`.
+- `apps/editor` — Vite + React + TipTap editor. The editable TipTap document is rendered inside the real `@active-book/core` `App` and `PageWrapper`.
 - `packages/book-builder` — internal Vite-based book builder used both by an npm script and by the editor dev server.
 - `example-book/book.json` — minimal ordered book containing TipTap page documents for CLI builds.
 
 ## Local core
 
-The repository expects the core to be available one level above the editor repository:
+Keep the current repositories in sibling directories:
 
 ```text
 parent/
-├─ activebook-core/
-└─ activeBook-editor/
+├─ active-book-core/
+├─ active-book-editor/
+└─ active-book-types/
 ```
 
-The root dependency is intentionally declared as:
+The core package is `@active-book/core`; its compiled archive is a local file
+dependency in the editor root. Install dependencies in `active-book-types` and
+`active-book-core` with `npm ci`, then run from this repository:
 
-```json
-"activeBook-core": "file:../activebook-core"
+```sh
+npm run core:package
 ```
 
-The core must have its `lib` output prepared because its package entry points to the compiled output.
+The command builds the sibling core, creates `active-book-core-<version>.tgz`,
+updates the `@active-book/core` dependency and lockfile, and installs it. Use
+`npm ci` for subsequent installs with that exact archive. No npm publication or
+old-name alias is required. This repository's root package is
+`active-book-editor-workspace`; the application workspace is `active-book-editor`.
 
 ## Run
 
@@ -43,15 +50,24 @@ The editor opens with an editable page inside `PageWrapper`. `Добавить C
 npm run build:book
 ```
 
-By default this builds `example-book/book.json`. A custom JSON document can be supplied directly to the workspace script:
+The root script builds `example-book`. It includes the renamed library archive at
+`example-book/dependencies/active-book-custom-test-0.0.8.tgz`. To rebuild that
+archive, run `npm ci && npm run make` in the sibling `active-book-custom-test`
+repository and copy the result from `tgz/` to this directory.
 
-```bash
-npm run build -w @active-book/book-builder -- ./path/to/book.json
+For another book, pass its project directory to the workspace script:
+
+```sh
+npm run build -w @active-book/book-builder -- ./path/to/book
 ```
+
+The path is relative to `packages/book-builder`; the directory must contain
+`book.json` and `package.json`. The runtime application workspace is
+`active-book-runtime`.
 
 ## Current prototype boundary
 
-The component registry currently contains `Counter` only. The important part of this prototype is the extension point: more `activeBook-core` components can be registered as TipTap nodes without changing the editor/build separation.
+The component registry currently contains `Counter` only. The important part of this prototype is the extension point: more `@active-book/core` components can be registered as TipTap nodes without changing the editor/build separation.
 
 The builder currently maps TipTap headings and paragraphs back to the core `H1`, `H2`, and `P` components and preserves basic inline marks. It deliberately has no Babel/core-js/legacy profile yet; compatibility profiles can be added later inside `packages/book-builder` without affecting the editor build.
 
@@ -110,17 +126,17 @@ Playwright's installed browser. The same variable works with `test`,
 ### Windows (PowerShell)
 
 Use Node.js 24.19.0 (the verified version; jsdom requires Node 24.15+ on the
-24.x line). Keep `activeBook-types`, `activeBook-react-core-next` and this
+24.x line). Keep `active-book-types`, `active-book-core` and this
 repository in sibling directories. The editor still depends on a local core
 archive; it is not downloaded from npm. For an unchanged lockfile, provide the
-exact `activebook-react-core-next-0.0.53.tgz` at the path in `package.json`.
+exact core archive at the path and version recorded in `package.json`.
 
 If that exact archive is unavailable, first run `npm ci` in the types and core
 repositories, then run the existing `npm run core:package` from the editor root.
 That command builds a new core archive, increments its version, updates the
 editor dependency and installs it with a new lockfile integrity. This is a
 local dependency refresh, so expect manifest/lockfile changes in both repos;
-do not disable integrity checks or rename a different archive to version 0.0.53.
+do not disable integrity checks or substitute a different archive under the recorded filename.
 
 Once the local core dependency is available, run from the editor root:
 

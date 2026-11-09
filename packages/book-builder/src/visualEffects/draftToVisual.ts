@@ -1,6 +1,6 @@
 import type { JsonValue } from '@active-book/types';
 
-import { createBuiltinRegistration } from 'activeBook-core/controllers/visualEffects/utils/declarations';
+import { createBuiltinRegistration } from '@active-book/core/controllers/visualEffects/utils/declarations';
 
 import { resolveBackgroundOptions, resolveFrameOptions } from '../effects';
 

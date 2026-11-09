@@ -1,8 +1,8 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 
-import type { AudioEffectOptions } from 'activeBook-core/@types';
+import type { AudioEffectOptions } from '@active-book/core/@types';
 
-import { Slider } from 'activeBook-core/components';
+import { Slider } from '@active-book/core/components';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';

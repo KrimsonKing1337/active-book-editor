@@ -6,7 +6,7 @@ This branch demonstrates the **library registration and render path**, not the i
 
 ## Contract
 
-The npm package `activebook-custom-test@0.0.5` contains:
+The npm package `active-book-custom-test@0.0.5` contains:
 
 - `package.json#activeBook` pointing to `./active-book.json`
 - a JSON manifest with `schemaVersion: 1`, `components.Counter.title`, `entry` and `export`
@@ -16,17 +16,17 @@ The book has its own `package.json`, separate from `book.json`.
 The former lists npm dependencies; the latter stores nodes using the package name and component name:
 
 ```json
-{ "type": "coreComponent", "attrs": { "package": "activebook-custom-test", "name": "Counter" } }
+{ "type": "coreComponent", "attrs": { "package": "active-book-custom-test", "name": "Counter" } }
 ```
 
 ## Quick smoke test
 
-1. Pull `activeBook-custom-test`, run `npm install && npm run make`; create `0.0.5.tgz`.
-2. Copy the archive into `activeBook-editor/example-book/dependencies/` (create the directory).
-3. From the **activeBook-editor repository root**, install the test package so Vite can currently find it:
+1. Pull `active-book-custom-test`, run `npm install && npm run make`; create `0.0.5.tgz`.
+2. Copy the archive into `active-book-editor/example-book/dependencies/` (create the directory).
+3. From the **active-book-editor repository root**, install the test package so Vite can currently find it:
 
    ```sh
-   npm install ./example-book/dependencies/activebook-custom-test-0.0.5.tgz
+   npm install ./example-book/dependencies/active-book-custom-test-0.0.5.tgz
    ```
 
    The installation modifies the root npm files locally; do not commit that temporary dependency.

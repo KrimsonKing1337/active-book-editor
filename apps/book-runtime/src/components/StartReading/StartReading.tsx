@@ -1,6 +1,6 @@
-import { useGoToPage } from 'activeBook-core/hooks/control/useGoToPage';
+import { useGoToPage } from '@active-book/core/hooks/control/useGoToPage';
 
-import { Action } from 'activeBook-core/components';
+import { Action } from '@active-book/core/components';
 
 import styles from './StartReading.module.scss';
 

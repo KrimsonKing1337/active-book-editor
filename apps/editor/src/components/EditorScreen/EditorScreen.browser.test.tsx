@@ -17,7 +17,7 @@ import {
 import { EditorScreen } from './EditorScreen';
 
 import 'reset-css/reset.css';
-import 'activeBook-core/styles/styles.scss';
+import '@active-book/core/styles/styles.scss';
 import '../../styles.scss';
 
 let project: Awaited<ReturnType<typeof createProject>>;

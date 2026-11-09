@@ -1,4 +1,4 @@
-import type { AudioEffectOptions } from 'activeBook-core/@types';
+import type { AudioEffectOptions } from '@active-book/core/@types';
 
 import { isRecord } from '../utils';
 

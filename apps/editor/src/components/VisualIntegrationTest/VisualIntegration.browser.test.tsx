@@ -6,12 +6,12 @@ import { page } from 'vitest/browser';
 
 import type { BookRuntime, VisualRendererProps } from '@active-book/types';
 
-import { StoreProvider, store } from 'activeBook-core/store';
-import { mainActions } from 'activeBook-core/store/main';
+import { StoreProvider, store } from '@active-book/core/store';
+import { mainActions } from '@active-book/core/store/main';
 
-import { AppWrapper } from 'activeBook-core/components';
+import { AppWrapper } from '@active-book/core/components';
 
-import { type VisualEffects, useVisualEffects } from 'activeBook-core/controllers/visualEffects';
+import { type VisualEffects, useVisualEffects } from '@active-book/core/controllers/visualEffects';
 
 import { isBookDocument } from '@active-book/book-builder/book';
 
@@ -23,7 +23,7 @@ import { compileVisualEffects } from '@active-book/book-builder/visualEffects';
 import fixture from '@root/tests/fixtures/multipage-book/book.json';
 import archiveUrl from '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url';
 
-import 'activeBook-core/styles/styles.scss';
+import '@active-book/core/styles/styles.scss';
 
 let session: VisualEffects;
 const Probe = () => {

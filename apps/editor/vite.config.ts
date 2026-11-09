@@ -13,7 +13,7 @@ import { optimizeSvg } from '@active-book/book-builder/build/svg';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const repoRoot = path.resolve(__dirname, '../..');
-const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
+const coreRoot = path.resolve(repoRoot, 'node_modules/@active-book/core');
 
 export default defineConfig(({ mode }) => {
   return {

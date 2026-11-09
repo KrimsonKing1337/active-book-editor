@@ -1,4 +1,4 @@
-import type { Config } from 'activeBook-core/@types';
+import type { Config } from '@active-book/core/@types';
 
 // Page0 uses a silent sound to unlock browser audio after the reader's first interaction.
 // eslint-disable-next-line @stylistic/max-len

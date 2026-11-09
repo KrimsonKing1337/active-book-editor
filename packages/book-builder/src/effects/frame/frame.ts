@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import type { JsonObject } from '@active-book/types';
 
-import type { FrameShadowItem, FrameTextItem } from 'activeBook-core/hooks/effects/frame/@types';
+import type { FrameShadowItem, FrameTextItem } from '@active-book/core/hooks/effects/frame/@types';
 
 import type { BackgroundComponentReference } from '../background';
 import type { FilterOperation } from '../style';

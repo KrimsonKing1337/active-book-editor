@@ -45,7 +45,7 @@ export default defineConfig([
 
     settings: {
       'import-x/internal-regex':
-        '^(@root|@build|@project|@hooks|@components|@utils|activeBook-core)(/.*)?$',
+        '^(@root|@build|@project|@hooks|@components|@utils|@active-book/core)(/.*)?$',
     },
 
     rules: {
@@ -66,17 +66,17 @@ export default defineConfig([
 
             { pattern: '@active-book/types{,/**}', group: 'external', position: 'after' },
 
-            { pattern: 'activeBook-core/@types{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/assets{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/styles{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/pages{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/store{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/hooks{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/components{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core/utils{,/**}', group: 'internal', position: 'before' },
-            { pattern: 'activeBook-core{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/@types{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/assets{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/styles{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/pages{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/store{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/hooks{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/components{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core/utils{,/**}', group: 'internal', position: 'before' },
+            { pattern: '@active-book/core{,/**}', group: 'internal', position: 'before' },
 
-            { pattern: '@active-book/editor{,/**}', group: 'internal', position: 'after' },
+            { pattern: 'active-book-editor{,/**}', group: 'internal', position: 'after' },
             { pattern: '@active-book/book-builder{,/**}', group: 'internal', position: 'after' },
 
             { pattern: '@root{,/**}', group: 'internal', position: 'after' },

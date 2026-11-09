@@ -42,12 +42,13 @@
           {
             "type": "coreComponent",
             "attrs": {
-              "package": "activebook-custom-test",
+              "package": "active-book-custom-test",
               "name": "Counter"
             }
           }
         ]
       }
     }
-  ]
+  ],
+  "visualEffects": []
 }

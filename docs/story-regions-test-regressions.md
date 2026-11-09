@@ -22,6 +22,6 @@ Production runtime явно включает маску, задаёт 8px/16px/1
 
 Коммиты: `0491494` — production fix и регрессии масок; `fe15449` — reset locator; `6eca355` — новый TGZ; `b93e469` — форматирование новых assertions; `a492ec4` — проверка асимметричной маски в готовом reader. Документация отдельным коммитом.
 
-[Полный русский отчёт: все восемь записей о падении, первопричины, исходные ошибки, проверки core и ограничения](https://github.com/KrimsonKing1337/activeBook-react-core-next/blob/fix/story-regions-test-regressions/docs/story-regions-test-regressions.ru.md).
+[Полный русский отчёт: все восемь записей о падении, первопричины, исходные ошибки, проверки core и ограничения](https://github.com/KrimsonKing1337/active-book-core/blob/fix/story-regions-test-regressions/docs/story-regions-test-regressions.ru.md).
 
 Прогоны выполнены в Linux/Chromium. Windows runner, его screenshots и аппаратные iOS/Android здесь не проверены. Перед main требуется Windows-прогон и отдельное решение по существующим общим lint errors. Vite chunk-size warning сохранён. Types не менялись, их три проверки проходят; отдельный types PR не требуется.

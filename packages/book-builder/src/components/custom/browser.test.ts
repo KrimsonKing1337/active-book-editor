@@ -42,7 +42,7 @@ const makeArchive = (files: Record<string, string>): Blob => {
 };
 
 const packageJson = {
-  name: 'activebook-custom-test',
+  name: 'active-book-custom-test',
   version: '0.0.6',
   activeBook: './active-book.json',
 };
@@ -70,7 +70,7 @@ describe('Browser TGZ component inspection', () => {
 
     const result = await inspectBrowserArchive(archive);
 
-    assert.equal(result.packageName, 'activebook-custom-test');
+    assert.equal(result.packageName, 'active-book-custom-test');
     assert.deepEqual(Object.keys(result.manifest.components), ['Counter']);
     assert.ok(result.files.has('package/dist/index.js'));
     assert.ok(result.files.has('package/dist/style.css'));

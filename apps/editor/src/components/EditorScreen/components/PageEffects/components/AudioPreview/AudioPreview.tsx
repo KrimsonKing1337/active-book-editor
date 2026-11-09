@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useAudioController } from 'activeBook-core/hooks/effects';
+import { useAudioController } from '@active-book/core/hooks/effects';
 
 import type { AudioEffectDraft } from '../../@types';
 

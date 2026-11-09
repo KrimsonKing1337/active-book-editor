@@ -2,7 +2,7 @@
 
 Ветка `experiment/css-first-story-surfaces`, база `experiment/persistent-story-viewport`. Реализация использует собранный core **0.0.50** и `@active-book/types` **0.0.2**. Исторические отчёты соседних экспериментов не являются описанием текущего контракта.
 
-[Полный отчёт ядра: DOM-схема, удалённые модули, демонстрации, замеры и исключения](https://github.com/KrimsonKing1337/activeBook-react-core-next/blob/experiment/css-first-story-surfaces/docs/css-first-story-surfaces.ru.md).
+[Полный отчёт ядра: DOM-схема, удалённые модули, демонстрации, замеры и исключения](https://github.com/KrimsonKing1337/active-book-core/blob/experiment/css-first-story-surfaces/docs/css-first-story-surfaces.ru.md).
 
 ## Разделение ревью
 

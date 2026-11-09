@@ -6,22 +6,22 @@ Core source through an npm workspace or a direct directory link.
 Clone or check out these three repositories as siblings:
 
 ```text
-activeBook-react-core-next/
-activeBook-editor/
-activeBook-types/
+active-book-core/
+active-book-editor/
+active-book-types/
 ```
 
 When developing visual background effects, use the branch
 `feature/visual-background-effects` in each repository.
 
-From `activeBook-editor/`, after installing dependencies in the Core repository:
+From `active-book-editor/`, after installing dependencies in the Core repository:
 
 ```bash
 npm run core:package
 ```
 
 The script runs Core's `npm run make`, which compiles Core and produces a new
-`.tgz`, updates the editor's `activeBook-core` file dependency and runs
+`.tgz`, updates the editor's `@active-book/core` file dependency and runs
 `npm install` to update `package-lock.json` and installed dependencies.
 
 The Core `make` script increments its patch version. This makes each new
