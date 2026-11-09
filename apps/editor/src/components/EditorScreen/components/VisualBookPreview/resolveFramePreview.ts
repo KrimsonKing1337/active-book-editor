@@ -20,30 +20,46 @@ export const resolveFramePreview = ({
 }: ResolveFrameInstanceOptionsParams) => {
   const { shadow, text } = effect.options;
 
-  const shadowPreviewKey = shadow ? getFramePreviewKey(effect.id, shadow.id) : undefined;
-  const textPreviewKey = text ? getFramePreviewKey(effect.id, text.id) : undefined;
-
-  const shadowPreview = shadowPreviewKey ? previews[shadowPreviewKey] : undefined;
-  const textPreview = textPreviewKey ? previews[textPreviewKey] : undefined;
-
-  let shadowStyleKey = '';
+  let previewShadow;
 
   if (shadow) {
-    shadowStyleKey = getFrameStylePreviewKey({
+    const preview = previews[getFramePreviewKey(effect.id, shadow.id)];
+    const styleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'shadow',
       itemId: shadow.id,
     });
+
+    previewShadow = {
+      ...shadow,
+      style: stylePreviews[styleKey] ?? shadow.style,
+      hidden: preview?.hidden ?? shadow.hidden,
+      animation: {
+        ...shadow.animation,
+        playState: preview?.playState ?? shadow.animation?.playState,
+      },
+    };
   }
 
-  let textStyleKey = '';
+  let previewText;
 
   if (text) {
-    textStyleKey = getFrameStylePreviewKey({
+    const preview = previews[getFramePreviewKey(effect.id, text.id)];
+    const styleKey = getFrameStylePreviewKey({
       effectId: effect.id,
       kind: 'text',
       itemId: text.id,
     });
+
+    previewText = {
+      ...text,
+      style: stylePreviews[styleKey] ?? text.style,
+      hidden: preview?.hidden ?? text.hidden,
+      animation: {
+        ...text.animation,
+        playState: preview?.playState ?? text.animation?.playState,
+      },
+    };
   }
 
   const componentStyleKey = getFrameStylePreviewKey({
@@ -52,50 +68,10 @@ export const resolveFramePreview = ({
     itemId: effect.id,
   });
 
-  const shadowStyle = shadowStyleKey ? stylePreviews[shadowStyleKey] : undefined;
-  const textStyle = textStyleKey ? stylePreviews[textStyleKey] : undefined;
-  const componentStyle = stylePreviews[componentStyleKey];
-
-  const previewShadowStyle = shadowStyle ?? shadow?.style;
-  const previewShadowHidden = shadowPreview?.hidden ?? shadow?.hidden;
-  const shadowPlayState = shadowPreview?.playState ?? shadow?.animation?.playState;
-
-  const shadowAnimation = {
-    ...shadow?.animation,
-    playState: shadowPlayState,
-  };
-
-  const previewShadow = shadow && {
-    ...shadow,
-    style: previewShadowStyle,
-    hidden: previewShadowHidden,
-    animation: shadowAnimation,
-  };
-
-  const previewTextStyle = textStyle ?? text?.style;
-  const previewTextHidden = textPreview?.hidden ?? text?.hidden;
-  const textPlayState = textPreview?.playState ?? text?.animation?.playState;
-
-  const textAnimation = {
-    ...text?.animation,
-    playState: textPlayState,
-  };
-
-  const previewText = text && {
-    ...text,
-    style: previewTextStyle,
-    hidden: previewTextHidden,
-    animation: textAnimation,
-  };
-
-  const resolvedShadow = previewShadow ?? undefined;
-  const resolvedText = previewText ?? undefined;
-  const previewComponentStyle = componentStyle ?? effect.options.style;
-
   return {
     ...effect.options,
-    shadow: resolvedShadow,
-    text: resolvedText,
-    style: previewComponentStyle,
+    shadow: previewShadow,
+    text: previewText,
+    style: stylePreviews[componentStyleKey] ?? effect.options.style,
   };
 };

@@ -86,11 +86,7 @@ export const draftToVisual = ({
   for (const propertyCur of Z_INDEX_STYLE_PROPERTIES) {
     const item = params[propertyCur] as Record<string, JsonValue> | undefined;
 
-    let style = item;
-
-    if (propertyCur !== 'style') {
-      style = item?.style as Record<string, JsonValue> | undefined;
-    }
+    const style = propertyCur === 'style' ? item : item?.style as Record<string, JsonValue> | undefined;
 
     if (style) {
       delete style.zIndex;
@@ -111,14 +107,10 @@ export const draftToVisual = ({
     depth,
   };
 
-  let lifetime: AuthoredVisualEffect['lifetime'] = {
+  const lifetime: AuthoredVisualEffect['lifetime'] = previous ? previous.lifetime : {
     type: 'page',
     pageId,
   };
-
-  if (previous) {
-    lifetime = previous.lifetime;
-  }
 
   return {
     effect,
