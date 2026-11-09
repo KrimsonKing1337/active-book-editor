@@ -3,7 +3,6 @@ import path from 'node:path';
 import type { InlineConfig } from 'vite';
 
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
 import { optimizeSvg } from './svg';
@@ -25,10 +24,6 @@ export const createViteConfig = ({
     root,
 
     plugins: [
-      tsconfigPaths({
-        projectDiscovery: 'lazy',
-      }),
-
       react(),
 
       svgr({
@@ -51,6 +46,7 @@ export const createViteConfig = ({
     },
 
     resolve: {
+      tsconfigPaths: true,
       dedupe: ['react', 'react-dom'],
     },
 

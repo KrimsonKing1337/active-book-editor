@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
 import { bookBuildPlugin } from '@active-book/book-builder/server/plugin';
@@ -18,10 +17,6 @@ const coreRoot = path.resolve(repoRoot, 'node_modules/@active-book/core');
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
-      tsconfigPaths({
-        projectDiscovery: 'lazy',
-      }),
-
       react(),
 
       svgr({
@@ -47,6 +42,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     resolve: {
+      tsconfigPaths: true,
       dedupe: ['react', 'react-dom'],
     },
   };
