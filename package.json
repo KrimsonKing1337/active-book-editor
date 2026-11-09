@@ -31,7 +31,7 @@
     "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.56.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.57.tgz"
   },
   "devDependencies": {
     "@active-book/types": "file:../active-book-types",
