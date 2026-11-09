@@ -59,9 +59,21 @@ export const AdvancedStyles = ({
   const [drafts, setDrafts] = useState<Draft[]>(() => getDrafts(style));
   const [error, setError] = useState('');
 
+  const {
+    opacity,
+    borderRadius,
+    objectFit,
+    objectPosition,
+  } = style;
+
   useEffect(() => {
-    setDrafts(getDrafts(style));
-  }, [style.opacity, style.borderRadius, style.objectFit, style.objectPosition]);
+    setDrafts(getDrafts({
+      opacity,
+      borderRadius,
+      objectFit,
+      objectPosition,
+    }));
+  }, [opacity, borderRadius, objectFit, objectPosition]);
 
   const options = PROPERTY_OPTIONS.filter((optionCur) => {
     const mediaOnly = optionCur.value === 'objectFit' || optionCur.value === 'objectPosition';
