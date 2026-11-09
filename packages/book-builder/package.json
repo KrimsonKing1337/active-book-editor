@@ -10,15 +10,16 @@
   },
   "dependencies": {
     "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-svgo": "^8.1.0",
-    "@vitejs/plugin-react": "^5.1.1",
-    "postcss": "^8.5.6",
+    "@vitejs/plugin-react": "^6.3.0",
+    "postcss": "^8.5.32",
     "postcss-modules": "^6.0.1",
-    "sass": "^1.96.0",
-    "vite": "^7.2.7",
+    "sass": "^1.108.1",
+    "vite": "^8.3.6",
     "vite-plugin-svgr": "^5.2.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "@tiptap/core": "^3.10.2"
+    "@tiptap/core": "^3.33.0",
+    "@svgr/core": "^8.1.0",
+    "svgo": "^4.1.0"
   },
   "exports": {
     "./*": "./src/*.ts",
@@ -32,7 +33,7 @@
     "./components/custom/visual": "./src/components/custom/visual.ts"
   },
   "devDependencies": {
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.6",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   },

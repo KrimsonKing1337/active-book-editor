@@ -12,10 +12,7 @@ export type BackgroundPreviewOptions = {
   stylePreviews: BackgroundStylePreviews;
 };
 
-export const resolveBackgroundPreview = ({
-  effect,
-  stylePreviews,
-}: BackgroundPreviewOptions) => {
+export const resolveBackgroundPreview = ({ effect, stylePreviews }: BackgroundPreviewOptions) => {
   const options = { ...effect.options };
 
   for (const layerCur of layers) {

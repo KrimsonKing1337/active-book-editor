@@ -8,6 +8,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
 import { bookBuildPlugin } from '@active-book/book-builder/server/plugin';
+import { optimizeSvg } from '@active-book/book-builder/build/svg';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,20 +27,7 @@ export default defineConfig(({ mode }) => {
       svgr({
         include: '**/*.svg',
         svgrOptions: {
-          plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
-          svgoConfig: {
-            plugins: [
-              {
-                name: 'preset-default',
-                params: {
-                  overrides: {
-                    removeViewBox: false,
-                  },
-                },
-              },
-              'prefixIds',
-            ],
-          },
+          plugins: [optimizeSvg, '@svgr/plugin-jsx'],
         },
       }),
 

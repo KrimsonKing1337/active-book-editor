@@ -6,6 +6,8 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
 
+import { optimizeSvg } from './svg';
+
 type CreateViteConfigParams = {
   root: string;
   repoRoot: string;
@@ -32,20 +34,7 @@ export const createViteConfig = ({
       svgr({
         include: '**/*.svg',
         svgrOptions: {
-          plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
-          svgoConfig: {
-            plugins: [
-              {
-                name: 'preset-default',
-                params: {
-                  overrides: {
-                    removeViewBox: false,
-                  },
-                },
-              },
-              'prefixIds',
-            ],
-          },
+          plugins: [optimizeSvg, '@svgr/plugin-jsx'],
         },
       }),
     ],
@@ -69,7 +58,7 @@ export const createViteConfig = ({
       outDir,
       assetsDir: 'app',
       emptyOutDir: true,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           assetFileNames: ({ names }) => {
             const [name = ''] = names;

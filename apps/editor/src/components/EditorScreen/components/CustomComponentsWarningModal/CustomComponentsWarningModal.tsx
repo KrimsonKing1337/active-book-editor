@@ -11,10 +11,7 @@ type CustomComponentsWarningModalProps = {
   onConfirm: (doNotShowAgain: boolean) => void;
 };
 
-export const CustomComponentsWarningModal = ({
-  onClose,
-  onConfirm,
-}: CustomComponentsWarningModalProps) => {
+export const CustomComponentsWarningModal = ({ onClose, onConfirm }: CustomComponentsWarningModalProps) => {
   const [doNotShowAgain, setDoNotShowAgain] = useState(false);
 
   const dialogRef = useRef<HTMLDialogElement>(null);
