@@ -256,7 +256,7 @@ const preview = previews[previewKey];
 const isVisible = effect.visible ?? true;
 ```
 
-Не превращать очевидную операцию в несколько бессмысленных переменных.
+**Avoid unnecessary placeholder states.** Determine the final result directly when clearer instead of assigning a value only to overwrite it. Keep meaningful intermediate variables, genuine defaults and staged updates; a simple ternary is often clearer than a longer branch block.
 
 ### 5.2. Объекты
 
@@ -354,6 +354,8 @@ if (!hasValidPath || !hasValidProject || !hasValidName) {
 
 Выбирать вариант, который проще читать в конкретной ситуации.
 
+**Separate feature eligibility from missing data.** Express whether an operation should run or a component should mount at that decision point, rather than only replacing available data with a missing value. Prefer a direct guard when it clarifies intent, while preserving lazy evaluation and required hook calls.
+
 Дополнительные требования:
 
 - Избегать вложенных тернарных операторов
@@ -380,15 +382,9 @@ const preview = key && previews[key];
 const preview = key ? previews[key] : undefined;
 ```
 
-При рефакторинге учитывать различия между:
+**Keep fallback chains semantically coherent.** Use short fallback chains with an obvious priority for the same value. Establish branch-specific choices separately instead of injecting `undefined` into a chain. Preserve the meanings of `false`, `0`, `''`, `null` and `undefined`; do not interchange `??` and `||` without checking their semantics.
 
-- `null`
-- `undefined`
-- `false`
-- `0`
-- `''`
-
-Не заменять `??` на `||` и наоборот без проверки исходной семантики.
+**Resolve related optional values together.** When several calculations depend on one optional object, consider resolving them under one presence check instead of creating absent keys and temporary values. Keep simple optional chaining and nullish expressions when they are clearer.
 
 ### 5.6. Строки
 
@@ -487,6 +483,8 @@ const getFullName = (user: User) => {
 Сложную независимую логику выносить за пределы компонентов.
 
 Не перегружать JSX вычислениями и преобразованиями данных.
+
+**Respect API boundaries and React lifecycle.** Represent absence according to the receiving contract: domain data, controlled input, CSS, component or hook. Keep valid `null`/`undefined` inputs and controlled empty strings. Do not change mounting, state, hook order or side effects for cosmetic simplification; follow the Rules of Hooks and prevent numeric visibility guards from accidentally rendering zero.
 
 ### 7.2. Вычисления перед JSX
 

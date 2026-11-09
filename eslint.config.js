@@ -6,6 +6,7 @@ import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import importX from 'eslint-plugin-import-x';
 import newlineDestructuring from 'eslint-plugin-newline-destructuring';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 const ignores = [
   '**/*.js',
@@ -29,6 +30,7 @@ export default defineConfig([
       'import-x': importX,
       '@stylistic': stylistic,
       'newline-destructuring': fixupPluginRules(newlineDestructuring),
+      'react-hooks': reactHooks,
     },
 
     languageOptions: {
@@ -159,6 +161,13 @@ export default defineConfig([
 
       'import-x/no-default-export': 'warn',
       'curly': ['error', 'all'],
+
+      'no-unneeded-ternary': ['error', {
+        defaultAssignment: true,
+      }],
+
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
 
       '@stylistic/jsx-max-props-per-line': [
         'error',

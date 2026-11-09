@@ -85,6 +85,12 @@ const violations = [
     severity: 2,
   },
   {
+    name: 'unneeded boolean ternary',
+    code: 'const value = ready ? true : false;\n',
+    ruleId: 'no-unneeded-ternary',
+    severity: 2,
+  },
+  {
     name: 'explicit any warning',
     code: 'const value: any = input;\n',
     ruleId: '@typescript-eslint/no-explicit-any',
@@ -114,3 +120,59 @@ test('accepts compact pairs and expanded triples when destructuring', async () =
     assert(!messages.some((message) => message.ruleId === 'newline-destructuring/newline'));
   }
 });
+
+test('accepts short value choices, nullish fallbacks and intentional truthy defaults', async () => {
+  const snippets = [
+    "const value = ready ? 'yes' : 'no';\n",
+    'const value = current ? current : fallback;\n',
+    'const value = preview.hidden ?? item?.hidden ?? false;\n',
+    'const value = item?.width ?? 0;\n',
+  ];
+
+  for (const snippetCur of snippets) {
+    const messages = await lintMessages(snippetCur);
+
+    assert(!messages.some((message) => message.ruleId === 'no-unneeded-ternary'), JSON.stringify(messages));
+  }
+});
+
+const reactSourceFiles = [
+  'apps/editor/src/components/EditorScreen/EditorScreen.tsx',
+  'apps/book-runtime/src/components/BookPage/BookPage.tsx',
+  'packages/book-builder/src/components/custom/runtime.ts',
+];
+
+for (const filePathCur of reactSourceFiles) {
+  test(`checks React Hooks in ${filePathCur}`, async () => {
+    const [invalid] = await eslint.lintText(`import { useEffect } from 'react';
+function Component({ ready }) {
+  if (ready) { useEffect(() => {}, []); }
+  return null;
+}
+`, { filePath: filePathCur });
+    const [missing] = await eslint.lintText(`import { useEffect } from 'react';
+function Component({ value }) {
+  useEffect(() => { consume(value); }, []);
+  return null;
+}
+`, { filePath: filePathCur });
+    const [valid] = await eslint.lintText(`import { useEffect } from 'react';
+function Component({ value }) {
+  useEffect(() => { consume(value); }, [value]);
+  return null;
+}
+`, { filePath: filePathCur });
+
+    assert(invalid.messages.some((message) => message.ruleId === 'react-hooks/rules-of-hooks'
+      && message.severity === 2), JSON.stringify(invalid.messages));
+    assert(missing.messages.some((message) => message.ruleId === 'react-hooks/exhaustive-deps'
+      && message.severity === 1), JSON.stringify(missing.messages));
+    assert(!valid.messages.some((message) => message.ruleId?.startsWith('react-hooks/')),
+      JSON.stringify(valid.messages));
+
+    const config = await eslint.calculateConfigForFile(filePathCur);
+    assert.deepEqual(config.rules['no-unneeded-ternary'], [2, { defaultAssignment: true }]);
+    assert.equal(config.rules['no-nested-ternary']?.[0] ?? 0, 0);
+    assert.equal(config.rules['no-restricted-syntax']?.[0] ?? 0, 0);
+  });
+}
