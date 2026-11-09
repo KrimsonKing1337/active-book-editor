@@ -57,9 +57,45 @@ stylelint-config-standard dependency; the SCSS config still includes it.
 The Node engine range reflects jsdom 30's supported runtimes.
 
 TypeScript remains on 5.9, matching typescript-eslint's supported compiler range.
-ESLint remains on its compatible 9.x line because current import/react plugins
-do not declare support for ESLint 10; npm still marks ESLint 9 deprecated. No
-peer requirements were bypassed and no linter rules were weakened.
+ESLint was subsequently migrated to 10.14.0, as described below. No peer
+requirements were bypassed and no linter rules were weakened.
+
+## ESLint 10 migration
+
+ESLint 10.14.0 and @eslint/js 10.0.1 use native flat presets; FlatCompat and the
+direct @eslint/eslintrc dependency were removed. typescript-eslint 8.72.1 and
+Stylistic 5.10.0 already declare ESLint 10 support.
+
+The maintained eslint-plugin-import-x 4.18.1 replaces eslint-plugin-import,
+whose peer range excludes ESLint 10. Import grouping, path groups, internal
+aliases and default-export warnings keep their exact settings under the new
+import-x namespace. The React and JSX-a11y plugins had no active rules, and the
+React Hooks plugin was registered without enabling any rules in this repository;
+those unused registrations and dependencies were removed. This removes their
+incompatible peer requirements without disabling any checks.
+
+The newline-destructuring plugin accepts ESLint >=7.2 but calls the removed
+getSourceCode method. The official @eslint/compat 2.1.1 fixupPluginRules adapts
+that API while retaining the exact pair/triple/rest formatting rules. The
+standard Stylistic rules were considered but do not enforce the same behavior.
+
+The new recommended preserve-caught-error rule identified an audio error that
+discarded its cause; the same error message is retained and its original cause
+is now attached. no-useless-assignment identified an initial empty outDir value
+that was always overwritten; only that initializer was removed. The cleanup
+finally block and response behavior remain the same. No new rules were disabled
+and no bulk formatting was run.
+
+Validation after `npm ci --strict-peer-deps --no-audit --no-fund`:
+
+- The same 236 files are linted with zero errors and the same 36 warnings.
+- All previously active user rules retain their options and severity. ESLint 10's
+  new recommended checks and stricter globalThis check are enabled.
+- `node --test config/eslint.test.js`: 13 passing regression cases cover formatting,
+  import ordering, destructuring, warnings and the new recommended checks.
+- Typecheck, all 85 Vitest tests and `npm ls --all` passed again.
+- The production editor build and the Chromium production-book integration
+  scenario passed again after the two source corrections.
 
 ## Validation
 
@@ -101,3 +137,5 @@ production runtime scenario verifies the complete media fixture.
 - [React plugin documentation](https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react)
 - [SVGO 3 to 4 migration guide](https://svgo.dev/docs/migrations/migration-from-v3-to-v4/)
 - [SVGR plugin API](https://react-svgr.com/docs/node-api/)
+- [ESLint 10 migration guide](https://eslint.org/docs/latest/use/migrate-to-10.0.0)
+- [Import-x compatibility and migration](https://github.com/un-ts/eslint-plugin-import-x)

@@ -44,7 +44,7 @@ export const resolveAudioSource = async (
     file = await project.storage.getAssetFile(assetPath);
   } catch (error) {
     if (error instanceof DOMException && error.name === 'NotFoundError') {
-      throw new Error('Аудиофайл не найден в папке проекта');
+      throw new Error('Аудиофайл не найден в папке проекта', { cause: error });
     }
 
     throw error;

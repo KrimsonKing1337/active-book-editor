@@ -1,27 +1,11 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { fixupPluginRules } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import { defineConfig, globalIgnores } from 'eslint/config';
-import _import from 'eslint-plugin-import';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
+import importX from 'eslint-plugin-import-x';
 import newlineDestructuring from 'eslint-plugin-newline-destructuring';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
 
 const ignores = [
   '**/*.js',
@@ -39,19 +23,12 @@ const globIgnores = globalIgnores(ignores);
 export default defineConfig([
   globIgnores,
   {
-    extends: compat.extends(
-      'eslint:recommended',
-      'plugin:@typescript-eslint/recommended',
-    ),
+    extends: [js.configs.recommended, typescriptEslint.configs['flat/recommended']],
 
     plugins: {
-      import: fixupPluginRules(_import),
+      'import-x': importX,
       '@stylistic': stylistic,
-      '@typescript-eslint': typescriptEslint,
-      'jsx-a11y': jsxA11y,
-      react,
-      'react-hooks': fixupPluginRules(reactHooks),
-      'newline-destructuring': newlineDestructuring,
+      'newline-destructuring': fixupPluginRules(newlineDestructuring),
     },
 
     languageOptions: {
@@ -67,15 +44,12 @@ export default defineConfig([
     },
 
     settings: {
-      react: {
-        version: 'detect',
-      },
-      'import/internal-regex':
+      'import-x/internal-regex':
         '^(@root|@build|@project|@hooks|@components|@utils|activeBook-core)(/.*)?$',
     },
 
     rules: {
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           'newlines-between': 'always-and-inside-groups',
@@ -183,10 +157,7 @@ export default defineConfig([
         },
       ],
 
-      'import/no-default-export': 'warn',
-      'no-negated-in-lhs': 'off',
-      'no-native-reassign': 'off',
-      'jsx-a11y/anchor-is-valid': 'off',
+      'import-x/no-default-export': 'warn',
       'curly': ['error', 'all'],
 
       '@stylistic/jsx-max-props-per-line': [

@@ -150,7 +150,7 @@ const handleCompleteRequest = async (
     return;
   }
 
-  let outDir = '';
+  let outDir: string;
 
   try {
     outDir = await completeBuildSession(repoRoot, sessionId);
