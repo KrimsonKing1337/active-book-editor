@@ -6,7 +6,7 @@ import type {
   BackgroundEffectMediaOptions,
   BackgroundEffectVideoOptions,
   BackgroundEffectShadowOptions,
-} from 'activeBook-core/hooks/effects/background/@types';
+} from '@active-book/core/hooks/effects/background/@types';
 
 import type { FilterOperation } from '../style';
 import type { VisualLayout } from '../@types';

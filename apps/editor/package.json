@@ -1,5 +1,5 @@
 {
-  "name": "@active-book/editor",
+  "name": "active-book-editor",
   "private": true,
   "version": "0.0.1",
   "type": "module",

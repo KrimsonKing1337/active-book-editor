@@ -2,10 +2,10 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
-import { useDispatch, useSelector } from 'activeBook-core/store';
-import { mainActions, mainSelectors } from 'activeBook-core/store/main';
+import { useDispatch, useSelector } from '@active-book/core/store';
+import { mainActions, mainSelectors } from '@active-book/core/store/main';
 
-import { useGoToPage } from 'activeBook-core/hooks/control/useGoToPage';
+import { useGoToPage } from '@active-book/core/hooks/control/useGoToPage';
 
 import type { BookDocument } from '@active-book/book-builder/book';
 

@@ -6,7 +6,7 @@
 ## Задача
 
 Автор библиотеки предварительно собирает JS и CSS командой `npm run make` в
-[activeBook-custom-test](https://github.com/KrimsonKing1337/activeBook-custom-test).
+[active-book-custom-test](https://github.com/KrimsonKing1337/active-book-custom-test).
 
 В результате в книге хранятся **готовые** `.tgz`:
 
@@ -16,7 +16,7 @@ MyBook/
   package.json
   assets/
   dependencies/
-    activebook-custom-test-0.0.6.tgz
+    active-book-custom-test-0.0.6.tgz
 ```
 
 Внутри `.tgz` находятся `package.json`, `active-book.json`, `dist/index.js` и `dist/style.css`.
@@ -64,7 +64,7 @@ Book Builder по-прежнему собирает **само приложен�
 
 ## Проверка
 
-1. В репозитории `activeBook-custom-test`: `npm install && npm run make` (архив версии **0.0.6**).
+1. В репозитории `active-book-custom-test`: `npm install && npm run make` (архив версии **0.0.6**).
 2. Переключиться на `feature/custom-components-manifest-poc` в репозитории редактора.
 3. `npm install && npm run dev`; создать/открыть книгу и импортировать новый TGZ.
 4. Проверить кнопку «Добавить Счётчик», работу хуков и стили.

@@ -1,11 +1,11 @@
 import { type ChangeEvent, useState } from 'react';
 
-import { useSelector } from 'activeBook-core/store';
+import { useSelector } from '@active-book/core/store';
 
-import { configSelectors } from 'activeBook-core/store/config';
-import { mainSelectors } from 'activeBook-core/store/main';
+import { configSelectors } from '@active-book/core/store/config';
+import { mainSelectors } from '@active-book/core/store/main';
 
-import { useFlashlight } from 'activeBook-core/hooks/effects';
+import { useFlashlight } from '@active-book/core/hooks/effects';
 
 import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
 

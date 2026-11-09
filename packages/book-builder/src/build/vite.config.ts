@@ -19,7 +19,7 @@ export const createViteConfig = ({
   repoRoot,
   outDir,
 }: CreateViteConfigParams): InlineConfig => {
-  const coreRoot = path.resolve(repoRoot, 'node_modules/activeBook-core');
+  const coreRoot = path.resolve(repoRoot, 'node_modules/@active-book/core');
 
   return {
     root,

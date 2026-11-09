@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "activebook-custom-test": "file:./dependencies/activebook-custom-test-0.0.6.tgz"
+    "active-book-custom-test": "file:./dependencies/active-book-custom-test-0.0.8.tgz"
   }
 }

@@ -33,7 +33,7 @@ selection updates, rather than setting DOM values or bypassing handlers.
 
 Use the existing sibling checkouts and Node 24.19.0. The lockfile references the generated core archive named in the root package.json. If you already have that exact
 archive, run `npm ci`. If it is missing or locally rebuilt with a different
-checksum, run `npm ci` in `activeBook-types` and `activeBook-react-core-next`,
+checksum, run `npm ci` in `active-book-types` and `active-book-core`,
 then run `npm run core:package` in this repository. That supported script
 rebuilds/version-bumps core and updates the editor dependency and lockfile;
 these local manifest changes are expected. Do not bypass checksum checks.

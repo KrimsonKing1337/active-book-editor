@@ -2,8 +2,8 @@ import { createElement } from 'react';
 
 import type { BookRuntime, VisualEffectDefinition, VisualRendererProps } from '@active-book/types';
 
-import { BackgroundRenderer } from 'activeBook-core/components/BackgroundEffects/components/BackgroundRenderer';
-import { FrameRenderer } from 'activeBook-core/components/FrameEffects/components/FrameRenderer';
+import { BackgroundRenderer } from '@active-book/core/components/BackgroundEffects/components/BackgroundRenderer';
+import { FrameRenderer } from '@active-book/core/components/FrameEffects/components/FrameRenderer';
 
 import type { BrowserLibrary } from './browser';
 

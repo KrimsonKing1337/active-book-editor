@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { useDispatch } from 'activeBook-core/store';
-import { mainActions } from 'activeBook-core/store/main';
+import { useDispatch } from '@active-book/core/store';
+import { mainActions } from '@active-book/core/store/main';
 
-import { useAudioController } from 'activeBook-core/hooks/effects';
+import { useAudioController } from '@active-book/core/hooks/effects';
 
-import { Audio } from 'activeBook-core/components/ProxyHooks';
+import { Audio } from '@active-book/core/components/ProxyHooks';
 
 import type { BookProject } from '@project/@types';
 

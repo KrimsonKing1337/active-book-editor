@@ -4,7 +4,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import Document from '@tiptap/extension-document';
 import StarterKit from '@tiptap/starter-kit';
 
-import type { Config } from 'activeBook-core/@types';
+import type { Config } from '@active-book/core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
 

@@ -3,7 +3,7 @@ import { type ChangeEvent, useEffect, useRef } from 'react';
 import { InputMask, unformat } from '@react-input/mask';
 import classNames from 'classnames';
 
-import { Slider } from 'activeBook-core/components';
+import { Slider } from '@active-book/core/components';
 
 import controlStyles from '../../../EffectControls/EffectControls.module.scss';
 import inputStyles from '../../../EffectControls/TextInput/TextInput.module.scss';

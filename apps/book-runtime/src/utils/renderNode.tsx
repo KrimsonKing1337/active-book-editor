@@ -2,7 +2,7 @@ import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
 
 import type { BookRuntime } from '@active-book/types';
 
-import { Counter, H1, H2, P } from 'activeBook-core/components';
+import { Counter, H1, H2, P } from '@active-book/core/components';
 
 import type { BookNode, CustomComponentType } from '@types';
 

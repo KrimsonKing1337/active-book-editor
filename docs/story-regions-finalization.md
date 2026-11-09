@@ -2,7 +2,7 @@
 
 Ветка `experiment/story-regions-finalization`, база `experiment/css-first-story-surfaces`. Используется собранный core **0.0.52**, types **0.0.3**. Старые экспериментальные ветки и main не изменены; merge не выполнялся.
 
-[Полный отчёт ядра: DOM, демонстрации, CSS/WAAPI, loader, проверки и оценка готовности](https://github.com/KrimsonKing1337/activeBook-react-core-next/blob/experiment/story-regions-finalization/docs/story-regions-finalization.ru.md).
+[Полный отчёт ядра: DOM, демонстрации, CSS/WAAPI, loader, проверки и оценка готовности](https://github.com/KrimsonKing1337/active-book-core/blob/experiment/story-regions-finalization/docs/story-regions-finalization.ru.md).
 
 ## Модель
 

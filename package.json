@@ -1,5 +1,5 @@
 {
-  "name": "activebook-editor",
+  "name": "active-book-editor-workspace",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @active-book/editor",
+    "dev": "npm run dev -w active-book-editor",
     "preview": "vite preview --outDir dist-book",
-    "build:editor": "npm run build -w @active-book/editor",
-    "build:book": "npm run build -w @active-book/book-builder -- \"../../../books_editor/new\"",
+    "build:editor": "npm run build -w active-book-editor",
+    "build:book": "npm run build -w @active-book/book-builder",
     "typecheck": "npm run typecheck --workspaces --if-present && npm run typecheck:test",
     "typecheck:test": "tsc -p tsconfig.test.json",
     "lint:ts": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
@@ -31,10 +31,10 @@
     "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts"
   },
   "dependencies": {
-    "activeBook-core": "file:../activeBook-react-core-next/tgz/activebook-react-core-next-0.0.55.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.56.tgz"
   },
   "devDependencies": {
-    "@active-book/types": "file:../activeBook-types",
+    "@active-book/types": "file:../active-book-types",
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -77,5 +77,9 @@
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrimsonKing1337/active-book-editor.git"
   }
 }

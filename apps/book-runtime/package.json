@@ -1,14 +1,14 @@
 {
-  "name": "@active-book/book-runtime",
+  "name": "active-book-runtime",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@active-book/book-builder": "^0.0.1",
-    "activeBook-core": "*",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "@active-book/core": "*"
   },
   "devDependencies": {
     "@active-book/types": "*",

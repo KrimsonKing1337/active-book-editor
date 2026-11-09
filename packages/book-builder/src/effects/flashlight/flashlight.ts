@@ -1,4 +1,4 @@
-import type { FlashlightProps } from 'activeBook-core/components/ProxyHooks';
+import type { FlashlightProps } from '@active-book/core/components/ProxyHooks';
 
 import { isRecord } from '../utils';
 

@@ -1,4 +1,4 @@
-import type { VibrationProps } from 'activeBook-core/components/ProxyHooks';
+import type { VibrationProps } from '@active-book/core/components/ProxyHooks';
 
 import { isRecord } from '../utils';
 

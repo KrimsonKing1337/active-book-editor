@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom/client';
 
-import { Page0 } from 'activeBook-core/pages/Page0';
+import { Page0 } from '@active-book/core/pages/Page0';
 
-import { StoreProvider } from 'activeBook-core/store';
+import { StoreProvider } from '@active-book/core/store';
 
-import { AppWrapper } from 'activeBook-core/components';
+import { AppWrapper } from '@active-book/core/components';
 
 import { missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
@@ -21,7 +21,7 @@ import { AUDIO_UNLOCK_SRC, config } from './constants';
 
 import bookDocumentDefault from '../book.json';
 
-import 'activeBook-core/styles/styles.scss';
+import '@active-book/core/styles/styles.scss';
 import './styles.scss';
 
 const root = document.getElementById('root');

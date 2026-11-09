@@ -2,9 +2,9 @@ import type { PropsWithChildren, ReactNode } from 'react';
 
 import type { VisualEffectDefinition } from '@active-book/types';
 
-import type { Config } from 'activeBook-core/@types';
+import type { Config } from '@active-book/core/@types';
 
-import { AppWrapper } from 'activeBook-core/components';
+import { AppWrapper } from '@active-book/core/components';
 
 import type { BookDocument } from '@active-book/book-builder/book';
 

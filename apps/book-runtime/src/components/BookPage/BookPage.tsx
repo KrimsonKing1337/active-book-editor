@@ -2,7 +2,7 @@ import { type ComponentType } from 'react';
 
 import type { BookRuntime } from '@active-book/types';
 
-import { Audio, Vibration, Flashlight } from 'activeBook-core/components/ProxyHooks';
+import { Audio, Vibration, Flashlight } from '@active-book/core/components/ProxyHooks';
 
 import type { PageDocument } from '@types';
 

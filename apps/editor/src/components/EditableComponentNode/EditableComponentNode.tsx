@@ -10,7 +10,7 @@ import {
 
 import classNames from 'classnames';
 
-import { P, H1, H2 } from 'activeBook-core/components';
+import { P, H1, H2 } from '@active-book/core/components';
 
 import styles from './EditableComponentNode.module.scss';
 

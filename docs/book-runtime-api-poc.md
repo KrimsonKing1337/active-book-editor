@@ -2,7 +2,7 @@
 
 ## Контракт
 
-Общий TypeScript-only контракт находится в отдельном репозитории `activeBook-types`,
+Общий TypeScript-only контракт находится в отдельном репозитории `active-book-types`,
 в пакете `@active-book/types`. Редактор и читатель используют его через
 `import type`; реальные объекты доступны при рендеринге через проп `book`.
 
@@ -22,15 +22,15 @@
 
 ## Локальные зависимости
 
-При локальной разработке папки `activeBook-editor`, `activeBook-types`
-и `activeBook-custom-test` должны располагаться рядом: редактор и тестовая библиотека
-указывают `@active-book/types` как `file:../activeBook-types`.
+При локальной разработке папки `active-book-editor`, `active-book-types`
+и `active-book-custom-test` должны располагаться рядом: редактор и тестовая библиотека
+указывают `@active-book/types` как `file:../active-book-types`.
 
 ## Проверка
 
-1. Собрать `activeBook-custom-test` из ветки `feature/book-runtime-consumer` (`npm run make`).
+1. Собрать `active-book-custom-test` из ветки `feature/book-runtime-consumer` (`npm run make`).
 2. Запустить редактор из ветки `feature/book-runtime-api`.
-3. Импортировать `activebook-custom-test-0.0.8.tgz` и вставить `RuntimeExample`.
+3. Импортировать `active-book-custom-test-0.0.8.tgz` и вставить `RuntimeExample`.
 4. Проверить рендеринг настоящих `P`, `H2`, работу счётчика и режим `editor`.
 5. Создать аудиоэффект с ID `test-audio-id`, привязать существующий аудиофайл.
 6. Вставить `AudioControl`, собрать книгу, пройти начальный экран разблокировки аудио.

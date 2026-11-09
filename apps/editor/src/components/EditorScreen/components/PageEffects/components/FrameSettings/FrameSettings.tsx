@@ -1,6 +1,6 @@
 import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
 
-import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 

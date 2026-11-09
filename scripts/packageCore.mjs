@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const editorRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const coreRoot = resolve(editorRoot, '..', 'activeBook-react-core-next');
+const coreRoot = resolve(editorRoot, '..', 'active-book-core');
 const corePackagePath = resolve(coreRoot, 'package.json');
 const editorPackagePath = resolve(editorRoot, 'package.json');
 
@@ -29,17 +29,19 @@ const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 
 const main = () => {
   if (!existsSync(corePackagePath)) {
-    throw new Error('Expected sibling repository ../activeBook-react-core-next');
+    throw new Error('Expected sibling repository ../active-book-core');
   }
 
   const editorPackage = readJson(editorPackagePath);
-  const previousArchive = editorPackage.dependencies['activeBook-core']?.replace(/^file:/, '');
+  const previousArchive = editorPackage.dependencies['@active-book/core']?.replace(/^file:/, '');
 
   run('npm', ['run', 'make'], coreRoot);
 
   let corePackage = readJson(corePackagePath);
   const archivePath = (version) => {
-    return `../activeBook-react-core-next/tgz/${corePackage.name}-${version}.tgz`;
+    const archiveName = corePackage.name.replace(/^@/, '').replace('/', '-');
+
+    return `../active-book-core/tgz/${archiveName}-${version}.tgz`;
   };
 
   let nextArchive = archivePath(corePackage.version);
@@ -56,12 +58,12 @@ const main = () => {
     throw new Error(`Core archive was not generated: ${nextArchive}`);
   }
 
-  editorPackage.dependencies['activeBook-core'] = `file:${nextArchive}`;
+  editorPackage.dependencies['@active-book/core'] = `file:${nextArchive}`;
   writeFileSync(editorPackagePath, `${JSON.stringify(editorPackage, null, 2)}\n`);
 
   run('npm', ['install', '--no-audit', '--no-fund'], editorRoot);
 
-  console.log(`Installed activeBook-core from ${nextArchive}`);
+  console.log(`Installed @active-book/core from ${nextArchive}`);
 };
 
 try {

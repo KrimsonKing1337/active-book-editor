@@ -1,9 +1,9 @@
-import type { FrameSide } from 'activeBook-core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
 
 import {
   type FrameShadowPreset,
   FRAME_SHADOW_PRESETS,
-} from 'activeBook-core/components/FrameEffects/components/FrameShadow/presets';
+} from '@active-book/core/components/FrameEffects/components/FrameShadow/presets';
 
 import type { FrameOptions } from '@active-book/book-builder/effects';
 
