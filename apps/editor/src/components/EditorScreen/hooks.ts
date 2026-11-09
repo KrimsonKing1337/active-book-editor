@@ -365,6 +365,10 @@ export const useProjectActions = ({
     replaceDocument,
     waitForSaves,
     confirmDiscardChanges,
+    setProject,
+    setPendingRestore,
+    setIsProjectBusy,
+    setProjectMessage,
   ]);
 
   const handleOpenProject = useCallback(async () => {
@@ -404,6 +408,10 @@ export const useProjectActions = ({
     replaceDocument,
     waitForSaves,
     confirmDiscardChanges,
+    setProject,
+    setPendingRestore,
+    setIsProjectBusy,
+    setProjectMessage,
   ]);
 
   const handleSaveProject = useCallback(async () => {
@@ -426,7 +434,7 @@ export const useProjectActions = ({
     } finally {
       setIsProjectBusy(false);
     }
-  }, [isProjectBusy, saveCurrentProject]);
+  }, [isProjectBusy, saveCurrentProject, setIsProjectBusy, setProjectMessage]);
 
   const handleContinueLastProject = useCallback(async () => {
     const discardChangesConfirmed = confirmDiscardChanges();
@@ -468,6 +476,10 @@ export const useProjectActions = ({
     replaceDocument,
     waitForSaves,
     confirmDiscardChanges,
+    setProject,
+    setPendingRestore,
+    setIsProjectBusy,
+    setProjectMessage,
   ]);
 
   const handleForgetLastProject = useCallback(async () => {
@@ -481,7 +493,7 @@ export const useProjectActions = ({
     } finally {
       setIsProjectBusy(false);
     }
-  }, []);
+  }, [setPendingRestore, setIsProjectBusy, setProjectMessage]);
 
   const buildBook = useCallback(async () => {
     if (!editor || isProjectBusy) {
@@ -516,7 +528,7 @@ export const useProjectActions = ({
     } finally {
       setIsProjectBusy(false);
     }
-  }, [editor, isProjectBusy, saveCurrentProject]);
+  }, [editor, isProjectBusy, saveCurrentProject, setIsProjectBusy, setBuildState]);
 
   return {
     handleNewProject,
