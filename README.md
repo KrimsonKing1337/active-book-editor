@@ -193,7 +193,7 @@ Regression follow-up: [preserved masks, current reset control and core 0.0.53 va
 ## Shared development infrastructure
 
 Clone the ActiveBook repositories as siblings. Install `active-book-common` first,
-then this repository; it has the devDependency `active-book-common: file:../active-book-common`.
+then this repository; it has the devDependency `@active-book/common: file:../active-book-common`.
 Read `../active-book-common/AGENTS.md` before the local AGENTS.md.
 Shared configurations load directly through the common package exports; no copied
 configuration snapshots or standalone-clone fallback are maintained.
@@ -204,8 +204,8 @@ suites; choose `test:unit` or another subgroup for a narrower run. `deps:sync`
 applies standard npm section policies to already declared packages and workspaces.
 See the common README for installation order, groups, presets and policy semantics.
 
-ESLint extends `active-book-common/eslint`; only project aliases, ignores and local
-rules remain here. Stylelint reexports `active-book-common/stylelint`, including
+ESLint extends `@active-book/common/eslint`; only project aliases, ignores and local
+rules remain here. Stylelint reexports `@active-book/common/stylelint`, including
 its SCSS rules and property ordering. `lint:ts:check` / `lint:css:check` check without
 fixes; existing fixing scripts remain available.
 

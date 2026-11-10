@@ -1,5 +1,5 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
-import common, { importOrder } from 'active-book-common/eslint';
+import common, { importOrder } from '@active-book/common/eslint';
 
 export default defineConfig([
   globalIgnores([

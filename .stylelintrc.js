@@ -1,1 +1,1 @@
-export { default } from 'active-book-common/stylelint';
+export { default } from '@active-book/common/stylelint';

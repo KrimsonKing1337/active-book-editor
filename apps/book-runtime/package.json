@@ -7,8 +7,8 @@
   "dependencies": {
     "@active-book/book-builder": "^0.0.1",
     "@active-book/core": "*",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@active-book/types": "*",

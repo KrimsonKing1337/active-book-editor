@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 
-import common, { browser, component, unit } from 'active-book-common/vitest';
+import common, { browser, component, unit } from '@active-book/common/vitest';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 import editorConfig from './apps/editor/vite.config';
