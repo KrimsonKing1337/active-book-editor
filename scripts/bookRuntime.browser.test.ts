@@ -71,6 +71,10 @@ test('production book selects stable page IDs in a persistent viewport with page
     throw error;
   }
 
+  assert.match(await editor.locator('body').evaluate((element) => getComputedStyle(element).fontFamily), /Inter/);
+  assert.match(await editor.locator('[data-book-application]').evaluate((element) => getComputedStyle(element).fontFamily), /Roboto/);
+  assert.notEqual(await editor.locator('body').evaluate((element) => getComputedStyle(element).userSelect), 'none');
+
   const readSaved = async (): Promise<BookDocument> => editor.evaluate(`(async () => {
     const storage = await navigator.storage.getDirectory();
     const directory = await storage.getDirectoryHandle('built-editor-book');
@@ -253,6 +257,34 @@ test('production book selects stable page IDs in a persistent viewport with page
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${address.port}/`);
   await page.getByRole('button', { name: 'Начать читать', exact: true }).waitFor();
+  const baseStyles = await page.evaluate(() => ({
+    sizes: ['html', 'body', '#root'].map((selector) => {
+      const bounds = document.querySelector(selector)!.getBoundingClientRect();
+      return [bounds.width, bounds.height];
+    }),
+    overflow: getComputedStyle(document.body).overflow,
+    margin: getComputedStyle(document.body).margin,
+    selection: getComputedStyle(document.body).userSelect,
+    font: getComputedStyle(document.querySelector('[data-book-application]')!).fontFamily,
+    background: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),
+  }));
+  assert.deepEqual(baseStyles.sizes, [[1100, 800], [1100, 800], [1100, 800]]);
+  assert.equal(baseStyles.overflow, 'hidden');
+  assert.equal(baseStyles.margin, '0px');
+  assert.equal(baseStyles.selection, 'none');
+  assert.match(baseStyles.font, /Roboto/);
+  assert.notEqual(baseStyles.background, '');
+  await page.evaluate(() => {
+    const input = document.createElement('input');
+    const editable = document.createElement('div');
+    editable.contentEditable = 'true';
+    document.body.append(input, editable);
+    if ([input, editable].some((element) => getComputedStyle(element).userSelect !== 'text')) {
+      throw new Error('Runtime must preserve editable text selection');
+    }
+    input.remove();
+    editable.remove();
+  });
   assert.equal(await page.locator('[data-page-id]').count(), 0, 'page 0 is a technical audio screen');
   const book = await page.locator('[data-story-region="story"]').elementHandle();
   assert(book);

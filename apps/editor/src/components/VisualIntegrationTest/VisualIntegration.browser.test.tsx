@@ -23,6 +23,7 @@ import { compileVisualEffects } from '@active-book/book-builder/visualEffects';
 import fixture from '@root/tests/fixtures/multipage-book/book.json';
 import archiveUrl from '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url';
 
+import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
 
 let session: VisualEffects;

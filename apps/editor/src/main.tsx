@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 
 import { EditorScreen } from '@components';
 
-import 'reset-css/reset.css';
+import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
 import './styles.scss';
 

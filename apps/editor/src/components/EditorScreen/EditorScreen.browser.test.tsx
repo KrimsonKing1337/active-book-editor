@@ -16,7 +16,7 @@ import {
 
 import { EditorScreen } from './EditorScreen';
 
-import 'reset-css/reset.css';
+import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
 import '../../styles.scss';
 
@@ -43,6 +43,7 @@ beforeEach(async () => {
 
   expect(effectsTrigger?.closest('[data-story-region="story"]')).toBeNull();
   expect(document.querySelector('[data-story-region="story"] #Toolbar')).not.toBeNull();
+  expect(document.querySelector('[data-welcome-tour-id="config"] svg')?.getBoundingClientRect().width).toBe(15);
 });
 
 afterEach(async () => {

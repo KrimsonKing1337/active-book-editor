@@ -34,9 +34,10 @@
     "test:scripts": "node --test scripts/packageCore.test.mjs"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.58.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.60.tgz"
   },
   "devDependencies": {
+    "@active-book/common": "file:../active-book-common",
     "@active-book/types": "file:../active-book-types",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -53,8 +54,7 @@
     "sass": "^1.108.1",
     "stylelint": "16.26.1",
     "vite": "^8.3.6",
-    "vitest": "4.1.12",
-    "@active-book/common": "file:../active-book-common"
+    "vitest": "4.1.12"
   },
   "husky": {
     "hooks": {
