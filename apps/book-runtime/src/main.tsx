@@ -22,7 +22,6 @@ import { AUDIO_UNLOCK_SRC, config } from './constants';
 import bookDocumentDefault from '../book.json';
 
 import '@active-book/common/styles';
-import '@active-book/core/styles/styles.scss';
 import './styles.scss';
 
 const root = document.getElementById('root');
