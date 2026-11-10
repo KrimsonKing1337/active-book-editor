@@ -98,7 +98,7 @@ loader, as the editor does, to resolve the TypeScript workspace exports.
   Local scripts do not enable JUnit. No coverage thresholds are imposed.
 
 `npm test` runs all projects once. For watch mode, append `-- --watch`.
-`npm run typecheck` also checks the test infrastructure. Import test APIs from
+`npm run typecheck` checks workspace sources; run `npm run typecheck:test` for the test infrastructure. Import test APIs from
 `vitest`; no global test functions are enabled. DOM setups register jest-dom
 matchers and explicitly clean up RTL after each test. Browser tests can use
 `page` and native interactions from `vitest/browser`.
@@ -189,33 +189,35 @@ Final story regions: [contract, Toolbar, masks and validation](docs/story-region
 
 Regression follow-up: [preserved masks, current reset control and core 0.0.53 validation](docs/story-regions-test-regressions.md).
 
+
 ## Shared development infrastructure
 
-Read `../active-book-common/AGENTS.md` before this repository's local additions when
-that checkout is available. The local AGENTS.md includes standalone instructions
-for cloud tasks with only this repository. Shared configuration candidates and
-the audit live in `../active-book-common/configs/README.md`; installed tooling
-continues to use this repository's local configuration.
+Clone the ActiveBook repositories as siblings. Install `active-book-common` first,
+then this repository; it has the devDependency `active-book-common: file:../active-book-common`.
+Read `../active-book-common/AGENTS.md` before the local AGENTS.md.
+Shared configurations load directly through the common package exports; no copied
+configuration snapshots or standalone-clone fallback are maintained.
 
-The common repository provides `deps:check`, `deps:sync`, `check` and an explicit
-`check:browser`. `lint:ts:check` and `lint:css:check` here check without fixing files;
-existing lint scripts retain their `--fix` behavior. `test:scripts` uses Node's test
-runner and includes an offline npm installation into a temporary workspace project.
+The common repository supplies grouped `check`, `typecheck`, `lint`, and `test`
+commands, each with `--repo` filtering. `check` and `test` include browser/runtime
+suites; choose `test:unit` or another subgroup for a narrower run. `deps:sync`
+applies standard npm section policies to already declared packages and workspaces.
+See the common README for installation order, groups, presets and policy semantics.
 
-`core:package` now runs the sibling core's `make` exactly once, reads its resulting
-name/version, verifies `tgz/active-book-core-<version>.tgz`, and passes that archive
-to `npm install --save --package-lock=true` in the editor root. npm updates the
-manifest and lock itself. The root owns the archive dependency; `active-book-runtime`
-continues to consume the hoisted package through `*`, so installing into the editor
-application workspace would change the dependency arrangement.
+ESLint extends `active-book-common/eslint`; only project aliases, ignores and local
+rules remain here. Stylelint reexports `active-book-common/stylelint`, including
+its SCSS rules and property ordering. `lint:ts:check` / `lint:css:check` check without
+fixes; existing fixing scripts remain available.
 
-`--save` is intentional: core's `make` deletes old archives and increments the
-version. `--no-save` would leave the manifest/lock pointing at the previous deleted
-archive and break subsequent `npm ci`. Expect the core version/lock and editor
-archive path/lock to change when explicitly running this command. A failure reports
-the npm step and working directory; an already completed core build is not rolled
-back if the later installation fails. The script does not add a second version bump,
-rewrite JSON by hand, change directory through a shell, or synchronize registry
-versions. It requires installed dependencies in core and access to its local types
-package. After publication to the future registry, this temporary archive workflow
-can be removed.
+Vitest uses the common coverage, unit, component and Playwright browser profiles;
+source paths, setups and Vite wiring remain in vitest.config.ts. The browser provider
+also stays a direct devDependency because TypeScript imports its context types.
+Editor tsconfig.base.json extends the common app profile.
+
+`core:package` runs sibling core's `make` once, reads its resulting name/version,
+computes `tgz/active-book-core-<version>.tgz`, then invokes `npm install <archive> --save`
+at the editor root. npm owns all manifest/lock updates. `make` increments the core
+version and removes old archives, so `--no-save` would leave a stale dependency.
+The root owns the archive; `active-book-runtime` uses the hoisted package through `*`.
+A build/install failure reports npm's error and exits nonzero; completed changes
+remain visible in Git. `test:scripts` checks this workflow through real offline npm.

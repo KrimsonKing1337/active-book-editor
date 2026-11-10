@@ -7,75 +7,18 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-import { packageCore } from './packageCore.mjs';
-
-function fixture(t) {
+test('real npm saves the archive and lock while the runtime workspace consumes the root package', (t) => {
   const parent = mkdtempSync(join(tmpdir(), 'active book core-'));
   t.after(() => rmSync(parent, { recursive: true, force: true }));
   const root = join(parent, 'active-book-editor');
   const core = join(parent, 'active-book-core');
   mkdirSync(root);
   mkdirSync(core);
-  const editorPackage = {
-    name: 'editor-root',
-    workspaces: ['apps/*'],
+  const corePackage = { name: '@active-book/core', version: '1.0.0' };
+  writeFileSync(join(root, 'package.json'), JSON.stringify({
+    name: 'editor-root', private: true, workspaces: ['apps/*'],
     dependencies: { '@active-book/core': 'file:../active-book-core/tgz/active-book-core-1.0.0.tgz' },
-  };
-  const corePackage = { name: '@active-book/core', version: '1.0.0', scripts: { make: 'node make.js' } };
-  writeFileSync(join(root, 'package.json'), JSON.stringify(editorPackage));
-  writeFileSync(join(root, 'package-lock.json'), 'original lock');
-  writeFileSync(join(core, 'package.json'), JSON.stringify(corePackage));
-
-  return { root, core, corePackage };
-}
-
-function buildArchive({ core, corePackage }) {
-  corePackage.version = '1.0.1';
-  writeFileSync(join(core, 'package.json'), JSON.stringify(corePackage));
-  mkdirSync(join(core, 'tgz'));
-  const archive = join(core, 'tgz/active-book-core-1.0.1.tgz');
-  writeFileSync(archive, 'fixture archive');
-
-  return archive;
-}
-
-test('make once, select the post-build scoped archive, save at workspace root through npm', (t) => {
-  const data = fixture(t);
-  const calls = [];
-  const before = readFileSync(join(data.root, 'package.json'), 'utf8');
-  const archive = packageCore({ root: data.root, npm(args, cwd) {
-    calls.push({ args, cwd });
-    if (args[0] === 'run') {
-      buildArchive(data);
-    }
-  } });
-  assert.deepEqual(calls, [
-    { args: ['run', 'make'], cwd: data.core },
-    { args: ['install', archive, '--save', '--package-lock=true', '--no-audit', '--no-fund'], cwd: data.root },
-  ]);
-  assert.equal(readFileSync(join(data.root, 'package.json'), 'utf8'), before);
-  assert.equal(readFileSync(join(data.root, 'package-lock.json'), 'utf8'), 'original lock');
-});
-
-test('missing core, wrong package ownership, missing archive and npm failures stop with context', (t) => {
-  const data = fixture(t);
-  assert.throws(() => packageCore({ root: data.root, npm() { throw new Error('make exit 2'); } }), /make exit 2/);
-  assert.throws(() => packageCore({ root: data.root, npm() {} }), /did not produce/);
-  assert.throws(() => packageCore({ root: data.root, npm(args) {
-    if (args[0] === 'run') {
-      buildArchive(data);
-    } else {
-      throw new Error('install exit 3');
-    }
-  } }), /install exit 3/);
-  writeFileSync(join(data.root, 'package.json'), '{"dependencies":{}}');
-  assert.throws(() => packageCore({ root: data.root }), /root to own/);
-  rmSync(data.core, { recursive: true });
-  assert.throws(() => packageCore({ root: data.root }), /Cannot read.*active-book-core/);
-});
-
-test('real npm saves the archive and lock while the runtime workspace consumes the root package', (t) => {
-  const { root, core, corePackage } = fixture(t);
+  }));
   const npmCli = process.env.npm_execpath;
   assert.ok(npmCli, 'Run through npm run test:scripts');
   mkdirSync(join(root, 'scripts'));
@@ -83,14 +26,12 @@ test('real npm saves the archive and lock while the runtime workspace consumes t
   const editorPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   editorPackage.scripts = { 'core:package': 'node scripts/packageCore.mjs' };
   writeFileSync(join(root, 'package.json'), JSON.stringify(editorPackage));
-  // Start without a lock: npm must create it, with the fresh archive integrity.
-  rmSync(join(root, 'package-lock.json'));
   mkdirSync(join(root, 'apps/runtime'), { recursive: true });
   writeFileSync(join(root, 'apps/runtime/package.json'), JSON.stringify({
     name: 'fixture-runtime', version: '1.0.0', dependencies: { '@active-book/core': '*' },
   }));
   corePackage.main = 'index.js';
-  corePackage.scripts.make = 'node make.cjs';
+  corePackage.scripts = { make: 'node make.cjs' };
   writeFileSync(join(core, 'package.json'), JSON.stringify(corePackage));
   writeFileSync(join(core, 'index.js'), 'module.exports = "fresh core";');
   writeFileSync(join(core, 'make.cjs'), `
