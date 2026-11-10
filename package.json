@@ -28,7 +28,10 @@
     "test:browser:preview": "vitest run --configLoader runner --mode preview --browser.ui=false --browser.headless=false",
     "test:coverage": "vitest run --configLoader runner --coverage",
     "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
-    "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts"
+    "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts",
+    "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
+    "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
+    "test:scripts": "node --test scripts/packageCore.test.mjs"
   },
   "dependencies": {
     "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.57.tgz"

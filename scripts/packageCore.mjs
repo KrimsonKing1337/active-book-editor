@@ -1,74 +1,85 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { dirname, resolve } from 'node:path';
+import { delimiter, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const editorRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const coreRoot = resolve(editorRoot, '..', 'active-book-core');
-const corePackagePath = resolve(coreRoot, 'package.json');
-const editorPackagePath = resolve(editorRoot, 'package.json');
+const editorRoot = fileURLToPath(new URL('../', import.meta.url));
 
-const run = (command, args, cwd) => {
-  const executable = process.platform === 'win32' ? `${command}.cmd` : command;
-  const result = spawnSync(executable, args, {
+function runNpm(args, cwd) {
+  // npm run supplies npm_execpath on Windows, Linux and macOS. Direct node
+  // invocation can also find npm's JS entry point without spawning a shell.
+  let npmCli = process.env.npm_execpath;
+  if (!npmCli) {
+    for (const directory of (process.env.PATH ?? '').split(delimiter)) {
+      const bundledCli = join(directory, 'node_modules/npm/bin/npm-cli.js');
+      const executable = join(directory, 'npm');
+      if (existsSync(bundledCli)) {
+        npmCli = bundledCli;
+        break;
+      }
+      if (process.platform !== 'win32' && existsSync(executable)) {
+        npmCli = realpathSync(executable);
+        break;
+      }
+    }
+  }
+  if (!npmCli) {
+    throw new Error('npm CLI not found; run npm run core:package');
+  }
+  const result = spawnSync(process.execPath, [npmCli, ...args], {
     cwd,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: false,
   });
+  if (result.error || result.status !== 0) {
+    throw new Error(`npm ${args.join(' ')} in ${cwd}: ${result.error?.message ?? result.signal ?? `exit ${result.status}`}`);
+  }
+}
 
-  if (result.error) {
-    throw result.error;
+function readPackage(directory) {
+  const path = join(directory, 'package.json');
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    throw new Error(`Cannot read ${path}: ${error.message}`);
+  }
+}
+
+export function packageCore({ root = editorRoot, npm = runNpm } = {}) {
+  const coreRoot = resolve(root, '../active-book-core');
+  const editorPackage = readPackage(root);
+  const corePackage = readPackage(coreRoot);
+  if (corePackage.name !== '@active-book/core' || !corePackage.scripts?.make) {
+    throw new Error(`Expected @active-book/core with a make script in ${coreRoot}`);
+  }
+  // The root owns the archive; active-book-runtime consumes the hoisted package
+  // through '*'. Installing at the root preserves this workspace arrangement.
+  if (!editorPackage.dependencies?.['@active-book/core']?.startsWith('file:')) {
+    throw new Error('Expected the editor root to own the @active-book/core file: dependency');
   }
 
-  if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(' ')} failed with exit code ${result.status}`);
-  }
-};
+  npm(['run', 'make'], coreRoot);
 
-const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
-
-const main = () => {
-  if (!existsSync(corePackagePath)) {
-    throw new Error('Expected sibling repository ../active-book-core');
+  const builtPackage = readPackage(coreRoot);
+  const archiveName = `${builtPackage.name.replace(/^@/, '').replace('/', '-')}-${builtPackage.version}.tgz`;
+  const archivePath = join(coreRoot, 'tgz', archiveName);
+  if (!existsSync(archivePath) || !statSync(archivePath).isFile()) {
+    throw new Error(`Core build did not produce ${archivePath}`);
   }
 
-  const editorPackage = readJson(editorPackagePath);
-  const previousArchive = editorPackage.dependencies['@active-book/core']?.replace(/^file:/, '');
+  // make already increments the version. Save the new archive and its integrity
+  // through npm: --no-save would leave manifests pointing at the removed archive.
+  npm(['install', archivePath, '--save', '--package-lock=true', '--no-audit', '--no-fund'], root);
+  console.log(`Installed @active-book/core from ${archivePath}`);
 
-  run('npm', ['run', 'make'], coreRoot);
+  return archivePath;
+}
 
-  let corePackage = readJson(corePackagePath);
-  const archivePath = (version) => {
-    const archiveName = corePackage.name.replace(/^@/, '').replace('/', '-');
-
-    return `../active-book-core/tgz/${archiveName}-${version}.tgz`;
-  };
-
-  let nextArchive = archivePath(corePackage.version);
-
-  // A fresh version prevents npm from continuing to reuse an older local tarball.
-  if (nextArchive === previousArchive) {
-    run('npm', ['run', 'up'], coreRoot);
-    run('npm', ['run', 'packaging'], coreRoot);
-    corePackage = readJson(corePackagePath);
-    nextArchive = archivePath(corePackage.version);
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    packageCore();
+  } catch (error) {
+    console.error(error.message);
+    process.exitCode = 1;
   }
-
-  if (!existsSync(resolve(editorRoot, nextArchive))) {
-    throw new Error(`Core archive was not generated: ${nextArchive}`);
-  }
-
-  editorPackage.dependencies['@active-book/core'] = `file:${nextArchive}`;
-  writeFileSync(editorPackagePath, `${JSON.stringify(editorPackage, null, 2)}\n`);
-
-  run('npm', ['install', '--no-audit', '--no-fund'], editorRoot);
-
-  console.log(`Installed @active-book/core from ${nextArchive}`);
-};
-
-try {
-  main();
-} catch (error) {
-  console.error(error);
-  process.exitCode = 1;
 }

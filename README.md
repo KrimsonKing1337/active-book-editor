@@ -188,3 +188,34 @@ Current CSS-first experiment: [contract, controls, commits and validation](docs/
 Final story regions: [contract, Toolbar, masks and validation](docs/story-regions-finalization.md).
 
 Regression follow-up: [preserved masks, current reset control and core 0.0.53 validation](docs/story-regions-test-regressions.md).
+
+## Shared development infrastructure
+
+Read `../active-book-common/AGENTS.md` before this repository's local additions when
+that checkout is available. The local AGENTS.md includes standalone instructions
+for cloud tasks with only this repository. Shared configuration candidates and
+the audit live in `../active-book-common/configs/README.md`; installed tooling
+continues to use this repository's local configuration.
+
+The common repository provides `deps:check`, `deps:sync`, `check` and an explicit
+`check:browser`. `lint:ts:check` and `lint:css:check` here check without fixing files;
+existing lint scripts retain their `--fix` behavior. `test:scripts` uses Node's test
+runner and includes an offline npm installation into a temporary workspace project.
+
+`core:package` now runs the sibling core's `make` exactly once, reads its resulting
+name/version, verifies `tgz/active-book-core-<version>.tgz`, and passes that archive
+to `npm install --save --package-lock=true` in the editor root. npm updates the
+manifest and lock itself. The root owns the archive dependency; `active-book-runtime`
+continues to consume the hoisted package through `*`, so installing into the editor
+application workspace would change the dependency arrangement.
+
+`--save` is intentional: core's `make` deletes old archives and increments the
+version. `--no-save` would leave the manifest/lock pointing at the previous deleted
+archive and break subsequent `npm ci`. Expect the core version/lock and editor
+archive path/lock to change when explicitly running this command. A failure reports
+the npm step and working directory; an already completed core build is not rolled
+back if the later installation fails. The script does not add a second version bump,
+rewrite JSON by hand, change directory through a shell, or synchronize registry
+versions. It requires installed dependencies in core and access to its local types
+package. After publication to the future registry, this temporary archive workflow
+can be removed.
