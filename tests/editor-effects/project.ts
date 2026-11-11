@@ -5,13 +5,12 @@ import type { JSONContent } from '@tiptap/core';
 
 import type { BookDocument } from '@active-book/book-builder/book';
 
-
 import { visualToDraft, pageVisualEffects } from '@active-book/book-builder/visualEffects';
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
 
-import { groupPageEffects } from '../../apps/editor/src/components/EditorScreen/components/PageEffects/context/utils';
+import { clearLastProjectHandle } from '@project/recentProjectStore';
 
-import { clearLastProjectHandle } from '../../apps/editor/src/project/recentProjectStore';
+import { groupPageEffects } from '@components/EditorScreen/components/PageEffects/context/utils';
 
 import book from '../fixtures/effects-book/book.json?raw';
 import herb from '../fixtures/effects-book/assets/herb.svg?raw';
@@ -28,8 +27,18 @@ export const savedPageEffects = (document: JSONContent) => {
   return groupPageEffects({ effects, previous: {} });
 };
 
-const writeFile = async (directory: FileSystemDirectoryHandle, name: string, content: string) => {
-  const fileHandle = await directory.getFileHandle(name, { create: true });
+type WriteFileAttrs = {
+  dir: FileSystemDirectoryHandle;
+  name: string;
+  content: string;
+};
+
+const writeFile = async ({
+  dir,
+  name,
+  content,
+}: WriteFileAttrs) => {
+  const fileHandle = await dir.getFileHandle(name, { create: true });
   const writableStream = await fileHandle.createWritable();
 
   await writableStream.write(content);
@@ -40,17 +49,31 @@ export const createProject = async ({ empty = false } = {}) => {
   await clearLastProjectHandle();
   localStorage.clear();
 
-  const storageRoot = await navigator.storage.getDirectory();
   const projectName = `effects-${crypto.randomUUID()}`;
+  const storageRoot = await navigator.storage.getDirectory();
+
   const projectDirectory = await storageRoot.getDirectoryHandle(projectName, { create: true });
   const assetsDirectory = await projectDirectory.getDirectoryHandle('assets', { create: true });
 
   if (!empty) {
-    await writeFile(projectDirectory, 'book.json', book);
+    await writeFile({
+      dir: projectDirectory,
+      name: 'book.json',
+      content: book,
+    });
   }
 
-  await writeFile(projectDirectory, 'package.json', '{"private":true,"dependencies":{}}');
-  await writeFile(assetsDirectory, 'herb.svg', herb);
+  await writeFile({
+    dir: projectDirectory,
+    name: 'package.json',
+    content: '{"private":true,"dependencies":{}}',
+  });
+
+  await writeFile({
+    dir: assetsDirectory,
+    name: 'herb.svg',
+    content: herb,
+  });
 
   // Only the OS folder picker/confirmation are replaced. Storage and IndexedDB are real.
   const pickDirectory = vi.fn(async () => projectDirectory);
