@@ -1,5 +1,8 @@
 # Editable carousel
 
+Follow-up [issue #65](./content-validation-review.md) documents range boundaries,
+incremental validation measurements and the updated regression results.
+
 Stage 2 uses the text-content contract already merged into `main`.
 
 ```text

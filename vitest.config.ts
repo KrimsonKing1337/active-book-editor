@@ -1,6 +1,10 @@
 import { fileURLToPath } from 'node:url';
 
-import common, { browser, component, unit } from '@active-book/common/vitest';
+import common, {
+  browser,
+  component,
+  unit,
+} from '@active-book/common/vitest';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 import editorConfig from './apps/editor/vite.config';
@@ -11,6 +15,7 @@ export default defineConfig((env) => mergeConfig(
     root: fileURLToPath(new URL('.', import.meta.url)),
     optimizeDeps: { include: ['@active-book/core/controllers/visualEffects'] },
     test: {
+      provide: { contentBenchmark: process.env.npm_lifecycle_event === 'bench:content' },
       coverage: { include: ['apps/*/src/**/*.{ts,tsx}', 'packages/*/src/**/*.{ts,tsx}'] },
       projects: [
         mergeConfig(unit, {

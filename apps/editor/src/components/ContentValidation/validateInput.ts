@@ -2,18 +2,30 @@ import { Fragment, Node } from '@tiptap/pm/model';
 
 import { assertContentDocument, assertContentNode } from '@active-book/book-builder/content';
 
-const assertHtml = (html: string, insideSlide: boolean): void => {
+type HtmlContext = {
+  insideSlide: boolean;
+  allowOpenSlide?: boolean;
+};
+
+const assertHtml = (html: string, context: HtmlContext): void => {
   const dom = new DOMParser().parseFromString(html, 'text/html');
   const containers = dom.querySelectorAll('[data-type="carousel"], [data-type="segment"]');
 
   for (const slideCur of dom.querySelectorAll('[data-type="carouselSlide"]')) {
-    if (!slideCur.parentElement?.matches('section[data-type="carousel"]')) {
+    const slice = slideCur.getAttribute('data-pm-slice') ?? '';
+    const open = /^(\d+) (\d+)(?: |$)/u.exec(slice);
+    const isOpenContext = context.allowOpenSlide && slideCur.parentElement === dom.body
+      && open !== null && Number(open[1]) > 0 && Number(open[2]) > 0;
+
+    if (!slideCur.parentElement?.matches('section[data-type="carousel"]') && !isOpenContext) {
       throw new Error('Слайд должен находиться внутри карусели');
     }
   }
 
   for (const containerCur of containers) {
-    if (insideSlide || containerCur.parentElement?.closest('[data-type="carousel"]')) {
+    const ancestor = containerCur.parentElement?.closest('[data-type="carousel"], [data-type="carouselSlide"]');
+
+    if (context.insideSlide || ancestor) {
       throw new Error('Карусель и segment нельзя вставить внутрь слайда');
     }
 
@@ -33,6 +45,10 @@ const assertHtml = (html: string, insideSlide: boolean): void => {
   }
 };
 
+export const validateClipboardHtml = (html: string, insideSlide: boolean): void => {
+  assertHtml(html, { insideSlide, allowOpenSlide: true });
+};
+
 export const validateInput = (content: unknown, insideSlide: boolean): void => {
   // TipTap accepts null (and an empty Fragment) as the clear-content input.
   if (content === null) {
@@ -40,7 +56,7 @@ export const validateInput = (content: unknown, insideSlide: boolean): void => {
   }
 
   if (typeof content === 'string') {
-    assertHtml(content, insideSlide);
+    assertHtml(content, { insideSlide });
 
     return;
   }
