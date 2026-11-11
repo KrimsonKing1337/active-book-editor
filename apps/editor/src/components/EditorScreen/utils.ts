@@ -7,7 +7,6 @@ import Document from '@tiptap/extension-document';
 import StarterKit from '@tiptap/starter-kit';
 import Paragraph from '@tiptap/extension-paragraph';
 import Heading from '@tiptap/extension-heading';
-import { ReactNodeViewRenderer } from '@tiptap/react';
 
 import type { Config } from '@active-book/core/@types';
 
@@ -22,25 +21,15 @@ import {
 } from '@project/errors';
 
 import { ComponentNode } from '@components/ComponentNode';
-import { TextNodeView } from '@components/TextNodeView';
-
 
 import type { BuildState, TextBlock } from './@types';
 
 export const AUTO_SAVE_DELAY = 1500;
 
 export const contentNodes = [
+  Paragraph,
+  Heading.configure({ levels: [1, 2] }),
   ComponentNode,
-  Paragraph.extend({
-    addNodeView() {
-      return ReactNodeViewRenderer(TextNodeView);
-    },
-  }),
-  Heading.extend({
-    addNodeView() {
-      return ReactNodeViewRenderer(TextNodeView);
-    },
-  }).configure({ levels: [1, 2] }),
 ];
 
 // The paragraph comes first so Enter and required empty blocks use the standard text node.

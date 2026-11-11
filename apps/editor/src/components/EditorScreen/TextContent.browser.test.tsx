@@ -15,6 +15,7 @@ import { page } from 'vitest/browser';
 import { textHtml } from '@root/tests/fixtures/text-content';
 
 import { createEmptyDocument, editorExtensions } from './utils';
+import styles from './EditorScreen.module.scss';
 
 import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
@@ -39,7 +40,11 @@ beforeEach(() => {
     editorProps: { attributes: { role: 'textbox', 'aria-label': 'Тестовый текст' } },
   });
 
-  render(<EditorContent editor={editor} />);
+  render(
+    <div className={styles.Canvas}>
+      <EditorContent editor={editor} />
+    </div>,
+  );
 });
 
 afterEach(() => {
@@ -66,7 +71,7 @@ test('uses standard paragraph and heading commands with levels 1 and 2 and undo/
   editor.commands.toggleHeading({ level: 2 });
   expect(editor.getHTML()).toBe('<h2>Текст</h2>');
   await expect.poll(() => {
-    return editor.view.dom.querySelector('[data-active-book-node="heading 2"]')?.textContent;
+    return editor.view.dom.querySelector('h2')?.textContent;
   }).toBe('Текст');
   editor.commands.setParagraph();
   expect(editor.getHTML()).toBe('<p>Текст</p>');
@@ -148,4 +153,34 @@ test('does not navigate on a normal editor link click', async () => {
   await page.getByRole('link', { name: 'Ссылка', exact: true }).click();
   expect(window.location.href).toBe(before);
   expect(open).not.toHaveBeenCalled();
+});
+
+test('uses semantic text elements without a React NodeView and preserves typography', () => {
+  editor.commands.setContent('<p>Paragraph</p><h1>Heading one</h1><h2>Heading two</h2>');
+
+  const paragraph = editor.view.dom.querySelector('p');
+  const headingOne = editor.view.dom.querySelector('h1');
+  const headingTwo = editor.view.dom.querySelector('h2');
+
+  if (!paragraph || !headingOne || !headingTwo) {
+    throw new Error('Expected native paragraph and heading elements');
+  }
+
+  expect(paragraph.parentElement).toBe(editor.view.dom);
+  expect(headingOne.parentElement).toBe(editor.view.dom);
+  expect(headingTwo.parentElement).toBe(editor.view.dom);
+
+  const paragraphStyle = getComputedStyle(paragraph);
+  const headingOneStyle = getComputedStyle(headingOne);
+  const headingTwoStyle = getComputedStyle(headingTwo);
+
+  expect(paragraphStyle.marginTop).toBe('0px');
+  expect(paragraphStyle.paddingBottom).toBe('7px');
+  expect(paragraphStyle.textIndent).not.toBe('0px');
+  expect(headingOneStyle.marginTop).toBe('0px');
+  expect(headingOneStyle.paddingBottom).toBe('7px');
+  expect(headingOneStyle.fontWeight).toBe('700');
+  expect(headingTwoStyle.marginTop).toBe('0px');
+  expect(headingTwoStyle.paddingBottom).toBe('16px');
+  expect(headingTwoStyle.fontStyle).toBe('italic');
 });

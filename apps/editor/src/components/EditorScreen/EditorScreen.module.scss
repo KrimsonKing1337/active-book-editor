@@ -6,6 +6,9 @@
 
   &.isStructureVisible {
     .Canvas {
+      :global(.tiptap p),
+      :global(.tiptap h1),
+      :global(.tiptap h2),
       :global([data-active-book-node]) {
         position: relative;
 
@@ -33,6 +36,18 @@
           pointer-events: none;
         }
       }
+
+      :global(.tiptap p):before {
+        content: 'paragraph';
+      }
+
+      :global(.tiptap h1):before {
+        content: 'heading 1';
+      }
+
+      :global(.tiptap h2):before {
+        content: 'heading 2';
+      }
     }
   }
 }
@@ -55,6 +70,33 @@
     min-height: 60vh;
 
     outline: none;
+
+    p {
+      margin: 0;
+      padding-bottom: 7px;
+
+      font-size: calc(var(--font-base) * 1.25 * var(--font-scale) / 100);
+      line-height: 1.2;
+      text-indent: 1.5em;
+    }
+
+    h1 {
+      margin: 0;
+      padding-bottom: 7px;
+
+      font-size: calc(var(--font-base) * 2 * var(--font-scale) / 100);
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin: 0;
+      padding-bottom: 16px;
+
+      font-size: calc(var(--font-base) * var(--font-scale) / 100);
+      font-weight: bold;
+      font-style: italic;
+    }
   }
 }
 
