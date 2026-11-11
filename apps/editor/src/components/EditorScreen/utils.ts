@@ -12,7 +12,7 @@ import type { Config } from '@active-book/core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
 
-import { isContentLinkAllowed } from '@active-book/book-builder/content';
+import { isContentLinkAllowed } from '@root/packages/book-builder/src/content/content';
 
 import {
   ExistingProjectError,
@@ -83,7 +83,9 @@ export const ActiveBlockHighlight = Extension.create({
               return DecorationSet.empty;
             }
 
-            const decoration = Decoration.node(blockPosition, blockPosition + block.nodeSize, {
+            const blockShift = blockPosition + block.nodeSize;
+
+            const decoration = Decoration.node(blockPosition, blockShift, {
               class: 'isActive',
             });
 
@@ -178,10 +180,12 @@ export const insertEditorContent = (editor: Editor | null, content: JSONContent)
   contentEditorChain.run();
 };
 
-export const insertCustomComponent = (
-  editor: Editor | null,
-  component: { packageName: string; name: string },
-): void => {
+type CustomComponent = {
+  packageName: string;
+  name: string;
+};
+
+export const insertCustomComponent = (editor: Editor | null, component: CustomComponent): void => {
   const { name, packageName } = component;
 
   insertEditorContent(editor, {

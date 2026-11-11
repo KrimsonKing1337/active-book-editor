@@ -11,8 +11,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-
-import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
+import { compileVisualEffects, missingVisualDefinitions } from '@root/packages/book-builder/src/visualEffects';
 
 import { useBookLibraries } from '@project/useBookLibraries';
 
@@ -22,11 +21,11 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
-import { VisualBookPreview, Pages } from '../components';
+import { VisualBookPreview, Pages } from '../index';
 
-import { useBookPages } from '../book/useBookPages';
+import { useBookPages } from '../../book/useBookPages';
 
-import type { BuildState, TextBlock } from '../@types';
+import type { BuildState, TextBlock } from '../../@types';
 
 import {
   useAutosave,
@@ -34,7 +33,7 @@ import {
   useProjectActions,
   useProjectRestore,
   useSaveShortcut,
-} from '../hooks';
+} from '../../hooks';
 
 import {
   CustomComponentsWarningModal,
@@ -42,9 +41,9 @@ import {
   PageEffects,
   PageEffectsProvider,
   RestoreBanner,
-} from '../components';
+} from '../index';
 
-import { AudioInstances } from '../components/PageEffects/components/AudioInstances';
+import { AudioInstances } from '../PageEffects/components/AudioInstances';
 
 import {
   editorConfig,
@@ -53,9 +52,9 @@ import {
   getBuildStateLabel,
   insertCustomComponent,
   insertTextBlock,
-} from '../utils';
+} from '../../utils';
 
-import styles from '../EditorScreen.module.scss';
+import styles from '../../EditorScreen.module.scss';
 
 import {
   SHOW_STRUCTURE_STORAGE_KEY,
@@ -63,7 +62,7 @@ import {
   SHOW_NARRATIVE_STORAGE_KEY,
   SHOW_BACKGROUNDS_STORAGE_KEY,
   SHOW_FRAME_EFFECTS_STORAGE_KEY,
-} from '../constants';
+} from '../../constants';
 
 export const EditorWorkspace = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
@@ -127,7 +126,9 @@ export const EditorWorkspace = () => {
   }, []);
 
   const registerStylesFlusher = useCallback((flush: (() => boolean) | null) => {
-    flushStylesRef.current = flush ?? (() => true);
+    const f = () => true;
+
+    flushStylesRef.current = flush ?? f;
   }, []);
 
   const pages = useBookPages({

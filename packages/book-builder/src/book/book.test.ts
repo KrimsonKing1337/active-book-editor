@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { draftToVisual } from '../visualEffects';
 import { compileBookDocument } from '../bookPreparation';
 
-import { isBookDocument } from './index';
+import { isBookDocument } from './book';
 
 const page = (id: string, text: string) => ({
   id,

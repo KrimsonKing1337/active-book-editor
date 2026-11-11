@@ -4,3 +4,4 @@ export * from './Pages';
 export * from './PageEffects';
 export * from './RestoreBanner';
 export * from './VisualBookPreview';
+export * from './EditorWorkspace';

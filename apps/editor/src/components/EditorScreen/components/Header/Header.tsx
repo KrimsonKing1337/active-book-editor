@@ -155,7 +155,11 @@ export const Header = ({
           );
         })}
 
-        <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextBlock({ type: 'paragraph' })}>
+        <button
+          type="button"
+          disabled={buttonIsDisabled}
+          onClick={() => onInsertTextBlock({ type: 'paragraph' })}
+        >
           Добавить параграф
         </button>
 

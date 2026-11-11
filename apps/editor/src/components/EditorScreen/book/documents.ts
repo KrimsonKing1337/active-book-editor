@@ -1,9 +1,10 @@
 import type { Editor, JSONContent } from '@tiptap/core';
 import { EditorState } from '@tiptap/pm/state';
 
-import type { BookDocument, BookPage } from '@active-book/book-builder/book';
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
-import { assertContentDocument } from '@active-book/book-builder/content';
+
+import type { BookDocument, BookPage } from '@root/packages/book-builder/src/book/book';
+import { assertContentDocument } from '@root/packages/book-builder/src/content/content';
 
 import { createEmptyDocument } from '../utils';
 

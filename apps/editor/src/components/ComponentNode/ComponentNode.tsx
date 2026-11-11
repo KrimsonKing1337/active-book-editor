@@ -4,6 +4,7 @@ import type { NodeViewProps } from '@tiptap/react';
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
+
 import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
@@ -12,7 +13,6 @@ import {
 import type { BookComponentProps } from '@active-book/types';
 
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
-
 
 import { useCustomComponents } from '@project/customComponentRegistry';
 
@@ -155,6 +155,7 @@ export const ComponentNode = Node.create({
           from: selection.from,
           to: selection.to,
         };
+
         const typeContent = { type: 'paragraph' };
 
         return this.editor.commands.insertContentAt(selectionContent, typeContent);

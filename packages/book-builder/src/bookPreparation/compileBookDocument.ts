@@ -1,10 +1,10 @@
 import type { VisualEffectRegistration } from '@active-book/types';
 
-import type { BookDocument } from '../book';
+import type { BookDocument } from '../book/book';
 import { compileVisualEffects } from '../visualEffects';
 
-import { isBookDocument } from '../book';
-import { assertContentDocument } from '../content';
+import { isBookDocument } from '../book/book';
+import { assertContentDocument } from '../content/content';
 
 import type {
   BuiltAudioEffect,
@@ -34,10 +34,7 @@ const getMappedEffects: GetMappedEffects = (effects) => {
   });
 };
 
-export const compilePageDocument = (
-  document: unknown,
-  path = 'document',
-): Record<string, unknown> => {
+export const compilePageDocument = (document: unknown, path = 'document'): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
     throw new Error('book.json must contain an Active Book document');
   }

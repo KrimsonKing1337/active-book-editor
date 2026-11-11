@@ -8,7 +8,7 @@ import {
   Flashlight,
 } from '@active-book/core/components/ProxyHooks';
 
-import { assertContentDocument } from '@active-book/book-builder/content';
+import { assertContentDocument } from '@root/packages/book-builder/src/content/content';
 
 import type { PageDocument } from '@types';
 
@@ -35,7 +35,9 @@ export const BookPage = ({
   customComponents,
   bookRuntime,
 }: BookPageProps) => {
-  assertContentDocument(document, `pages[${page - 1}].document`);
+  const documentPath = `pages[${page - 1}].document`;
+
+  assertContentDocument(document, documentPath);
 
   const content = document.content ?? [];
 
@@ -83,12 +85,14 @@ export const BookPage = ({
       </>
 
       {content.map((nodeCur, index) => {
+        const nodePath = `${documentPath}.content[${index}]`;
+
         return renderNode({
           node: nodeCur,
           key: index,
           customComponents,
           bookRuntime,
-          path: `pages[${page - 1}].document.content[${index}]`,
+          path: nodePath,
         });
       })}
     </div>

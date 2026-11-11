@@ -10,7 +10,7 @@ import {
   assertContentDocument,
   assertContentNode,
   isContentLinkAllowed,
-} from './index';
+} from './content';
 
 const paragraph = {
   type: 'paragraph',

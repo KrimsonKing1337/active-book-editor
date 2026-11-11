@@ -20,11 +20,11 @@ import {
   P,
 } from '@active-book/core/components';
 
-import { assertContentNode } from '@active-book/book-builder/content';
+import { assertContentNode } from '@root/packages/book-builder/src/content/content';
 
 const linkRel = (value: string | null | undefined): string => {
   const tokens = (value ?? '').split(/\s+/);
-  const safeTokens = tokens.filter((token) => token && token.toLowerCase() !== 'opener');
+  const safeTokens = tokens.filter((cur) => cur && cur.toLowerCase() !== 'opener');
   const relations = new Set(safeTokens);
 
   relations.add('noopener');
@@ -43,35 +43,49 @@ const renderMarks = (content: ReactNode, marks: BookTextMark[]): ReactNode => {
     switch (mark.type) {
       case 'bold':
         result = <strong>{result}</strong>;
+
         break;
       case 'italic':
         result = <em>{result}</em>;
+
         break;
       case 'strike':
         result = <s>{result}</s>;
+
         break;
       case 'underline':
         result = <u>{result}</u>;
+
         break;
       case 'code':
         result = <code>{result}</code>;
+
         break;
-      case 'link':
+      case 'link': {
+        const { attrs } = mark;
+        const { href, rel } = attrs;
+
+        const target = attrs.target ?? undefined;
+        const className = mark.attrs.class ?? undefined;
+        const linkedRel = linkRel(rel);
+
         result = (
           <a
-            href={mark.attrs.href}
-            target={mark.attrs.target ?? undefined}
-            rel={linkRel(mark.attrs.rel)}
-            className={mark.attrs.class ?? undefined}
+            href={href}
+            target={target}
+            rel={linkedRel}
+            className={className}
           >
             {result}
           </a>
         );
-        break;
-      default: {
-        const unsupported: never = mark;
 
-        throw new Error(`Unsupported reader mark: ${JSON.stringify(unsupported)}`);
+        break;
+      }
+      default: {
+        const jsonString = JSON.stringify(mark);
+
+        throw new Error(`Unsupported reader mark: ${jsonString}`);
       }
     }
   }
@@ -100,11 +114,23 @@ const renderValidatedNode = ({
   path,
 }: ValidatedNodeParams): ReactNode => {
   if (node.type === 'text') {
-    return <Fragment key={key}>{renderMarks(node.text, node.marks ?? [])}</Fragment>;
+    const marks = node.marks ?? [];
+
+    return (
+      <Fragment key={key}>
+        {renderMarks(node.text, marks)}
+      </Fragment>
+    );
   }
 
   if (node.type === 'hardBreak') {
-    return <Fragment key={key}>{renderMarks(<br />, node.marks ?? [])}</Fragment>;
+    const marks = node.marks ?? [];
+
+    return (
+      <Fragment key={key}>
+        {renderMarks(<br />, marks)}
+      </Fragment>
+    );
   }
 
   if (node.type === 'coreComponent') {
@@ -130,25 +156,41 @@ const renderValidatedNode = ({
     throw new Error(`${path}: unknown core component "${name}"`);
   }
 
-  const children = (node.content ?? []).map((child, index) => {
+  const content = node.content ?? [];
+
+  const children = (content).map((childCur, index) => {
+    const childPath = `${path}.content[${index}]`;
+
     return renderValidatedNode({
-      node: child,
+      node: childCur,
       key: index,
       customComponents,
       bookRuntime,
-      path: `${path}.content[${index}]`,
+      path: childPath,
     });
   });
 
   if (node.type === 'paragraph') {
-    return <P key={key} data-active-book-node="paragraph">{children}</P>;
+    return (
+      <P key={key} data-active-book-node="paragraph">
+        {children}
+      </P>
+    );
   }
 
   if (node.attrs.level === 1) {
-    return <H1 key={key}>{children}</H1>;
+    return (
+      <H1 key={key}>
+        {children}
+      </H1>
+    );
   }
 
-  return <H2 key={key}>{children}</H2>;
+  return (
+    <H2 key={key}>
+      {children}
+    </H2>
+  );
 };
 
 export const renderNode = ({
