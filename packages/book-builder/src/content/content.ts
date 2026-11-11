@@ -166,18 +166,9 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
   }
 
   if (type === 'heading') {
-    const headingFail = () => {
-      fail(`${path}.attrs.level`, 'expected heading level 1 or 2');
-    };
+    const attrs = value.attrs;
 
-    if (!isRecord(value.attrs)) {
-      headingFail();
-    }
-
-    const attrs = value.attrs as Record<string, unknown>;
-    const headingLevelIsWrong = attrs.level !== 1 && attrs.level !== 2;
-
-    if (headingLevelIsWrong) {
+    if (!isRecord(attrs) || (attrs.level !== 1 && attrs.level !== 2)) {
       fail(`${path}.attrs.level`, 'expected heading level 1 or 2');
     }
   }
