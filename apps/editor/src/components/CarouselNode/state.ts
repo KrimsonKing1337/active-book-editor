@@ -7,7 +7,12 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view';
 
 export const carouselKey = new PluginKey<Map<number, number>>('carouselSelection');
 
-export const slidePosition = (node: Node, options: { position: number; index: number }): number => {
+type SlidePositionOptions = {
+  position: number;
+  index: number;
+};
+
+export const slidePosition = (node: Node, options: SlidePositionOptions): number => {
   let position = options.position + 1;
 
   for (let index = 0; index < options.index; index += 1) {
@@ -33,7 +38,9 @@ export const isInsideSlide = (state: EditorState, position = state.selection.fro
   return false;
 };
 
-const followSelection = (slides: Map<number, number>, state: EditorState): Map<number, number> => {
+type Slides = Map<number, number>;
+
+const followSelection = (slides: Slides, state: EditorState): Slides => {
   const { $from } = state.selection;
 
   for (let depth = $from.depth; depth > 0; depth -= 1) {
@@ -45,7 +52,7 @@ const followSelection = (slides: Map<number, number>, state: EditorState): Map<n
   return slides;
 };
 
-const mapSlides = (slides: Map<number, number>, transaction: Transaction): Map<number, number> => {
+const mapSlides = (slides: Slides, transaction: Transaction): Slides => {
   const next = new Map<number, number>();
 
   for (const [position, index] of slides) {
@@ -53,7 +60,9 @@ const mapSlides = (slides: Map<number, number>, transaction: Transaction): Map<n
     const node = transaction.doc.nodeAt(mapped.pos);
 
     if (!mapped.deleted && node?.type.name === 'carousel') {
-      next.set(mapped.pos, Math.min(index, node.childCount - 1));
+      const nextPosition = Math.min(index, node.childCount - 1);
+
+      next.set(mapped.pos, nextPosition);
     }
   }
 
@@ -65,12 +74,18 @@ export const carouselSelectionPlugin = () => new Plugin({
   appendTransaction: (...args) => {
     const [transactions, _oldState, state] = args;
 
-    if (transactions.some((transaction) => transaction.getMeta(carouselKey))) {
+    const hasCarouselKey = transactions.some((transactionCur) => {
+      return transactionCur.getMeta(carouselKey);
+    });
+
+    if (hasCarouselKey) {
       return closeHistory(state.tr);
     }
   },
   state: {
-    init: (_config, state) => followSelection(new Map(), state),
+    init: (_config, state) => {
+      return followSelection(new Map(), state);
+    },
     apply: (...args) => {
       const [transaction, slides, _oldState, state] = args;
 
@@ -90,6 +105,7 @@ export const carouselSelectionPlugin = () => new Plugin({
 
         node.forEach((...args) => {
           const [slide, offset, index] = args;
+
           const start = position + 1 + offset;
           const attrs: Record<string, string> = { 'aria-label': `Слайд ${index + 1}` };
 

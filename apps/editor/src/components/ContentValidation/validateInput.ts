@@ -6,26 +6,26 @@ const assertHtml = (html: string, insideSlide: boolean): void => {
   const dom = new DOMParser().parseFromString(html, 'text/html');
   const containers = dom.querySelectorAll('[data-type="carousel"], [data-type="segment"]');
 
-  for (const slide of dom.querySelectorAll('[data-type="carouselSlide"]')) {
-    if (!slide.parentElement?.matches('section[data-type="carousel"]')) {
+  for (const slideCur of dom.querySelectorAll('[data-type="carouselSlide"]')) {
+    if (!slideCur.parentElement?.matches('section[data-type="carousel"]')) {
       throw new Error('Слайд должен находиться внутри карусели');
     }
   }
 
-  for (const container of containers) {
-    if (insideSlide || container.parentElement?.closest('[data-type="carousel"]')) {
+  for (const containerCur of containers) {
+    if (insideSlide || containerCur.parentElement?.closest('[data-type="carousel"]')) {
       throw new Error('Карусель и segment нельзя вставить внутрь слайда');
     }
 
-    if (container.getAttribute('data-type') === 'segment') {
+    if (containerCur.getAttribute('data-type') === 'segment') {
       throw new Error('Узел segment пока не поддерживается');
     }
 
-    if (!container.children.length) {
+    if (!containerCur.children.length) {
       throw new Error('Карусель должна содержать хотя бы один слайд');
     }
 
-    for (const slide of container.children) {
+    for (const slide of containerCur.children) {
       if (!slide.matches('section[data-type="carouselSlide"]') || !slide.children.length) {
         throw new Error('Карусель должна содержать слайды с блочным содержимым');
       }
@@ -59,10 +59,14 @@ export const validateInput = (content: unknown, insideSlide: boolean): void => {
     return;
   }
 
-  if (content !== null && typeof content === 'object' && 'type' in content && content.type === 'doc') {
+  if (typeof content === 'object' && 'type' in content && content.type === 'doc') {
     assertContentDocument(content);
 
-    if (insideSlide && content.content.some((child) => child.type === 'carousel')) {
+    const hasCarousel = content.content.some((childCur) => {
+      return childCur.type === 'carousel';
+    });
+
+    if (insideSlide && hasCarousel) {
       throw new Error('Карусель нельзя вставить внутрь слайда');
     }
 

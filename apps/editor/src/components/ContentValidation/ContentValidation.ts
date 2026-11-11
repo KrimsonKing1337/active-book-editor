@@ -15,49 +15,54 @@ export const ContentValidation = Extension.create({
   name: 'contentValidation',
 
   addCommands() {
-    const insertContentAt: RawCommands['insertContentAt'] = (...args) => (props) => {
-      const [position, content, options] = args;
-      let from = position;
-      let isDocumentReplacement = false;
+    const insertContentAt: RawCommands['insertContentAt'] = (...args) => {
+      return (props) => {
+        const [position, content, options] = args;
 
-      if (typeof from !== 'number') {
-        isDocumentReplacement = from.from === 0 && from.to === props.tr.doc.content.size;
-        from = from.from;
-      }
+        let from = position;
+        let isDocumentReplacement = false;
 
-      try {
-        const insideSlide = !isDocumentReplacement && isInsideSlide(props.state, from);
-
-        validateInput(content, insideSlide);
-
-        return commands.insertContentAt(position, content, {
-          ...options,
-          errorOnInvalidContent: true,
-        })(props);
-      } catch (error) {
-        if (props.dispatch) {
-          reportContentError(props.editor, error);
+        if (typeof from !== 'number') {
+          isDocumentReplacement = from.from === 0 && from.to === props.tr.doc.content.size;
+          from = from.from;
         }
 
-        return false;
-      }
+        try {
+          const insideSlide = !isDocumentReplacement && isInsideSlide(props.state, from);
+
+          validateInput(content, insideSlide);
+
+          return commands.insertContentAt(position, content, {
+            ...options,
+            errorOnInvalidContent: true,
+          })(props);
+        } catch (error) {
+          if (props.dispatch) {
+            reportContentError(props.editor, error);
+          }
+
+          return false;
+        }
+      };
     };
 
-    const setContent: RawCommands['setContent'] = (content, options) => (props) => {
-      try {
-        validateInput(content, false);
+    const setContent: RawCommands['setContent'] = (content, options) => {
+      return (props) => {
+        try {
+          validateInput(content, false);
 
-        return commands.setContent(content, {
-          ...options,
-          errorOnInvalidContent: true,
-        })(props);
-      } catch (error) {
-        if (props.dispatch) {
-          reportContentError(props.editor, error);
+          return commands.setContent(content, {
+            ...options,
+            errorOnInvalidContent: true,
+          })(props);
+        } catch (error) {
+          if (props.dispatch) {
+            reportContentError(props.editor, error);
+          }
+
+          return false;
         }
-
-        return false;
-      }
+      };
     };
 
     return { insertContentAt, setContent };
@@ -87,11 +92,14 @@ export const ContentValidation = Extension.create({
         handleDOMEvents: {
           paste(view, event) {
             try {
-              validateInput(event.clipboardData?.getData('text/html') ?? '', isInsideSlide(view.state));
+              const clipboardData = event.clipboardData?.getData('text/html') ?? '';
+
+              validateInput(clipboardData, isInsideSlide(view.state));
 
               return false;
             } catch (error) {
               event.preventDefault();
+
               reportContentError(editor, error);
 
               return true;
@@ -100,12 +108,15 @@ export const ContentValidation = Extension.create({
         },
         handleDrop(...args) {
           const [view, event, slice] = args;
+
           const target = view.posAtCoords({ left: event.clientX, top: event.clientY });
           const position = target?.pos ?? view.state.selection.from;
           const insideSlide = isInsideSlide(view.state, position);
 
           try {
-            validateInput(event.dataTransfer?.getData('text/html') ?? '', insideSlide);
+            const dataTransfer = event.dataTransfer?.getData('text/html') ?? '';
+
+            validateInput(dataTransfer, insideSlide);
             validateInput(slice.content, insideSlide);
 
             return false;

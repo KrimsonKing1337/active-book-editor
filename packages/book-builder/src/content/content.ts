@@ -111,10 +111,12 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
     fail(path, `unknown node "${type}"`);
   }
 
-  const isWrongLocation = (location === 'inline' && !isInline)
-    || (location === 'block' && !isBlock)
-    || (location === 'slide' && !isSlide)
-    || (location === 'slideBlock' && !isOrdinaryBlock);
+  const wrongInline = location === 'inline' && !isInline;
+  const wrongBlock = location === 'block' && !isBlock;
+  const wrongSlide = location === 'slide' && !isSlide;
+  const wrongSlideBlock = location === 'slideBlock' && !isOrdinaryBlock;
+
+  const isWrongLocation = wrongInline || wrongBlock || wrongSlide || wrongSlideBlock;
 
   if (isWrongLocation) {
     fail(path, `node "${type}" is not allowed in ${location} content`);
@@ -152,8 +154,10 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
     }
 
     for (const [index, child] of value.content.entries()) {
+      const nodePath = `${path}.content[${index}]`;
+
       assertNode(child, {
-        path: `${path}.content[${index}]`,
+        path: nodePath,
         location: childLocation,
       });
     }
@@ -162,7 +166,18 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
   }
 
   if (type === 'heading') {
-    if (!isRecord(value.attrs) || (value.attrs.level !== 1 && value.attrs.level !== 2)) {
+    const headingFail = () => {
+      fail(`${path}.attrs.level`, 'expected heading level 1 or 2');
+    };
+
+    if (!isRecord(value.attrs)) {
+      headingFail();
+    }
+
+    const attrs = value.attrs as Record<string, unknown>;
+    const headingLevelIsWrong = attrs.level !== 1 && attrs.level !== 2;
+
+    if (headingLevelIsWrong) {
       fail(`${path}.attrs.level`, 'expected heading level 1 or 2');
     }
   }

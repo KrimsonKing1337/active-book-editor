@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
-export const ContentError = ({ editor }: { editor: Editor | null }) => {
+export type ContentErrorProps = {
+  editor: Editor | null;
+};
+
+type HandleErrorArgs = {
+  error: Error;
+};
+
+export const ContentError = ({ editor }: ContentErrorProps) => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -10,8 +18,13 @@ export const ContentError = ({ editor }: { editor: Editor | null }) => {
       return;
     }
 
-    const handleError = ({ error }: { error: Error }) => setMessage(error.message);
-    const handleUpdate = () => setMessage('');
+    const handleError = ({ error }: HandleErrorArgs) => {
+      setMessage(error.message);
+    };
+
+    const handleUpdate = () => {
+      setMessage('');
+    };
 
     editor.on('contentError', handleError);
     editor.on('update', handleUpdate);

@@ -55,8 +55,12 @@ export const CarouselNode = Node.create({
 
         return props.commands.insertContent({ type: this.name, content: [slide, slide] });
       },
-      selectCarouselSlide: (position, index) => (props) => selectSlide(props, { position, index }),
-      changeCarouselSlides: (position, action) => (props) => changeSlides(props, { position, action }),
+      selectCarouselSlide: (position, index) => (props) => {
+        return selectSlide(props, { position, index });
+      },
+      changeCarouselSlides: (position, action) => (props) => {
+        return changeSlides(props, { position, action });
+      },
     };
   },
 });

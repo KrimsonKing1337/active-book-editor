@@ -181,7 +181,11 @@ export const Header = ({
           Добавить заголовок 2
         </button>
 
-        <button type="button" disabled={buttonIsDisabled} onClick={onInsertCarousel}>
+        <button
+          type="button"
+          disabled={buttonIsDisabled}
+          onClick={onInsertCarousel}
+        >
           Добавить карусель
         </button>
 

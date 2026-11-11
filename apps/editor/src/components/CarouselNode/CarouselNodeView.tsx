@@ -10,6 +10,8 @@ import { activeSlide } from './state';
 
 import styles from './CarouselNode.module.scss';
 
+export type CarouselNodeViewChangeAction = 'add' | 'delete' | 'left' | 'right';
+
 export const CarouselNodeView = ({
   node,
   editor,
@@ -37,7 +39,7 @@ export const CarouselNodeView = ({
     }
   };
 
-  const change = (action: 'add' | 'delete' | 'left' | 'right') => {
+  const change = (action: CarouselNodeViewChangeAction) => {
     const position = getPos();
 
     if (position !== undefined) {
