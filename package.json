@@ -34,7 +34,7 @@
     "test:scripts": "node --test scripts/packageCore.test.mjs"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.61.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.62.tgz"
   },
   "devDependencies": {
     "@active-book/common": "file:../active-book-common",

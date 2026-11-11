@@ -34,8 +34,10 @@ test('production book selects stable page IDs in a persistent viewport with page
   const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH });
   context.after(() => browser.close());
   const editor = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  // The test project has no favicon asset; keep resource errors meaningful.
+  await editor.route('**/favicon.ico', (route) => route.fulfill({ status: 204 }));
   editor.on('dialog', (dialog) => dialog.accept());
-  const files = await Promise.all(['book.json', 'package.json', 'assets/tone.wav', 'assets/movie.webm', 'assets/range-pattern.svg', 'dependencies/fixture-parts.tgz']
+  const files = await Promise.all(['book.json', 'package.json', 'assets/tone.wav', 'assets/movie.webm', 'assets/range-pattern.svg', 'assets/img/poster-default.png', 'dependencies/fixture-parts.tgz']
     .map(async (filename) => ({ filename, bytes: [...await readFile(path.join(projectRoot, filename))] })));
   // A source string avoids tsx's function-name helpers leaking into serialized browser callbacks.
   await editor.addInitScript(`(() => {
@@ -62,6 +64,9 @@ test('production book selects stable page IDs in a persistent viewport with page
   })();`);
   const editorErrors: string[] = [];
   editor.on('pageerror', (error) => editorErrors.push(error.message));
+  editor.on('console', (message) => {
+    if (message.type() === 'error') editorErrors.push(message.text());
+  });
   await editor.goto(`http://127.0.0.1:${editorAddress.port}/`);
   await editor.getByRole('button', { name: 'Открыть проект', exact: true }).click();
   try {
@@ -221,6 +226,22 @@ test('production book selects stable page IDs in a persistent viewport with page
   const allIds = reopened.pages.flatMap((cur) => cur.document.attrs?.visualEffects.map((visual: { effect: { id: string } }) => visual.effect.id) ?? []);
   assert(originalIds.every((id: string) => allIds.includes(id)));
   await editor.getByRole('textbox', { name: 'Текст страницы', exact: true }).click();
+  await editor.keyboard.press('Control+End');
+  await editor.getByRole('button', { name: 'Добавить карусель', exact: true }).click();
+  await editor.getByRole('button', { name: 'Слайд 1', exact: true }).click();
+  await editor.keyboard.type('Первый слайд из редактора');
+  await editor.getByRole('button', { name: 'Слайд 2', exact: true }).click();
+  await editor.keyboard.type('Второй слайд из редактора');
+  const withCarousel = await save();
+  const savedCarousel = withCarousel.pages[0].document.content?.find((node) => node.type === 'carousel');
+  assert(savedCarousel);
+  assert.equal(savedCarousel.content?.length, 2);
+  await editor.getByRole('button', { name: 'Слайд 1', exact: true }).click();
+  assert.deepEqual(await readSaved(), withCarousel, 'slide selection does not dirty or save the document');
+  await editor.reload();
+  await editor.getByText('Первый слайд из редактора', { exact: true }).waitFor();
+  assert.deepEqual(await readSaved(), withCarousel);
+  await editor.getByRole('textbox', { name: 'Текст страницы', exact: true }).click();
   await editor.keyboard.press('Control+Home');
   await editor.keyboard.type('Из редактора. ');
   await editor.getByRole('button', { name: 'Переместить страницу 3 вверх', exact: true }).click();
@@ -238,6 +259,11 @@ test('production book selects stable page IDs in a persistent viewport with page
 
   const server = createServer(async (request, response) => {
     const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+    if (pathname === '/favicon.ico') {
+      response.writeHead(204);
+      response.end();
+      return;
+    }
     const filename = pathname === '/' ? '/index.html' : pathname;
     try {
       const data = await readFile(path.join(outDir, filename));
@@ -255,6 +281,9 @@ test('production book selects stable page IDs in a persistent viewport with page
   const page = await browser.newPage({ viewport: { width: 1100, height: 800 } });
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`${message.text()} (${message.location().url})`);
+  });
   await page.goto(`http://127.0.0.1:${address.port}/`);
   await page.getByRole('button', { name: 'Начать читать', exact: true }).waitFor();
   const baseStyles = await page.evaluate(() => ({
@@ -295,6 +324,29 @@ test('production book selects stable page IDs in a persistent viewport with page
   const readerUrl = page.url();
   await page.getByRole('button', { name: 'Начать читать', exact: true }).click();
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
+  const carousel = page.getByRole('region', { name: 'Карусель', exact: true });
+  await carousel.getByText('1 из 2', { exact: true }).waitFor();
+  await carousel.getByRole('button', { name: 'Следующий слайд', exact: true }).click();
+  await carousel.getByText('2 из 2', { exact: true }).waitFor();
+  assert.equal(await page.locator('#story-shell').getAttribute('data-page-id'), 'stable-alpha');
+  await carousel.focus();
+  await page.keyboard.press('ArrowLeft');
+  await carousel.getByText('1 из 2', { exact: true }).waitFor();
+  await carousel.scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const slide = document.querySelector('[data-carousel-slide]');
+    const viewport = slide?.parentElement?.parentElement;
+    return slide && viewport && Math.abs(slide.getBoundingClientRect().x - viewport.getBoundingClientRect().x) < 1;
+  });
+  const slideBounds = await carousel.locator('[data-carousel-slide]').first().boundingBox();
+  assert(slideBounds);
+  await page.mouse.move(slideBounds.x + slideBounds.width * 0.8, slideBounds.y + 20);
+  await page.mouse.down();
+  await page.mouse.move(slideBounds.x + slideBounds.width * 0.2, slideBounds.y + 20, { steps: 12 });
+  await page.mouse.up();
+  await carousel.getByText('2 из 2', { exact: true }).waitFor();
+  assert.equal(await page.locator('#story-shell').getAttribute('data-page-id'), 'stable-alpha');
+  await carousel.evaluate((element) => { if (element instanceof HTMLElement) element.blur(); });
   await page.getByText('1 из 3', { exact: true }).waitFor();
   const textLink = page.getByRole('link', { name: 'Форматированная ссылка', exact: true });
 
@@ -367,6 +419,39 @@ test('production book selects stable page IDs in a persistent viewport with page
   await page.getByText('Гамма: третья страница', { exact: true }).waitFor();
   await page.keyboard.press('ArrowLeft');
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
+  await carousel.getByText('1 из 2', { exact: true }).waitFor();
   assert.equal(await page.getByTestId('custom-badge').textContent(), 'Кастомная вставка: 0');
+
+  const mobileContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  context.after(() => mobileContext.close());
+  const mobile = await mobileContext.newPage();
+  mobile.on('pageerror', (error) => errors.push(error.message));
+  mobile.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`${message.text()} (${message.location().url})`);
+  });
+  await mobile.goto(`http://127.0.0.1:${address.port}/`);
+  await mobile.getByRole('button', { name: 'Начать читать', exact: true }).click();
+  const mobileCarousel = mobile.getByRole('region', { name: 'Карусель', exact: true });
+  await mobileCarousel.getByRole('button', { name: 'Следующий слайд' }).waitFor();
+  await mobileCarousel.scrollIntoViewIfNeeded();
+  const mobileBounds = await mobileCarousel.locator('[data-carousel-slide]').first().boundingBox();
+  assert(mobileBounds);
+  assert(mobileBounds.width <= 390, 'slide adapts to the mobile viewport');
+  const touch = await mobileContext.newCDPSession(mobile);
+  const y = mobileBounds.y + 15;
+  const startX = mobileBounds.x + mobileBounds.width * 0.8;
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: startX, y }] });
+  for (let step = 1; step <= 8; step += 1) {
+    const x = startX - mobileBounds.width * 0.6 * step / 8;
+    await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
+  }
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await mobileCarousel.getByText('2 из 2', { exact: true }).waitFor();
+  assert.equal(await mobile.locator('#story-shell').getAttribute('data-page-id'), 'stable-alpha');
+  await touch.detach();
   assert.deepEqual(errors, []);
 });

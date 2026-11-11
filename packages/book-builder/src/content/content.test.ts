@@ -39,6 +39,57 @@ const paragraph = {
   }],
 };
 
+const slide = {
+  type: 'carouselSlide',
+  content: [
+    paragraph,
+    { type: 'heading', attrs: { level: 2 } },
+    { type: 'coreComponent', attrs: { name: 'Badge', package: 'fixture-parts' } },
+  ],
+};
+
+test('preserves slides and ordinary blocks through book compilation', () => {
+  const carousel = { type: 'carousel', content: [slide, slide] };
+  const document = { type: 'doc', content: [paragraph, carousel] };
+  const compiled = compilePageDocument(document, 'page');
+
+  expect(compiled.content).toEqual(document.content);
+});
+
+test.each(['carousel', 'segment'])('rejects %s inside a slide with its exact source path', (type) => {
+  const carousel = {
+    type: 'carousel',
+    content: [{ type: 'carouselSlide', content: [{ type, content: [slide] }] }],
+  };
+
+  expect(() => assertContentNode(carousel))
+    .toThrow(`node.content[0].content[0]: node "${type}" is not allowed inside carouselSlide`);
+});
+
+test('rejects empty containers, orphan slides and unknown nested blocks and marks', () => {
+  for (const type of ['carousel', 'carouselSlide']) {
+    expect(() => assertContentNode({ type, content: [] })).toThrow('requires nonempty content');
+  }
+
+  expect(() => assertContentDocument({ type: 'doc', content: [slide] })).toThrow('not allowed in block');
+  expect(() => assertContentNode({ type: 'carousel', content: [paragraph] })).toThrow('not allowed in slide');
+  expect(() => assertContentNode({
+    type: 'carousel',
+    content: [{ type: 'carouselSlide', content: [{ type: 'missingBlock' }] }],
+  })).toThrow('node.content[0].content[0]: unknown node "missingBlock"');
+  expect(() => assertContentNode({
+    type: 'carousel',
+    content: [{
+      type: 'carouselSlide',
+      content: [{ type: 'paragraph', content: [{
+        type: 'text',
+        text: 'x',
+        marks: [{ type: 'missingMark' }],
+      }] }],
+    }],
+  })).toThrow('node.content[0].content[0].content[0].marks[0]: unknown mark "missingMark"');
+});
+
 test('preserves the supported ProseMirror JSON without mutating it during compilation', () => {
   const content = [
     {

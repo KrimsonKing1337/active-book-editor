@@ -30,6 +30,7 @@ type HeaderProps = {
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
   onInsertTextBlock: (block: TextBlock) => void;
+  onInsertCarousel: () => void;
   onBuildBook: () => Promise<void>;
   onImportCustomComponents: () => void;
 };
@@ -57,6 +58,7 @@ export const Header = ({
   onInsertCustomComponent,
   customComponentDefinitions,
   onInsertTextBlock,
+  onInsertCarousel,
   onBuildBook,
   onImportCustomComponents,
 }: HeaderProps) => {
@@ -177,6 +179,10 @@ export const Header = ({
           onClick={() => onInsertTextBlock({ type: 'heading', attrs: { level: 2 } })}
         >
           Добавить заголовок 2
+        </button>
+
+        <button type="button" disabled={buttonIsDisabled} onClick={onInsertCarousel}>
+          Добавить карусель
         </button>
 
         <button
