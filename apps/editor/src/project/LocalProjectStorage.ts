@@ -1,6 +1,6 @@
-import type { BookDocument } from '@root/packages/book-builder/src/book/book';
-import { isBookDocument } from '@root/packages/book-builder/src/book/book';
-import { assertContentDocument } from '@root/packages/book-builder/src/content/content';
+import type { BookDocument } from '@active-book/book-builder/book';
+import { isBookDocument } from '@active-book/book-builder/book';
+import { assertContentDocument } from '@active-book/book-builder/content';
 
 import type {
   ProjectBuildFile,

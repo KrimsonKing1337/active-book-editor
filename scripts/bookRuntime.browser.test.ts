@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
 import { compileBookDocument } from '../packages/book-builder/src/bookPreparation/compileBookDocument';
-import type { BookDocument } from '@active-book/book-builder/book/book';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import { chromium } from 'playwright';
 import { createServer as createViteServer } from 'vite';

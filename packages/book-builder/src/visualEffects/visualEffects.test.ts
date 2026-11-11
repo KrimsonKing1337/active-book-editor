@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 
 import fixture from '../../../../tests/fixtures/multipage-book/book.json';
 
-import { isBookDocument } from '../book/book';
+import { isBookDocument } from '../book';
 import { compileBookDocument } from '../bookPreparation';
 
 import type { VisualDraft } from './drafts';

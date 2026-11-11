@@ -9,7 +9,7 @@ import {
 
 import type { Editor } from '@tiptap/core';
 
-import type { BookDocument } from '@root/packages/book-builder/src/book/book';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import { buildProject } from '@build/buildProject';
 

@@ -1,10 +1,10 @@
 import type { VisualEffectRegistration } from '@active-book/types';
 
-import type { BookDocument } from '../book/book';
+import type { BookDocument } from '../book';
 import { compileVisualEffects } from '../visualEffects';
 
-import { isBookDocument } from '../book/book';
-import { assertContentDocument } from '../content/content';
+import { isBookDocument } from '../book';
+import { assertContentDocument } from '../content';
 
 import type {
   BuiltAudioEffect,

@@ -11,7 +11,7 @@ import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
 
-import { compileVisualEffects, missingVisualDefinitions } from '@root/packages/book-builder/src/visualEffects';
+import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
 import { useBookLibraries } from '@project/useBookLibraries';
 
@@ -21,7 +21,8 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
-import { VisualBookPreview, Pages } from '../index';
+import { Pages } from '../Pages';
+import { VisualBookPreview } from '../VisualBookPreview';
 
 import { useBookPages } from '../../book/useBookPages';
 
@@ -35,13 +36,10 @@ import {
   useSaveShortcut,
 } from '../../hooks';
 
-import {
-  CustomComponentsWarningModal,
-  Header,
-  PageEffects,
-  PageEffectsProvider,
-  RestoreBanner,
-} from '../index';
+import { CustomComponentsWarningModal } from '../CustomComponentsWarningModal';
+import { Header } from '../Header';
+import { PageEffects, PageEffectsProvider } from '../PageEffects';
+import { RestoreBanner } from '../RestoreBanner';
 
 import { AudioInstances } from '../PageEffects/components/AudioInstances';
 
@@ -126,9 +124,7 @@ export const EditorWorkspace = () => {
   }, []);
 
   const registerStylesFlusher = useCallback((flush: (() => boolean) | null) => {
-    const f = () => true;
-
-    flushStylesRef.current = flush ?? f;
+    flushStylesRef.current = flush ?? (() => true);
   }, []);
 
   const pages = useBookPages({
@@ -260,7 +256,6 @@ export const EditorWorkspace = () => {
       setProjectMessage(`Не загружены определения эффектов: ${missing.join(', ')}`);
     }
   }, [pages.book, libraries.definitions, libraries.isLoading]);
-
 
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;

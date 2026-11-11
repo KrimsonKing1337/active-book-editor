@@ -8,7 +8,7 @@ import {
   Flashlight,
 } from '@active-book/core/components/ProxyHooks';
 
-import { assertContentDocument } from '@root/packages/book-builder/src/content/content';
+import { assertContentDocument } from '@active-book/book-builder/content';
 
 import type { PageDocument } from '@types';
 

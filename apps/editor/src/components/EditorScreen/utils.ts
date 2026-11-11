@@ -12,7 +12,7 @@ import type { Config } from '@active-book/core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
 
-import { isContentLinkAllowed } from '@root/packages/book-builder/src/content/content';
+import { isContentLinkAllowed } from '@active-book/book-builder/content';
 
 import {
   ExistingProjectError,

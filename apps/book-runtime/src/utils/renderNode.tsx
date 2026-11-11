@@ -20,7 +20,7 @@ import {
   P,
 } from '@active-book/core/components';
 
-import { assertContentNode } from '@root/packages/book-builder/src/content/content';
+import { assertContentNode } from '@active-book/book-builder/content';
 
 const linkRel = (value: string | null | undefined): string => {
   const tokens = (value ?? '').split(/\s+/);
@@ -66,7 +66,7 @@ const renderMarks = (content: ReactNode, marks: BookTextMark[]): ReactNode => {
         const { href, rel } = attrs;
 
         const target = attrs.target ?? undefined;
-        const className = mark.attrs.class ?? undefined;
+        const className = attrs.class ?? undefined;
         const linkedRel = linkRel(rel);
 
         result = (
@@ -83,7 +83,8 @@ const renderMarks = (content: ReactNode, marks: BookTextMark[]): ReactNode => {
         break;
       }
       default: {
-        const jsonString = JSON.stringify(mark);
+        const unsupported: never = mark;
+        const jsonString = JSON.stringify(unsupported);
 
         throw new Error(`Unsupported reader mark: ${jsonString}`);
       }
@@ -158,7 +159,7 @@ const renderValidatedNode = ({
 
   const content = node.content ?? [];
 
-  const children = (content).map((childCur, index) => {
+  const children = content.map((childCur, index) => {
     const childPath = `${path}.content[${index}]`;
 
     return renderValidatedNode({

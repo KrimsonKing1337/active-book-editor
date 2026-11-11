@@ -22,13 +22,12 @@ import { AppWrapper } from '@active-book/core/components';
 
 import { type VisualEffects, useVisualEffects } from '@active-book/core/controllers/visualEffects';
 
-
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 import { loadBrowserLibrary } from '@active-book/book-builder/components/custom/browser';
 import { createCustomVisualDefinitions } from '@active-book/book-builder/components/custom/visual';
 import { compileVisualEffects } from '@active-book/book-builder/visualEffects';
 
-import { isBookDocument } from '@root/packages/book-builder/src/book/book';
+import { isBookDocument } from '@active-book/book-builder/book';
 
 import fixture from '@root/tests/fixtures/multipage-book/book.json';
 import archiveUrl from '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url';

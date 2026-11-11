@@ -1,4 +1,4 @@
-import type { BookPage } from '@root/packages/book-builder/src/book/book';
+import type { BookPage } from '@active-book/book-builder/book';
 
 import styles from './Pages.module.scss';
 

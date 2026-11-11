@@ -14,8 +14,7 @@ import {
   getVisualCategory,
 } from '@active-book/book-builder/visualEffects';
 
-import type { BookDocument } from '@root/packages/book-builder/src/book/book';
-
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import type { BookProject } from '@project/@types';
 

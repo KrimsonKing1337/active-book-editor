@@ -3,8 +3,8 @@ import { EditorState } from '@tiptap/pm/state';
 
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
 
-import type { BookDocument, BookPage } from '@root/packages/book-builder/src/book/book';
-import { assertContentDocument } from '@root/packages/book-builder/src/content/content';
+import type { BookDocument, BookPage } from '@active-book/book-builder/book';
+import { assertContentDocument } from '@active-book/book-builder/content';
 
 import { createEmptyDocument } from '../utils';
 
