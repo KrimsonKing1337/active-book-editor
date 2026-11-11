@@ -68,3 +68,23 @@ that opening the page again resets to its first slide.
 
 Appearance settings and per-slide visual effects remain a separate next stage.
 They currently have no attributes or editor controls in this contract.
+
+Validation on 2026-11-11:
+
+- Types: typecheck, NodeNext and Bundler contract tests pass.
+- Core: typecheck, test typecheck, Stylelint, 47 unit tests and 8 SCSS alias
+  tests pass. Packaging produces the archive consumed by the integration tests.
+- Editor: typecheck, test typecheck, Stylelint, 94 unit tests, 8 component tests,
+  the packaging script test, editor production build and production reader test
+  pass. All 15 focused carousel/text browser tests pass.
+- Full browser run: 29 pass; one existing effects screenshot fails. A clean
+  `origin/main` source snapshot reproduces the same 1116 changed pixels in text.
+  The snapshot test was given the same alias discovery and filesystem access to
+  the installed dependencies. Its reference image was not updated.
+- Full ESLint still fails: Core 121 errors / 47 warnings; Editor 70 errors /
+  47 warnings. Both baselines have the same errors; the editor baseline has 45
+  warnings. The two additional warnings concern file length. New carousel modules
+  have no lint errors. Existing unrelated diagnostics are not reformatted.
+- The production test captures console errors as well as page exceptions. Its
+  video fixture now includes Core's default poster asset to avoid an unrelated
+  missing-poster request. Production builds retain the large-chunk warning.

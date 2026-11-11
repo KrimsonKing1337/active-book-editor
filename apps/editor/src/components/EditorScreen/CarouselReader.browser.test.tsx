@@ -59,7 +59,11 @@ test('saves, opens, compiles and recursively renders slide blocks and components
 
     expect(built.pages[0].document.content).toEqual([carousel]);
     const click = vi.fn();
-    const TestButton = () => <button type="button" onClick={click}>Вложенная кнопка</button>;
+    const TestButton = () => (
+      <button type="button" onClick={click}>
+        Вложенная кнопка
+      </button>
+    );
     const node = built.pages[0].document.content?.[0];
 
     const { container } = render(

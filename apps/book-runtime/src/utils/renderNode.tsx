@@ -177,7 +177,11 @@ const renderValidatedNode = ({
   }
 
   if (node.type === 'carouselSlide') {
-    return <Fragment key={key}>{children}</Fragment>;
+    return (
+      <Fragment key={key}>
+        {children}
+      </Fragment>
+    );
   }
 
   if (node.type === 'paragraph') {
