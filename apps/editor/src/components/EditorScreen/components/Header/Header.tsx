@@ -2,7 +2,7 @@ import classNames from 'classnames';
 
 import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
 
-import type { BuildState, TextComponentName } from '../../@types';
+import type { BuildState, TextBlock } from '../../@types';
 
 import styles from './Header.module.scss';
 
@@ -29,7 +29,7 @@ type HeaderProps = {
   onToggleFrameEffects: () => void;
   onInsertCustomComponent: (packageName: string, name: string) => void;
   customComponentDefinitions: BrowserComponentDefinition[];
-  onInsertTextComponent: (name: TextComponentName) => void;
+  onInsertTextBlock: (block: TextBlock) => void;
   onBuildBook: () => Promise<void>;
   onImportCustomComponents: () => void;
 };
@@ -56,7 +56,7 @@ export const Header = ({
   onToggleFrameEffects,
   onInsertCustomComponent,
   customComponentDefinitions,
-  onInsertTextComponent,
+  onInsertTextBlock,
   onBuildBook,
   onImportCustomComponents,
 }: HeaderProps) => {
@@ -155,15 +155,23 @@ export const Header = ({
           );
         })}
 
-        <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextComponent('P')}>
+        <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextBlock({ type: 'paragraph' })}>
           Добавить параграф
         </button>
 
-        <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextComponent('H1')}>
+        <button
+          type="button"
+          disabled={buttonIsDisabled}
+          onClick={() => onInsertTextBlock({ type: 'heading', attrs: { level: 1 } })}
+        >
           Добавить заголовок 1
         </button>
 
-        <button type="button" disabled={buttonIsDisabled} onClick={() => onInsertTextComponent('H2')}>
+        <button
+          type="button"
+          disabled={buttonIsDisabled}
+          onClick={() => onInsertTextBlock({ type: 'heading', attrs: { level: 2 } })}
+        >
           Добавить заголовок 2
         </button>
 

@@ -15,8 +15,8 @@ export class ExistingProjectError extends Error {
 }
 
 export class InvalidProjectError extends Error {
-  constructor(message = 'The selected directory is not a valid Active Book project.') {
-    super(message);
+  constructor(message = 'The selected directory is not a valid Active Book project.', options?: ErrorOptions) {
+    super(message, options);
 
     this.name = 'InvalidProjectError';
   }

@@ -68,7 +68,7 @@
         },
         "content": [
           {
-            "type": "P",
+            "type": "paragraph",
             "content": [
               {
                 "type": "text",

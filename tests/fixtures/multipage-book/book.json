@@ -149,7 +149,7 @@
         },
         "content": [
           {
-            "type": "P",
+            "type": "paragraph",
             "content": [
               {
                 "type": "text",
@@ -163,6 +163,74 @@
               "package": "fixture-parts",
               "name": "Badge"
             }
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 1
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Заголовок первого уровня"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Заголовок второго уровня"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Форматированная ссылка",
+                "marks": [
+                  {
+                    "type": "bold"
+                  },
+                  {
+                    "type": "italic"
+                  },
+                  {
+                    "type": "strike"
+                  },
+                  {
+                    "type": "underline"
+                  },
+                  {
+                    "type": "link",
+                    "attrs": {
+                      "href": "https://example.com/note",
+                      "target": "_blank",
+                      "rel": "nofollow",
+                      "class": null
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "hardBreak"
+              },
+              {
+                "type": "text",
+                "text": "reader-code",
+                "marks": [
+                  {
+                    "type": "code"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -296,7 +364,7 @@
         },
         "content": [
           {
-            "type": "P",
+            "type": "paragraph",
             "content": [
               {
                 "type": "text",
@@ -475,7 +543,7 @@
         },
         "content": [
           {
-            "type": "P",
+            "type": "paragraph",
             "content": [
               {
                 "type": "text",

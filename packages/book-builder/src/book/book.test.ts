@@ -10,7 +10,7 @@ const page = (id: string, text: string) => ({
   document: {
     type: 'doc',
     content: [{
-      type: 'P',
+      type: 'paragraph',
       content: [{
         type: 'text',
         text,

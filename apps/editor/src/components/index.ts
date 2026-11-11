@@ -1,3 +1,3 @@
 export * from './ComponentNode';
 export * from './EditorScreen';
-export * from './EditableComponentNode';
+export * from './TextNodeView';

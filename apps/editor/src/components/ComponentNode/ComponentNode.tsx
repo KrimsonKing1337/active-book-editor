@@ -1,8 +1,13 @@
 import type { ComponentType } from 'react';
 
+import type { NodeViewProps } from '@tiptap/react';
+
 import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
-import { type NodeViewProps, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+import {
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from '@tiptap/react';
 
 import type { BookComponentProps } from '@active-book/types';
 
@@ -97,7 +102,7 @@ const ComponentView = ({
 export const ComponentNode = Node.create({
   name: 'coreComponent',
   priority: 110,
-  group: 'bookBlock',
+  group: 'block',
   atom: true,
   selectable: true,
 
@@ -150,7 +155,7 @@ export const ComponentNode = Node.create({
           from: selection.from,
           to: selection.to,
         };
-        const typeContent = { type: 'P' };
+        const typeContent = { type: 'paragraph' };
 
         return this.editor.commands.insertContentAt(selectionContent, typeContent);
       }

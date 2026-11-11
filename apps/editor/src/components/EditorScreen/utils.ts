@@ -1,12 +1,19 @@
-import { Extension, type Editor, type JSONContent } from '@tiptap/core';
+import type { Editor, JSONContent } from '@tiptap/core';
+
+import { Extension } from '@tiptap/core';
 import { NodeSelection, Plugin } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import Document from '@tiptap/extension-document';
 import StarterKit from '@tiptap/starter-kit';
+import Paragraph from '@tiptap/extension-paragraph';
+import Heading from '@tiptap/extension-heading';
+import { ReactNodeViewRenderer } from '@tiptap/react';
 
 import type { Config } from '@active-book/core/@types';
 
 import type { PageEffects } from '@active-book/book-builder/effects';
+
+import { isContentLinkAllowed } from '@active-book/book-builder/content';
 
 import {
   ExistingProjectError,
@@ -15,23 +22,30 @@ import {
 } from '@project/errors';
 
 import { ComponentNode } from '@components/ComponentNode';
-import { H1Node, H2Node, PNode } from '@components/EditableComponentNode';
+import { TextNodeView } from '@components/TextNodeView';
 
-import type { BuildState, TextComponentName } from './@types';
+
+import type { BuildState, TextBlock } from './@types';
 
 export const AUTO_SAVE_DELAY = 1500;
 
-export const bookBlockNodes = [
+export const contentNodes = [
   ComponentNode,
-  PNode,
-  H1Node,
-  H2Node,
+  Paragraph.extend({
+    addNodeView() {
+      return ReactNodeViewRenderer(TextNodeView);
+    },
+  }),
+  Heading.extend({
+    addNodeView() {
+      return ReactNodeViewRenderer(TextNodeView);
+    },
+  }).configure({ levels: [1, 2] }),
 ];
 
-// Чтобы явно указать, что дефолтный текстовый узел - это P, пишем его первым.
-// И тогда при нажатии на Enter вставится именно он.
+// The paragraph comes first so Enter and required empty blocks use the standard text node.
 export const PageDocument = Document.extend({
-  content: '(P | bookBlock)+',
+  content: '(paragraph | block)+',
 
   addAttributes() {
     const defaultEffects = {
@@ -49,9 +63,8 @@ export const PageDocument = Document.extend({
 });
 
 const ACTIVE_BLOCK_NAMES = new Set([
-  'P',
-  'H1',
-  'H2',
+  'paragraph',
+  'heading',
   'coreComponent',
 ]);
 
@@ -105,6 +118,10 @@ export const editorExtensions = [
     listItem: false,
     horizontalRule: false,
     trailingNode: false,
+    link: {
+      openOnClick: false,
+      isAllowedUri: isContentLinkAllowed,
+    },
     hardBreak: {
       keepMarks: true,
     },
@@ -112,7 +129,7 @@ export const editorExtensions = [
 
   PageDocument,
   ActiveBlockHighlight,
-  ...bookBlockNodes,
+  ...contentNodes,
 ];
 
 export const editorConfig: Omit<Config, 'pages'> = {
@@ -126,7 +143,7 @@ export const createEmptyDocument = (): JSONContent => ({
   type: 'doc',
   content: [
     {
-      type: 'P',
+      type: 'paragraph',
     },
   ],
 });
@@ -174,9 +191,10 @@ export const insertEditorContent = (editor: Editor | null, content: JSONContent)
 
 export const insertCustomComponent = (
   editor: Editor | null,
-  packageName: string,
-  name: string,
+  component: { packageName: string; name: string },
 ): void => {
+  const { name, packageName } = component;
+
   insertEditorContent(editor, {
     type: 'coreComponent',
     attrs: {
@@ -186,8 +204,6 @@ export const insertCustomComponent = (
   });
 };
 
-export const insertTextComponent = (editor: Editor | null, name: TextComponentName): void => {
-  insertEditorContent(editor, {
-    type: name,
-  });
+export const insertTextBlock = (editor: Editor | null, block: TextBlock): void => {
+  insertEditorContent(editor, block);
 };

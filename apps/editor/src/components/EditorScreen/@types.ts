@@ -1,3 +1,5 @@
 export type BuildState = 'idle' | 'building' | 'success' | 'error';
 
-export type TextComponentName = 'P' | 'H1' | 'H2';
+export type TextBlock =
+  | { type: 'paragraph' }
+  | { type: 'heading'; attrs: { level: 1 | 2 } };
