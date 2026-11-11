@@ -4,6 +4,7 @@ import type { BookDocument } from '../book';
 import { compileVisualEffects } from '../visualEffects';
 
 import { isBookDocument } from '../book';
+import { assertContentDocument } from '../content';
 
 import type {
   BuiltAudioEffect,
@@ -33,10 +34,12 @@ const getMappedEffects: GetMappedEffects = (effects) => {
   });
 };
 
-export const compilePageDocument = (document: unknown): Record<string, unknown> => {
+export const compilePageDocument = (document: unknown, path = 'document'): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
     throw new Error('book.json must contain an Active Book document');
   }
+
+  assertContentDocument(document, path);
 
   const attributes = isRecord(document.attrs) ? document.attrs : {};
   const builtAttributes = { ...attributes };
@@ -75,8 +78,8 @@ export const compileBookDocument = (book: unknown): BuiltBookDocument => {
     throw new Error('book.json must contain a nonempty book with unique page IDs and valid positional ranges');
   }
 
-  const pages = book.pages.map((pageCur) => {
-    const document = compilePageDocument(pageCur.document);
+  const pages = book.pages.map((pageCur, index) => {
+    const document = compilePageDocument(pageCur.document, `pages[${index}].document`);
 
     return {
       ...pageCur,

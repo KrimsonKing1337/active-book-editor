@@ -59,7 +59,7 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
         }],
       },
     },
-    content: [{ type: 'P' }],
+    content: [{ type: 'paragraph' }],
   };
 
   const built = compilePageDocument(document);
@@ -85,14 +85,14 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
         }],
       },
     },
-    content: [{ type: 'P' }],
+    content: [{ type: 'paragraph' }],
   });
 });
 
-test('an empty document compiles with empty effect groups', () => {
+test('an empty paragraph compiles with empty effect groups', () => {
   assert.deepEqual(compilePageDocument({
     type: 'doc',
-    content: [],
+    content: [{ type: 'paragraph' }],
   }), {
     type: 'doc',
     attrs: {
@@ -102,7 +102,7 @@ test('an empty document compiles with empty effect groups', () => {
         flashlight: [],
       },
     },
-    content: [],
+    content: [{ type: 'paragraph' }],
   });
 });
 
@@ -169,7 +169,7 @@ test('preserves independent frame layers, masks and component references in comp
   const document = {
     type: 'doc',
     attrs: { visualEffects },
-    content: [{ type: 'P' }],
+    content: [{ type: 'paragraph' }],
   };
   const book = {
     type: 'book',

@@ -11,7 +11,7 @@ The current `book.json` format is an ordered book, not an individual TipTap doc:
       "document": {
         "type": "doc",
         "attrs": { "pageEffects": {} },
-        "content": [{ "type": "P" }]
+        "content": [{ "type": "paragraph" }]
       }
     }
   ]

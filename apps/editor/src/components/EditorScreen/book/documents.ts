@@ -1,8 +1,10 @@
 import type { Editor, JSONContent } from '@tiptap/core';
 import { EditorState } from '@tiptap/pm/state';
 
-import type { BookDocument, BookPage } from '@active-book/book-builder/book';
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
+
+import type { BookDocument, BookPage } from '@active-book/book-builder/book';
+import { assertContentDocument } from '@active-book/book-builder/content';
 
 import { createEmptyDocument } from '../utils';
 
@@ -25,6 +27,8 @@ export const createEmptyBook = (): BookDocument => {
 
 /** A fresh plugin state intentionally clears undo/redo when changing pages or projects. */
 export const replaceEditorDocument = (editor: Editor, document: JSONContent): void => {
+  assertContentDocument(document);
+
   const pageEffects = normalizeSpecializedEffects(document.attrs?.pageEffects);
   const visualEffects = document.attrs?.visualEffects ?? [];
 

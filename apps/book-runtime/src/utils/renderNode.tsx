@@ -1,28 +1,93 @@
-import { type ComponentType, type Key, type ReactNode, Fragment } from 'react';
+import type {
+  ComponentType,
+  Key,
+  ReactNode,
+} from 'react';
 
-import type { BookRuntime } from '@active-book/types';
+import { Fragment } from 'react';
 
-import { Counter, H1, H2, P } from '@active-book/core/components';
+import type {
+  BookComponentProps,
+  BookContentNode,
+  BookRuntime,
+  BookTextMark,
+} from '@active-book/types';
 
-import type { BookNode, CustomComponentType } from '@types';
+import {
+  Counter,
+  H1,
+  H2,
+  P,
+} from '@active-book/core/components';
 
-const renderText = (node: BookNode): ReactNode => {
-  const marks = node.marks ?? [];
+import { assertContentNode } from '@active-book/book-builder/content';
 
-  let result: ReactNode = node.text ?? '';
+const linkRel = (value: string | null | undefined): string => {
+  const tokens = (value ?? '').split(/\s+/);
+  const safeTokens = tokens.filter((cur) => cur && cur.toLowerCase() !== 'opener');
+  const relations = new Set(safeTokens);
 
-  for (const markCur of marks) {
-    if (markCur.type === 'bold') {
-      result = <strong>{result}</strong>;
-    }
-    if (markCur.type === 'italic') {
-      result = <em>{result}</em>;
-    }
-    if (markCur.type === 'strike') {
-      result = <s>{result}</s>;
-    }
-    if (markCur.type === 'code') {
-      result = <code>{result}</code>;
+  relations.add('noopener');
+  relations.add('noreferrer');
+
+  return [...relations].join(' ');
+};
+
+const renderMarks = (content: ReactNode, marks: BookTextMark[]): ReactNode => {
+  let result = content;
+
+  // ProseMirror serializes the first mark as the outermost wrapper.
+  for (let index = marks.length - 1; index >= 0; index -= 1) {
+    const mark = marks[index];
+
+    switch (mark.type) {
+      case 'bold':
+        result = <strong>{result}</strong>;
+
+        break;
+      case 'italic':
+        result = <em>{result}</em>;
+
+        break;
+      case 'strike':
+        result = <s>{result}</s>;
+
+        break;
+      case 'underline':
+        result = <u>{result}</u>;
+
+        break;
+      case 'code':
+        result = <code>{result}</code>;
+
+        break;
+      case 'link': {
+        const { attrs } = mark;
+        const { href, rel } = attrs;
+
+        const target = attrs.target ?? undefined;
+        const className = attrs.class ?? undefined;
+        const linkedRel = linkRel(rel);
+
+        result = (
+          <a
+            href={href}
+            target={target}
+            rel={linkedRel}
+            className={className}
+          >
+            {result}
+          </a>
+        );
+
+        break;
+      }
+      default: {
+        const unsupported: never = mark;
+        const jsonString = JSON.stringify(unsupported);
+
+        throw new Error(`Unsupported reader mark: ${jsonString}`);
+      }
     }
   }
 
@@ -30,78 +95,115 @@ const renderText = (node: BookNode): ReactNode => {
 };
 
 type RenderNodeParams = {
-  node: BookNode;
+  node: unknown;
   key: Key;
   customComponents: Record<string, ComponentType>;
   bookRuntime: BookRuntime;
+  path?: string;
 };
 
-export const renderNode = ({
+type ValidatedNodeParams = Omit<RenderNodeParams, 'node' | 'path'> & {
+  node: BookContentNode;
+  path: string;
+};
+
+const renderValidatedNode = ({
   node,
   key,
   customComponents,
   bookRuntime,
-}: RenderNodeParams): ReactNode => {
+  path,
+}: ValidatedNodeParams): ReactNode => {
   if (node.type === 'text') {
+    const marks = node.marks ?? [];
+
     return (
       <Fragment key={key}>
-        {renderText(node)}
+        {renderMarks(node.text, marks)}
       </Fragment>
     );
   }
 
   if (node.type === 'hardBreak') {
-    return <br key={key} />;
+    const marks = node.marks ?? [];
+
+    return (
+      <Fragment key={key}>
+        {renderMarks(<br />, marks)}
+      </Fragment>
+    );
+  }
+
+  if (node.type === 'coreComponent') {
+    const { name, package: packageName } = node.attrs;
+
+    if (packageName) {
+      const componentId = `${packageName}/${name}`;
+      const CustomComponent = customComponents[componentId];
+
+      if (!CustomComponent) {
+        throw new Error(`${path}: unknown custom component "${componentId}"`);
+      }
+
+      const props: BookComponentProps = { book: bookRuntime };
+
+      return <CustomComponent key={key} {...props} />;
+    }
+
+    if (name === 'Counter') {
+      return <Counter key={key} />;
+    }
+
+    throw new Error(`${path}: unknown core component "${name}"`);
   }
 
   const content = node.content ?? [];
 
-  const children = content.map((child, index) => {
-    return renderNode({
-      node: child,
+  const children = content.map((childCur, index) => {
+    const childPath = `${path}.content[${index}]`;
+
+    return renderValidatedNode({
+      node: childCur,
       key: index,
       customComponents,
       bookRuntime,
+      path: childPath,
     });
   });
 
-  if (node.type === 'H1' || node.type === 'activeBookH1') {
-    return <H1 key={key}>{children}</H1>;
-  }
-  if (node.type === 'H2' || node.type === 'activeBookH2') {
-    return <H2 key={key}>{children}</H2>;
-  }
-  if (node.type === 'P' || node.type === 'activeBookP' || node.type === 'paragraph') {
-    return <P key={key} data-active-book-node="P">{children}</P>;
-  }
-
-  if (node.type === 'heading') {
-    return node.attrs?.level === 1
-      ? <H1 key={key}>{children}</H1>
-      : <H2 key={key}>{children}</H2>;
-  }
-
-  if (node.type === 'coreComponent' && typeof node.attrs?.package === 'string') {
-    const componentId = `${node.attrs.package}/${node.attrs.name}`;
-
-    const CustomComponent = customComponents[componentId] as CustomComponentType;
-
-    const unknownComponent = (
-      <span key={key}>
-        Unknown custom component: {componentId}
-      </span>
+  if (node.type === 'paragraph') {
+    return (
+      <P key={key} data-active-book-node="paragraph">
+        {children}
+      </P>
     );
-
-    return CustomComponent ? <CustomComponent key={key} book={bookRuntime} /> : unknownComponent;
   }
 
-  if (node.type === 'coreComponent' && node.attrs?.name === 'Counter') {
-    return <Counter key={key} />;
+  if (node.attrs.level === 1) {
+    return (
+      <H1 key={key}>
+        {children}
+      </H1>
+    );
   }
 
   return (
-    <Fragment key={key}>
+    <H2 key={key}>
       {children}
-    </Fragment>
+    </H2>
   );
+};
+
+export const renderNode = ({
+  node,
+  path = 'node',
+  ...context
+}: RenderNodeParams): ReactNode => {
+  assertContentNode(node, path);
+
+  return renderValidatedNode({
+    node,
+    path,
+    ...context,
+  });
 };

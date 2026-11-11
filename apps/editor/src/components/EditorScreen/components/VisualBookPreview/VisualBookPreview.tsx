@@ -6,8 +6,6 @@ import type { Config } from '@active-book/core/@types';
 
 import { AppWrapper } from '@active-book/core/components';
 
-import type { BookDocument } from '@active-book/book-builder/book';
-
 import {
   type VisualDraft,
   compileVisualEffects,
@@ -15,6 +13,8 @@ import {
   pageVisualEffects,
   getVisualCategory,
 } from '@active-book/book-builder/visualEffects';
+
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import type { BookProject } from '@project/@types';
 

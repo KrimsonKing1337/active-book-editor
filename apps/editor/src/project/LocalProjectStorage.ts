@@ -1,5 +1,6 @@
 import type { BookDocument } from '@active-book/book-builder/book';
 import { isBookDocument } from '@active-book/book-builder/book';
+import { assertContentDocument } from '@active-book/book-builder/content';
 
 import type {
   ProjectBuildFile,
@@ -150,6 +151,18 @@ export class LocalProjectStorage implements ProjectStorage {
 
     if (!isBookDocument(document)) {
       throw new InvalidProjectError('book.json должен содержать книгу с непустым списком страниц и уникальными id');
+    }
+
+    try {
+      for (const [index, page] of document.pages.entries()) {
+        assertContentDocument(page.document, `pages[${index}].document`);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new InvalidProjectError(error.message, { cause: error });
+      }
+
+      throw error;
     }
 
     return document;

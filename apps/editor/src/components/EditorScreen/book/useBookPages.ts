@@ -1,4 +1,9 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import type { Editor } from '@tiptap/core';
 
@@ -9,7 +14,11 @@ import { useGoToPage } from '@active-book/core/hooks/control/useGoToPage';
 
 import type { BookDocument } from '@active-book/book-builder/book';
 
-import { createEmptyBook, createPage, replaceEditorDocument } from './documents';
+import {
+  createEmptyBook,
+  createPage,
+  replaceEditorDocument,
+} from './documents';
 
 type BookPagesOptions = {
   editor: Editor | null;

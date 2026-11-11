@@ -1,9 +1,15 @@
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
 
 import classNames from 'classnames';
-
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
@@ -15,11 +21,12 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
-import { VisualBookPreview, Pages } from '../components';
+import { Pages } from '../Pages';
+import { VisualBookPreview } from '../VisualBookPreview';
 
-import { useBookPages } from '../book/useBookPages';
+import { useBookPages } from '../../book/useBookPages';
 
-import type { BuildState, TextComponentName } from '../@types';
+import type { BuildState, TextBlock } from '../../@types';
 
 import {
   useAutosave,
@@ -27,17 +34,14 @@ import {
   useProjectActions,
   useProjectRestore,
   useSaveShortcut,
-} from '../hooks';
+} from '../../hooks';
 
-import {
-  CustomComponentsWarningModal,
-  Header,
-  PageEffects,
-  PageEffectsProvider,
-  RestoreBanner,
-} from '../components';
+import { CustomComponentsWarningModal } from '../CustomComponentsWarningModal';
+import { Header } from '../Header';
+import { PageEffects, PageEffectsProvider } from '../PageEffects';
+import { RestoreBanner } from '../RestoreBanner';
 
-import { AudioInstances } from '../components/PageEffects/components/AudioInstances';
+import { AudioInstances } from '../PageEffects/components/AudioInstances';
 
 import {
   editorConfig,
@@ -45,10 +49,10 @@ import {
   createEmptyDocument,
   getBuildStateLabel,
   insertCustomComponent,
-  insertTextComponent,
-} from '../utils';
+  insertTextBlock,
+} from '../../utils';
 
-import styles from '../EditorScreen.module.scss';
+import styles from '../../EditorScreen.module.scss';
 
 import {
   SHOW_STRUCTURE_STORAGE_KEY,
@@ -56,7 +60,7 @@ import {
   SHOW_NARRATIVE_STORAGE_KEY,
   SHOW_BACKGROUNDS_STORAGE_KEY,
   SHOW_FRAME_EFFECTS_STORAGE_KEY,
-} from '../constants';
+} from '../../constants';
 
 export const EditorWorkspace = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
@@ -253,7 +257,6 @@ export const EditorWorkspace = () => {
     }
   }, [pages.book, libraries.definitions, libraries.isLoading]);
 
-
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
   const structureButtonIsDisabled = !editor;
@@ -329,11 +332,11 @@ export const EditorWorkspace = () => {
   };
 
   const handleInsertCustomComponent = (packageName: string, name: string) => {
-    insertCustomComponent(editor, packageName, name);
+    insertCustomComponent(editor, { packageName, name });
   };
 
-  const handleInsertTextComponent = (name: TextComponentName) => {
-    insertTextComponent(editor, name);
+  const handleInsertTextBlock = (block: TextBlock) => {
+    insertTextBlock(editor, block);
   };
 
   const handleCanvasKeyDown = (event: KeyboardEvent<HTMLElement>) => {
@@ -396,7 +399,7 @@ export const EditorWorkspace = () => {
             onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
             onInsertCustomComponent={handleInsertCustomComponent}
             customComponentDefinitions={customComponentDefinitions}
-            onInsertTextComponent={handleInsertTextComponent}
+            onInsertTextBlock={handleInsertTextBlock}
             onBuildBook={buildBook}
             onImportCustomComponents={handleImportCustomComponents}
           />

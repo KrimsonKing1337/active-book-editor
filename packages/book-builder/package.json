@@ -28,6 +28,7 @@
     "./server": "./src/server/index.ts",
     "./components/custom": "./src/components/custom/index.ts",
     "./book": "./src/book/index.ts",
+    "./content": "./src/content/index.ts",
     "./visualEffects": "./src/visualEffects/index.ts",
     "./components/custom/visual": "./src/components/custom/visual.ts"
   },

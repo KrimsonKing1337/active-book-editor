@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
 import { compileBookDocument } from '../packages/book-builder/src/bookPreparation/compileBookDocument';
-import type { BookDocument } from '../packages/book-builder/src/book';
+import type { BookDocument } from '@active-book/book-builder/book';
 
 import { chromium } from 'playwright';
 import { createServer as createViteServer } from 'vite';
@@ -296,6 +296,24 @@ test('production book selects stable page IDs in a persistent viewport with page
   await page.getByRole('button', { name: 'Начать читать', exact: true }).click();
   await page.getByText('Из редактора. Альфа: первая страница', { exact: true }).waitFor();
   await page.getByText('1 из 3', { exact: true }).waitFor();
+  const textLink = page.getByRole('link', { name: 'Форматированная ссылка', exact: true });
+
+  assert.equal(await textLink.getAttribute('href'), 'https://example.com/note');
+  assert.equal(await textLink.getAttribute('target'), '_blank');
+  assert.match(await textLink.getAttribute('rel') ?? '', /noopener/);
+  assert.match(await textLink.getAttribute('rel') ?? '', /noreferrer/);
+
+  const formattedParagraph = page.locator('[data-active-book-node="paragraph"]').filter({ has: textLink });
+
+  for (const tag of ['strong', 'em', 's', 'u']) {
+    assert.equal(await formattedParagraph.locator(tag).textContent(), 'Форматированная ссылка');
+  }
+
+  assert.equal(await page.locator('code').filter({ hasText: 'reader-code' }).count(), 1);
+  assert.equal(await page.getByText('Заголовок первого уровня', { exact: true })
+    .evaluate((element) => getComputedStyle(element).fontWeight), '700');
+  assert.equal(await page.getByText('Заголовок второго уровня', { exact: true })
+    .evaluate((element) => getComputedStyle(element).fontStyle), 'italic');
   await page.getByTestId('native-visual').waitFor();
   const nativeParams = JSON.parse(await page.getByTestId('native-visual').getAttribute('data-params') ?? '{}');
   assert.deepEqual(nativeParams, compiled.visualEffects.find((cur) => cur.effect.id === 'range-native')?.effect.params);
