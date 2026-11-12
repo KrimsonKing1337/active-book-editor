@@ -1,2 +1,2 @@
 export { ContentValidation } from './ContentValidation';
-export { reportContentError } from './utils/errors';
+export { reportContentError } from './utils';

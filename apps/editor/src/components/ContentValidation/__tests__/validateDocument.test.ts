@@ -8,7 +8,7 @@ import {
 import { contentSchema } from '@root/tests/fixtures/content-schema';
 import { rangeDocument } from '@root/tests/fixtures/carousel-ranges';
 
-import { createDocumentValidator } from '../utils/validateDocument';
+import { createDocumentValidator } from '../utils';
 
 test('reuses immutable top-level blocks but checks changed blocks and undo documents', () => {
   const validate = createDocumentValidator();

@@ -3,11 +3,13 @@ import type { Range, RawCommands } from '@tiptap/core';
 import { commands, Extension } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 
-import { clipboardGuards } from './utils/clipboardGuards';
-import { reportContentError } from './utils/errors';
-import { createDocumentValidator } from './utils/validateDocument';
-import { validateInput } from './utils/validateInput';
-import { validateRange } from './utils/validateRange';
+import {
+  clipboardGuards,
+  createDocumentValidator,
+  reportContentError,
+  validateInput,
+  validateRange,
+} from './utils';
 
 // Validate the source before ProseMirror fitting can lift or discard forbidden containers.
 export const ContentValidation = Extension.create({
