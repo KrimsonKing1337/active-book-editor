@@ -10,7 +10,7 @@ import { userEvent } from 'vitest/browser';
 
 import { createLongDocument } from '@root/tests/fixtures/long-content';
 
-import { editorExtensions } from '../EditorScreen/utils';
+import { editorExtensions } from '../../EditorScreen/utils';
 
 declare module 'vitest' {
   interface ProvidedContext {

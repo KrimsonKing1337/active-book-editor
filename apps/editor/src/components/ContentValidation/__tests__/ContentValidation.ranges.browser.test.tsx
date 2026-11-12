@@ -19,7 +19,7 @@ import {
   rangeDocument,
 } from '@root/tests/fixtures/carousel-ranges';
 
-import { editorExtensions } from '../EditorScreen/utils';
+import { editorExtensions } from '../../EditorScreen/utils';
 
 let editor: Editor;
 const errors = vi.fn();

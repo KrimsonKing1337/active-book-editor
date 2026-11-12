@@ -40,6 +40,8 @@ export const createDocumentValidator = () => {
           content = Fragment.from(doc.firstChild);
         }
 
+        // This is only a validation projection of changed blocks, not a new
+        // authoritative document. On errors, validate the original doc in full.
         candidate = doc.copy(content);
       }
     }

@@ -1,7 +1,7 @@
 import { Node } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 
-import { reportContentError } from '../ContentValidation/errors';
+import { reportContentError } from '../ContentValidation';
 
 import { CarouselNodeView } from './CarouselNodeView';
 import { changeSlides, selectSlide } from './commands';

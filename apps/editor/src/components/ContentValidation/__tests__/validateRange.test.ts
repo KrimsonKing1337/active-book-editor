@@ -6,7 +6,7 @@ import {
 import { crossSlideRanges, rangeDocument } from '@root/tests/fixtures/carousel-ranges';
 import { contentSchema } from '@root/tests/fixtures/content-schema';
 
-import { validateRange } from './validateRange';
+import { validateRange } from '../utils/validateRange';
 
 const doc = contentSchema.nodeFromJSON(rangeDocument);
 
