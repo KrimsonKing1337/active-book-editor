@@ -14,6 +14,7 @@ const containerPosition = (position: ResolvedPos, name: string): number | undefi
 export const validateRange = (doc: Node, range: Range): boolean => {
   const from = doc.resolve(range.from);
   const to = doc.resolve(range.to);
+
   const fromCarousel = containerPosition(from, 'carousel');
   const toCarousel = containerPosition(to, 'carousel');
 

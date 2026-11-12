@@ -27,67 +27,71 @@ const openSlideContent = (slice: Slice): Fragment => {
   return content;
 };
 
-export const clipboardGuards = (editor: Editor): EditorProps => ({
-  handleDOMEvents: {
-    paste(view, event) {
+export const clipboardGuards = (editor: Editor): EditorProps => {
+  return {
+    handleDOMEvents: {
+      paste(view, event) {
+        try {
+          const insideSlide = validateRange(view.state.doc, view.state.selection);
+          const html = event.clipboardData?.getData('text/html') ?? '';
+
+          validateClipboardHtml(html, insideSlide);
+
+          return false;
+        } catch (error) {
+          event.preventDefault();
+
+          reportContentError(editor, error);
+
+          return true;
+        }
+      },
+    },
+    handlePaste(...args) {
+      const [view, event, slice] = args;
+
       try {
         const insideSlide = validateRange(view.state.doc, view.state.selection);
         const html = event.clipboardData?.getData('text/html') ?? '';
 
         validateClipboardHtml(html, insideSlide);
+        validateInput(openSlideContent(slice), insideSlide);
 
         return false;
       } catch (error) {
-        event.preventDefault();
         reportContentError(editor, error);
 
         return true;
       }
     },
-  },
-  handlePaste(...args) {
-    const [view, event, slice] = args;
+    handleDrop(...args) {
+      const [view, event, slice, moved] = args;
 
-    try {
-      const insideSlide = validateRange(view.state.doc, view.state.selection);
-      const html = event.clipboardData?.getData('text/html') ?? '';
+      const target = view.posAtCoords({ left: event.clientX, top: event.clientY });
 
-      validateClipboardHtml(html, insideSlide);
-      validateInput(openSlideContent(slice), insideSlide);
-
-      return false;
-    } catch (error) {
-      reportContentError(editor, error);
-
-      return true;
-    }
-  },
-  handleDrop(...args) {
-    const [view, event, slice, moved] = args;
-    const target = view.posAtCoords({ left: event.clientX, top: event.clientY });
-
-    if (!target) {
-      return false;
-    }
-
-    try {
-      // External drops insert at the pointer, rather than replacing the selection.
-      // Internal moves also delete their source selection; validate both ends.
-      if (moved) {
-        validateRange(view.state.doc, view.state.selection);
+      if (!target) {
+        return false;
       }
 
-      const insideSlide = validateRange(view.state.doc, { from: target.pos, to: target.pos });
-      const html = event.dataTransfer?.getData('text/html') ?? '';
+      try {
+        // External drops insert at the pointer, rather than replacing the selection.
+        // Internal moves also delete their source selection; validate both ends.
+        if (moved) {
+          validateRange(view.state.doc, view.state.selection);
+        }
 
-      validateClipboardHtml(html, insideSlide);
-      validateInput(openSlideContent(slice), insideSlide);
+        const insideSlide = validateRange(view.state.doc, { from: target.pos, to: target.pos });
+        const html = event.dataTransfer?.getData('text/html') ?? '';
 
-      return false;
-    } catch (error) {
-      reportContentError(editor, error);
+        validateClipboardHtml(html, insideSlide);
+        validateInput(openSlideContent(slice), insideSlide);
 
-      return true;
-    }
-  },
-});
+        return false;
+      } catch (error) {
+        reportContentError(editor, error);
+
+        return true;
+      }
+    },
+  };
+};

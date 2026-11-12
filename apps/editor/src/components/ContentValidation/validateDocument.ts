@@ -1,6 +1,4 @@
-import type { Node } from '@tiptap/pm/model';
-
-import { Fragment } from '@tiptap/pm/model';
+import { type Node, Fragment } from '@tiptap/pm/model';
 
 import { assertContentDocument } from '@active-book/book-builder/content';
 
@@ -17,7 +15,9 @@ export const createDocumentValidator = () => {
 
       if (start !== null) {
         const end = previous.content.findDiffEnd(doc.content);
-        const to = Math.min(doc.content.size, Math.max(start + 1, end?.b ?? start));
+
+        const endPoint = Math.max(start + 1, end?.b ?? start);
+        const to = Math.min(doc.content.size, endPoint);
 
         // Include whole top-level blocks, even when a diff begins inside text.
         doc.nodesBetween(start, to, (node) => {

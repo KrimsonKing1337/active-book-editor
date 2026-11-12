@@ -2,6 +2,12 @@ import { Fragment, Node } from '@tiptap/pm/model';
 
 import { assertContentDocument, assertContentNode } from '@active-book/book-builder/content';
 
+const selectors = {
+  carousel: '[data-type="carousel"]',
+  segment: '[data-type="segment"]',
+  carouselSlide: '[data-type="carouselSlide"]',
+};
+
 type HtmlContext = {
   insideSlide: boolean;
   allowOpenSlide?: boolean;
@@ -9,21 +15,30 @@ type HtmlContext = {
 
 const assertHtml = (html: string, context: HtmlContext): void => {
   const dom = new DOMParser().parseFromString(html, 'text/html');
-  const containers = dom.querySelectorAll('[data-type="carousel"], [data-type="segment"]');
+  const containers = dom.querySelectorAll(`${selectors.carousel}, ${selectors.segment}`);
 
-  for (const slideCur of dom.querySelectorAll('[data-type="carouselSlide"]')) {
+  for (const slideCur of dom.querySelectorAll(selectors.carouselSlide)) {
+    const parent = slideCur.parentElement;
+
+    if (parent?.matches(`section${selectors.carousel}`)) {
+      continue;
+    }
+
+    if (!context.allowOpenSlide || parent !== dom.body) {
+      throw new Error('Слайд должен находиться внутри карусели');
+    }
+
     const slice = slideCur.getAttribute('data-pm-slice') ?? '';
-    const open = /^(\d+) (\d+)(?: |$)/u.exec(slice);
-    const isOpenContext = context.allowOpenSlide && slideCur.parentElement === dom.body
-      && open !== null && Number(open[1]) > 0 && Number(open[2]) > 0;
+    const match = /^(\d+) (\d+)(?: |$)/u.exec(slice);
 
-    if (!slideCur.parentElement?.matches('section[data-type="carousel"]') && !isOpenContext) {
+    if (!match || Number(match[1]) <= 0 || Number(match[2]) <= 0) {
       throw new Error('Слайд должен находиться внутри карусели');
     }
   }
 
   for (const containerCur of containers) {
-    const ancestor = containerCur.parentElement?.closest('[data-type="carousel"], [data-type="carouselSlide"]');
+    const ancestor = containerCur.parentElement
+      ?.closest(`${selectors.carousel}, ${selectors.carouselSlide}`);
 
     if (context.insideSlide || ancestor) {
       throw new Error('Карусель и segment нельзя вставить внутрь слайда');
@@ -38,7 +53,7 @@ const assertHtml = (html: string, context: HtmlContext): void => {
     }
 
     for (const slide of containerCur.children) {
-      if (!slide.matches('section[data-type="carouselSlide"]') || !slide.children.length) {
+      if (!slide.matches(`section${selectors.carouselSlide}`) || !slide.children.length) {
         throw new Error('Карусель должна содержать слайды с блочным содержимым');
       }
     }
@@ -68,8 +83,8 @@ export const validateInput = (content: unknown, insideSlide: boolean): void => {
   }
 
   if (Array.isArray(content)) {
-    for (const child of content) {
-      validateInput(child, insideSlide);
+    for (const childCur of content) {
+      validateInput(childCur, insideSlide);
     }
 
     return;

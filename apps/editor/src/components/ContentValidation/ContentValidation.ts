@@ -71,23 +71,25 @@ export const ContentValidation = Extension.create({
     const editor = this.editor;
     const validateDocument = createDocumentValidator();
 
-    return [new Plugin({
-      filterTransaction(transaction, state) {
-        if (!transaction.docChanged) {
-          return true;
-        }
+    return [
+      new Plugin({
+        filterTransaction(transaction, state) {
+          if (!transaction.docChanged) {
+            return true;
+          }
 
-        try {
-          validateDocument(transaction.doc, state.doc);
+          try {
+            validateDocument(transaction.doc, state.doc);
 
-          return true;
-        } catch (error) {
-          reportContentError(editor, error);
+            return true;
+          } catch (error) {
+            reportContentError(editor, error);
 
-          return false;
-        }
-      },
-      props: clipboardGuards(editor),
-    })];
+            return false;
+          }
+        },
+        props: clipboardGuards(editor),
+      }),
+    ];
   },
 });
