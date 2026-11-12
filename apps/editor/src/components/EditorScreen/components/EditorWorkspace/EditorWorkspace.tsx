@@ -21,6 +21,8 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
+import { ContentError } from '@components/ContentError';
+
 import { Pages } from '../Pages';
 import { VisualBookPreview } from '../VisualBookPreview';
 
@@ -92,6 +94,8 @@ export const EditorWorkspace = () => {
   });
 
   const editor = useEditor({
+    // ContentError displays rejected input; TipTap's default handler would throw.
+    onContentError: () => {},
     content: createEmptyDocument(),
     editable: false,
     extensions: editorExtensions,
@@ -400,9 +404,12 @@ export const EditorWorkspace = () => {
             onInsertCustomComponent={handleInsertCustomComponent}
             customComponentDefinitions={customComponentDefinitions}
             onInsertTextBlock={handleInsertTextBlock}
+            onInsertCarousel={() => editor?.commands.insertCarousel()}
             onBuildBook={buildBook}
             onImportCustomComponents={handleImportCustomComponents}
           />
+
+          <ContentError editor={editor} />
 
           <Pages
             pages={pages.book.pages}

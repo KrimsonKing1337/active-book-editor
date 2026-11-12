@@ -1,0 +1,327 @@
+{
+  "date": "2026-11-11",
+  "baselineCommit": "e1b2f4291ca315f0eca9dcdce8eb4790663de6fb",
+  "scope": "ContentValidation filter and synchronous ProseMirror dispatch; see ../content-validation-review.md",
+  "before": [
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 1000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 508617,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 0.6000000014901161,
+            "p95Ms": 1.5,
+            "totalMs": 84
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 1.7000000029802322,
+            "p95Ms": 2.7999999970197678,
+            "totalMs": 201.29999999701977
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 1.1000000014901161,
+            "p95Ms": 2.100000001490116,
+            "totalMs": 27.30000001192093
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 5.399999998509884,
+            "p95Ms": 11.699999995529652,
+            "totalMs": 143.10000000149012
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 1.9000000059604645,
+            "p95Ms": 7.5,
+            "totalMs": 40.1000000089407
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 17.799999997019768,
+            "p95Ms": 42.70000000298023,
+            "totalMs": 290.70000000298023
+          }
+        }
+      }
+    },
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 5000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 2204777,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 2.5,
+            "p95Ms": 3.7999999970197678,
+            "totalMs": 295.8999999836087
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 5.4000000059604645,
+            "p95Ms": 7.4000000059604645,
+            "totalMs": 579.1999999955297
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 2.3000000044703484,
+            "p95Ms": 5.199999995529652,
+            "totalMs": 56.19999998807907
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 9.800000004470348,
+            "p95Ms": 13,
+            "totalMs": 207.50000000745058
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 2,
+            "p95Ms": 2.399999998509884,
+            "totalMs": 20.700000010430813
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 110.39999999850988,
+            "p95Ms": 119.59999999403954,
+            "totalMs": 1361.7999999970198
+          }
+        }
+      }
+    },
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 10000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 4324797,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 4.5,
+            "p95Ms": 7.5,
+            "totalMs": 530.7999999970198
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 9.5,
+            "p95Ms": 13.600000001490116,
+            "totalMs": 1030.600000075996
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 4,
+            "p95Ms": 6.299999997019768,
+            "totalMs": 87.90000000596046
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 24.200000002980232,
+            "p95Ms": 30.900000005960464,
+            "totalMs": 479.9000000208616
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 3.7000000029802322,
+            "p95Ms": 4.399999998509884,
+            "totalMs": 45.00000000745058
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 380.1000000014901,
+            "p95Ms": 493.40000000596046,
+            "totalMs": 4628.900000013411
+          }
+        }
+      }
+    }
+  ],
+  "after": [
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 1000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 508617,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 0.10000000149011612,
+            "p95Ms": 0.20000000298023224,
+            "totalMs": 10.400000028312206
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 1.2000000029802322,
+            "p95Ms": 2.2000000029802322,
+            "totalMs": 139.8999999910593
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 0.10000000149011612,
+            "p95Ms": 1.4000000059604645,
+            "totalMs": 5.80000002682209
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 5,
+            "p95Ms": 9.300000004470348,
+            "totalMs": 121.20000001043081
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 1.5,
+            "p95Ms": 5.899999998509884,
+            "totalMs": 28.5
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 17.799999997019768,
+            "p95Ms": 21.5,
+            "totalMs": 250.30000000447035
+          }
+        }
+      }
+    },
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 5000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 2204777,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 0.29999999701976776,
+            "p95Ms": 0.4000000059604645,
+            "totalMs": 27.400000020861626
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 3,
+            "p95Ms": 6.100000001490116,
+            "totalMs": 331.5000000447035
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 0.19999999552965164,
+            "p95Ms": 0.30000000447034836,
+            "totalMs": 4.699999995529652
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 13,
+            "p95Ms": 16.200000002980232,
+            "totalMs": 266.8999999836087
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 2.399999998509884,
+            "p95Ms": 7.899999998509884,
+            "totalMs": 38.69999999552965
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 111.60000000149012,
+            "p95Ms": 126.69999999552965,
+            "totalMs": 1456.2000000029802
+          }
+        }
+      }
+    },
+    {
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "hardwareConcurrency": 3,
+      "paragraphs": 10000,
+      "carousels": 10,
+      "slidesPerCarousel": 2,
+      "blocksPerSlide": 10,
+      "jsonBytes": 4324797,
+      "measurements": {
+        "typing": {
+          "validation": {
+            "count": 100,
+            "p50Ms": 0.4000000059604645,
+            "p95Ms": 0.5999999940395355,
+            "totalMs": 43.69999996572733
+          },
+          "dispatch": {
+            "count": 100,
+            "p50Ms": 4.399999998509884,
+            "p95Ms": 5.600000001490116,
+            "totalMs": 476.19999998807907
+          }
+        },
+        "paste": {
+          "validation": {
+            "count": 20,
+            "p50Ms": 0.29999999701976776,
+            "p95Ms": 0.3999999985098839,
+            "totalMs": 6.200000017881393
+          },
+          "dispatch": {
+            "count": 20,
+            "p50Ms": 17.799999997019768,
+            "p95Ms": 25.100000001490116,
+            "totalMs": 394.80000000447035
+          }
+        },
+        "bulkReplacement": {
+          "validation": {
+            "count": 10,
+            "p50Ms": 4.399999998509884,
+            "p95Ms": 7.600000001490116,
+            "totalMs": 49.70000001043081
+          },
+          "dispatch": {
+            "count": 10,
+            "p50Ms": 241.29999999701977,
+            "p95Ms": 271.30000000447035,
+            "totalMs": 3064.3999999910593
+          }
+        }
+      }
+    }
+  ]
+}

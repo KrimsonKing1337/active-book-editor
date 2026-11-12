@@ -1,0 +1,25 @@
+.Carousel {
+  margin-block: 12px;
+
+  padding: 8px;
+
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
+.Controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+
+  button[aria-pressed='true'] {
+    outline: 2px solid currentColor;
+  }
+}
+
+.Content {
+  min-width: 0;
+
+  overflow-wrap: anywhere;
+}

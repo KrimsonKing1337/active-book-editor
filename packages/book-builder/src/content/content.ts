@@ -82,7 +82,7 @@ const assertMarks = (value: unknown, path: string): void => {
   }
 };
 
-type NodeLocation = 'block' | 'inline' | 'any';
+type NodeLocation = 'block' | 'inline' | 'slide' | 'slideBlock' | 'any';
 
 type AssertNodeOptions = {
   path: string;
@@ -99,13 +99,26 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
   const { type } = value;
 
   const isInline = type === 'text' || type === 'hardBreak';
-  const isBlock = type === 'paragraph' || type === 'heading' || type === 'coreComponent';
+  const isOrdinaryBlock = type === 'paragraph' || type === 'heading' || type === 'coreComponent';
+  const isBlock = isOrdinaryBlock || type === 'carousel';
+  const isSlide = type === 'carouselSlide';
 
-  if (!isInline && !isBlock) {
+  if (location === 'slideBlock' && (type === 'carousel' || type === 'segment')) {
+    fail(path, `node "${type}" is not allowed inside carouselSlide`);
+  }
+
+  if (!isInline && !isBlock && !isSlide) {
     fail(path, `unknown node "${type}"`);
   }
 
-  if ((location === 'inline' && !isInline) || (location === 'block' && !isBlock)) {
+  const wrongInline = location === 'inline' && !isInline;
+  const wrongBlock = location === 'block' && !isBlock;
+  const wrongSlide = location === 'slide' && !isSlide;
+  const wrongSlideBlock = location === 'slideBlock' && !isOrdinaryBlock;
+
+  const isWrongLocation = wrongInline || wrongBlock || wrongSlide || wrongSlideBlock;
+
+  if (isWrongLocation) {
     fail(path, `node "${type}" is not allowed in ${location} content`);
   }
 
@@ -129,8 +142,33 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
     fail(`${path}.marks`, 'block nodes cannot have marks');
   }
 
+  if (type === 'carousel' || isSlide) {
+    if (!Array.isArray(value.content) || value.content.length === 0) {
+      fail(`${path}.content`, `node "${type}" requires nonempty content`);
+    }
+
+    let childLocation: NodeLocation = 'slideBlock';
+
+    if (type === 'carousel') {
+      childLocation = 'slide';
+    }
+
+    for (const [index, child] of value.content.entries()) {
+      const nodePath = `${path}.content[${index}]`;
+
+      assertNode(child, {
+        path: nodePath,
+        location: childLocation,
+      });
+    }
+
+    return;
+  }
+
   if (type === 'heading') {
-    if (!isRecord(value.attrs) || (value.attrs.level !== 1 && value.attrs.level !== 2)) {
+    const attrs = value.attrs;
+
+    if (!isRecord(attrs) || (attrs.level !== 1 && attrs.level !== 2)) {
       fail(`${path}.attrs.level`, 'expected heading level 1 or 2');
     }
   }

@@ -21,15 +21,19 @@ import {
 } from '@project/errors';
 
 import { ComponentNode } from '@components/ComponentNode';
+import { CarouselNode, CarouselSlide } from '@components/CarouselNode';
+import { ContentValidation } from '@components/ContentValidation';
 
 import type { BuildState, TextBlock } from './@types';
 
 export const AUTO_SAVE_DELAY = 1500;
 
 export const contentNodes = [
-  Paragraph,
-  Heading.configure({ levels: [1, 2] }),
-  ComponentNode,
+  Paragraph.extend({ group: 'block slideBlock' }),
+  Heading.extend({ group: 'block slideBlock' }).configure({ levels: [1, 2] }),
+  ComponentNode.extend({ group: 'block slideBlock' }),
+  CarouselNode,
+  CarouselSlide,
 ];
 
 // The paragraph comes first so Enter and required empty blocks use the standard text node.
@@ -55,6 +59,7 @@ const ACTIVE_BLOCK_NAMES = new Set([
   'paragraph',
   'heading',
   'coreComponent',
+  'carousel',
 ]);
 
 export const ActiveBlockHighlight = Extension.create({
@@ -121,6 +126,7 @@ export const editorExtensions = [
   PageDocument,
   ActiveBlockHighlight,
   ...contentNodes,
+  ContentValidation,
 ];
 
 export const editorConfig: Omit<Config, 'pages'> = {

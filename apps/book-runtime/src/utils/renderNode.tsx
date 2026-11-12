@@ -14,6 +14,7 @@ import type {
 } from '@active-book/types';
 
 import {
+  Carousel,
   Counter,
   H1,
   H2,
@@ -170,6 +171,18 @@ const renderValidatedNode = ({
       path: childPath,
     });
   });
+
+  if (node.type === 'carousel') {
+    return <Carousel key={key} slides={children} />;
+  }
+
+  if (node.type === 'carouselSlide') {
+    return (
+      <Fragment key={key}>
+        {children}
+      </Fragment>
+    );
+  }
 
   if (node.type === 'paragraph') {
     return (
