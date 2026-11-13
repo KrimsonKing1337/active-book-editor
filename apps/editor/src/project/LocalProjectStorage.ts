@@ -28,6 +28,7 @@ import {
 
 export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;
+  private assetImport: Promise<unknown> = Promise.resolve();
 
   constructor(public readonly directoryHandle: ProjectDirectoryHandle) {
     this.name = directoryHandle.name;
@@ -341,7 +342,11 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
-    return trackProjectWrite(() => this.importAssetFileInternal(file, sourceHandle));
+    const operation = this.assetImport.then(() => this.importAssetFileInternal(file, sourceHandle));
+    // Keep the queue usable after a failure; callers still receive the original rejected operation.
+    this.assetImport = operation.then(() => undefined, () => undefined);
+
+    return trackProjectWrite(() => operation);
   }
 
   private async importAssetFileInternal(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {

@@ -16,8 +16,6 @@ import {
 
 import type { BookDocument } from '@active-book/book-builder/book';
 
-import type { BookProject } from '@project/@types';
-
 import { useBackgroundStylePreviews, usePageEffects } from '../PageEffects/context';
 
 import { resolveFramePreview } from './resolveFramePreview';
@@ -31,7 +29,6 @@ type VisualBookPreviewProps = PropsWithChildren<{
   session: number;
   config: Config;
   definitions: VisualEffectDefinition[];
-  project: BookProject | null;
   showBackgrounds: boolean;
   showFrameEffects: boolean;
   editorTools: ReactNode;
@@ -43,7 +40,6 @@ export const VisualBookPreview = ({
   session,
   config,
   definitions,
-  project,
   showBackgrounds,
   showFrameEffects,
   editorTools,
@@ -121,11 +117,7 @@ export const VisualBookPreview = ({
     pages: previewPages,
   };
 
-  const registrations = useVisualAssets({
-    registrations: compileVisualEffects(previewBook),
-    project,
-    session,
-  });
+  const registrations = useVisualAssets(compileVisualEffects(previewBook));
 
   const hiddenRegistrations = registrations.filter((registrationCur) => {
     const category = getVisualCategory(registrationCur.effect.definitionId);
