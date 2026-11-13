@@ -53,10 +53,9 @@ Sources: [release/license](https://www.npmjs.com/package/embla-carousel/v/8.6.0)
 [React adapter](https://www.npmjs.com/package/embla-carousel-react/v/8.6.0),
 [Embla options](https://www.embla-carousel.com/docs/api/options/).
 
-The existing public `SlideShow` remains exported. Its modal mode, loop and
-border-related API are not fully replaced by this minimal narrative carousel.
-No internal consumers were found beyond its export. Removal requires an explicit
-decision about those capabilities rather than an implicit compatibility adapter.
+Core's Embla-based `Carousel` is the only reader carousel implementation.
+The editor's TipTap `CarouselNodeView` remains a separate authoring component:
+ProseMirror owns its editable content, selection and undo/redo history.
 
 Core is packaged as `0.0.62` through `npm run core:package`; the editor's manifest
 and lock refer to its local sibling TGZ, following the existing workflow in
