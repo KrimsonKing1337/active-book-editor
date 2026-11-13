@@ -1,0 +1,9 @@
+.Media {
+  display: block;
+  width: var(--book-media-width, 100%);
+  max-width: 100%;
+  height: var(--book-media-height, auto);
+  margin-inline: var(--book-media-start, 0) var(--book-media-end, auto);
+
+  object-fit: var(--book-media-fit, contain);
+}

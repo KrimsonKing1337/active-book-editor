@@ -5,6 +5,7 @@ import { build } from 'vite';
 
 import { createViteConfig } from './vite.config';
 import { compileBookDocument } from '../bookPreparation';
+import { contentAssetPaths } from '../bookPreparation/contentAssets';
 
 type BuildBookParams = {
   projectRoot: string;
@@ -22,11 +23,17 @@ const getPathExists = async (targetPath: string): Promise<boolean> => {
   }
 };
 
-const prepareRuntime = async (
-  projectRoot: string,
-  runtimeRoot: string,
-  tempRoot: string,
-): Promise<void> => {
+type PrepareRuntimeParams = {
+  projectRoot: string;
+  runtimeRoot: string;
+  tempRoot: string;
+};
+
+const prepareRuntime = async ({
+  projectRoot,
+  runtimeRoot,
+  tempRoot,
+}: PrepareRuntimeParams): Promise<void> => {
   await fs.cp(runtimeRoot, tempRoot, { recursive: true });
 
   const bookJsonSource = path.join(projectRoot, 'book.json');
@@ -35,6 +42,18 @@ const prepareRuntime = async (
   const bookJsonContent = await fs.readFile(bookJsonSource, 'utf8');
   const projectDocument: unknown = JSON.parse(bookJsonContent);
   const builtDocument = compileBookDocument(projectDocument);
+
+  for (const assetPath of contentAssetPaths(builtDocument)) {
+    try {
+      const file = await fs.stat(path.join(projectRoot, assetPath));
+
+      if (!file.isFile()) {
+        throw new Error('expected a file');
+      }
+    } catch (cause) {
+      throw new Error(`Медиафайл отсутствует или недоступен: ${assetPath}`, { cause });
+    }
+  }
 
   await fs.writeFile(bookJsonTarget, `${JSON.stringify(builtDocument, null, 2)}\n`);
 
@@ -99,7 +118,11 @@ export async function buildBook({
       force: true,
     });
 
-    await prepareRuntime(projectRoot, runtimeRoot, tempRoot);
+    await prepareRuntime({
+      projectRoot,
+      runtimeRoot,
+      tempRoot,
+    });
 
     const viteConfig = {
       root: tempRoot,
