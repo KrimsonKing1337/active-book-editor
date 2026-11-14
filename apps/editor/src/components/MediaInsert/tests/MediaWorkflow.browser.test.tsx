@@ -44,7 +44,11 @@ test('imports images, saves attributes and restores media after page/project cha
   const writable = await image.createWritable();
   await writable.write(imageMarkup);
   await writable.close();
-  vi.stubGlobal('showOpenFilePicker', vi.fn(async () => [image]));
+  let finishPick: (files: FileSystemFileHandle[]) => void = () => {};
+  const pickerReady = new Promise<FileSystemFileHandle[]>((resolve) => {
+    finishPick = resolve;
+  });
+  vi.stubGlobal('showOpenFilePicker', vi.fn(() => pickerReady));
   render(<EditorScreen />);
   await expect.element(page.getByRole('button', { name: 'Новый проект', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Новый проект', exact: true }).click();
@@ -53,6 +57,9 @@ test('imports images, saves attributes and restores media after page/project cha
   await page.getByRole('textbox', { name: 'Текст страницы', exact: true }).fill('Before after');
   await userEvent.keyboard('{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}{ArrowLeft}');
   await page.getByRole('button', { name: 'Добавить изображение', exact: true }).click();
+  await page.getByRole('button', { name: 'Показать структуру', exact: true }).click();
+  await expect.element(page.getByRole('button', { name: 'Добавить изображение', exact: true })).toBeDisabled();
+  finishPick([image]);
   await expect.poll(() => document.querySelector('[data-editor-media="image"] img')?.getAttribute('src'))
     .toMatch(/^blob:/u);
   const element = document.querySelector('[data-editor-media="image"] img');

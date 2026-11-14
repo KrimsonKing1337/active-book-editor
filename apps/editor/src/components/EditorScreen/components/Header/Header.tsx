@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react';
 
-import classNames from 'classnames';
-
 import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
 
 import type { BuildState, TextBlock } from '../../@types';
+
+import {
+  ProjectStatus,
+  ProjectControls,
+  ViewControls,
+  InsertControls,
+  LibraryControls,
+} from './components';
 
 import styles from './Header.module.scss';
 
@@ -66,134 +72,59 @@ export const Header = ({
   onBuildBook,
   onImportCustomComponents,
 }: HeaderProps) => {
-  const savedStatusClassNames = classNames({
-    [styles.SavedStatus]: true,
-    [styles.isVisible]: showSavedStatus,
-  });
+  let buttonBuildLabel = 'Собрать книгу';
 
-  const buttonBuildLabel = buildState === 'building' ? 'Сборка...' : 'Собрать книгу';
-  const structureButtonLabel = showStructure ? 'Скрыть структуру' : 'Показать структуру';
-  const dirtyStatusLabel = isDirty ? ' *' : '';
-  const projectBusyStatusLabel = isProjectBusy ? 'Подождите...' : 'Сохранить';
-
-  const narrativeControlButtonLabel = showNarrative ? 'Скрыть нарратив' : 'Показать нарратив';
-  const backgroundControlButtonLabel = showBackgrounds ? 'Скрыть фон' : 'Показать фон';
-  const frameEffectsButtonLabel = showFrameEffects ? 'Скрыть рамочные эффекты' : 'Показать рамочные эффекты';
+  if (buildState === 'building') {
+    buttonBuildLabel = 'Сборка...';
+  }
 
   return (
     <header className={styles.Header}>
-      <div className={styles.ProjectTitle}>
-        <div className={styles.TitleLine}>
-          <strong>
-            {projectName}
-            {dirtyStatusLabel}
-          </strong>
-
-          <span className={savedStatusClassNames} aria-hidden={!showSavedStatus}>
-            Сохранено
-          </span>
-        </div>
-
-        <span>
-          {projectMessage}
-        </span>
-      </div>
+      <ProjectStatus
+        projectName={projectName}
+        projectMessage={projectMessage}
+        isDirty={isDirty}
+        showSavedStatus={showSavedStatus}
+      />
 
       <div className={styles.Actions}>
-        <button type="button" disabled={buttonIsDisabled} onClick={() => void onNewProject()}>
-          Новый проект
-        </button>
+        <ProjectControls
+          disabled={buttonIsDisabled}
+          isProjectBusy={isProjectBusy}
 
-        <button type="button" disabled={buttonIsDisabled} onClick={() => void onOpenProject()}>
-          Открыть проект
-        </button>
-
-        <button type="button" disabled={buttonIsDisabled} onClick={() => void onSaveProject()}>
-          {projectBusyStatusLabel}
-        </button>
+          onNewProject={onNewProject}
+          onOpenProject={onOpenProject}
+          onSaveProject={onSaveProject}
+        />
 
         <span className={styles.Separator} />
 
-        <button
-          type="button"
-          disabled={structureButtonIsDisabled}
-          aria-pressed={showStructure}
-          onClick={onToggleStructure}
-        >
-          {structureButtonLabel}
-        </button>
+        <ViewControls
+          showStructure={showStructure}
+          showNarrative={showNarrative}
+          showBackgrounds={showBackgrounds}
+          showFrameEffects={showFrameEffects}
+          structureButtonIsDisabled={structureButtonIsDisabled}
 
-        <button type="button" aria-pressed={showNarrative} onClick={onToggleNarrative}>
-          {narrativeControlButtonLabel}
-        </button>
+          onToggleStructure={onToggleStructure}
+          onToggleNarrative={onToggleNarrative}
+          onToggleBackgrounds={onToggleBackgrounds}
+          onToggleFrameEffects={onToggleFrameEffects}
+        />
 
-        <button type="button" aria-pressed={showBackgrounds} onClick={onToggleBackgrounds}>
-          {backgroundControlButtonLabel}
-        </button>
-
-        <button type="button" aria-pressed={showFrameEffects} onClick={onToggleFrameEffects}>
-          {frameEffectsButtonLabel}
-        </button>
-
-        <button type="button" disabled={buttonIsDisabled} onClick={() => void onImportCustomComponents()}>
-          Импортировать .tgz
-        </button>
-
-        {customComponentDefinitions.map((componentCur) => {
-          const {
-            id,
-            description,
-            packageName,
-            name,
-            title,
-          } = componentCur;
-
-          return (
-            <button
-              key={id}
-              type="button"
-              disabled={buttonIsDisabled}
-              title={description}
-              onClick={() => onInsertCustomComponent(packageName, name)}
-            >
-              Добавить {title}
-            </button>
-          );
-        })}
-
-        <button
-          type="button"
+        <LibraryControls
+          definitions={customComponentDefinitions}
           disabled={buttonIsDisabled}
-          onClick={() => onInsertTextBlock({ type: 'paragraph' })}
-        >
-          Добавить параграф
-        </button>
+          onImport={onImportCustomComponents}
+          onInsertComponent={onInsertCustomComponent}
+        />
 
-        <button
-          type="button"
+        <InsertControls
+          mediaTools={mediaTools}
           disabled={buttonIsDisabled}
-          onClick={() => onInsertTextBlock({ type: 'heading', attrs: { level: 1 } })}
-        >
-          Добавить заголовок 1
-        </button>
-
-        <button
-          type="button"
-          disabled={buttonIsDisabled}
-          onClick={() => onInsertTextBlock({ type: 'heading', attrs: { level: 2 } })}
-        >
-          Добавить заголовок 2
-        </button>
-
-        <button
-          type="button"
-          disabled={buttonIsDisabled}
-          onClick={onInsertCarousel}
-        >
-          Добавить карусель
-        </button>
-
-        {mediaTools}
+          onInsertTextBlock={onInsertTextBlock}
+          onInsertCarousel={onInsertCarousel}
+        />
 
         <button
           type="button"
