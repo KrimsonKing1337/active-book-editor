@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 import type {
   BookImageNode,
   BookMediaAlignment,
@@ -8,7 +10,7 @@ import type {
 import { MediaDimensions } from './MediaDimensions';
 import { MediaPoster } from './MediaPoster';
 
-import styles from './MediaNode.module.scss';
+import styles from '../MediaNode.module.scss';
 
 type MediaSettingsProps = {
   node: BookImageNode | BookVideoNode;
@@ -20,21 +22,36 @@ const alignments: BookMediaAlignment[] = [
   'center',
   'right',
 ];
-const fits: BookMediaFit[] = ['contain', 'cover'];
+
+const fits: BookMediaFit[] = [
+  'contain',
+  'cover',
+];
 
 export const MediaSettings = ({ node, onChange }: MediaSettingsProps) => {
   const { attrs } = node;
+
   let options;
 
   if (node.type === 'image') {
+    const alt = node.attrs.alt ?? '';
+
+    const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+      onChange({ alt: e.target.value });
+    };
+
     options = (
       <label>
-        Альтернативное описание
-        <input value={node.attrs.alt ?? ''} onChange={(event) => onChange({ alt: event.target.value })} />
+        <span>
+          Альтернативное описание
+        </span>
+
+        <input value={alt} onChange={changeHandler} />
       </label>
     );
   } else {
     const video = node.attrs;
+
     const booleans = [
       {
         name: 'controls',
@@ -57,23 +74,61 @@ export const MediaSettings = ({ node, onChange }: MediaSettingsProps) => {
         checked: video.loop ?? false,
       },
     ];
+
     options = (
       <>
         <MediaPoster value={video.poster} onChange={onChange} />
 
-        {booleans.map(({
-          name,
-          label,
-          checked,
-        }) => (
-          <label key={name}>
-            <input type="checkbox" checked={checked} onChange={(event) => onChange({ [name]: event.target.checked })} />
-            {label}
-          </label>
-        ))}
+        {booleans.map((booleanCur) => {
+          const {
+            checked,
+            label,
+            name,
+          } = booleanCur;
+
+          const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+            onChange({ [name]: e.target.checked });
+          };
+
+          return (
+            <label key={name}>
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={changeHandler}
+              />
+
+              {label}
+            </label>
+          );
+        })}
       </>
     );
   }
+
+  const alignValue = attrs.align ?? 'left';
+
+  const alignChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
+    const align = alignments.find((valueCur) => {
+      return valueCur === e.target.value;
+    });
+
+    if (align) {
+      onChange({ align });
+    }
+  };
+
+  const fitValue = attrs.fit ?? 'contain';
+
+  const fitChangeHandler = (e: ChangeEvent<HTMLSelectElement>) => {
+    const fit = fits.find((valueCur) => {
+      return valueCur === e.target.value;
+    });
+
+    if (fit) {
+      onChange({ fit });
+    }
+  };
 
   return (
     <fieldset className={styles.Settings} aria-label="Настройки медиа">
@@ -84,16 +139,13 @@ export const MediaSettings = ({ node, onChange }: MediaSettingsProps) => {
       <MediaDimensions attrs={attrs} onChange={onChange} />
 
       <label>
-        Выравнивание
-        <select
-          value={attrs.align ?? 'left'}
-          onChange={(event) => {
-            const align = alignments.find((value) => value === event.target.value);
+        <span>
+          Выравнивание
+        </span>
 
-            if (align) {
-              onChange({ align });
-            }
-          }}
+        <select
+          value={alignValue}
+          onChange={alignChangeHandler}
         >
           <option value="left">
             Слева
@@ -112,14 +164,8 @@ export const MediaSettings = ({ node, onChange }: MediaSettingsProps) => {
       <label>
         Размещение в заданной области
         <select
-          value={attrs.fit ?? 'contain'}
-          onChange={(event) => {
-            const fit = fits.find((value) => value === event.target.value);
-
-            if (fit) {
-              onChange({ fit });
-            }
-          }}
+          value={fitValue}
+          onChange={fitChangeHandler}
         >
           <option value="contain">
             Показать целиком

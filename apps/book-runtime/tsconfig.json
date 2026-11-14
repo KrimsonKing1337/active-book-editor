@@ -10,24 +10,14 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@root/*": [
-        "../../*"
-      ],
-      "@types": [
-        "src/@types"
-      ],
-      "@types/*": [
-        "src/@types/*"
-      ],
-      "@components": [
-        "src/components"
-      ],
-      "@components/*": [
-        "src/components/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ]
+      "@root/*": ["../../*"],
+      "@editor": ["../editor/src"],
+      "@editor/*": ["../editor/src/*"],
+      "@types": ["src/@types"],
+      "@types/*": ["src/@types/*"],
+      "@components": ["src/components"],
+      "@components/*": ["src/components/*"],
+      "@utils/*": ["src/utils/*"]
     }
   },
   "include": [

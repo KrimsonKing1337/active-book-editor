@@ -1,19 +1,17 @@
 import { useState } from 'react';
 
-import type { NodeViewProps } from '@tiptap/react';
+import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react';
 
-import { NodeViewWrapper } from '@tiptap/react';
+import { getMediaStyle } from '@book-runtime/components/ContentMedia/layout';
+import mediaStyles from '@book-runtime/components/ContentMedia/ContentMedia.module.scss';
 
-import { assertContentNode } from '@active-book/book-builder/content';
-
-import { getMediaStyle } from '@root/apps/book-runtime/src/components/ContentMedia/layout';
-import mediaStyles from '@root/apps/book-runtime/src/components/ContentMedia/ContentMedia.module.scss';
+import { assertContentNode } from '@root/packages/book-builder/src/content';
 
 import { useProjectAssetUrls } from '@project/ProjectAssets';
 
 import { MediaSettings } from './MediaSettings';
 
-import styles from './MediaNode.module.scss';
+import styles from '../MediaNode.module.scss';
 
 export const MediaNodeView = ({
   node,
@@ -21,12 +19,15 @@ export const MediaNodeView = ({
   updateAttributes,
 }: NodeViewProps) => {
   const content: unknown = node.toJSON();
+
   assertContentNode(content);
 
   if (content.type !== 'image' && content.type !== 'video') {
     throw new Error('MediaNodeView requires an image or video node');
   }
+
   const { attrs, type } = content;
+
   const paths = [attrs.src];
 
   if (type === 'video' && content.attrs.poster) {
@@ -34,9 +35,12 @@ export const MediaNodeView = ({
   }
 
   const { urls, errors } = useProjectAssetUrls(paths);
+
   const [failed, setFailed] = useState<string | null>(null);
+
   const src = urls.get(attrs.src);
   let error = errors.get(attrs.src);
+
   let poster: string | undefined;
   let alt = '';
 
@@ -52,18 +56,22 @@ export const MediaNodeView = ({
   }
 
   const style = getMediaStyle(attrs);
+
   const handleError = () => setFailed(src ?? null);
+
   let preview;
 
   if (src && failed !== src) {
     if (content.type === 'image') {
-      preview = <img
-        className={mediaStyles.Media}
-        src={src}
-        alt={alt}
-        style={style}
-        onError={handleError}
-      />;
+      preview = (
+        <img
+          className={mediaStyles.Media}
+          src={src}
+          alt={alt}
+          style={style}
+          onError={handleError}
+        />
+      );
     } else {
       preview = (
         <video

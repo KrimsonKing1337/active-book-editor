@@ -1,16 +1,20 @@
 import type { ProjectStorage } from '../@types';
 
+type Storage = Pick<ProjectStorage, 'getAssetFile'> | undefined;
+
 /** Shared project-file URL ownership for content and visual-effect previews. */
-export const createProjectAssetUrls = (storage: Pick<ProjectStorage, 'getAssetFile'> | undefined) => {
+export const createProjectAssetUrls = (storage: Storage) => {
   const urls = new Map<string, string>();
   const pending = new Map<string, Promise<string>>();
+
   let generation = 0;
   let isActive = false;
 
   const dispose = () => {
+    urls.forEach((urlCur) => URL.revokeObjectURL(urlCur));
+
     isActive = false;
     generation += 1;
-    urls.forEach((url) => URL.revokeObjectURL(url));
     urls.clear();
     pending.clear();
   };
@@ -38,6 +42,7 @@ export const createProjectAssetUrls = (storage: Pick<ProjectStorage, 'getAssetFi
     }
 
     const owner = generation;
+
     const request = storage.getAssetFile(path).then((file) => {
       if (!isActive || owner !== generation) {
         throw new DOMException('Project asset scope closed', 'AbortError');
@@ -52,12 +57,13 @@ export const createProjectAssetUrls = (storage: Pick<ProjectStorage, 'getAssetFi
         pending.delete(path);
       }
     });
+
     pending.set(path, request);
 
     return request;
   };
 
-  const lookup = (path: string) => urls.get(path);
+  const lookup = (pathCur: string) => urls.get(pathCur);
 
   return {
     lookup,

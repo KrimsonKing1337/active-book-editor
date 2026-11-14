@@ -56,7 +56,7 @@ const resolveSources = (value: JsonValue, urls: Map<string, string>): JsonValue 
 
 /** The project provider owns URLs; this adapter only projects visual-effect params. */
 export const useVisualAssets = (registrations: VisualEffectRegistration[]) => {
-  const paths = registrations.flatMap((registration) => assetPaths(registration.effect.params));
+  const paths = registrations.flatMap((cur) => assetPaths(cur.effect.params));
   const { urls } = useProjectAssetUrls(paths);
 
   const availableRegistrations = registrations.filter((registrationCur) => {

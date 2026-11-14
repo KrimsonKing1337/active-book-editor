@@ -72,8 +72,8 @@ export const loadProjectLibraries = async (
 
     return libraries;
   } catch (error) {
-    for (const library of libraries) {
-      library.dispose();
+    for (const libraryCur of libraries) {
+      libraryCur.dispose();
     }
 
     throw error;

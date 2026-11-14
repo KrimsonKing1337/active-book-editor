@@ -133,14 +133,20 @@ export const VisualBookPreview = ({
     return registrationCur.effect.id;
   });
 
+  const storyPages = book.pages.map((pageCur) => {
+    const content = pageCur.id === pageId ? children : null;
+
+    return {
+      id: pageCur.id,
+      content,
+    };
+  });
+
   return (
     <AppWrapper
       bookKey={session}
       initialPageId={pageId}
-      storyPages={book.pages.map((pageCur) => ({
-        id: pageCur.id,
-        content: pageCur.id === pageId ? children : null,
-      }))}
+      storyPages={storyPages}
       config={config}
       tableOfContents={[]}
       rangeEffects={[]}

@@ -18,7 +18,7 @@ import { imageMarkup } from '../../MediaNode/tests/fixture';
 
 import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
-import '../../../styles.scss';
+import '@styles/styles.scss';
 
 let project: Awaited<ReturnType<typeof createProject>>;
 

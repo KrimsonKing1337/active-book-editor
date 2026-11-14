@@ -13,7 +13,7 @@ import classNames from 'classnames';
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
-import { useBookLibraries } from '@project/useBookLibraries';
+import { useBookLibraries } from '@project/hooks';
 import { ProjectAssetsProvider } from '@project/ProjectAssets';
 
 import { importBrowserLibrary } from '@project/customComponents';
@@ -377,6 +377,15 @@ export const EditorWorkspace = () => {
     <PageEffects key={pageScope} project={project} onSaveProject={saveCurrentProject} />
   );
 
+  const mediaInsert = (
+    <MediaInsert
+      editor={editor}
+      project={project}
+      scope={pageScope}
+      disabled={buttonIsDisabled}
+    />
+  );
+
   return (
     <ProjectAssetsProvider project={project}>
       <CustomComponentsContext value={libraries.registry}>
@@ -388,14 +397,7 @@ export const EditorWorkspace = () => {
         >
           <div className={editorScreenClassNames}>
             <Header
-              mediaTools={(
-                <MediaInsert
-                  editor={editor}
-                  project={project}
-                  scope={pageScope}
-                  disabled={buttonIsDisabled}
-                />
-              )}
+              mediaTools={mediaInsert}
               projectName={projectName}
               projectMessage={projectMessage}
               isDirty={isDirty}

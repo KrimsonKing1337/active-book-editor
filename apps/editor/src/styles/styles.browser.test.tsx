@@ -6,7 +6,7 @@ import Arrow from '@active-book/core/assets/img/toolbar/i-arrow-right.svg';
 
 import { BookApplicationSurface } from '@active-book/core/components/BookApplicationSurface';
 
-import '@active-book/common/styles';
+import '../../../../../active-book-common/styles/styles.scss';
 import '@active-book/core/styles/styles.scss';
 import './styles.scss';
 

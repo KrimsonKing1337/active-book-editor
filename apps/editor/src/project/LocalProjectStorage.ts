@@ -44,11 +44,11 @@ export class LocalProjectStorage implements ProjectStorage {
     directoryHandle: ProjectDirectoryHandle,
     relativePath: string,
   ): AsyncGenerator<ProjectBuildFile> {
-    for await (const entryHandle of directoryHandle.values()) {
-      const entryPath = `${relativePath}/${entryHandle.name}`;
+    for await (const entryHandleCur of directoryHandle.values()) {
+      const entryPath = `${relativePath}/${entryHandleCur.name}`;
 
-      if (entryHandle.kind === 'file') {
-        const file = await entryHandle.getFile();
+      if (entryHandleCur.kind === 'file') {
+        const file = await entryHandleCur.getFile();
 
         yield {
           path: entryPath,
@@ -58,7 +58,7 @@ export class LocalProjectStorage implements ProjectStorage {
         continue;
       }
 
-      yield* this.getDirectoryBuildFiles(entryHandle, entryPath);
+      yield* this.getDirectoryBuildFiles(entryHandleCur, entryPath);
     }
   }
 
@@ -379,8 +379,8 @@ export class LocalProjectStorage implements ProjectStorage {
       try {
         await assetsDirectory.getFileHandle(candidate);
 
-        candidate = `${baseName}-${suffix}${extension}`;
         suffix += 1;
+        candidate = `${baseName}-${suffix}${extension}`;
       } catch (error) {
         if (error instanceof DOMException && error.name === 'NotFoundError') {
           break;

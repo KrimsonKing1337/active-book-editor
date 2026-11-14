@@ -74,16 +74,16 @@ export const saveLastProjectHandle = async (
   await withStore('readwrite', actionFunction);
 };
 
+type Handle = ProjectDirectoryHandle | undefined;
+
 export const getLastProjectHandle = async (): Promise<ProjectDirectoryHandle | null> => {
   const actionFunction = (store: IDBObjectStore) => {
     return store.get(LAST_PROJECT_KEY);
   };
 
-  const handle = await withStore('readonly', actionFunction);
+  const handle: Handle = await withStore('readonly', actionFunction);
 
-  type Handle = ProjectDirectoryHandle | undefined;
-
-  return handle as Handle ?? null;
+  return handle ?? null;
 };
 
 export const clearLastProjectHandle = async (): Promise<void> => {

@@ -11,7 +11,7 @@ import type { ProjectFileHandle } from '@project/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
 
-import type { MediaKind } from '../MediaNode/attributes';
+import type { MediaKind } from '../MediaNode/utils';
 
 import {
   assertMediaFile,
@@ -32,9 +32,10 @@ type ImportSource = {
 };
 
 export const useMediaImport = (options: MediaImportOptions) => {
-  const current = useRef<MediaImportOptions | null>(options);
   const [isImporting, setImporting] = useState(false);
   const [error, setError] = useState('');
+
+  const current = useRef<MediaImportOptions | null>(options);
 
   const {
     editor,
@@ -48,6 +49,7 @@ export const useMediaImport = (options: MediaImportOptions) => {
       project,
       scope,
     };
+
     setImporting(false);
     setError('');
 
@@ -60,9 +62,18 @@ export const useMediaImport = (options: MediaImportOptions) => {
     scope,
   ]);
 
-  const isCurrent = (owner: MediaImportOptions) => {
-    return current.current?.editor === owner.editor && current.current?.project === owner.project
-      && current.current?.scope === owner.scope && !owner.editor?.isDestroyed;
+  const isCurrent = (owner: MediaImportOptions): boolean => {
+    const active = current.current;
+
+    if (!active || owner.editor?.isDestroyed) {
+      return false;
+    }
+
+    const editorIsEqual = active.editor === owner.editor;
+    const projectIsEqual = active.project === owner.project;
+    const scopeIsEqual = active.scope === owner.scope;
+
+    return editorIsEqual && projectIsEqual && scopeIsEqual;
   };
 
   const importFile = async (source: ImportSource, owner = options) => {
@@ -75,16 +86,25 @@ export const useMediaImport = (options: MediaImportOptions) => {
 
     try {
       assertMediaFile(source.file, source.kind);
+
       const src = await owner.project.storage.importAssetFile(source.file, source.handle);
 
       if (isCurrent(owner)) {
-        const chain = owner.editor.chain().focus().insertContent({ type: source.kind, attrs: { src } });
-        const inserted = chain.command(({ commands }) => {
+        const content = {
+          type: source.kind,
+          attrs: { src },
+        };
+
+        const chain = owner.editor.chain().focus().insertContent(content);
+
+        const chainedContent = chain.command(({ commands }) => {
           // An atom at a block edge needs a caret paragraph; within text it is already available.
           commands.createParagraphNear();
 
           return true;
-        }).run();
+        });
+
+        const inserted = chainedContent.run();
 
         if (!inserted) {
           throw new Error('Не удалось вставить медиа в выбранное место документа');
@@ -107,6 +127,7 @@ export const useMediaImport = (options: MediaImportOptions) => {
     }
 
     const owner = options;
+
     setImporting(true);
     setError('');
 
@@ -117,9 +138,11 @@ export const useMediaImport = (options: MediaImportOptions) => {
       });
 
       if (handle) {
+        const file = await handle.getFile();
+
         await importFile({
           kind,
-          file: await handle.getFile(),
+          file,
           handle,
         }, owner);
       }

@@ -1,15 +1,15 @@
-import type { ChangeEvent } from 'react';
-
-import { useRef } from 'react';
+import { type ChangeEvent, useRef } from 'react';
 
 import type { Editor } from '@tiptap/core';
 
 import type { BookProject } from '@project/@types';
 
-import type { MediaKind } from '../MediaNode/attributes';
+import type { MediaKind } from '../MediaNode/utils';
 
 import { useMediaImport } from './hooks';
 import { mediaFormats } from './utils';
+
+type Inputs = Record<MediaKind, HTMLInputElement | null>;
 
 type MediaInsertProps = {
   editor: Editor | null;
@@ -18,15 +18,23 @@ type MediaInsertProps = {
   disabled: boolean;
 };
 
+type Control = {
+  kind: MediaKind;
+  label: string;
+};
+
 export const MediaInsert = ({ disabled, ...options }: MediaInsertProps) => {
-  const inputs = useRef<Record<MediaKind, HTMLInputElement | null>>({ image: null, video: null });
+  const inputs = useRef<Inputs>({ image: null, video: null });
+
   const {
     isImporting,
     error,
     importFile,
     chooseFile,
   } = useMediaImport(options);
+
   const isDisabled = disabled || isImporting || !options.project;
+
   let title: string | undefined;
 
   if (!options.project) {
@@ -41,46 +49,53 @@ export const MediaInsert = ({ disabled, ...options }: MediaInsertProps) => {
     }
   };
 
-  const handleFile = (event: ChangeEvent<HTMLInputElement>, kind: MediaKind) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
+  const handleFile = (e: ChangeEvent<HTMLInputElement>, kind: MediaKind) => {
+    const file = e.target.files?.[0];
+
+    e.target.value = '';
 
     if (file) {
       void importFile({ kind, file });
     }
   };
 
-  const controls: {
-    kind: MediaKind;
-    label: string;
-  }[] = [{ kind: 'image', label: 'Добавить изображение' }, { kind: 'video', label: 'Добавить видео' }];
+  const controls: Control[] = [
+    { kind: 'image', label: 'Добавить изображение' },
+    { kind: 'video', label: 'Добавить видео' },
+  ];
 
   return (
     <>
-      {controls.map(({ kind, label }) => (
-        <span key={kind}>
-          <button
-            type="button"
-            title={title}
-            disabled={isDisabled}
-            onClick={() => void choose(kind)}
-          >
-            {label}
-          </button>
+      {controls.map(({ kind, label }) => {
+        const ref = (element: HTMLInputElement) => {
+          inputs.current[kind] = element;
+        };
 
-          <input
-            ref={(element) => {
-              inputs.current[kind] = element;
-            }}
-            type="file"
-            aria-label={label}
-            hidden
-            accept={Object.values(mediaFormats[kind]).flat().join(',')}
-            disabled={isDisabled}
-            onChange={(event) => handleFile(event, kind)}
-          />
-        </span>
-      ))}
+        const inputAccept = Object.values(mediaFormats[kind]).flat().join(',');
+
+        return (
+          <span key={kind}>
+            <button
+              type="button"
+              title={title}
+              disabled={isDisabled}
+              onClick={() => void choose(kind)}
+            >
+              {label}
+            </button>
+
+            <input
+              ref={ref}
+              type="file"
+              aria-label={label}
+              hidden
+              accept={inputAccept}
+              disabled={isDisabled}
+              onChange={(e) => handleFile(e, kind)}
+            />
+          </span>
+        );
+      })}
 
       {error && (
         <span role="alert">

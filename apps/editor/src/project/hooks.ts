@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import type { BrowserLibrary } from '@active-book/book-builder/components/custom/browser';
 
@@ -73,11 +77,18 @@ export const useBookLibraries = ({
 
       resources.forEach((cur) => cur.dispose());
     };
-  }, [project, session, revision, onError]);
+  }, [
+    project,
+    session,
+    revision,
+    onError,
+  ]);
 
-  const isCurrent = loaded?.project === project
-    && loaded?.session === session
-    && loaded?.revision === revision;
+  const isProject = loaded?.project === project;
+  const isSession = loaded?.session === session;
+  const isRevision = loaded?.revision === revision;
+
+  const isCurrent = isProject && isSession && isRevision;
 
   const libraries = isCurrent ? loaded.libraries : noLibraries;
 

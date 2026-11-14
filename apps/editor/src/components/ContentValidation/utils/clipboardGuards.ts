@@ -32,21 +32,23 @@ const openSlideContent = (slice: Slice): Fragment => {
 export const clipboardGuards = (editor: Editor): EditorProps => {
   return {
     handleDOMEvents: {
-      drop(view, event) {
-        if (!event.dataTransfer?.files.length || view.dragging) {
+      drop(view, e) {
+        if (!e.dataTransfer?.files.length || view.dragging) {
           return false;
         }
 
-        event.preventDefault();
+        e.preventDefault();
+
         reportContentError(editor, new Error(fileImportMessage));
 
         return true;
       },
-      paste(view, event) {
-        const html = event.clipboardData?.getData('text/html') ?? '';
+      paste(view, e) {
+        const html = e.clipboardData?.getData('text/html') ?? '';
 
-        if (event.clipboardData?.files.length && !html) {
-          event.preventDefault();
+        if (e.clipboardData?.files.length && !html) {
+          e.preventDefault();
+
           reportContentError(editor, new Error(fileImportMessage));
 
           return true;
@@ -54,11 +56,12 @@ export const clipboardGuards = (editor: Editor): EditorProps => {
 
         try {
           const insideSlide = validateRange(view.state.doc, view.state.selection);
+
           validateClipboardHtml(html, insideSlide);
 
           return false;
         } catch (error) {
-          event.preventDefault();
+          e.preventDefault();
 
           reportContentError(editor, error);
 

@@ -6,17 +6,24 @@ import {
 
 import { ProjectAssetsContext } from './context';
 
+
+type Strings = Map<string, string>;
+
 type Resolution = {
   owner: unknown;
   key: string;
-  urls: Map<string, string>;
-  errors: Map<string, string>;
+  urls: Strings;
+  errors: Strings;
 };
+
+const getNewStrings = () => new Map<string, string>;
 
 export const useProjectAssetUrls = (paths: readonly string[]) => {
   const cache = useContext(ProjectAssetsContext);
-  const key = JSON.stringify([...new Set(paths)].sort());
+
   const [resolved, setResolved] = useState<Resolution | null>(null);
+
+  const key = JSON.stringify([...new Set(paths)].sort());
 
   useEffect(() => {
     let cancelled = false;
@@ -30,23 +37,26 @@ export const useProjectAssetUrls = (paths: readonly string[]) => {
       return cache.load(path);
     };
 
-    void Promise.allSettled(requested.map(load)).then((results) => {
+    const mappedRequests = requested.map(load);
+
+    void Promise.allSettled(mappedRequests).then((results) => {
       if (cancelled) {
         return;
       }
 
-      const urls = new Map<string, string>();
-      const errors = new Map<string, string>();
+      const urls = getNewStrings();
+      const errors = getNewStrings();
 
-      results.forEach((result, index) => {
+      results.forEach((resultCur, index) => {
         const path = requested[index];
 
-        if (result.status === 'fulfilled') {
-          urls.set(path, result.value);
+        if (resultCur.status === 'fulfilled') {
+          urls.set(path, resultCur.value);
         } else {
           errors.set(path, `Файл ${path} недоступен. Проверьте папку assets/ проекта`);
         }
       });
+
       setResolved({
         owner: cache,
         key,
@@ -66,13 +76,15 @@ export const useProjectAssetUrls = (paths: readonly string[]) => {
 
   const urls = new Map<string, string>();
 
-  for (const path of paths) {
-    const available = cache?.lookup(path);
+  for (const pathCur of paths) {
+    const available = cache?.lookup(pathCur);
 
     if (available) {
-      urls.set(path, available);
+      urls.set(pathCur, available);
     }
   }
 
-  return { urls, errors: new Map<string, string>() };
+  const errors = getNewStrings();
+
+  return { urls, errors };
 };

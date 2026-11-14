@@ -18,7 +18,11 @@ export const ContentValidation = Extension.create({
   addCommands() {
     const insertContentAt: RawCommands['insertContentAt'] = (...args) => {
       return (props) => {
-        const [position, content, options] = args;
+        const [
+          position,
+          content,
+          options,
+        ] = args;
 
         let range: Range;
 
@@ -33,10 +37,12 @@ export const ContentValidation = Extension.create({
 
           validateInput(content, insideSlide);
 
-          return commands.insertContentAt(position, content, {
+          const command = commands.insertContentAt(position, content, {
             ...options,
             errorOnInvalidContent: true,
-          })(props);
+          });
+
+          return command(props);
         } catch (error) {
           if (props.dispatch) {
             reportContentError(props.editor, error);
@@ -52,10 +58,12 @@ export const ContentValidation = Extension.create({
         try {
           validateInput(content, false);
 
-          return commands.setContent(content, {
+          const command = commands.setContent(content, {
             ...options,
             errorOnInvalidContent: true,
-          })(props);
+          });
+
+          return command(props);
         } catch (error) {
           if (props.dispatch) {
             reportContentError(props.editor, error);
@@ -73,25 +81,23 @@ export const ContentValidation = Extension.create({
     const editor = this.editor;
     const validateDocument = createDocumentValidator();
 
-    return [
-      new Plugin({
-        filterTransaction(transaction, state) {
-          if (!transaction.docChanged) {
-            return true;
-          }
+    return [new Plugin({
+      filterTransaction(transaction, state) {
+        if (!transaction.docChanged) {
+          return true;
+        }
 
-          try {
-            validateDocument(transaction.doc, state.doc);
+        try {
+          validateDocument(transaction.doc, state.doc);
 
-            return true;
-          } catch (error) {
-            reportContentError(editor, error);
+          return true;
+        } catch (error) {
+          reportContentError(editor, error);
 
-            return false;
-          }
-        },
-        props: clipboardGuards(editor),
-      }),
-    ];
+          return false;
+        }
+      },
+      props: clipboardGuards(editor),
+    })];
   },
 });

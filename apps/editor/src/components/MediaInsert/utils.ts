@@ -2,7 +2,7 @@ import { contentMediaFormats, contentMediaFormat } from '@active-book/book-build
 
 import type { FilePickerWindow } from '@project/fileSystemAccess';
 
-import type { MediaKind } from '../MediaNode/attributes';
+import type { MediaKind } from '../MediaNode/utils';
 
 export const mediaFormats = contentMediaFormats;
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { isContentAssetPath, contentMediaFormat } from '@active-book/book-builder/content';
+import { isContentAssetPath, contentMediaFormat } from '@root/packages/book-builder/src/content';
 
 type MediaPosterProps = {
   value: string | null | undefined;
@@ -17,13 +17,23 @@ export const MediaPoster = ({ value, onChange }: MediaPosterProps) => {
   }, [value]);
 
   const commit = () => {
-    if (draft && (!isContentAssetPath(draft) || !contentMediaFormat(draft, 'image'))) {
+    const pathIsRight = isContentAssetPath(draft);
+    const formatIsRight = contentMediaFormat(draft, 'image');
+
+    if (draft && !pathIsRight) {
       setError('Укажите путь к постеру внутри assets/');
 
       return;
     }
 
+    if (draft && !formatIsRight) {
+      setError('Укажите путь к изображению');
+
+      return;
+    }
+
     setError('');
+
     const poster = draft || null;
 
     if (poster !== (value ?? null)) {
@@ -33,11 +43,14 @@ export const MediaPoster = ({ value, onChange }: MediaPosterProps) => {
 
   return (
     <label>
-      Постер (путь в assets/)
+      <span>
+        Постер (путь в assets/)
+      </span>
+
       <input
         value={draft}
         placeholder="assets/poster.png"
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
       />
 
