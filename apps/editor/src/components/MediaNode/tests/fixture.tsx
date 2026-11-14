@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { createProject } from '@root/tests/editor-effects/project';
 
 import { openLocalProject } from '@project/projectService';
-import { ProjectAssetsProvider } from '@project/ProjectAssets';
+import { ProjectAssetsProvider } from '@project/assets';
 
 import { ContentError } from '../../ContentError';
 import { editorExtensions } from '../../EditorScreen/utils';
