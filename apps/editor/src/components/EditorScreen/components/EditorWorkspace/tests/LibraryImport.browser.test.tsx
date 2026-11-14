@@ -73,7 +73,7 @@ test('keeps warning preference and releases busy on cancelled picker', async () 
   expect(error).not.toHaveBeenCalled();
 });
 
-test('retains a real TGZ registry through view changes and declined replacement', async () => {
+test('retains a real TGZ registry until replacement is confirmed, then reloads and releases old URLs', async () => {
   vi.stubGlobal('showOpenFilePicker', vi.fn(async () => {
     expect((await project.readDocument()).type).toBe('book');
 
@@ -120,5 +120,22 @@ test('retains a real TGZ registry through view changes and declined replacement'
 
   for (const url of urls) {
     expect(revoke.mock.calls.flat()).not.toContain(url);
+  }
+
+  vi.mocked(window.confirm).mockReturnValueOnce(true);
+  await trigger.click();
+  await proceed.click();
+  await expect.poll(async () => {
+    const description = JSON.parse(await (await metadata.getFile()).text());
+
+    return description.dependencies['fixture-parts'];
+  }).toBe('file:./dependencies/fixture-parts-1.tgz');
+  await expect.poll(() => reads.mock.calls.length).toBe(readCount + 1);
+  await expect.element(insert).toBeEnabled();
+  await expect.element(badge).toBeInTheDocument();
+  expect(window.confirm).toHaveBeenCalledTimes(2);
+
+  for (const url of urls) {
+    expect(revoke.mock.calls.flat()).toContain(url);
   }
 });

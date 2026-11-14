@@ -9,9 +9,9 @@ import type { BrowserLibrary } from '@active-book/book-builder/components/custom
 import { createCustomVisualDefinitions } from '@active-book/book-builder/components/custom/visual';
 import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
 
-import type { BookProject } from './@types';
+import type { BookProject } from '../@types';
 
-import { loadProjectLibraries } from './customComponents';
+import { loadProjectLibraries } from './loadProjectLibraries';
 import { emptyCustomComponents } from './customComponentRegistry';
 
 const bookRuntime = createBookRuntime('editor');

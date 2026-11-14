@@ -8,7 +8,7 @@ import { customVisualDefinitionId } from '@active-book/book-builder/visualEffect
 
 import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
-import { useCustomComponents } from '@project/customComponentRegistry';
+import { useCustomComponents } from '@project/libraries';
 
 import { FrameSideCheckboxes } from './components/FrameSideCheckboxes';
 import { LayoutSettings } from './components/LayoutSettings';

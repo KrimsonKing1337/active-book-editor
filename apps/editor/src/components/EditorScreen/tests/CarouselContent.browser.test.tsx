@@ -14,7 +14,7 @@ import {
 } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 
-import { CustomComponentsContext } from '@project/customComponentRegistry';
+import { CustomComponentsContext } from '@project/libraries';
 
 import { ContentError } from '@components/ContentError';
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { BookProject } from '@project/@types';
 
-import { importBrowserLibrary } from '@project/customComponents';
+import { importBrowserLibrary } from '@project/libraries';
 
 import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '../../../constants';
 

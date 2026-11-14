@@ -11,10 +11,8 @@ import classNames from 'classnames';
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
-import { useBookLibraries } from '@project/hooks';
 import { ProjectAssetsProvider } from '@project/assets';
-
-import { CustomComponentsContext } from '@project/customComponentRegistry';
+import { CustomComponentsContext, useBookLibraries } from '@project/libraries';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 

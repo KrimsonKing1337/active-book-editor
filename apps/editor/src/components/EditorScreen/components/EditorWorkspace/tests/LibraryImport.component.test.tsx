@@ -11,13 +11,13 @@ import {
 } from 'vitest';
 
 import { LocalProjectStorage } from '@project/storage';
-import { importBrowserLibrary } from '@project/customComponents';
+import { importBrowserLibrary } from '@project/libraries';
 
 import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '../../../constants';
 
 import { useLibraryImport } from '../hooks/useLibraryImport';
 
-vi.mock('@project/customComponents', () => ({ importBrowserLibrary: vi.fn() }));
+vi.mock('@project/libraries', () => ({ importBrowserLibrary: vi.fn() }));
 
 const unexpectedStorage = async (): Promise<never> => {
   throw new Error('The import hook must delegate storage to importBrowserLibrary');
