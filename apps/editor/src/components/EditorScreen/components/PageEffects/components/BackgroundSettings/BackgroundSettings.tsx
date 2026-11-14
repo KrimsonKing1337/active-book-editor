@@ -5,7 +5,7 @@ import type { VisualLayout } from '@active-book/book-builder/effects';
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
-import type { ProjectFileHandle } from '@project/fileSystemAccess';
+import type { ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 

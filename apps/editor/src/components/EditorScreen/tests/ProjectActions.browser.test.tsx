@@ -11,7 +11,7 @@ import { page } from 'vitest/browser';
 
 import { createProject } from '@root/tests/editor-effects/project';
 
-import { LocalProjectStorage } from '@project/LocalProjectStorage';
+import { LocalProjectStorage } from '@project/storage';
 
 import { EditorScreen } from '../EditorScreen';
 

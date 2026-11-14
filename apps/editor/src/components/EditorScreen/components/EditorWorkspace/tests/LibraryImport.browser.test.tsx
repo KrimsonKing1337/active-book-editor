@@ -11,7 +11,7 @@ import { page } from 'vitest/browser';
 import archiveUrl from '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url';
 import { createProject } from '@root/tests/editor-effects/project';
 
-import { LocalProjectStorage } from '@project/LocalProjectStorage';
+import { LocalProjectStorage } from '@project/storage';
 
 import { EditorScreen } from '../../../EditorScreen';
 import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '../../../constants';

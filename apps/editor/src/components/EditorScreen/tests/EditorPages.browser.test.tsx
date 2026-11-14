@@ -20,7 +20,7 @@ import {
   setColor,
 } from '@root/tests/editor-effects/controls';
 
-import { LocalProjectStorage } from '@project/LocalProjectStorage';
+import { LocalProjectStorage } from '@project/storage';
 
 import { EditorScreen } from '../EditorScreen';
 

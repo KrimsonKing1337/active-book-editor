@@ -10,7 +10,7 @@ import {
   vi,
 } from 'vitest';
 
-import { LocalProjectStorage } from '@project/LocalProjectStorage';
+import { LocalProjectStorage } from '@project/storage';
 import { importBrowserLibrary } from '@project/customComponents';
 
 import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '../../../constants';

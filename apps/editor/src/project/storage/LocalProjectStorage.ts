@@ -5,14 +5,14 @@ import { assertContentDocument } from '@active-book/book-builder/content';
 import type {
   ProjectBuildFile,
   ProjectStorage,
-} from './@types';
+} from '../@types';
 
 import type {
   ProjectDirectoryHandle,
   ProjectFileHandle,
-} from './fileSystemAccess';
+} from '../@types/fileSystemAccess';
 
-import { trackProjectWrite } from './pendingOperations';
+import { trackProjectWrite } from '../pendingOperations';
 
 import {
   BOOK_FILE_NAME,
@@ -24,7 +24,7 @@ import {
 import {
   ExistingProjectError,
   InvalidProjectError,
-} from './errors';
+} from '../errors';
 
 export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;

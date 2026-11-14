@@ -7,7 +7,7 @@ import {
 import { LOCAL_FILE_PATH } from '@project/constants';
 
 import type { ProjectStorage } from './@types';
-import type { FilePickerWindow, ProjectFileHandle } from './fileSystemAccess';
+import type { FilePickerWindow, ProjectFileHandle } from './@types/fileSystemAccess';
 
 type PackageDescription = {
   dependencies?: Record<string, string>;

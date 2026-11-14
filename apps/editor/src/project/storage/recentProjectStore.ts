@@ -1,4 +1,4 @@
-import type { ProjectDirectoryHandle } from './fileSystemAccess';
+import type { ProjectDirectoryHandle } from '../@types/fileSystemAccess';
 
 import {
   DATABASE_NAME,

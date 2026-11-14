@@ -5,7 +5,10 @@ import type { AudioEffectOptions } from '@active-book/core/@types';
 import { Slider } from '@active-book/core/components';
 
 import type { BookProject } from '@project/@types';
-import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
+import type {
+  FilePickerWindow,
+  ProjectFileHandle,
+} from '@project/@types/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
 

@@ -9,15 +9,14 @@ import type {
   DirectoryPickerWindow,
   ProjectDirectoryHandle,
   ProjectPermissionState,
-} from './fileSystemAccess';
-
-import { LocalProjectStorage } from './LocalProjectStorage';
+} from './@types/fileSystemAccess';
 
 import {
+  LocalProjectStorage,
   clearLastProjectHandle,
   getLastProjectHandle,
   saveLastProjectHandle,
-} from './recentProjectStore';
+} from './storage';
 
 import type {
   BookProject,

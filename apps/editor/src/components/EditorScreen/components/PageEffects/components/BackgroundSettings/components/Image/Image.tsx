@@ -1,4 +1,4 @@
-import type { ProjectFileHandle } from '@project/fileSystemAccess';
+import type { ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 

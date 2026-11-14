@@ -8,7 +8,7 @@ import type { BookDocument } from '@active-book/book-builder/book';
 import { visualToDraft, pageVisualEffects } from '@active-book/book-builder/visualEffects';
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
 
-import { clearLastProjectHandle } from '@project/recentProjectStore';
+import { clearLastProjectHandle } from '@project/storage';
 
 import { groupPageEffects } from '@components/EditorScreen/components/PageEffects/context/utils';
 
