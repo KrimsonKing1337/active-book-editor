@@ -15,7 +15,7 @@ import { markProjectStylesSaved } from '@project/pendingOperations';
 
 import { AUTO_SAVE_DELAY, getProjectErrorMessage } from '../utils';
 
-import type { StateSetter } from './types';
+import type { StateSetter } from './@types';
 
 type UseAutosaveParams = {
   editor: Editor | null;

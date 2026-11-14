@@ -22,7 +22,7 @@ import type { BuildState } from '../@types';
 import { createEmptyBook } from '../book/documents';
 import { getProjectErrorMessage } from '../utils';
 
-import type { StateSetter } from './types';
+import type { StateSetter } from './@types';
 
 type UseProjectActionsParams = {
   editor: Editor | null;

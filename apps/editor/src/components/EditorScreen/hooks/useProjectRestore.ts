@@ -10,7 +10,7 @@ import { useAsyncEffect } from '@hooks/useAsyncEffect';
 
 import { getProjectErrorMessage } from '../utils';
 
-import type { StateSetter } from './types';
+import type { StateSetter } from './@types';
 
 type UseProjectRestoreParams = {
   editor: Editor | null;
