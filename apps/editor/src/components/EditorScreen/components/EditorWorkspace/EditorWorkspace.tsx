@@ -1,5 +1,3 @@
-import type { KeyboardEvent } from 'react';
-
 import {
   useCallback,
   useEffect,
@@ -15,8 +13,6 @@ import { compileVisualEffects, missingVisualDefinitions } from '@active-book/boo
 
 import { useBookLibraries } from '@project/hooks';
 import { ProjectAssetsProvider } from '@project/ProjectAssets';
-
-import { importBrowserLibrary } from '@project/customComponents';
 
 import { CustomComponentsContext } from '@project/customComponentRegistry';
 
@@ -56,11 +52,12 @@ import {
   insertTextBlock,
 } from '../../utils';
 
+import { useCanvasInteraction, useLibraryImport } from './hooks';
+
 import styles from '../../EditorScreen.module.scss';
 
 import {
   SHOW_STRUCTURE_STORAGE_KEY,
-  HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY,
   SHOW_NARRATIVE_STORAGE_KEY,
   SHOW_BACKGROUNDS_STORAGE_KEY,
   SHOW_FRAME_EFFECTS_STORAGE_KEY,
@@ -70,13 +67,10 @@ export const EditorWorkspace = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
-  const [librariesRevision, setLibrariesRevision] = useState(0);
-  const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
   const [showSavedStatus, setShowSavedStatus] = useState(false);
-  const [isNodeSelectionActive, setIsNodeSelectionActive] = useState(false);
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
   const [showStructure, setShowStructure] = useState(() => {
@@ -203,39 +197,20 @@ export const EditorWorkspace = () => {
   useBeforeUnload(isDirty);
   useSaveShortcut(handleSaveProject);
 
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
+  const {
+    librariesRevision,
+    isImportWarningOpen,
+    handleImportCustomComponents,
+    handleConfirmCustomComponentsImport,
+    closeImportWarning,
+  } = useLibraryImport({
+    isProjectBusy,
+    saveCurrentProject,
+    setIsProjectBusy,
+    setProjectMessage,
+  });
 
-    const handleCanvasInteraction = (event: Event) => {
-      const target = event.target;
-
-      if (!(target instanceof Node)) {
-        return;
-      }
-
-      if (editor.view.dom.contains(target)) {
-        setIsNodeSelectionActive(true);
-
-        return;
-      }
-
-      if (target instanceof Element && target.closest('[data-active-book-effects-ui]')) {
-        return;
-      }
-
-      setIsNodeSelectionActive(false);
-    };
-
-    document.addEventListener('pointerdown', handleCanvasInteraction, true);
-    document.addEventListener('focusin', handleCanvasInteraction, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handleCanvasInteraction, true);
-      document.removeEventListener('focusin', handleCanvasInteraction, true);
-    };
-  }, [editor]);
+  const { isNodeSelectionActive, handleCanvasKeyDown } = useCanvasInteraction(editor);
 
   useEffect(() => {
     localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
@@ -283,94 +258,12 @@ export const EditorWorkspace = () => {
     setShowStructure((structureIsVisible) => !structureIsVisible);
   };
 
-  const importCustomComponents = async () => {
-    if (isProjectBusy) {
-      return;
-    }
-
-    setIsProjectBusy(true);
-
-    try {
-      const savedProject = await saveCurrentProject();
-
-      if (!savedProject) {
-        return;
-      }
-
-      const message = await importBrowserLibrary(savedProject.storage);
-
-      if (message) {
-        setLibrariesRevision((revision) => revision + 1);
-        setProjectMessage(`Подключена библиотека ${message}`);
-      }
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) {
-        console.error('[custom-components] Import failed.', error);
-
-        const errorMessage = error instanceof Error
-          ? error.message
-          : 'Ошибка импорта TGZ';
-
-        setProjectMessage(errorMessage);
-      }
-    } finally {
-      setIsProjectBusy(false);
-    }
-  };
-
-  const handleImportCustomComponents = () => {
-    if (isProjectBusy) {
-      return;
-    }
-
-    if (localStorage.getItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY) === 'true') {
-      void importCustomComponents();
-
-      return;
-    }
-
-    setIsImportWarningOpen(true);
-  };
-
-  const handleConfirmCustomComponentsImport = (doNotShowAgain: boolean) => {
-    if (doNotShowAgain) {
-      localStorage.setItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY, 'true');
-    }
-
-    setIsImportWarningOpen(false);
-    void importCustomComponents();
-  };
-
   const handleInsertCustomComponent = (packageName: string, name: string) => {
     insertCustomComponent(editor, { packageName, name });
   };
 
   const handleInsertTextBlock = (block: TextBlock) => {
     insertTextBlock(editor, block);
-  };
-
-  const handleCanvasKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== 'Escape' || !editor) {
-      return;
-    }
-
-    const target = event.target;
-
-    if (!(target instanceof Node) || !editor.view.dom.contains(target)) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const focusedElement = document.activeElement;
-
-    if (focusedElement instanceof HTMLElement && editor.view.dom.contains(focusedElement)) {
-      focusedElement.blur();
-    }
-
-    editor.commands.blur();
-    setIsNodeSelectionActive(false);
   };
 
   const pageEffects = (
@@ -454,7 +347,7 @@ export const EditorWorkspace = () => {
 
             {isImportWarningOpen && (
               <CustomComponentsWarningModal
-                onClose={() => setIsImportWarningOpen(false)}
+                onClose={closeImportWarning}
                 onConfirm={handleConfirmCustomComponentsImport}
               />
             )}
