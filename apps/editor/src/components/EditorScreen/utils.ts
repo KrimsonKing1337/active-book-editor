@@ -23,6 +23,7 @@ import {
 import { ComponentNode } from '@components/ComponentNode';
 import { CarouselNode, CarouselSlide } from '@components/CarouselNode';
 import { ContentValidation } from '@components/ContentValidation';
+import { ImageNode, VideoNode } from '@components/MediaNode';
 
 import type { BuildState, TextBlock } from './@types';
 
@@ -31,6 +32,8 @@ export const AUTO_SAVE_DELAY = 1500;
 export const contentNodes = [
   Paragraph.extend({ group: 'block slideBlock' }),
   Heading.extend({ group: 'block slideBlock' }).configure({ levels: [1, 2] }),
+  ImageNode,
+  VideoNode,
   ComponentNode.extend({ group: 'block slideBlock' }),
   CarouselNode,
   CarouselSlide,
@@ -59,6 +62,8 @@ const ACTIVE_BLOCK_NAMES = new Set([
   'paragraph',
   'heading',
   'coreComponent',
+  'image',
+  'video',
   'carousel',
 ]);
 
@@ -66,39 +71,37 @@ export const ActiveBlockHighlight = Extension.create({
   name: 'activeBlockHighlight',
 
   addProseMirrorPlugins() {
-    return [
-      new Plugin({
-        props: {
-          decorations(state) {
-            const { selection } = state;
+    return [new Plugin({
+      props: {
+        decorations(state) {
+          const { selection } = state;
 
-            let blockPosition: number;
+          let blockPosition: number;
 
-            if (selection instanceof NodeSelection) {
-              blockPosition = selection.from;
-            } else if (selection.$head.depth > 0) {
-              blockPosition = selection.$head.before(1);
-            } else {
-              return DecorationSet.empty;
-            }
+          if (selection instanceof NodeSelection) {
+            blockPosition = selection.from;
+          } else if (selection.$head.depth > 0) {
+            blockPosition = selection.$head.before(1);
+          } else {
+            return DecorationSet.empty;
+          }
 
-            const block = state.doc.nodeAt(blockPosition);
+          const block = state.doc.nodeAt(blockPosition);
 
-            if (!block || !ACTIVE_BLOCK_NAMES.has(block.type.name)) {
-              return DecorationSet.empty;
-            }
+          if (!block || !ACTIVE_BLOCK_NAMES.has(block.type.name)) {
+            return DecorationSet.empty;
+          }
 
-            const blockShift = blockPosition + block.nodeSize;
+          const blockShift = blockPosition + block.nodeSize;
 
-            const decoration = Decoration.node(blockPosition, blockShift, {
-              class: 'isActive',
-            });
+          const decoration = Decoration.node(blockPosition, blockShift, {
+            class: 'isActive',
+          });
 
-            return DecorationSet.create(state.doc, [decoration]);
-          },
+          return DecorationSet.create(state.doc, [decoration]);
         },
-      }),
-    ];
+      },
+    })];
   },
 });
 
@@ -138,11 +141,9 @@ export const editorConfig: Omit<Config, 'pages'> = {
 
 export const createEmptyDocument = (): JSONContent => ({
   type: 'doc',
-  content: [
-    {
-      type: 'paragraph',
-    },
-  ],
+  content: [{
+    type: 'paragraph',
+  }],
 });
 
 export const getProjectErrorMessage = (error: unknown): string => {

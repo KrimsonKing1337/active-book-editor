@@ -28,6 +28,7 @@ import {
 
 export class LocalProjectStorage implements ProjectStorage {
   public readonly name: string;
+  private assetImport: Promise<unknown> = Promise.resolve();
 
   constructor(public readonly directoryHandle: ProjectDirectoryHandle) {
     this.name = directoryHandle.name;
@@ -43,11 +44,11 @@ export class LocalProjectStorage implements ProjectStorage {
     directoryHandle: ProjectDirectoryHandle,
     relativePath: string,
   ): AsyncGenerator<ProjectBuildFile> {
-    for await (const entryHandle of directoryHandle.values()) {
-      const entryPath = `${relativePath}/${entryHandle.name}`;
+    for await (const entryHandleCur of directoryHandle.values()) {
+      const entryPath = `${relativePath}/${entryHandleCur.name}`;
 
-      if (entryHandle.kind === 'file') {
-        const file = await entryHandle.getFile();
+      if (entryHandleCur.kind === 'file') {
+        const file = await entryHandleCur.getFile();
 
         yield {
           path: entryPath,
@@ -57,7 +58,7 @@ export class LocalProjectStorage implements ProjectStorage {
         continue;
       }
 
-      yield* this.getDirectoryBuildFiles(entryHandle, entryPath);
+      yield* this.getDirectoryBuildFiles(entryHandleCur, entryPath);
     }
   }
 
@@ -341,7 +342,11 @@ export class LocalProjectStorage implements ProjectStorage {
   }
 
   async importAssetFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
-    return trackProjectWrite(() => this.importAssetFileInternal(file, sourceHandle));
+    const operation = this.assetImport.then(() => this.importAssetFileInternal(file, sourceHandle));
+    // Keep the queue usable after a failure; callers still receive the original rejected operation.
+    this.assetImport = operation.then(() => undefined, () => undefined);
+
+    return trackProjectWrite(() => operation);
   }
 
   private async importAssetFileInternal(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
@@ -374,8 +379,8 @@ export class LocalProjectStorage implements ProjectStorage {
       try {
         await assetsDirectory.getFileHandle(candidate);
 
-        candidate = `${baseName}-${suffix}${extension}`;
         suffix += 1;
+        candidate = `${baseName}-${suffix}${extension}`;
       } catch (error) {
         if (error instanceof DOMException && error.name === 'NotFoundError') {
           break;

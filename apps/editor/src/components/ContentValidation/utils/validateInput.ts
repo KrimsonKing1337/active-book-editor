@@ -2,11 +2,27 @@ import { Fragment, Node } from '@tiptap/pm/model';
 
 import { assertContentDocument, assertContentNode } from '@active-book/book-builder/content';
 
+import { validateMediaHtml } from '@components/MediaNode/utils';
+
 const selectors = {
   carousel: '[data-type="carousel"]',
   segment: '[data-type="segment"]',
   carouselSlide: '[data-type="carouselSlide"]',
 };
+
+const sourceTypes = new Set([
+  'doc',
+  'paragraph',
+  'heading',
+  'text',
+  'hardBreak',
+  'coreComponent',
+  'carousel',
+  'carouselSlide',
+  'segment',
+  'image',
+  'video',
+]);
 
 type HtmlContext = {
   insideSlide: boolean;
@@ -15,6 +31,17 @@ type HtmlContext = {
 
 const assertHtml = (html: string, context: HtmlContext): void => {
   const dom = new DOMParser().parseFromString(html, 'text/html');
+
+  validateMediaHtml(dom);
+
+  for (const elementCur of dom.querySelectorAll('[data-type]')) {
+    const type = elementCur.getAttribute('data-type');
+
+    if (type && !sourceTypes.has(type)) {
+      throw new Error(`Неизвестный тип содержимого: ${type}`);
+    }
+  }
+
   const containers = dom.querySelectorAll(`${selectors.carousel}, ${selectors.segment}`);
 
   for (const slideCur of dom.querySelectorAll(selectors.carouselSlide)) {

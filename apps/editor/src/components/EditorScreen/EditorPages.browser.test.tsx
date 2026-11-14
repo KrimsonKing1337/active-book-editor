@@ -1,11 +1,24 @@
 import { StrictMode } from 'react';
 
 import { cleanup, render } from '@testing-library/react';
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+
+import {
+  afterEach,
+  beforeEach,
+  expect,
+  test,
+  vi,
+} from 'vitest';
+
 import { page, userEvent } from 'vitest/browser';
 
 import { createProject, savedPageEffects } from '@root/tests/editor-effects/project';
-import { addEffect, configureShadow, historyShortcut, setColor } from '@root/tests/editor-effects/controls';
+import {
+  addEffect,
+  configureShadow,
+  historyShortcut,
+  setColor,
+} from '@root/tests/editor-effects/controls';
 
 import { LocalProjectStorage } from '@project/LocalProjectStorage';
 
@@ -13,7 +26,7 @@ import { EditorScreen } from './EditorScreen';
 
 import '@active-book/common/styles';
 import '@active-book/core/styles/styles.scss';
-import '../../styles.scss';
+import '@styles/styles.scss';
 
 let project: Awaited<ReturnType<typeof createProject>>;
 
@@ -109,7 +122,12 @@ test('edits, reorders, saves and reopens three independent pages with isolated h
   const pageButtons = document.querySelectorAll<HTMLButtonElement>(
     'nav[aria-label="Страницы книги"] li > button:first-child',
   );
-  for (const index of [1, 0, 2, 1, 2, 0]) {
+  for (const index of [1,
+    0,
+    2,
+    1,
+    2,
+    0]) {
     pageButtons[index].click();
   }
   await selectPage(1);
@@ -135,7 +153,9 @@ test('edits, reorders, saves and reopens three independent pages with isolated h
   }))
     .toHaveAttribute('aria-current', 'page');
   const moved = await saveBook();
-  expect(moved.pages.map((cur) => cur.id)).toEqual([firstId, beforeMove.pages[2].id, beforeMove.pages[1].id]);
+  expect(moved.pages.map((cur) => cur.id)).toEqual([firstId,
+    beforeMove.pages[2].id,
+    beforeMove.pages[1].id]);
   expect(moved.pages[1]).toEqual(beforeMove.pages[2]);
   await page.getByRole('button', {
     name: 'Удалить страницу 2',
@@ -248,6 +268,9 @@ test('opens a complete book with page-owned media and a real custom TGZ, preserv
     '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url'
   );
   const { default: soundUrl } = await import('@root/tests/fixtures/multipage-book/assets/tone.wav?url');
+
+  // todo: применить правило max-params
+  // eslint-disable-next-line max-params
   const write = async (directory: FileSystemDirectoryHandle, name: string, data: string | Blob) => {
     const handle = await directory.getFileHandle(name, { create: true });
     const stream = await handle.createWritable();
@@ -290,7 +313,9 @@ test('opens a complete book with page-owned media and a real custom TGZ, preserv
     exact: true,
   }).click();
   const saved = await saveBook();
-  expect(saved.pages.map((cur) => cur.id)).toEqual(['stable-alpha', 'stable-gamma', 'stable-beta']);
+  expect(saved.pages.map((cur) => cur.id)).toEqual(['stable-alpha',
+    'stable-gamma',
+    'stable-beta']);
   expect(saved.visualEffects).toEqual(fixture.visualEffects);
   expect(saved.pages[1].document.content).toEqual(fixture.pages[2].document.content);
   expect(saved.pages[1]).toEqual(beforeMove.pages[2]);
@@ -321,6 +346,8 @@ test('switching projects during a real TGZ import disposes resources and isolate
   const { default: archiveUrl } = await import(
     '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url'
   );
+  // todo: применить правило max-params
+  // eslint-disable-next-line max-params
   const write = async (directory: FileSystemDirectoryHandle, name: string, data: string | Blob) => {
     const file = await directory.getFileHandle(name, { create: true });
     const stream = await file.createWritable();

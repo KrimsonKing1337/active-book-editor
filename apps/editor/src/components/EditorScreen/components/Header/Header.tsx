@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import classNames from 'classnames';
 
 import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
@@ -7,6 +9,7 @@ import type { BuildState, TextBlock } from '../../@types';
 import styles from './Header.module.scss';
 
 type HeaderProps = {
+  mediaTools: ReactNode;
   projectName: string;
   projectMessage: string;
   isDirty: boolean;
@@ -36,6 +39,7 @@ type HeaderProps = {
 };
 
 export const Header = ({
+  mediaTools,
   projectName,
   projectMessage,
   isDirty,
@@ -188,6 +192,8 @@ export const Header = ({
         >
           Добавить карусель
         </button>
+
+        {mediaTools}
 
         <button
           type="button"

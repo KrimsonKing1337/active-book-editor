@@ -6,6 +6,8 @@ import { reportContentError } from './errors';
 import { validateClipboardHtml, validateInput } from './validateInput';
 import { validateRange } from './validateRange';
 
+const fileImportMessage = 'Для импорта файла используйте команды добавления изображения или видео';
+
 const openSlideContent = (slice: Slice): Fragment => {
   const content = slice.content;
   const first = content.firstChild;
@@ -30,16 +32,36 @@ const openSlideContent = (slice: Slice): Fragment => {
 export const clipboardGuards = (editor: Editor): EditorProps => {
   return {
     handleDOMEvents: {
-      paste(view, event) {
+      drop(view, e) {
+        if (!e.dataTransfer?.files.length || view.dragging) {
+          return false;
+        }
+
+        e.preventDefault();
+
+        reportContentError(editor, new Error(fileImportMessage));
+
+        return true;
+      },
+      paste(view, e) {
+        const html = e.clipboardData?.getData('text/html') ?? '';
+
+        if (e.clipboardData?.files.length && !html) {
+          e.preventDefault();
+
+          reportContentError(editor, new Error(fileImportMessage));
+
+          return true;
+        }
+
         try {
           const insideSlide = validateRange(view.state.doc, view.state.selection);
-          const html = event.clipboardData?.getData('text/html') ?? '';
 
           validateClipboardHtml(html, insideSlide);
 
           return false;
         } catch (error) {
-          event.preventDefault();
+          e.preventDefault();
 
           reportContentError(editor, error);
 
@@ -48,7 +70,11 @@ export const clipboardGuards = (editor: Editor): EditorProps => {
       },
     },
     handlePaste(...args) {
-      const [view, event, slice] = args;
+      const [
+        view,
+        event,
+        slice,
+      ] = args;
 
       try {
         const insideSlide = validateRange(view.state.doc, view.state.selection);
@@ -65,7 +91,12 @@ export const clipboardGuards = (editor: Editor): EditorProps => {
       }
     },
     handleDrop(...args) {
-      const [view, event, slice, moved] = args;
+      const [
+        view,
+        event,
+        slice,
+        moved,
+      ] = args;
 
       const target = view.posAtCoords({ left: event.clientX, top: event.clientY });
 

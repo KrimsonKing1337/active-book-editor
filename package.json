@@ -33,7 +33,8 @@
     "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
     "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
     "test:scripts": "node --test scripts/packageCore.test.mjs",
-    "test:media:runtime": "node --import tsx --test scripts/mediaRuntime.browser.test.ts"
+    "test:media:runtime": "node --import tsx --test scripts/mediaRuntime.browser.test.ts",
+    "test:media:workflow": "node --import tsx --test scripts/mediaWorkflow.browser.test.ts"
   },
   "dependencies": {
     "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.65.tgz"

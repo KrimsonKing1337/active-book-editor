@@ -13,7 +13,8 @@ import classNames from 'classnames';
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
-import { useBookLibraries } from '@project/useBookLibraries';
+import { useBookLibraries } from '@project/hooks';
+import { ProjectAssetsProvider } from '@project/ProjectAssets';
 
 import { importBrowserLibrary } from '@project/customComponents';
 
@@ -22,6 +23,7 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
 import { ContentError } from '@components/ContentError';
+import { MediaInsert } from '@components/MediaInsert';
 
 import { Pages } from '../Pages';
 import { VisualBookPreview } from '../VisualBookPreview';
@@ -259,7 +261,11 @@ export const EditorWorkspace = () => {
     if (missing.length) {
       setProjectMessage(`Не загружены определения эффектов: ${missing.join(', ')}`);
     }
-  }, [pages.book, libraries.definitions, libraries.isLoading]);
+  }, [
+    pages.book,
+    libraries.definitions,
+    libraries.isLoading,
+  ]);
 
   const projectName = project?.name ?? 'Без названия';
   const buttonIsDisabled = !editor || isProjectBusy;
@@ -371,97 +377,108 @@ export const EditorWorkspace = () => {
     <PageEffects key={pageScope} project={project} onSaveProject={saveCurrentProject} />
   );
 
+  const mediaInsert = (
+    <MediaInsert
+      editor={editor}
+      project={project}
+      scope={pageScope}
+      disabled={buttonIsDisabled}
+    />
+  );
+
   return (
-    <CustomComponentsContext value={libraries.registry}>
-      <PageEffectsProvider
-        editor={editor}
-        pageId={pageScope}
-        ownerPageId={pages.activePage.id}
-        onStylesFlusher={registerStylesFlusher}
-      >
-        <div className={editorScreenClassNames}>
-          <Header
-            projectName={projectName}
-            projectMessage={projectMessage}
-            isDirty={isDirty}
-            isProjectBusy={isProjectBusy}
-            showSavedStatus={showSavedStatus}
-            showStructure={showStructure}
-            showNarrative={showNarrative}
-            showBackgrounds={showBackgrounds}
-            showFrameEffects={showFrameEffects}
-            buildState={buildState}
-            buttonIsDisabled={buttonIsDisabled}
-            structureButtonIsDisabled={structureButtonIsDisabled}
-
-            onNewProject={handleNewProject}
-            onOpenProject={handleOpenProject}
-            onSaveProject={handleSaveProject}
-            onToggleStructure={toggleStructure}
-            onToggleNarrative={() => setShowNarrative((visible) => !visible)}
-            onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
-            onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
-            onInsertCustomComponent={handleInsertCustomComponent}
-            customComponentDefinitions={customComponentDefinitions}
-            onInsertTextBlock={handleInsertTextBlock}
-            onInsertCarousel={() => editor?.commands.insertCarousel()}
-            onBuildBook={buildBook}
-            onImportCustomComponents={handleImportCustomComponents}
-          />
-
-          <ContentError editor={editor} />
-
-          <Pages
-            pages={pages.book.pages}
-            activeId={pages.activePage.id}
-            disabled={buttonIsDisabled}
-            onSelect={pages.selectPage}
-            onAdd={pages.addPage}
-            onDelete={pages.deletePage}
-            onMove={pages.movePage}
-          />
-
-          {isImportWarningOpen && (
-            <CustomComponentsWarningModal
-              onClose={() => setIsImportWarningOpen(false)}
-              onConfirm={handleConfirmCustomComponentsImport}
-            />
-          )}
-
-          {pendingRestore && (
-            <RestoreBanner
-              pendingRestore={pendingRestore}
+    <ProjectAssetsProvider project={project}>
+      <CustomComponentsContext value={libraries.registry}>
+        <PageEffectsProvider
+          editor={editor}
+          pageId={pageScope}
+          ownerPageId={pages.activePage.id}
+          onStylesFlusher={registerStylesFlusher}
+        >
+          <div className={editorScreenClassNames}>
+            <Header
+              mediaTools={mediaInsert}
+              projectName={projectName}
+              projectMessage={projectMessage}
+              isDirty={isDirty}
               isProjectBusy={isProjectBusy}
-              onContinueLastProject={handleContinueLastProject}
-              onForgetLastProject={handleForgetLastProject}
-            />
-          )}
-
-          <div className={styles.BuildStatus} data-state={buildState}>
-            {buildStateLabel}
-          </div>
-
-          <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
-            <VisualBookPreview
-              book={pages.book}
-              pageId={pages.activePage.id}
-              session={pages.session}
-              definitions={libraries.definitions}
-              project={project}
+              showSavedStatus={showSavedStatus}
+              showStructure={showStructure}
+              showNarrative={showNarrative}
               showBackgrounds={showBackgrounds}
               showFrameEffects={showFrameEffects}
-              config={previewConfig}
-              editorTools={pageEffects}
-            >
-              <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
+              buildState={buildState}
+              buttonIsDisabled={buttonIsDisabled}
+              structureButtonIsDisabled={structureButtonIsDisabled}
 
-              <div data-editor-page-id={pages.activePage.id}>
-                <EditorContent editor={editor} />
-              </div>
-            </VisualBookPreview>
-          </main>
-        </div>
-      </PageEffectsProvider>
-    </CustomComponentsContext>
+              onNewProject={handleNewProject}
+              onOpenProject={handleOpenProject}
+              onSaveProject={handleSaveProject}
+              onToggleStructure={toggleStructure}
+              onToggleNarrative={() => setShowNarrative((visible) => !visible)}
+              onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
+              onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
+              onInsertCustomComponent={handleInsertCustomComponent}
+              customComponentDefinitions={customComponentDefinitions}
+              onInsertTextBlock={handleInsertTextBlock}
+              onInsertCarousel={() => editor?.commands.insertCarousel()}
+              onBuildBook={buildBook}
+              onImportCustomComponents={handleImportCustomComponents}
+            />
+
+            <ContentError editor={editor} />
+
+            <Pages
+              pages={pages.book.pages}
+              activeId={pages.activePage.id}
+              disabled={buttonIsDisabled}
+              onSelect={pages.selectPage}
+              onAdd={pages.addPage}
+              onDelete={pages.deletePage}
+              onMove={pages.movePage}
+            />
+
+            {isImportWarningOpen && (
+              <CustomComponentsWarningModal
+                onClose={() => setIsImportWarningOpen(false)}
+                onConfirm={handleConfirmCustomComponentsImport}
+              />
+            )}
+
+            {pendingRestore && (
+              <RestoreBanner
+                pendingRestore={pendingRestore}
+                isProjectBusy={isProjectBusy}
+                onContinueLastProject={handleContinueLastProject}
+                onForgetLastProject={handleForgetLastProject}
+              />
+            )}
+
+            <div className={styles.BuildStatus} data-state={buildState}>
+              {buildStateLabel}
+            </div>
+
+            <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
+              <VisualBookPreview
+                book={pages.book}
+                pageId={pages.activePage.id}
+                session={pages.session}
+                definitions={libraries.definitions}
+                showBackgrounds={showBackgrounds}
+                showFrameEffects={showFrameEffects}
+                config={previewConfig}
+                editorTools={pageEffects}
+              >
+                <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
+
+                <div data-editor-page-id={pages.activePage.id}>
+                  <EditorContent editor={editor} />
+                </div>
+              </VisualBookPreview>
+            </main>
+          </div>
+        </PageEffectsProvider>
+      </CustomComponentsContext>
+    </ProjectAssetsProvider>
   );
 };
