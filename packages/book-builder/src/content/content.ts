@@ -1,7 +1,4 @@
-import type {
-  BookContentDocument,
-  BookContentNode,
-} from '@active-book/types';
+import type { BookContentDocument, BookContentNode } from '@active-book/types';
 
 import { isRecord } from '../effects/utils';
 

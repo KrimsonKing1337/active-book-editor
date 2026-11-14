@@ -7,33 +7,42 @@ type MediaStyle = CSSProperties & {
 };
 
 export const getMediaStyle = (attrs: BookMediaAttributes): MediaStyle => {
-  let width = '100%';
-  let height = 'auto';
-  let start = '0px';
-  let end = 'auto';
+  const {
+    width,
+    height,
+    align,
+    fit,
+  } = attrs;
 
-  if (attrs.width) {
-    width = `${attrs.width.value}${attrs.width.unit}`;
+  let bookMediaWidth = '100%';
+  let bookMediaHeight = 'auto';
+  let bookMediaStart = '0px';
+  let bookMediaEnd = 'auto';
+
+  const bookMediaFit = fit ?? 'contain';
+
+  if (width) {
+    bookMediaWidth = `${width.value}${width.unit}`;
   }
 
-  if (attrs.height) {
-    height = `${attrs.height.value}px`;
+  if (height) {
+    bookMediaHeight = `${height.value}px`;
   }
 
-  if (attrs.align === 'center' || attrs.align === 'right') {
-    start = 'auto';
+  if (align === 'center' || align === 'right') {
+    bookMediaStart = 'auto';
   }
 
-  if (attrs.align === 'right') {
-    end = '0px';
+  if (align === 'right') {
+    bookMediaEnd = '0px';
   }
 
   return {
-    '--book-media-width': width,
-    '--book-media-height': height,
-    '--book-media-start': start,
-    '--book-media-end': end,
-    '--book-media-fit': attrs.fit ?? 'contain',
+    '--book-media-width': bookMediaWidth,
+    '--book-media-height': bookMediaHeight,
+    '--book-media-start': bookMediaStart,
+    '--book-media-end': bookMediaEnd,
+    '--book-media-fit': bookMediaFit,
   };
 };
 

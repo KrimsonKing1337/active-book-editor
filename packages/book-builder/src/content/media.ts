@@ -8,27 +8,36 @@ export const isContentAssetPath = (path: unknown): path is string => {
     return false;
   }
 
-  const hasControl = [...path].some((character) => {
-    const code = character.codePointAt(0)!;
+  const hasControl = [...path].some((characterCur) => {
+    const code = characterCur.codePointAt(0)!;
 
     return code < 32 || code === 127;
   });
-  const invalidSegment = path.split('/').some((segment) => !segment || segment === '.' || segment === '..');
+
+  const invalidSegment = path.split('/').some((segmentCur) => {
+    return !segmentCur || segmentCur === '.' || segmentCur === '..';
+  });
 
   return !hasControl && !invalidSegment;
 };
 
-const assertLength = (length: unknown, options: {
+type AssertLengthOptions = {
   path: string;
   allowPercent: boolean
-}): void => {
+};
+
+const assertLength = (length: unknown, options: AssertLengthOptions): void => {
   if (length === undefined || length === null) {
     return;
   }
 
   const { path, allowPercent } = options;
 
-  if (!isRecord(length) || typeof length.value !== 'number' || !Number.isFinite(length.value) || length.value <= 0) {
+  if (!isRecord(length) || typeof length.value !== 'number') {
+    throw new Error(`${path}: expected a number`);
+  }
+
+  if (!Number.isFinite(length.value) || length.value <= 0) {
     throw new Error(`${path}: expected a positive finite length`);
   }
 
@@ -39,7 +48,11 @@ const assertLength = (length: unknown, options: {
     throw new Error(`${path}: unsupported unit or percentage outside (0, 100]`);
   }
 
-  if (Object.keys(length).some((key) => key !== 'value' && key !== 'unit')) {
+  const wrongLengthAttr = Object.keys(length).some((keyCur) => {
+    return keyCur !== 'value' && keyCur !== 'unit';
+  });
+
+  if (wrongLengthAttr) {
     throw new Error(`${path}: unknown length attribute`);
   }
 };
@@ -61,11 +74,17 @@ export const assertMediaAttributes = (attrs: unknown, { type, path }: MediaValid
   assertLength(attrs.width, { path: `${path}.width`, allowPercent: true });
   assertLength(attrs.height, { path: `${path}.height`, allowPercent: false });
 
-  const isInvalidAlign = typeof attrs.align !== 'string' || ![
+  if (typeof attrs.align !== 'string') {
+    throw new Error(`${path}.align: expected a string`);
+  }
+
+  const alings = [
     'left',
     'center',
     'right',
-  ].includes(attrs.align);
+  ];
+
+  const isInvalidAlign = !alings.includes(attrs.align);
 
   if (attrs.align !== undefined && isInvalidAlign) {
     throw new Error(`${path}.align: expected left, center or right`);
@@ -98,23 +117,25 @@ export const assertMediaAttributes = (attrs: unknown, { type, path }: MediaValid
       }
     }
 
-    for (const name of [
+    const mediaAttrs = [
       'controls',
       'autoPlay',
       'muted',
       'loop',
-    ]) {
-      allowed.add(name);
+    ];
 
-      if (attrs[name] !== undefined && typeof attrs[name] !== 'boolean') {
-        throw new Error(`${path}.${name}: expected a boolean`);
+    for (const nameCur of mediaAttrs) {
+      allowed.add(nameCur);
+
+      if (attrs[nameCur] !== undefined && typeof attrs[nameCur] !== 'boolean') {
+        throw new Error(`${path}.${nameCur}: expected a boolean`);
       }
     }
   }
 
-  for (const name of Object.keys(attrs)) {
-    if (!allowed.has(name)) {
-      throw new Error(`${path}.${name}: unknown media attribute`);
+  for (const nameCur of Object.keys(attrs)) {
+    if (!allowed.has(nameCur)) {
+      throw new Error(`${path}.${nameCur}: unknown media attribute`);
     }
   }
 };

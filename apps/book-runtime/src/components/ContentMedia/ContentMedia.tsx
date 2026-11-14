@@ -13,17 +13,20 @@ type ContentMediaProps = {
 
 export const ContentMedia = ({ node, id }: ContentMediaProps) => {
   const { attrs } = node;
+
   const src = contentAssetUrl(attrs.src);
   const style = getMediaStyle(attrs);
 
   if (node.type === 'image') {
-    return <img
-      className={styles.Media}
-      data-book-media="image"
-      src={src}
-      alt={node.attrs.alt ?? ''}
-      style={style}
-    />;
+    return (
+      <img
+        className={styles.Media}
+        data-book-media="image"
+        src={src}
+        alt={node.attrs.alt ?? ''}
+        style={style}
+      />
+    );
   }
 
   const {

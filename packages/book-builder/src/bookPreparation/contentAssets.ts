@@ -5,15 +5,19 @@ import type { BookDocument } from '../book';
 import { assertContentDocument } from '../content';
 
 const collect = (nodes: readonly BookContentNode[], paths: Set<string>): void => {
-  for (const node of nodes) {
-    if (node.type === 'image' || node.type === 'video') {
-      paths.add(node.attrs.src);
+  for (const nodeCur of nodes) {
+    const { type } = nodeCur;
 
-      if (node.type === 'video' && node.attrs.poster) {
-        paths.add(node.attrs.poster);
+    if (type === 'image') {
+      paths.add(nodeCur.attrs.src);
+    } else if (type === 'video') {
+      const { attrs } = nodeCur;
+
+      if (attrs.poster) {
+        paths.add(attrs.poster);
       }
-    } else if (node.type === 'carousel' || node.type === 'carouselSlide') {
-      collect(node.content, paths);
+    } else if (type === 'carousel' || type === 'carouselSlide') {
+      collect(nodeCur.content, paths);
     }
   }
 };
@@ -21,8 +25,9 @@ const collect = (nodes: readonly BookContentNode[], paths: Set<string>): void =>
 export const contentAssetPaths = (book: Pick<BookDocument, 'pages'>): readonly string[] => {
   const paths = new Set<string>();
 
-  for (const page of book.pages) {
-    const document: unknown = page.document;
+  for (const pageCur of book.pages) {
+    const document: unknown = pageCur.document;
+
     assertContentDocument(document);
     collect(document.content, paths);
   }

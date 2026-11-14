@@ -11,12 +11,14 @@ const formattingMarks = new Set([
   'underline',
   'code',
 ]);
+
 const linkProtocols = new Set([
   'http:',
   'https:',
   'mailto:',
   'tel:',
 ]);
+
 const attributesNames = [
   'target',
   'rel',

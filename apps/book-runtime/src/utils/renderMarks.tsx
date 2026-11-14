@@ -63,8 +63,7 @@ export const renderMarks = (content: ReactNode, marks: BookTextMark[]): ReactNod
         break;
       }
       default: {
-        const unsupported: never = mark;
-        const jsonString = JSON.stringify(unsupported);
+        const jsonString = JSON.stringify(mark);
 
         throw new Error(`Unsupported reader mark: ${jsonString}`);
       }

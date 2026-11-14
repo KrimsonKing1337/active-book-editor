@@ -1,13 +1,15 @@
 import type { ComponentType } from 'react';
 
-import { loadBrowserLibrary, type BrowserLibrary } from '@active-book/book-builder/components/custom/browser';
+import { type BrowserLibrary, loadBrowserLibrary } from '@active-book/book-builder/components/custom/browser';
 
 import customPackageList from '../../custom-components.json';
 
-export const loadCustomComponents = async (): Promise<{
+export type LoadCustomComponentsAttrs = {
   components: Record<string, ComponentType>;
   libraries: BrowserLibrary[];
-}> => {
+};
+
+export const loadCustomComponents = async (): Promise<LoadCustomComponentsAttrs> => {
   const dependencies: Record<string, string> = customPackageList.dependencies ?? {};
   const libraries: BrowserLibrary[] = [];
   const components: Record<string, ComponentType> = {};
@@ -21,8 +23,10 @@ export const loadCustomComponents = async (): Promise<{
       const filePath = specifier.slice('file:./'.length);
       const parts = filePath.split('/');
 
-      if (parts.length !== 2 || parts[0] !== 'dependencies'
-        || !parts[1].toLowerCase().endsWith('.tgz')) {
+      const noDependencies = parts.length !== 2 || parts[0] !== 'dependencies';
+      const noTgz = !parts[1].toLowerCase().endsWith('.tgz');
+
+      if (noDependencies || noTgz) {
         throw new Error(`Invalid Active Book library path: ${specifier}`);
       }
 
@@ -33,14 +37,17 @@ export const loadCustomComponents = async (): Promise<{
         throw new Error(`Cannot load Active Book library ${packageName}: HTTP ${response.status}`);
       }
 
-      const library = await loadBrowserLibrary(await response.blob());
+      const blob = await response.blob();
+      const library = await loadBrowserLibrary(blob);
 
       if (library.packageName !== packageName) {
         library.dispose();
+
         throw new Error(`Unexpected library name: ${library.packageName}`);
       }
 
       libraries.push(library);
+
       Object.assign(components, library.components);
     }
 
@@ -49,8 +56,8 @@ export const loadCustomComponents = async (): Promise<{
       components,
     };
   } catch (error) {
-    for (const library of libraries) {
-      library.dispose();
+    for (const libraryCur of libraries) {
+      libraryCur.dispose();
     }
 
     throw error;
