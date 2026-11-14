@@ -2,7 +2,7 @@ import classNames from 'classnames';
 
 import styles from '../Header.module.scss';
 
-type ProjectStatusProps = {
+export type ProjectStatusProps = {
   projectName: string;
   projectMessage: string;
   isDirty: boolean;

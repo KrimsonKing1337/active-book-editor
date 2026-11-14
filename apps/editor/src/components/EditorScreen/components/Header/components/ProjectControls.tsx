@@ -1,4 +1,4 @@
-type ProjectControlsProps = {
+export type ProjectControlsProps = {
   disabled: boolean;
   isProjectBusy: boolean;
 

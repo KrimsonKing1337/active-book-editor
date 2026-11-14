@@ -23,32 +23,74 @@ export const createHeaderFixture = () => {
   };
 
   const props = {
-    ...commands,
-    projectName: 'Test book',
-    projectMessage: 'Локальный проект',
-    isDirty: false,
-    isProjectBusy: false,
-    showSavedStatus: false,
-    showStructure: false,
-    showNarrative: true,
-    showBackgrounds: true,
-    showFrameEffects: true,
-    buildState: 'idle',
-    buttonIsDisabled: false,
-    structureButtonIsDisabled: false,
-    customComponentDefinitions: [{
-      id: 'fixture/Counter',
-      packageName: '@fixture/components',
-      name: 'Counter',
-      title: 'Счётчик',
-      description: 'Fixture counter',
-    }],
-    mediaTools: (
-      <button type="button">
-        Медиа-инструменты
-      </button>
-    ),
+    projectStatus: {
+      projectName: 'Test book',
+      projectMessage: 'Локальный проект',
+      isDirty: false,
+      showSavedStatus: false,
+    },
+    projectControls: {
+      disabled: false,
+      isProjectBusy: false,
+      onNewProject: commands.onNewProject,
+      onOpenProject: commands.onOpenProject,
+      onSaveProject: commands.onSaveProject,
+    },
+    viewControls: {
+      showStructure: false,
+      showNarrative: true,
+      showBackgrounds: true,
+      showFrameEffects: true,
+      structureButtonIsDisabled: false,
+      onToggleStructure: commands.onToggleStructure,
+      onToggleNarrative: commands.onToggleNarrative,
+      onToggleBackgrounds: commands.onToggleBackgrounds,
+      onToggleFrameEffects: commands.onToggleFrameEffects,
+    },
+    insertControls: {
+      disabled: false,
+      onInsertTextBlock: commands.onInsertTextBlock,
+      onInsertCarousel: commands.onInsertCarousel,
+      mediaTools: (
+        <button type="button">
+          Медиа-инструменты
+        </button>
+      ),
+    },
+    libraryControls: {
+      disabled: false,
+      onImport: commands.onImportCustomComponents,
+      onInsertComponent: commands.onInsertCustomComponent,
+      definitions: [{
+        id: 'fixture/Counter',
+        packageName: '@fixture/components',
+        name: 'Counter',
+        title: 'Счётчик',
+        description: 'Fixture counter',
+      }],
+    },
+    build: {
+      state: 'idle',
+      disabled: false,
+      onBuild: commands.onBuildBook,
+    },
   } satisfies ComponentProps<typeof Header>;
 
-  return { props, commands };
+  const busyProps = {
+    ...props,
+    projectControls: {
+      ...props.projectControls,
+      disabled: true,
+      isProjectBusy: true,
+    },
+    insertControls: { ...props.insertControls, disabled: true },
+    libraryControls: { ...props.libraryControls, disabled: true },
+    build: { ...props.build, disabled: true },
+  } satisfies ComponentProps<typeof Header>;
+
+  return {
+    props,
+    commands,
+    busyProps,
+  };
 };

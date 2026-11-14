@@ -1,4 +1,4 @@
-type ViewControlsProps = {
+export type ViewControlsProps = {
   showStructure: boolean;
   showNarrative: boolean;
   showBackgrounds: boolean;

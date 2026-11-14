@@ -1,8 +1,12 @@
-import type { ReactNode } from 'react';
+import type { BuildState } from '../../@types';
 
-import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
-
-import type { BuildState, TextBlock } from '../../@types';
+import type {
+  ProjectStatusProps,
+  ProjectControlsProps,
+  ViewControlsProps,
+  InsertControlsProps,
+  LibraryControlsProps,
+} from './components';
 
 import {
   ProjectStatus,
@@ -14,64 +18,32 @@ import {
 
 import styles from './Header.module.scss';
 
-type HeaderProps = {
-  mediaTools: ReactNode;
-  projectName: string;
-  projectMessage: string;
-  isDirty: boolean;
-  isProjectBusy: boolean;
-  showSavedStatus: boolean;
-  showStructure: boolean;
-  showNarrative: boolean;
-  showBackgrounds: boolean;
-  showFrameEffects: boolean;
-  buildState: BuildState;
-  buttonIsDisabled: boolean;
-  structureButtonIsDisabled: boolean;
-
-  onNewProject: () => Promise<void>;
-  onOpenProject: () => Promise<void>;
-  onSaveProject: () => Promise<void>;
-  onToggleStructure: () => void;
-  onToggleNarrative: () => void;
-  onToggleBackgrounds: () => void;
-  onToggleFrameEffects: () => void;
-  onInsertCustomComponent: (packageName: string, name: string) => void;
-  customComponentDefinitions: BrowserComponentDefinition[];
-  onInsertTextBlock: (block: TextBlock) => void;
-  onInsertCarousel: () => void;
-  onBuildBook: () => Promise<void>;
-  onImportCustomComponents: () => void;
+export type HeaderProps = {
+  projectStatus: ProjectStatusProps;
+  projectControls: ProjectControlsProps;
+  viewControls: ViewControlsProps;
+  insertControls: InsertControlsProps;
+  libraryControls: LibraryControlsProps;
+  build: {
+    state: BuildState;
+    disabled: boolean;
+    onBuild: () => Promise<void>;
+  };
 };
 
 export const Header = ({
-  mediaTools,
-  projectName,
-  projectMessage,
-  isDirty,
-  isProjectBusy,
-  showSavedStatus,
-  showStructure,
-  showNarrative,
-  showBackgrounds,
-  showFrameEffects,
-  buildState,
-  buttonIsDisabled,
-  structureButtonIsDisabled,
-  onNewProject,
-  onOpenProject,
-  onSaveProject,
-  onToggleStructure,
-  onToggleNarrative,
-  onToggleBackgrounds,
-  onToggleFrameEffects,
-  onInsertCustomComponent,
-  customComponentDefinitions,
-  onInsertTextBlock,
-  onInsertCarousel,
-  onBuildBook,
-  onImportCustomComponents,
+  projectStatus,
+  projectControls,
+  viewControls,
+  insertControls,
+  libraryControls,
+  build,
 }: HeaderProps) => {
+  const {
+    state: buildState,
+    disabled: buildIsDisabled,
+    onBuild,
+  } = build;
   let buttonBuildLabel = 'Собрать книгу';
 
   if (buildState === 'building') {
@@ -80,56 +52,19 @@ export const Header = ({
 
   return (
     <header className={styles.Header}>
-      <ProjectStatus
-        projectName={projectName}
-        projectMessage={projectMessage}
-        isDirty={isDirty}
-        showSavedStatus={showSavedStatus}
-      />
+      <ProjectStatus {...projectStatus} />
 
       <div className={styles.Actions}>
-        <ProjectControls
-          disabled={buttonIsDisabled}
-          isProjectBusy={isProjectBusy}
-
-          onNewProject={onNewProject}
-          onOpenProject={onOpenProject}
-          onSaveProject={onSaveProject}
-        />
-
+        <ProjectControls {...projectControls} />
         <span className={styles.Separator} />
-
-        <ViewControls
-          showStructure={showStructure}
-          showNarrative={showNarrative}
-          showBackgrounds={showBackgrounds}
-          showFrameEffects={showFrameEffects}
-          structureButtonIsDisabled={structureButtonIsDisabled}
-
-          onToggleStructure={onToggleStructure}
-          onToggleNarrative={onToggleNarrative}
-          onToggleBackgrounds={onToggleBackgrounds}
-          onToggleFrameEffects={onToggleFrameEffects}
-        />
-
-        <LibraryControls
-          definitions={customComponentDefinitions}
-          disabled={buttonIsDisabled}
-          onImport={onImportCustomComponents}
-          onInsertComponent={onInsertCustomComponent}
-        />
-
-        <InsertControls
-          mediaTools={mediaTools}
-          disabled={buttonIsDisabled}
-          onInsertTextBlock={onInsertTextBlock}
-          onInsertCarousel={onInsertCarousel}
-        />
+        <ViewControls {...viewControls} />
+        <LibraryControls {...libraryControls} />
+        <InsertControls {...insertControls} />
 
         <button
           type="button"
-          disabled={buttonIsDisabled || buildState === 'building'}
-          onClick={() => void onBuildBook()}
+          disabled={buildIsDisabled || buildState === 'building'}
+          onClick={() => void onBuild()}
         >
           {buttonBuildLabel}
         </button>

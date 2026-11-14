@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { TextBlock } from '../../../@types';
 
-type InsertControlsProps = {
+export type InsertControlsProps = {
   mediaTools: ReactNode;
   disabled: boolean;
 

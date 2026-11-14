@@ -7,7 +7,11 @@ import { Header } from '../Header';
 import { createHeaderFixture } from './fixture';
 
 test('forwards exact insert/import arguments, preserves the media slot and blocks commands when disabled', async () => {
-  const { props, commands } = createHeaderFixture();
+  const {
+    props,
+    commands,
+    busyProps,
+  } = createHeaderFixture();
   const user = userEvent.setup();
   const { rerender } = render(<Header {...props} />);
   const names = [
@@ -41,7 +45,7 @@ test('forwards exact insert/import arguments, preserves the media slot and block
   expect(screen.getByRole('banner')).toContainElement(media);
   expect(buttons[mediaIndex - 1]).toHaveAccessibleName('Добавить карусель');
   expect(buttons[mediaIndex + 1]).toHaveAccessibleName('Собрать книгу');
-  rerender(<Header {...props} buttonIsDisabled />);
+  rerender(<Header {...busyProps} />);
 
   for (const name of names) {
     const button = screen.getByRole('button', { name });
@@ -57,13 +61,17 @@ test('forwards exact insert/import arguments, preserves the media slot and block
 });
 
 test('distinguishes build progress from project busy and applies both build disabling conditions', async () => {
-  const { props, commands } = createHeaderFixture();
+  const {
+    props,
+    commands,
+    busyProps,
+  } = createHeaderFixture();
   const user = userEvent.setup();
   const { rerender } = render(<Header {...props} />);
 
   await user.click(screen.getByRole('button', { name: 'Собрать книгу' }));
   expect(commands.onBuildBook.mock.calls).toEqual([[]]);
-  rerender(<Header {...props} buildState="building" />);
+  rerender(<Header {...props} build={{ ...props.build, state: 'building' }} />);
   const building = screen.getByRole('button', { name: 'Сборка...' });
 
   expect(building).toBeDisabled();
@@ -72,10 +80,8 @@ test('distinguishes build progress from project busy and applies both build disa
   await user.click(building);
   expect(commands.onBuildBook).toHaveBeenCalledTimes(1);
   rerender(<Header
-    {...props}
-    isProjectBusy
-    buttonIsDisabled
-    buildState="success"
+    {...busyProps}
+    build={{ ...busyProps.build, state: 'success' }}
   />);
   const blocked = screen.getByRole('button', { name: 'Собрать книгу' });
 
@@ -83,7 +89,7 @@ test('distinguishes build progress from project busy and applies both build disa
   expect(screen.getByRole('button', { name: 'Подождите...' })).toBeDisabled();
   await user.click(blocked);
   expect(commands.onBuildBook).toHaveBeenCalledTimes(1);
-  rerender(<Header {...props} buildState="error" />);
+  rerender(<Header {...props} build={{ ...props.build, state: 'error' }} />);
   expect(screen.getByRole('button', { name: 'Собрать книгу' })).toBeEnabled();
   expect(commands.onBuildBook).toHaveBeenCalledTimes(1);
 });

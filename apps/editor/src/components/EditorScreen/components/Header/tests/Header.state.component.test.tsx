@@ -7,7 +7,11 @@ import { Header } from '../Header';
 import { createHeaderFixture } from './fixture';
 
 test('renders project status without issuing commands and forwards New, Open and Save once', async () => {
-  const { props, commands } = createHeaderFixture();
+  const {
+    props,
+    commands,
+    busyProps,
+  } = createHeaderFixture();
   const user = userEvent.setup();
   const { rerender } = render(<Header {...props} />);
   const saved = screen.getByText('Сохранено');
@@ -17,9 +21,12 @@ test('renders project status without issuing commands and forwards New, Open and
   expect(saved).toHaveAttribute('aria-hidden', 'true');
   rerender(<Header
     {...props}
-    isDirty
-    showSavedStatus
-    projectMessage="Запись завершена"
+    projectStatus={{
+      ...props.projectStatus,
+      isDirty: true,
+      showSavedStatus: true,
+      projectMessage: 'Запись завершена',
+    }}
   />);
   expect(screen.getByText('Test book *')).toBeInTheDocument();
   expect(screen.getByText('Запись завершена')).toBeInTheDocument();
@@ -37,7 +44,7 @@ test('renders project status without issuing commands and forwards New, Open and
   expect(commands.onOpenProject.mock.calls).toEqual([[]]);
   expect(commands.onSaveProject.mock.calls).toEqual([[]]);
 
-  rerender(<Header {...props} isProjectBusy buttonIsDisabled />);
+  rerender(<Header {...busyProps} />);
   expect(screen.getByText('Test book')).toBeInTheDocument();
 
   for (const name of [
@@ -57,9 +64,13 @@ test('renders project status without issuing commands and forwards New, Open and
 });
 
 test('keeps view labels, pressed states and their distinct availability rules', async () => {
-  const { props, commands } = createHeaderFixture();
+  const {
+    props,
+    commands,
+    busyProps,
+  } = createHeaderFixture();
   const user = userEvent.setup();
-  const { rerender } = render(<Header {...props} isProjectBusy buttonIsDisabled />);
+  const { rerender } = render(<Header {...busyProps} />);
   const controls = [
     {
       show: 'Показать структуру',
@@ -103,11 +114,14 @@ test('keeps view labels, pressed states and their distinct availability rules', 
   rerender(
     <Header
       {...props}
-      showStructure
-      showNarrative={false}
-      showBackgrounds={false}
-      showFrameEffects={false}
-      structureButtonIsDisabled
+      viewControls={{
+        ...props.viewControls,
+        showStructure: true,
+        showNarrative: false,
+        showBackgrounds: false,
+        showFrameEffects: false,
+        structureButtonIsDisabled: true,
+      }}
     />,
   );
 

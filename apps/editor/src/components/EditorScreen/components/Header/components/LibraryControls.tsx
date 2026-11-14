@@ -1,6 +1,6 @@
 import type { BrowserComponentDefinition } from '@active-book/book-builder/components/custom/browser';
 
-type LibraryControlsProps = {
+export type LibraryControlsProps = {
   definitions: BrowserComponentDefinition[];
   disabled: boolean;
 

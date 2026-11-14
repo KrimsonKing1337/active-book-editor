@@ -397,33 +397,47 @@ export const EditorWorkspace = () => {
         >
           <div className={editorScreenClassNames}>
             <Header
-              mediaTools={mediaInsert}
-              projectName={projectName}
-              projectMessage={projectMessage}
-              isDirty={isDirty}
-              isProjectBusy={isProjectBusy}
-              showSavedStatus={showSavedStatus}
-              showStructure={showStructure}
-              showNarrative={showNarrative}
-              showBackgrounds={showBackgrounds}
-              showFrameEffects={showFrameEffects}
-              buildState={buildState}
-              buttonIsDisabled={buttonIsDisabled}
-              structureButtonIsDisabled={structureButtonIsDisabled}
-
-              onNewProject={handleNewProject}
-              onOpenProject={handleOpenProject}
-              onSaveProject={handleSaveProject}
-              onToggleStructure={toggleStructure}
-              onToggleNarrative={() => setShowNarrative((visible) => !visible)}
-              onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
-              onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
-              onInsertCustomComponent={handleInsertCustomComponent}
-              customComponentDefinitions={customComponentDefinitions}
-              onInsertTextBlock={handleInsertTextBlock}
-              onInsertCarousel={() => editor?.commands.insertCarousel()}
-              onBuildBook={buildBook}
-              onImportCustomComponents={handleImportCustomComponents}
+              projectStatus={{
+                projectName,
+                projectMessage,
+                isDirty,
+                showSavedStatus,
+              }}
+              projectControls={{
+                disabled: buttonIsDisabled,
+                isProjectBusy,
+                onNewProject: handleNewProject,
+                onOpenProject: handleOpenProject,
+                onSaveProject: handleSaveProject,
+              }}
+              viewControls={{
+                showStructure,
+                showNarrative,
+                showBackgrounds,
+                showFrameEffects,
+                structureButtonIsDisabled,
+                onToggleStructure: toggleStructure,
+                onToggleNarrative: () => setShowNarrative((visible) => !visible),
+                onToggleBackgrounds: () => setShowBackgrounds((visible) => !visible),
+                onToggleFrameEffects: () => setShowFrameEffects((visible) => !visible),
+              }}
+              insertControls={{
+                mediaTools: mediaInsert,
+                disabled: buttonIsDisabled,
+                onInsertTextBlock: handleInsertTextBlock,
+                onInsertCarousel: () => editor?.commands.insertCarousel(),
+              }}
+              libraryControls={{
+                definitions: customComponentDefinitions,
+                disabled: buttonIsDisabled,
+                onImport: handleImportCustomComponents,
+                onInsertComponent: handleInsertCustomComponent,
+              }}
+              build={{
+                state: buildState,
+                disabled: buttonIsDisabled,
+                onBuild: buildBook,
+              }}
             />
 
             <ContentError editor={editor} />
