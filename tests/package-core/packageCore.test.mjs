@@ -22,7 +22,10 @@ test('real npm saves the archive and lock while the runtime workspace consumes t
   const npmCli = process.env.npm_execpath;
   assert.ok(npmCli, 'Run through npm run test:scripts');
   mkdirSync(join(root, 'scripts'));
-  writeFileSync(join(root, 'scripts/packageCore.mjs'), readFileSync(fileURLToPath(new URL('./packageCore.mjs', import.meta.url))));
+  writeFileSync(
+    join(root, 'scripts/packageCore.mjs'),
+    readFileSync(fileURLToPath(new URL('../../scripts/packageCore.mjs', import.meta.url))),
+  );
   const editorPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   editorPackage.scripts = { 'core:package': 'node scripts/packageCore.mjs' };
   writeFileSync(join(root, 'package.json'), JSON.stringify(editorPackage));

@@ -3,7 +3,7 @@ import { readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { test } from 'node:test';
 
-import { buildBook } from '../packages/book-builder/src/build/build';
+import { buildBook } from '../../packages/book-builder/src/build/build';
 
 import {
   openMediaReader,

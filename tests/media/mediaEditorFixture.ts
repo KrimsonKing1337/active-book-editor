@@ -7,7 +7,7 @@ import type { Page } from 'playwright';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
 
-import { isBookDocument } from '../packages/book-builder/src/book/book';
+import { isBookDocument } from '../../packages/book-builder/src/book/book';
 
 import { repoRoot } from './mediaBrowserFixture';
 

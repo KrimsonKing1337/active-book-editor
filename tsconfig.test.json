@@ -18,8 +18,6 @@
     "vitest.config.ts",
     "tests",
     "apps/editor/src/**/*.component.test.tsx",
-    "apps/editor/src/**/*.browser.test.tsx",
-    "scripts/bookRuntime.browser.test.ts",
-    "scripts/media*.ts"
+    "apps/editor/src/**/*.browser.test.tsx"
   ]
 }

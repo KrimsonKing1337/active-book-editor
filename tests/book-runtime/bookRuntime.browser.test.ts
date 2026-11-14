@@ -5,13 +5,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-import { compileBookDocument } from '../packages/book-builder/src/bookPreparation/compileBookDocument';
+import { compileBookDocument } from '../../packages/book-builder/src/bookPreparation/compileBookDocument';
 import type { BookDocument } from '@active-book/book-builder/book';
 
 import { chromium } from 'playwright';
 import { createServer as createViteServer } from 'vite';
 
-const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const projectRoot = path.join(repoRoot, 'tests/fixtures/multipage-book');
 const outDir = path.join(repoRoot, 'dist-book');
 

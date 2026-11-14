@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { test } from 'node:test';
 
-import { assertContentDocument } from '../packages/book-builder/src/content';
+import { assertContentDocument } from '../../packages/book-builder/src/content';
 
 import {
   openMediaReader,

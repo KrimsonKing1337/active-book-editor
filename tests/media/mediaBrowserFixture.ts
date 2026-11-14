@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import type { Page } from 'playwright';
 import { chromium } from 'playwright';
 
-export const repoRoot = fileURLToPath(new URL('../', import.meta.url));
+export const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 
 export const prepareMediaProject = async (context: TestContext) => {
   const root = await mkdtemp(path.join(tmpdir(), 'active-book-media-'));
