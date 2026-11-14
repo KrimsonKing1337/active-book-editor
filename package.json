@@ -32,10 +32,11 @@
     "test:runtime": "node --import tsx --test scripts/bookRuntime.browser.test.ts",
     "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
     "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
-    "test:scripts": "node --test scripts/packageCore.test.mjs"
+    "test:scripts": "node --test scripts/packageCore.test.mjs",
+    "test:media:runtime": "node --import tsx --test scripts/mediaRuntime.browser.test.ts"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.63.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.65.tgz"
   },
   "devDependencies": {
     "@active-book/common": "file:../active-book-common",

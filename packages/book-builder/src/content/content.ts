@@ -1,86 +1,12 @@
-import type {
-  BookContentDocument,
-  BookContentNode,
-  BookTextMark,
-} from '@active-book/types';
+import type { BookContentDocument, BookContentNode } from '@active-book/types';
 
 import { isRecord } from '../effects/utils';
 
-const formattingMarks = new Set(['bold', 'italic', 'strike', 'underline', 'code']);
-const linkProtocols = new Set(['http:', 'https:', 'mailto:', 'tel:']);
-const attributesNames = ['target', 'rel', 'class'];
+import { assertMediaAttributes } from './media';
+import { assertMarks } from './marks';
+import { fail } from './utils';
 
-export const isContentLinkAllowed = (href: string): boolean => {
-  try {
-    const url = new URL(href, 'https://active-book.invalid/');
-
-    return linkProtocols.has(url.protocol);
-  } catch {
-    return false;
-  }
-};
-
-// У const-стрелки TypeScript требует явный тип переменной для сужения типов после вызова never.
-function fail(path: string, message: string): never {
-  throw new Error(`${path}: ${message}`);
-}
-
-const assertMark: (
-  value: unknown,
-  path: string,
-) => asserts value is BookTextMark = (value, path) => {
-  if (!isRecord(value) || typeof value.type !== 'string') {
-    fail(path, 'expected a mark with a type');
-  }
-
-  if (formattingMarks.has(value.type)) {
-    return;
-  }
-
-  if (value.type !== 'link') {
-    fail(path, `unknown mark "${value.type}"`);
-  }
-
-  const attrs = value.attrs;
-
-  if (!isRecord(attrs) || typeof attrs.href !== 'string' || !isContentLinkAllowed(attrs.href)) {
-    fail(`${path}.attrs.href`, 'expected an allowed URL (http, https, mailto, tel or a relative URL)');
-  }
-
-  for (const nameCur of attributesNames) {
-    const attribute = attrs[nameCur];
-
-    if (attribute !== undefined && attribute !== null && typeof attribute !== 'string') {
-      fail(`${path}.attrs.${nameCur}`, 'expected a string or null');
-    }
-  }
-};
-
-const assertMarks = (value: unknown, path: string): void => {
-  if (value === undefined) {
-    return;
-  }
-
-  if (!Array.isArray(value)) {
-    fail(path, 'expected an array of marks');
-  }
-
-  const types = new Set<string>();
-
-  for (const [index, mark] of value.entries()) {
-    assertMark(mark, `${path}[${index}]`);
-
-    if (types.has(mark.type)) {
-      fail(`${path}[${index}]`, `duplicate mark "${mark.type}"`);
-    }
-
-    types.add(mark.type);
-  }
-
-  if (types.has('code') && types.size > 1) {
-    fail(path, 'code excludes other marks in the standard TipTap schema');
-  }
-};
+export { isContentLinkAllowed } from './marks';
 
 type NodeLocation = 'block' | 'inline' | 'slide' | 'slideBlock' | 'any';
 
@@ -99,7 +25,8 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
   const { type } = value;
 
   const isInline = type === 'text' || type === 'hardBreak';
-  const isOrdinaryBlock = type === 'paragraph' || type === 'heading' || type === 'coreComponent';
+  const isMedia = type === 'image' || type === 'video';
+  const isOrdinaryBlock = type === 'paragraph' || type === 'heading' || type === 'coreComponent' || isMedia;
   const isBlock = isOrdinaryBlock || type === 'carousel';
   const isSlide = type === 'carouselSlide';
 
@@ -140,6 +67,16 @@ const assertNode = (value: unknown, options: AssertNodeOptions): void => {
 
   if (value.marks !== undefined) {
     fail(`${path}.marks`, 'block nodes cannot have marks');
+  }
+
+  if (type === 'image' || type === 'video') {
+    assertMediaAttributes(value.attrs, { type, path: `${path}.attrs` });
+
+    if (value.content !== undefined) {
+      fail(`${path}.content`, `${type} is atomic`);
+    }
+
+    return;
   }
 
   if (type === 'carousel' || isSlide) {

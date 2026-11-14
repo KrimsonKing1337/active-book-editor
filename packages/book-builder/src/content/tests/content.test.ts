@@ -4,39 +4,43 @@ import {
   test,
 } from 'vitest';
 
-import { compileBookDocument, compilePageDocument } from '../bookPreparation';
+import { compileBookDocument, compilePageDocument } from '../../bookPreparation';
 
 import {
   assertContentDocument,
   assertContentNode,
   isContentLinkAllowed,
-} from './content';
+} from '../content';
 
 const paragraph = {
   type: 'paragraph',
-  content: [{
-    type: 'text',
-    text: 'A formatted link',
-    marks: [
-      { type: 'bold' },
-      { type: 'italic' },
-      { type: 'strike' },
-      { type: 'underline' },
-      {
-        type: 'link',
-        attrs: {
-          href: 'https://example.com/story?chapter=1#note',
-          target: '_blank',
-          rel: 'nofollow',
-          class: null,
+  content: [
+    {
+      type: 'text',
+      text: 'A formatted link',
+      marks: [
+        { type: 'bold' },
+        { type: 'italic' },
+        { type: 'strike' },
+        { type: 'underline' },
+        {
+          type: 'link',
+          attrs: {
+            href: 'https://example.com/story?chapter=1#note',
+            target: '_blank',
+            rel: 'nofollow',
+            class: null,
+          },
         },
-      },
-    ],
-  }, { type: 'hardBreak' }, {
-    type: 'text',
-    text: 'inline code',
-    marks: [{ type: 'code' }],
-  }],
+      ],
+    },
+    { type: 'hardBreak' },
+    {
+      type: 'text',
+      text: 'inline code',
+      marks: [{ type: 'code' }],
+    },
+  ],
 };
 
 const slide = {
@@ -114,7 +118,13 @@ test('preserves the supported ProseMirror JSON without mutating it during compil
 });
 
 describe('diagnostic paths', () => {
-  test.each(['image', 'P', 'H1', 'H2', 'activeBookP'])('rejects unsupported node %s', (type) => {
+  test.each([
+    'audio',
+    'P',
+    'H1',
+    'H2',
+    'activeBookP',
+  ])('rejects unsupported node %s', (type) => {
     const document = { type: 'doc', content: [{ type }] };
 
     expect(() => compilePageDocument(document, 'pages[2].document'))
@@ -139,7 +149,12 @@ describe('diagnostic paths', () => {
       .toThrow('pages[0].document.content[0].content[0].marks[0]: unknown mark "textAction"');
   });
 
-  test.each([0, 3, '1', null])('rejects heading level %s', (level) => {
+  test.each([
+    0,
+    3,
+    '1',
+    null,
+  ])('rejects heading level %s', (level) => {
     expect(() => assertContentNode({ type: 'heading', attrs: { level } }))
       .toThrow('node.attrs.level: expected heading level 1 or 2');
   });

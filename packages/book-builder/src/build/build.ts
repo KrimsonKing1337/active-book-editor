@@ -5,6 +5,7 @@ import { build } from 'vite';
 
 import { createViteConfig } from './vite.config';
 import { compileBookDocument } from '../bookPreparation';
+import { contentAssetPaths } from '../bookPreparation/contentAssets';
 
 type BuildBookParams = {
   projectRoot: string;
@@ -22,11 +23,21 @@ const getPathExists = async (targetPath: string): Promise<boolean> => {
   }
 };
 
-const prepareRuntime = async (
-  projectRoot: string,
-  runtimeRoot: string,
-  tempRoot: string,
-): Promise<void> => {
+type PackageJsonDependencies = {
+  dependencies?: Record<string, string>
+};
+
+type PrepareRuntimeParams = {
+  projectRoot: string;
+  runtimeRoot: string;
+  tempRoot: string;
+};
+
+const prepareRuntime = async ({
+  projectRoot,
+  runtimeRoot,
+  tempRoot,
+}: PrepareRuntimeParams): Promise<void> => {
   await fs.cp(runtimeRoot, tempRoot, { recursive: true });
 
   const bookJsonSource = path.join(projectRoot, 'book.json');
@@ -36,15 +47,26 @@ const prepareRuntime = async (
   const projectDocument: unknown = JSON.parse(bookJsonContent);
   const builtDocument = compileBookDocument(projectDocument);
 
-  await fs.writeFile(bookJsonTarget, `${JSON.stringify(builtDocument, null, 2)}\n`);
+  for (const assetPathCur of contentAssetPaths(builtDocument)) {
+    try {
+      const file = await fs.stat(path.join(projectRoot, assetPathCur));
+
+      if (!file.isFile()) {
+        throw new Error('expected a file');
+      }
+    } catch (cause) {
+      throw new Error(`Медиафайл отсутствует или недоступен: ${assetPathCur}`, { cause });
+    }
+  }
+
+  const buildDocumentJsonString = JSON.stringify(builtDocument, null, 2);
+  await fs.writeFile(bookJsonTarget, `${buildDocumentJsonString}\n`);
 
   let dependencies: Record<string, string> = {};
 
   try {
     const packageRaw = await fs.readFile(path.join(projectRoot, 'package.json'), 'utf8');
-    const packageJson = JSON.parse(packageRaw) as {
-      dependencies?: Record<string, string>
-    };
+    const packageJson = JSON.parse(packageRaw) as PackageJsonDependencies;
 
     dependencies = packageJson.dependencies ?? {};
   } catch (error) {
@@ -53,10 +75,8 @@ const prepareRuntime = async (
     }
   }
 
-  await fs.writeFile(
-    path.join(tempRoot, 'custom-components.json'),
-    `${JSON.stringify({ dependencies }, null, 2)}\n`,
-  );
+  const dependenciesJsonString = JSON.stringify({ dependencies }, null, 2);
+  await fs.writeFile(path.join(tempRoot, 'custom-components.json'),`${dependenciesJsonString}\n`);
 
   const dependenciesSource = path.join(projectRoot, 'dependencies');
 
@@ -99,7 +119,11 @@ export async function buildBook({
       force: true,
     });
 
-    await prepareRuntime(projectRoot, runtimeRoot, tempRoot);
+    await prepareRuntime({
+      projectRoot,
+      runtimeRoot,
+      tempRoot,
+    });
 
     const viteConfig = {
       root: tempRoot,

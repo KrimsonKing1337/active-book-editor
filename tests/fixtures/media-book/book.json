@@ -1,0 +1,158 @@
+{
+  "type": "book",
+  "visualEffects": [],
+  "pages": [
+    {
+      "id": "media-page",
+      "document": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 1
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Built media"
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "assets/a #?%.svg",
+              "alt": "Portrait",
+              "width": {
+                "value": 45,
+                "unit": "%"
+              },
+              "height": {
+                "value": 180,
+                "unit": "px"
+              },
+              "align": "center",
+              "fit": "cover"
+            }
+          },
+          {
+            "type": "video",
+            "attrs": {
+              "src": "assets/movie.webm",
+              "poster": "assets/a #?%.svg",
+              "controls": true,
+              "autoPlay": true,
+              "muted": true,
+              "loop": true,
+              "width": {
+                "value": 220,
+                "unit": "px"
+              },
+              "height": {
+                "value": 120,
+                "unit": "px"
+              }
+            }
+          },
+          {
+            "type": "carousel",
+            "content": [
+              {
+                "type": "carouselSlide",
+                "content": [
+                  {
+                    "type": "image",
+                    "attrs": {
+                      "src": "assets/a #?%.svg",
+                      "alt": "Slide portrait",
+                      "height": {
+                        "value": 180,
+                        "unit": "px"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "carouselSlide",
+                "content": [
+                  {
+                    "type": "video",
+                    "attrs": {
+                      "src": "assets/portrait.webm",
+                      "controls": true,
+                      "autoPlay": true,
+                      "muted": true,
+                      "loop": true,
+                      "height": {
+                        "value": 180,
+                        "unit": "px"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "carouselSlide",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Mixed slide"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "image",
+                    "attrs": {
+                      "src": "assets/a #?%.svg",
+                      "alt": "Mixed portrait",
+                      "width": {
+                        "value": 15,
+                        "unit": "%"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "After media"
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "assets/wide.svg",
+              "alt": "Wide image",
+              "width": {
+                "value": 80,
+                "unit": "%"
+              }
+            }
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "assets/small.svg",
+              "alt": "Small image",
+              "width": {
+                "value": 32,
+                "unit": "px"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
