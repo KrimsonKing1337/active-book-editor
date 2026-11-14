@@ -6,17 +6,16 @@ import {
 
 import { ProjectAssetsContext } from './context';
 
-
-type Strings = Map<string, string>;
+type PathMap = Map<string, string>;
 
 type Resolution = {
   owner: unknown;
   key: string;
-  urls: Strings;
-  errors: Strings;
+  urls: PathMap;
+  errors: PathMap;
 };
 
-const getNewStrings = () => new Map<string, string>;
+const createPathMap = (): PathMap => new Map();
 
 export const useProjectAssetUrls = (paths: readonly string[]) => {
   const cache = useContext(ProjectAssetsContext);
@@ -44,8 +43,8 @@ export const useProjectAssetUrls = (paths: readonly string[]) => {
         return;
       }
 
-      const urls = getNewStrings();
-      const errors = getNewStrings();
+      const urls = createPathMap();
+      const errors = createPathMap();
 
       results.forEach((resultCur, index) => {
         const path = requested[index];
@@ -74,7 +73,7 @@ export const useProjectAssetUrls = (paths: readonly string[]) => {
     return resolved;
   }
 
-  const urls = new Map<string, string>();
+  const urls = createPathMap();
 
   for (const pathCur of paths) {
     const available = cache?.lookup(pathCur);
@@ -84,7 +83,7 @@ export const useProjectAssetUrls = (paths: readonly string[]) => {
     }
   }
 
-  const errors = getNewStrings();
+  const errors = createPathMap();
 
   return { urls, errors };
 };

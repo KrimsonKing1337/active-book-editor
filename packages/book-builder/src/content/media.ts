@@ -74,20 +74,20 @@ export const assertMediaAttributes = (attrs: unknown, { type, path }: MediaValid
   assertLength(attrs.width, { path: `${path}.width`, allowPercent: true });
   assertLength(attrs.height, { path: `${path}.height`, allowPercent: false });
 
-  if (typeof attrs.align !== 'string') {
-    throw new Error(`${path}.align: expected a string`);
-  }
+  if (attrs.align !== undefined) {
+    if (typeof attrs.align !== 'string') {
+      throw new Error(`${path}.align: expected a string`);
+    }
 
-  const alings = [
-    'left',
-    'center',
-    'right',
-  ];
+    const alignments = [
+      'left',
+      'center',
+      'right',
+    ];
 
-  const isInvalidAlign = !alings.includes(attrs.align);
-
-  if (attrs.align !== undefined && isInvalidAlign) {
-    throw new Error(`${path}.align: expected left, center or right`);
+    if (!alignments.includes(attrs.align)) {
+      throw new Error(`${path}.align: expected left, center or right`);
+    }
   }
 
   if (attrs.fit !== undefined && attrs.fit !== 'contain' && attrs.fit !== 'cover') {

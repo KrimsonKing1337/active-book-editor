@@ -379,8 +379,8 @@ export class LocalProjectStorage implements ProjectStorage {
       try {
         await assetsDirectory.getFileHandle(candidate);
 
-        suffix += 1;
         candidate = `${baseName}-${suffix}${extension}`;
+        suffix += 1;
       } catch (error) {
         if (error instanceof DOMException && error.name === 'NotFoundError') {
           break;

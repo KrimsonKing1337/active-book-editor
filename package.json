@@ -37,7 +37,7 @@
     "test:media:workflow": "node --import tsx --test scripts/mediaWorkflow.browser.test.ts"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.65.tgz"
+    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.64.tgz"
   },
   "devDependencies": {
     "@active-book/common": "file:../active-book-common",
