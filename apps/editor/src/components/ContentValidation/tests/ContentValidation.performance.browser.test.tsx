@@ -39,7 +39,11 @@ test.skipIf(!inject('contentBenchmark'))('measures validation in mounted long-pa
 
   context.task.meta.contentValidation = reports;
 
-  for (const paragraphs of [1000, 5000, 10000]) {
+  for (const paragraphs of [
+    1000,
+    5000,
+    10000,
+  ]) {
     const editor = new Editor({ extensions: editorExtensions, content: createLongDocument(paragraphs) });
     const validationTimes: number[] = [];
     const dispatchTimes: number[] = [];

@@ -18,7 +18,7 @@ import { CustomComponentsContext } from '@project/customComponentRegistry';
 
 import { ContentError } from '@components/ContentError';
 
-import { createEmptyDocument, editorExtensions } from './utils';
+import { createEmptyDocument, editorExtensions } from '../utils';
 
 let editor: Editor;
 const nestedClick = vi.fn();

@@ -8,7 +8,7 @@ import {
 } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 
-import { pageVisualEffects } from '@active-book/book-builder/visualEffects';
+import { pageVisualEffects } from '@root/packages/book-builder/src/visualEffects';
 
 import { createProject } from '@root/tests/editor-effects/project';
 import {
@@ -20,9 +20,9 @@ import {
   setColor,
 } from '@root/tests/editor-effects/controls';
 
-import { EditorScreen } from './EditorScreen';
+import { EditorScreen } from '../EditorScreen';
 
-import '@active-book/common/styles';
+import '../../../../../../../active-book-common/styles/styles.scss';
 import '@active-book/core/styles/styles.scss';
 import '@styles/styles.scss';
 
@@ -347,9 +347,11 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     name: 'Слой эффекта',
     exact: true,
   }).selectOptions('aboveStoryControls');
-  for (const region of ['storyViewportFrame',
+  for (const region of [
+    'storyViewportFrame',
     'narrativeFrame',
-    'toolbarFrame']) {
+    'toolbarFrame',
+  ]) {
     await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions(region);
     await expect.element(page.getByRole('checkbox', {
       name: 'Снизу',
@@ -372,9 +374,11 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     expect(effect.placement?.region).toBe('toolbarFrame');
     expect(effect.depth?.plane).toBe('aboveStoryControls');
     expect(effect.visibility).toEqual({
-      sides: ['top',
+      sides: [
+        'top',
         'right',
-        'left'],
+        'left',
+      ],
       frameWidth: {
         top: {
           value: 18,
@@ -413,9 +417,11 @@ test('Toolbar region masks survive duplication, save and reopen and can be remov
     name: 'Ограничить сторонами рамки',
     exact: true,
   }).click();
-  for (const region of ['storyViewportFrame',
+  for (const region of [
+    'storyViewportFrame',
     'narrativeFrame',
-    'toolbarFrame']) {
+    'toolbarFrame',
+  ]) {
     await page.getByRole('combobox', { name: 'Область размещения эффекта' }).selectOptions(region);
     await expect.element(page.getByRole('checkbox', {
       name: 'Ограничить сторонами рамки',

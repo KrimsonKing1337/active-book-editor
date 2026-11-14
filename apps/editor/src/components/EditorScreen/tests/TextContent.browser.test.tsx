@@ -14,10 +14,10 @@ import { page } from 'vitest/browser';
 
 import { textHtml } from '@root/tests/fixtures/text-content';
 
-import { createEmptyDocument, editorExtensions } from './utils';
-import styles from './EditorScreen.module.scss';
+import { createEmptyDocument, editorExtensions } from '../utils';
+import styles from '../EditorScreen.module.scss';
 
-import '@active-book/common/styles';
+import '../../../../../../../active-book-common/styles/styles.scss';
 import '@active-book/core/styles/styles.scss';
 
 let editor: Editor;
@@ -82,11 +82,20 @@ test('round-trips standard HTML, all marks and hard breaks without losing block 
 
   const original = editor.getJSON();
 
-  expect(original.content?.map((node) => node.type)).toEqual(['heading', 'heading', 'paragraph']);
+  expect(original.content?.map((node) => node.type)).toEqual([
+    'heading',
+    'heading',
+    'paragraph',
+  ]);
   expect(original.content?.[0].attrs?.level).toBe(1);
   expect(original.content?.[1].attrs?.level).toBe(2);
   expect(original.content?.[2].content?.[0].marks?.map((mark) => mark.type))
-    .toEqual(expect.arrayContaining(['bold', 'italic', 'strike', 'underline']));
+    .toEqual(expect.arrayContaining([
+      'bold',
+      'italic',
+      'strike',
+      'underline',
+    ]));
   expect(editor.getHTML()).toContain('<br>');
   expect(editor.getHTML()).toContain('<code>code</code>');
   expect(editor.getHTML()).toContain('href="https://example.com/note"');

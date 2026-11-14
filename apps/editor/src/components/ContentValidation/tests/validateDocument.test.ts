@@ -17,7 +17,11 @@ test('reuses immutable top-level blocks but checks changed blocks and undo docum
   validate(original);
   const untouched = vi.spyOn(original.child(0), 'toJSON');
   const replacement = contentSchema.nodes.paragraph.create(null, contentSchema.text('Changed'));
-  const changed = original.copy(Fragment.from([original.child(0), original.child(1), replacement]));
+  const changed = original.copy(Fragment.from([
+    original.child(0),
+    original.child(1),
+    replacement,
+  ]));
 
   expect(() => validate(changed, original)).not.toThrow();
   expect(untouched).not.toHaveBeenCalled();
@@ -89,7 +93,11 @@ test('handles overlapping prefix/suffix diffs for duplicate block insertion and 
   const validate = createDocumentValidator();
   const paragraph = contentSchema.nodes.paragraph.create(null, contentSchema.text('Repeated'));
   const original = contentSchema.nodes.doc.create(null, [paragraph, paragraph]);
-  const inserted = contentSchema.nodes.doc.create(null, [paragraph, paragraph, paragraph]);
+  const inserted = contentSchema.nodes.doc.create(null, [
+    paragraph,
+    paragraph,
+    paragraph,
+  ]);
 
   validate(original);
   expect(() => validate(inserted, original)).not.toThrow();

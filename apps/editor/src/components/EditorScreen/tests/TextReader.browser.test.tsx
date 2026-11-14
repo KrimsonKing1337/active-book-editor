@@ -11,19 +11,20 @@ import {
   vi,
 } from 'vitest';
 
-import { compileBookDocument } from '@active-book/book-builder/bookPreparation';
-import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
+import { renderNode } from '@book-runtime/utils/renderNode';
 
-import { renderNode } from '@root/apps/book-runtime/src/utils/renderNode';
+import { compileBookDocument } from '@root/packages/book-builder/src/bookPreparation';
+import { createBookRuntime } from '@root/packages/book-builder/src/components/custom/runtime';
+
 import { createProject } from '@root/tests/editor-effects/project';
 import { textHtml } from '@root/tests/fixtures/text-content';
 
 import { createLocalProject, openLocalProject } from '@project/projectService';
 import { InvalidProjectError } from '@project/errors';
 
-import { createEmptyDocument, editorExtensions } from './utils';
+import { createEmptyDocument, editorExtensions } from '../utils';
 
-import '@active-book/common/styles';
+import '../../../../../../../active-book-common/styles/styles.scss';
 import '@active-book/core/styles/styles.scss';
 
 let editor: Editor;
@@ -77,7 +78,12 @@ test('saves and reopens actual project JSON, compiles it and renders the same te
 
     expect(container.textContent).toContain('Первый заголовок');
     expect(container.textContent).toContain('Второй заголовок');
-    for (const tag of ['strong', 'em', 's', 'u']) {
+    for (const tag of [
+      'strong',
+      'em',
+      's',
+      'u',
+    ]) {
       expect(container.querySelector(tag)?.textContent).toBe('Форматирование');
     }
     expect(container.querySelector('br')).not.toBeNull();
@@ -109,11 +115,13 @@ test('reader diagnoses unknown nodes and marks with their nested source paths', 
     .toThrow('pages[0].document.content[0]: unknown node "unknown"');
   expect(() => renderUnknown({
     type: 'paragraph',
-    content: [{
-      type: 'text',
-      text: 'keep me',
-      marks: [{ type: 'unknownMark' }],
-    }],
+    content: [
+      {
+        type: 'text',
+        text: 'keep me',
+        marks: [{ type: 'unknownMark' }],
+      },
+    ],
   })).toThrow('pages[0].document.content[0].content[0].marks[0]: unknown mark "unknownMark"');
 });
 
@@ -127,20 +135,26 @@ test('rejects unknown marks when opening a project before TipTap can discard the
     await writable.write(JSON.stringify({
       type: 'book',
       visualEffects: [],
-      pages: [{
-        id: 'unknown-mark',
-        document: {
-          type: 'doc',
-          content: [{
-            type: 'paragraph',
-            content: [{
-              type: 'text',
-              text: 'Keep me',
-              marks: [{ type: 'missingAction' }],
-            }],
-          }],
+      pages: [
+        {
+          id: 'unknown-mark',
+          document: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Keep me',
+                    marks: [{ type: 'missingAction' }],
+                  },
+                ],
+              },
+            ],
+          },
         },
-      }],
+      ],
     }));
     await writable.close();
 

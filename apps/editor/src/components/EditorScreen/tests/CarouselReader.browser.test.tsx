@@ -7,15 +7,16 @@ import {
 } from 'vitest';
 import { page, userEvent } from 'vitest/browser';
 
-import { createBookRuntime } from '@active-book/book-builder/components/custom/runtime';
-import { compileBookDocument } from '@active-book/book-builder/bookPreparation';
+import { renderNode } from '@book-runtime/utils/renderNode';
 
-import { renderNode } from '@root/apps/book-runtime/src/utils/renderNode';
+import { createBookRuntime } from '@root/packages/book-builder/src/components/custom/runtime';
+import { compileBookDocument } from '@root/packages/book-builder/src/bookPreparation';
+
 import { createProject } from '@root/tests/editor-effects/project';
 
 import { createLocalProject, openLocalProject } from '@project/projectService';
 
-import '@active-book/common/styles';
+import '../../../../../../../active-book-common/styles/styles.scss';
 import '@active-book/core/styles/styles.scss';
 
 afterEach(() => {
@@ -27,24 +28,36 @@ afterEach(() => {
 test('saves, opens, compiles and recursively renders slide blocks and components', async () => {
   const carousel = {
     type: 'carousel',
-    content: [{
-      type: 'carouselSlide',
-      content: [{
-        type: 'heading',
-        attrs: { level: 2 },
-        content: [{
-          type: 'text',
-          text: 'Заголовок слайда',
-          marks: [{ type: 'bold' }],
-        }],
-      }, {
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'Текст' }, { type: 'hardBreak' }, { type: 'text', text: 'Продолжение' }],
-      }],
-    }, {
-      type: 'carouselSlide',
-      content: [{ type: 'coreComponent', attrs: { name: 'Button', package: 'test-parts' } }],
-    }],
+    content: [
+      {
+        type: 'carouselSlide',
+        content: [
+          {
+            type: 'heading',
+            attrs: { level: 2 },
+            content: [
+              {
+                type: 'text',
+                text: 'Заголовок слайда',
+                marks: [{ type: 'bold' }],
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: [
+              { type: 'text', text: 'Текст' },
+              { type: 'hardBreak' },
+              { type: 'text', text: 'Продолжение' },
+            ],
+          },
+        ],
+      },
+      {
+        type: 'carouselSlide',
+        content: [{ type: 'coreComponent', attrs: { name: 'Button', package: 'test-parts' } }],
+      },
+    ],
   };
   const project = await createProject({ empty: true });
 

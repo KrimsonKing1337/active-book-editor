@@ -24,7 +24,10 @@ import { editorExtensions } from '../../EditorScreen/utils';
 let editor: Editor;
 const errors = vi.fn();
 
-const paste = (input: { html?: string; text?: string }): boolean => {
+const paste = (input: {
+  html?: string;
+  text?: string
+}): boolean => {
   const clipboardData = new DataTransfer();
 
   clipboardData.setData('text/html', input.html ?? '');
@@ -61,7 +64,11 @@ const inputs = [
   { name: 'JSON segment', content: { type: 'segment', content: [{ type: 'paragraph' }] } },
 ];
 
-for (const rangeIndex of [0, 1, 2]) {
+for (const rangeIndex of [
+  0,
+  1,
+  2,
+]) {
   test.each(inputs)(`rejects $name for cross-boundary command range ${rangeIndex}`, ({ content }) => {
     const initial = editor.getJSON();
     const after = paragraphStart(editor.state.doc, 'After');

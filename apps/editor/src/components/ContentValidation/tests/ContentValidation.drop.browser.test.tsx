@@ -52,7 +52,11 @@ afterEach(() => {
   errors.mockClear();
 });
 
-test.each([0, 1, 2])('rejects an internal move deleting cross-boundary source range %i', (index) => {
+test.each([
+  0,
+  1,
+  2,
+])('rejects an internal move deleting cross-boundary source range %i', (index) => {
   const before = editor.getJSON();
   const range = crossSlideRanges(editor.state.doc)[index];
 
