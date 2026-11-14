@@ -74,6 +74,16 @@ test('keeps warning preference and releases busy on cancelled picker', async () 
 });
 
 test('retains a real TGZ registry until replacement is confirmed, then reloads and releases old URLs', async () => {
+  const metadata = await project.directory.getFileHandle('package.json');
+  const initialPackage = {
+    name: 'Library metadata fixture',
+    private: true,
+    metadata: { authors: ['Test author'], extra: [null, { enabled: true }] },
+  };
+  const writable = await metadata.createWritable();
+
+  await writable.write(JSON.stringify(initialPackage));
+  await writable.close();
   vi.stubGlobal('showOpenFilePicker', vi.fn(async () => {
     expect((await project.readDocument()).type).toBe('book');
 
@@ -93,9 +103,9 @@ test('retains a real TGZ registry until replacement is confirmed, then reloads a
   const readCount = reads.mock.calls.length;
 
   expect(readCount).toBeGreaterThan(0);
-  const metadata = await project.directory.getFileHandle('package.json');
   const savedPackage = await (await metadata.getFile()).text();
 
+  expect(JSON.parse(savedPackage)).toMatchObject(initialPackage);
   expect(JSON.parse(savedPackage).dependencies['fixture-parts']).toBe('file:./dependencies/fixture-parts.tgz');
   await insert.click();
   const badge = page.getByTestId('custom-badge');
