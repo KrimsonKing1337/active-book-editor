@@ -114,11 +114,16 @@ test('imports video inside the selected slide, saves native attributes and never
   await expect.element(page.getByRole('button', { name: 'Новый проект', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Новый проект', exact: true }).click();
   await save();
+  const editorRoot = page.getByRole('textbox', { name: 'Текст страницы', exact: true }).element();
+  const pageId = editorRoot.closest('[data-editor-page-id]')?.getAttribute('data-editor-page-id');
+
   await page.getByRole('button', { name: 'Добавить карусель', exact: true }).click();
-  await page.getByRole('button', { name: 'Слайд 1', exact: true }).click();
+  await page.getByRole('button', { name: 'Слайд 2', exact: true }).click();
   const paragraph = document.querySelector('[data-type="carouselSlide"]:not([hidden]) p');
   expect(paragraph).not.toBeNull();
   await page.elementLocator(paragraph!).click();
+  await page.getByRole('button', { name: 'Добавить заголовок 2', exact: true }).click();
+  await expect.element(page.elementLocator(editorRoot).getByRole('heading', { level: 2 })).toBeInTheDocument();
   await page.getByRole('button', { name: 'Добавить видео', exact: true }).click();
   await expect.poll(() => document.querySelector('[data-editor-media="video"] video')).not.toBeNull();
   const video = document.querySelector('[data-editor-media="video"] video');
@@ -130,7 +135,8 @@ test('imports video inside the selected slide, saves native attributes and never
   await page.getByLabelText('Высота (пиксели)').fill('180');
   const saved = await save();
   const carousel = saved.pages[0].document.content?.find((node) => node.type === 'carousel');
-  const media = carousel?.content?.[0]?.content?.find((node) => node.type === 'video');
+  const media = carousel?.content?.[1]?.content?.find((node) => node.type === 'video');
+  expect(carousel?.content?.[0]?.content).toEqual([{ type: 'paragraph' }]);
   expect(media?.attrs).toMatchObject({
     src: 'assets/movie.webm',
     poster: 'assets/herb.svg',
@@ -142,8 +148,10 @@ test('imports video inside the selected slide, saves native attributes and never
   });
   expect(JSON.stringify(saved)).not.toContain('blob:');
   expect(video instanceof HTMLVideoElement && video.paused && !video.autoplay && !video.controls).toBe(true);
-  await page.getByRole('button', { name: 'Слайд 2', exact: true }).click();
   await page.getByRole('button', { name: 'Слайд 1', exact: true }).click();
+  await page.getByRole('button', { name: 'Слайд 2', exact: true }).click();
   expect(document.querySelector('[data-editor-media="video"] video')).toBe(video);
   expect(video instanceof HTMLVideoElement && video.paused).toBe(true);
+  expect(page.getByRole('textbox', { name: 'Текст страницы', exact: true }).element()).toBe(editorRoot);
+  expect(editorRoot.closest('[data-editor-page-id]')?.getAttribute('data-editor-page-id')).toBe(pageId);
 });
