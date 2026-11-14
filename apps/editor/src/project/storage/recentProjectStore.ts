@@ -7,8 +7,10 @@ import {
   LAST_PROJECT_KEY,
 } from './constants';
 
-const requestToPromise = <T>(request: IDBRequest<T>): Promise<T> => {
+const requestToPromise = <T>(createRequest: () => IDBRequest<T>): Promise<T> => {
   return new Promise((resolve, reject) => {
+    const request = createRequest();
+
     request.addEventListener('success', () => resolve(request.result));
     request.addEventListener('error', () => reject(request.error));
   });
@@ -53,12 +55,18 @@ const withStore = async <T>(
     const transaction = database.transaction(STORE_NAME, mode);
 
     const transactionDone = transactionToPromise(transaction);
-    const request = operation(transaction.objectStore(STORE_NAME));
-    const result = await requestToPromise(request);
+    const requestDone = requestToPromise(() => operation(transaction.objectStore(STORE_NAME)));
+    const [requestResult, transactionResult] = await Promise.allSettled([requestDone, transactionDone]);
 
-    await transactionDone;
+    if (requestResult.status === 'rejected') {
+      throw requestResult.reason;
+    }
 
-    return result;
+    if (transactionResult.status === 'rejected') {
+      throw transactionResult.reason;
+    }
+
+    return requestResult.value;
   } finally {
     database.close();
   }
