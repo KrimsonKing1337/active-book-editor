@@ -69,21 +69,26 @@ export const getBuildSessionFilePath = ({
   relativePath,
 }: GetBuildSessionFilePathArgs): string => {
   const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
+
   const normalizedPath = relativePath.replaceAll('\\', '/');
   const safePath = path.posix.normalize(normalizedPath);
 
-  const isProjectManifest = safePath === 'book.json' || safePath === 'package.json';
+  const hasParentDirectory = normalizedPath.split('/').includes('..');
+  const isAbsolutePath = path.posix.isAbsolute(safePath);
 
+  if (hasParentDirectory || isAbsolutePath) {
+    throw new Error('Invalid project file path');
+  }
+
+  const isProjectManifest = safePath === 'book.json' || safePath === 'package.json';
   const isAsset = safePath.startsWith('assets/');
 
   const isDependencyArchive = safePath.startsWith('dependencies/')
     && safePath.toLowerCase().endsWith('.tgz');
 
-  const isOutsideProject = safePath.startsWith('../')
-    || path.posix.isAbsolute(safePath)
-    || normalizedPath.split('/').includes('..');
+  const isAllowedFile = isProjectManifest || isAsset || isDependencyArchive;
 
-  if (isOutsideProject || (!isProjectManifest && !isAsset && !isDependencyArchive)) {
+  if (!isAllowedFile) {
     throw new Error('Invalid project file path');
   }
 
