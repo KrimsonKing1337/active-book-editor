@@ -1,13 +1,14 @@
-import type { ChangeEvent, FocusEvent, InputHTMLAttributes } from 'react';
+import type {
+  ChangeEvent,
+  FocusEvent,
+  InputHTMLAttributes,
+} from 'react';
 import { useEffect, useState } from 'react';
 
-import { InputMask, unformat } from '@react-input/mask';
 import classNames from 'classnames';
 
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import inputStyles from '../EffectControls/TextInput/TextInput.module.scss';
-
-import { replacement } from './constants';
 
 type ExcludedInputProps =
   | 'value'
@@ -43,48 +44,60 @@ export const IntegerInput = ({
   }, [value]);
 
   const digits = maxDigits ?? String(max).length;
-  const mask = 'd'.repeat(digits);
-
-  const maskOptions = {
-    mask,
-    replacement,
-  };
 
   const inputClassNames = classNames(sharedStyles.Control, inputStyles.Input, props.className);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const raw = unformat(event.target.value, maskOptions);
+    const input = event.currentTarget;
+    const entered = input.value;
+    const filtered = entered.replace(/\D/g, '');
+    const canonical = filtered.replace(/^0+(?=\d)/, '');
+    const raw = canonical.slice(0, digits);
+
+    if (raw !== entered) {
+      const caret = input.selectionStart ?? entered.length;
+      const prefix = entered.slice(0, caret).replace(/\D/g, '');
+      const removedZeros = filtered.length - canonical.length;
+      const nextCaret = Math.max(0, Math.min(prefix.length - removedZeros, raw.length));
+
+      input.value = raw;
+      input.setSelectionRange(nextCaret, nextCaret);
+    }
+
+    setDraft(raw);
 
     if (!raw) {
-      setDraft(String(min));
-
-      onValueChange(min);
-
       return;
     }
 
-    const number = Math.min(max, Math.max(min, Number(raw)));
+    const number = Number(raw);
 
-    setDraft(String(number));
-
-    onValueChange(number);
+    if (number >= min && number <= max && number !== value) {
+      onValueChange(number);
+    }
   };
 
   const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
-    if (draft === '') {
-      setDraft(String(value));
+    let number = min;
+
+    if (draft !== '') {
+      number = Math.min(max, Math.max(min, Number(draft)));
+    }
+
+    setDraft(String(number));
+
+    if (number !== value) {
+      onValueChange(number);
     }
 
     onBlur?.(event);
   };
 
   return (
-    <InputMask
+    <input
       {...props}
       className={inputClassNames}
-      mask={mask}
-      replacement={replacement}
-      showMask
+      type="text"
       inputMode="numeric"
       value={draft}
       onChange={handleChange}
