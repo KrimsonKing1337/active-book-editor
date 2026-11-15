@@ -1,5 +1,4 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
-
 import { createContext, useContext } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';

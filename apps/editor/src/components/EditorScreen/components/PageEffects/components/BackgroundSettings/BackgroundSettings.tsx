@@ -1,6 +1,8 @@
-import type { ChangeEvent } from 'react';
-
-import { useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  useRef,
+  useState,
+} from 'react';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 
