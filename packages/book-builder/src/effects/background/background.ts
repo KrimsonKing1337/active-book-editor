@@ -31,7 +31,13 @@ export type StyledBackgroundShadow = BackgroundEffectShadowOptions & {
   styleFilters?: FilterOperation[];
 };
 
-export const backgroundEffectKinds = ['background', 'image', 'video', 'shadow', 'component'] as const;
+export const backgroundEffectKinds = [
+  'background',
+  'image',
+  'video',
+  'shadow',
+  'component',
+] as const;
 
 export type BackgroundEffectKind = (typeof backgroundEffectKinds)[number];
 

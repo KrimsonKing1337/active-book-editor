@@ -14,7 +14,11 @@ import { Button } from '../../../EffectControls';
 import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
-import { CONFIG, PROPERTY_OPTIONS, FUNCTION_OPTIONS } from './constants';
+import {
+  CONFIG,
+  PROPERTY_OPTIONS,
+  FUNCTION_OPTIONS,
+} from './constants';
 
 import styles from '../../StyleEditor.module.scss';
 

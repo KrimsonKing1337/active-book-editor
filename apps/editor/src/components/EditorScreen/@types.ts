@@ -5,5 +5,10 @@ export type TextBlockAttrs = {
 };
 
 export type TextBlock =
-  | { type: 'paragraph' }
-  | { type: 'heading'; attrs: TextBlockAttrs };
+  | {
+    type: 'paragraph'
+  }
+  | {
+    type: 'heading';
+    attrs: TextBlockAttrs
+  };

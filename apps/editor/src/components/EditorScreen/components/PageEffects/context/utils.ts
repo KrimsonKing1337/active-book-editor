@@ -40,7 +40,11 @@ export const getFrameStylePreviewKey = ({
   kind,
   itemId,
 }: FrameStylePreviewKeyParams): string => {
-  return JSON.stringify([effectId, kind, itemId]);
+  return JSON.stringify([
+    effectId,
+    kind,
+    itemId,
+  ]);
 };
 
 export const getBackgroundPreviewKey = ({
@@ -48,7 +52,11 @@ export const getBackgroundPreviewKey = ({
   layer,
   mediaId = null,
 }: BackgroundPreviewKeyParams): string => {
-  return JSON.stringify([effectId, layer, mediaId]);
+  return JSON.stringify([
+    effectId,
+    layer,
+    mediaId,
+  ]);
 };
 
 export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {

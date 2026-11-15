@@ -58,12 +58,20 @@ const effects = [
 
 test('lists every top-level effect category with its supported subtypes', () => {
   assert.deepEqual(EFFECT_CATEGORIES.map((cur) => cur.value), [
-    'audio', 'background', 'frame', 'vibration', 'flashlight',
+    'audio',
+    'background',
+    'frame',
+    'vibration',
+    'flashlight',
   ]);
 
   const audio = EFFECT_CATEGORIES[0];
 
-  assert.deepEqual(audio.groups.map((cur) => cur.value), ['sfx', 'music', 'bg']);
+  assert.deepEqual(audio.groups.map((cur) => cur.value), [
+    'sfx',
+    'music',
+    'bg',
+  ]);
 });
 
 test('filters globally without changing the order of effects', () => {
@@ -74,7 +82,12 @@ test('filters globally without changing the order of effects', () => {
       group: null,
       query: '',
     }).map((cur) => cur.id),
-    ['rain', 'soundtrack', 'forest', 'shadow'],
+    [
+      'rain',
+      'soundtrack',
+      'forest',
+      'shadow',
+    ],
   );
 
   assert.deepEqual(

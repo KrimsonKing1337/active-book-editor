@@ -72,7 +72,11 @@ const mapSlides = (slides: Slides, transaction: Transaction): Slides => {
 export const carouselSelectionPlugin = () => new Plugin({
   key: carouselKey,
   appendTransaction: (...args) => {
-    const [transactions, _oldState, state] = args;
+    const [
+      transactions,
+      _oldState,
+      state,
+    ] = args;
 
     const hasCarouselKey = transactions.some((transactionCur) => {
       return transactionCur.getMeta(carouselKey);
@@ -87,7 +91,12 @@ export const carouselSelectionPlugin = () => new Plugin({
       return followSelection(new Map(), state);
     },
     apply: (...args) => {
-      const [transaction, slides, _oldState, state] = args;
+      const [
+        transaction,
+        slides,
+        _oldState,
+        state,
+      ] = args;
 
       return followSelection(mapSlides(slides, transaction), state);
     },
@@ -104,7 +113,11 @@ export const carouselSelectionPlugin = () => new Plugin({
         const selected = activeSlide(state, position);
 
         node.forEach((...args) => {
-          const [slide, offset, index] = args;
+          const [
+            slide,
+            offset,
+            index,
+          ] = args;
 
           const start = position + 1 + offset;
           const attrs: Record<string, string> = { 'aria-label': `Слайд ${index + 1}` };

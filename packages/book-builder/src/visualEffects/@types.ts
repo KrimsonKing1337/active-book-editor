@@ -1,4 +1,8 @@
-import type { PageRange, VisualEffectInstance, VisualEffectRegistration } from '@active-book/types';
+import type {
+  PageRange,
+  VisualEffectInstance,
+  VisualEffectRegistration,
+} from '@active-book/types';
 
 export type AuthoredVisualLifetime =
   | {

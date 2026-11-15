@@ -1,4 +1,11 @@
-export const units = ['px', '%', 'rem', 'em', 'vw', 'vh'] as const;
+export const units = [
+  'px',
+  '%',
+  'rem',
+  'em',
+  'vw',
+  'vh',
+] as const;
 
 export type Unit = typeof units[number];
 

@@ -50,13 +50,15 @@ const frame: FrameEffect[] = [
 ];
 
 test('restores every frame kind and its placement from saved page effects', () => {
-  const background = [{
-    id: 'background',
-    type: 'background',
-    kind: 'background',
-    slug: 'Background',
-    options: { style: { zIndex: 1 } },
-  }];
+  const background = [
+    {
+      id: 'background',
+      type: 'background',
+      kind: 'background',
+      slug: 'Background',
+      options: { style: { zIndex: 1 } },
+    },
+  ];
   const saved = JSON.parse(JSON.stringify({
     background,
     frame,

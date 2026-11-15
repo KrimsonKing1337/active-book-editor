@@ -61,13 +61,15 @@ export const createHeaderFixture = () => {
       disabled: false,
       onImport: commands.onImportCustomComponents,
       onInsertComponent: commands.onInsertCustomComponent,
-      definitions: [{
-        id: 'fixture/Counter',
-        packageName: '@fixture/components',
-        name: 'Counter',
-        title: 'Счётчик',
-        description: 'Fixture counter',
-      }],
+      definitions: [
+        {
+          id: 'fixture/Counter',
+          packageName: '@fixture/components',
+          name: 'Counter',
+          title: 'Счётчик',
+          description: 'Fixture counter',
+        },
+      ],
     },
     build: {
       state: 'idle',

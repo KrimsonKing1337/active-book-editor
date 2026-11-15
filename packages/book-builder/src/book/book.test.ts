@@ -9,13 +9,17 @@ const page = (id: string, text: string) => ({
   id,
   document: {
     type: 'doc',
-    content: [{
-      type: 'paragraph',
-      content: [{
-        type: 'text',
-        text,
-      }],
-    }],
+    content: [
+      {
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text,
+          },
+        ],
+      },
+    ],
   },
 });
 const rangeVisual = () => ({
@@ -31,10 +35,12 @@ const rangeVisual = () => ({
   }),
   lifetime: {
     type: 'range',
-    range: [{
-      from: 3,
-      to: 5,
-    }],
+    range: [
+      {
+        from: 3,
+        to: 5,
+      },
+    ],
   },
 });
 
@@ -83,26 +89,36 @@ test('compiles ordered pages, preserves IDs and positional ranges, and strips ed
     ...second.document,
     attrs: {
       pageEffects: {
-        audio: [{
-          id: 'audio',
-          type: 'audio',
-          slug: 'Звук',
-          options: { src: 'x.ogg' },
-        }],
+        audio: [
+          {
+            id: 'audio',
+            type: 'audio',
+            slug: 'Звук',
+            options: { src: 'x.ogg' },
+          },
+        ],
       },
     },
   };
   const book = {
     type: 'book',
-    pages: [third, first, {
-      ...second,
-      document,
-    }],
+    pages: [
+      third,
+      first,
+      {
+        ...second,
+        document,
+      },
+    ],
     visualEffects: [rangeVisual()],
   };
   const original = JSON.stringify(book);
   const built = compileBookDocument(book);
-  expect(built.pages.map((cur) => cur.id)).toEqual(['persistent-third', 'persistent-first', 'persistent-second']);
+  expect(built.pages.map((cur) => cur.id)).toEqual([
+    'persistent-third',
+    'persistent-first',
+    'persistent-second',
+  ]);
   expect(built.pages.map((cur) => cur.document.content)).toEqual(book.pages.map((cur) => cur.document.content));
   expect(built.pages[2].document.attrs?.pageEffects.audio[0]).not.toHaveProperty('slug');
   expect(built.visualEffects[0].lifetime).toEqual(book.visualEffects[0].lifetime);
@@ -117,19 +133,24 @@ test('accepts ranges beyond a shortened book and validates only numeric structur
   };
   expect(isBookDocument(JSON.parse(JSON.stringify(book)))).toBe(true);
   expect(compileBookDocument(book).visualEffects[0].lifetime).toEqual(book.visualEffects[0].lifetime);
-  for (const range of [{
-    from: 2,
-    to: 1,
-  }, {
-    from: 0,
-    to: 1,
-  }, {
-    from: 1.5,
-    to: 3,
-  }, {
-    from: '1',
-    to: 3,
-  }]) {
+  for (const range of [
+    {
+      from: 2,
+      to: 1,
+    },
+    {
+      from: 0,
+      to: 1,
+    },
+    {
+      from: 1.5,
+      to: 3,
+    },
+    {
+      from: '1',
+      to: 3,
+    },
+  ]) {
     const visual = {
       ...rangeVisual(),
       lifetime: {

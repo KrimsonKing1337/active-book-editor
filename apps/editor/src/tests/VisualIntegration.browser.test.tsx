@@ -75,16 +75,20 @@ test('native identity and independent book sessions', async () => {
       <StrictMode>
         <StoreProvider>
           <AppWrapper
-            storyPages={[{
-              id: 'first',
-              content: <p>Native contract</p>,
-            }, {
-              id: 'second',
-              content: null,
-            }, {
-              id: 'third',
-              content: null,
-            }]}
+            storyPages={[
+              {
+                id: 'first',
+                content: <p>Native contract</p>,
+              },
+              {
+                id: 'second',
+                content: null,
+              },
+              {
+                id: 'third',
+                content: null,
+              },
+            ]}
             editorTools={<Probe />}
             config={config}
             rangeEffects={[]}
@@ -103,8 +107,17 @@ test('native identity and independent book sessions', async () => {
     const firstElement = native.element();
     const props = implementations.flatMap((renderer) => renderer.mock.calls).at(-1)?.[0];
     expect(props).toBeDefined();
-    for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame',
-      'narrativeViewport', 'narrativeContent', 'storyViewportFrame', 'toolbar', 'toolbarFrame'] as const) {
+    for (const region of [
+      'application',
+      'story',
+      'storyViewport',
+      'narrativeFrame',
+      'narrativeViewport',
+      'narrativeContent',
+      'storyViewportFrame',
+      'toolbar',
+      'toolbarFrame',
+    ] as const) {
       const selector = region === 'application' ? '[data-book-application]' : `[data-story-region="${region}"]`;
       expect(props?.regions[region]).toBe(document.querySelector(selector));
     }
@@ -121,13 +134,15 @@ test('native identity and independent book sessions', async () => {
       ...original.effect.params,
       custom: { color: 'red' },
     };
-    const changed = [{
-      ...original,
-      effect: {
-        ...original.effect,
-        params,
+    const changed = [
+      {
+        ...original,
+        effect: {
+          ...original.effect,
+          params,
+        },
       },
-    }];
+    ];
     rerender(view(changed));
     await expect.element(native).toHaveStyle({ color: 'rgb(255, 0, 0)' });
     expect(native.element()).toBe(firstElement);
@@ -135,13 +150,15 @@ test('native identity and independent book sessions', async () => {
       ...params,
       componentKey: 'replacement',
     };
-    const keyed = [{
-      ...original,
-      effect: {
-        ...original.effect,
-        params: keyedParams,
+    const keyed = [
+      {
+        ...original,
+        effect: {
+          ...original.effect,
+          params: keyedParams,
+        },
       },
-    }];
+    ];
     rerender(view(keyed));
     await expect.poll(() => native.element() !== firstElement).toBe(true);
     expect(document.querySelector('[data-effect-id="range-native"]')).toBe(wrapper);

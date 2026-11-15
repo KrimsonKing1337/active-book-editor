@@ -92,7 +92,11 @@ export const AudioPreview = ({ effect, onLoadingChange }: AudioPreviewProps) => 
         audio.howlInst.loop(effect.options.loop ?? false);
       }
     };
-  }, [audio, loopPreview, effect.options.loop]);
+  }, [
+    audio,
+    loopPreview,
+    effect.options.loop,
+  ]);
 
   useEffect(() => {
     onLoadingChange(isLoading);

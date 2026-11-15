@@ -18,7 +18,11 @@ type StyleFilters = {
 export type StyledFrameShadow = FrameShadowItem & StyleFilters;
 export type StyledFrameText = FrameTextItem & StyleFilters;
 
-export const frameEffectKinds = ['shadow', 'text', 'component'] as const;
+export const frameEffectKinds = [
+  'shadow',
+  'text',
+  'component',
+] as const;
 
 export type FrameEffectKind = (typeof frameEffectKinds)[number];
 

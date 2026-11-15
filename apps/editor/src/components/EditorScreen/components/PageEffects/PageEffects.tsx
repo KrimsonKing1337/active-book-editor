@@ -1,4 +1,8 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import type { BackgroundEffectKind, FrameEffectKind } from '@active-book/book-builder/effects';
 
@@ -123,7 +127,12 @@ export const PageEffects = ({ project, onSaveProject }: PageEffectsProps) => {
     setSelectedVisualEffectId(effectId);
 
     return () => setSelectedVisualEffectId(null);
-  }, [isOpen, selectedEffectId, selectedEffectType, setSelectedVisualEffectId]);
+  }, [
+    isOpen,
+    selectedEffectId,
+    selectedEffectType,
+    setSelectedVisualEffectId,
+  ]);
 
   const openEffects = () => {
     setIsOpen(true);

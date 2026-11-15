@@ -7,10 +7,18 @@ import { mainSelectors } from '@active-book/core/store/main';
 
 import { useFlashlight } from '@active-book/core/hooks/effects';
 
-import type { FlashlightEffectDraft, FlashlightOptions, OptionUpdater } from '../../@types';
+import type {
+  FlashlightEffectDraft,
+  FlashlightOptions,
+  OptionUpdater,
+} from '../../@types';
 
 import { IntegerInput } from '../IntegerInput';
-import { TextInput, Checkbox, Button } from '../EffectControls';
+import {
+  TextInput,
+  Checkbox,
+  Button,
+} from '../EffectControls';
 
 import styles from './FlashlightSettings.module.scss';
 

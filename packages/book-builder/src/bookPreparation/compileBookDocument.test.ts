@@ -39,24 +39,30 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
     type: 'doc',
     attrs: {
       pageEffects: {
-        audio: [{
-          id: 'a',
-          type: 'audio',
-          slug: 'Звук',
-          options: audioOptions,
-        }],
-        vibration: [{
-          id: 'v',
-          type: 'vibration',
-          slug: 'Толчок',
-          options: vibrationOptions,
-        }],
-        flashlight: [{
-          id: 'f',
-          type: 'flashlight',
-          slug: 'Вспышка',
-          options: flashlightOptions,
-        }],
+        audio: [
+          {
+            id: 'a',
+            type: 'audio',
+            slug: 'Звук',
+            options: audioOptions,
+          },
+        ],
+        vibration: [
+          {
+            id: 'v',
+            type: 'vibration',
+            slug: 'Толчок',
+            options: vibrationOptions,
+          },
+        ],
+        flashlight: [
+          {
+            id: 'f',
+            type: 'flashlight',
+            slug: 'Вспышка',
+            options: flashlightOptions,
+          },
+        ],
       },
     },
     content: [{ type: 'paragraph' }],
@@ -68,21 +74,27 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
     type: 'doc',
     attrs: {
       pageEffects: {
-        audio: [{
-          id: 'a',
-          type: 'audio',
-          options: audioOptions,
-        }],
-        vibration: [{
-          id: 'v',
-          type: 'vibration',
-          options: vibrationOptions,
-        }],
-        flashlight: [{
-          id: 'f',
-          type: 'flashlight',
-          options: flashlightOptions,
-        }],
+        audio: [
+          {
+            id: 'a',
+            type: 'audio',
+            options: audioOptions,
+          },
+        ],
+        vibration: [
+          {
+            id: 'v',
+            type: 'vibration',
+            options: vibrationOptions,
+          },
+        ],
+        flashlight: [
+          {
+            id: 'f',
+            type: 'flashlight',
+            options: flashlightOptions,
+          },
+        ],
       },
     },
     content: [{ type: 'paragraph' }],
@@ -173,15 +185,21 @@ test('preserves independent frame layers, masks and component references in comp
   };
   const book = {
     type: 'book',
-    pages: [{
-      id: 'owner',
-      document,
-    }],
+    pages: [
+      {
+        id: 'owner',
+        document,
+      },
+    ],
     visualEffects: [],
   };
   const saved = JSON.parse(JSON.stringify(book));
   const built = compileBookDocument(saved);
-  assert.deepEqual(built.visualEffects.map((cur) => cur.effect.id), ['shadow', 'text', 'component']);
+  assert.deepEqual(built.visualEffects.map((cur) => cur.effect.id), [
+    'shadow',
+    'text',
+    'component',
+  ]);
   assert.deepEqual(built.visualEffects.map((cur) => cur.effect.depth), [
     {
       plane: 'belowNarrative',

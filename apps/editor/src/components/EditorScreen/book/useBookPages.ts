@@ -130,7 +130,12 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
 
     navigateRef.current(1);
-  }, [editor, flushStyles, dispatch, publish]);
+  }, [
+    editor,
+    flushStyles,
+    dispatch,
+    publish,
+  ]);
 
   const activePosition = Math.min(Math.max(position, 1), book.pages.length);
   const activePage = book.pages[activePosition - 1];
@@ -175,7 +180,16 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     return () => {
       cancelled = true;
     };
-  }, [editor, activePage.id, activePosition, position, book.pages.length, flushStyles, captureCurrentPage, dispatch]);
+  }, [
+    editor,
+    activePage.id,
+    activePosition,
+    position,
+    book.pages.length,
+    flushStyles,
+    captureCurrentPage,
+    dispatch,
+  ]);
 
   useLayoutEffect(() => {
     if (!editor) {
@@ -215,7 +229,11 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     dispatch(mainActions.setStoryPages(next.pages.map((cur) => cur.id)));
 
     navigateRef.current(next.pages.length);
-  }, [getSnapshot, publish, dispatch]);
+  }, [
+    getSnapshot,
+    publish,
+    dispatch,
+  ]);
 
   const deletePage = useCallback((id: string) => {
     const current = getSnapshot();
@@ -242,7 +260,11 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
 
     navigateRef.current(nextPosition);
-  }, [getSnapshot, publish, dispatch]);
+  }, [
+    getSnapshot,
+    publish,
+    dispatch,
+  ]);
 
   const movePage = useCallback((id: string, direction: -1 | 1) => {
     const current = getSnapshot();
@@ -267,7 +289,11 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
 
     navigateRef.current(pages[selected].id);
-  }, [getSnapshot, publish, dispatch]);
+  }, [
+    getSnapshot,
+    publish,
+    dispatch,
+  ]);
 
   const getRevision = useCallback(() => revisionRef.current, []);
 

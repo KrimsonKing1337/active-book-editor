@@ -2,7 +2,11 @@ import { useState } from 'react';
 
 import type { PanelGeometry, Position } from './utils';
 
-import { getSavedGeometry, getRndOptions, PANEL_GEOMETRY_KEY } from './utils';
+import {
+  getSavedGeometry,
+  getRndOptions,
+  PANEL_GEOMETRY_KEY,
+} from './utils';
 
 export const usePanelGeometry = () => {
   const [geometry, setGeometry] = useState(getSavedGeometry);
@@ -28,6 +32,8 @@ export const usePanelGeometry = () => {
     element: HTMLElement,
     _delta: unknown,
     position: Position,
+    // Контакт RND требует более двух аргументов
+    // eslint-disable-next-line max-params
   ) => {
     saveGeometry({
       x: position.x,
