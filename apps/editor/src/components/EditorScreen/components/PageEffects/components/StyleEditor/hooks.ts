@@ -55,7 +55,15 @@ export const useStyleEditor = ({
     }
   };
 
-  const setProperty = (name: string, nextValue: StylePropertyValue, updateLocal = true) => {
+  const setProperty = ({
+    name,
+    nextValue,
+    updateLocal = true,
+  }: {
+    name: string;
+    nextValue: StylePropertyValue;
+    updateLocal?: boolean;
+  }) => {
     const updatedValue = draftStyleRef.current ?? value;
 
     const updated: Record<string, StylePropertyValue> = {

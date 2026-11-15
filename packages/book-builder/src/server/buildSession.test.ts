@@ -42,7 +42,11 @@ test.each([
   'package.json',
   'assets/image.TGZ',
 ])('preserves the exact filename and existing allowed areas: %s', (relativePath) => {
-  const target = getBuildSessionFilePath(repoRoot, sessionId, relativePath);
+  const target = getBuildSessionFilePath({
+    repoRoot,
+    sessionId,
+    relativePath,
+  });
   const expected = path.join(repoRoot, BUILD_ROOT_NAME, sessionId, relativePath.replaceAll('\\', '/'));
 
   expect(target).toBe(expected);
@@ -66,5 +70,9 @@ test.each([
   'other/Library.TGZ',
   'Library.TGZ',
 ])('rejects unsupported extensions and forbidden paths: %s', (relativePath) => {
-  expect(() => getBuildSessionFilePath(repoRoot, sessionId, relativePath)).toThrow('Invalid project file path');
+  expect(() => getBuildSessionFilePath({
+    repoRoot,
+    sessionId,
+    relativePath,
+  })).toThrow('Invalid project file path');
 });

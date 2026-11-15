@@ -113,7 +113,10 @@ export const StyleEditor = ({
 
         const handleColorChange = (val: string) => {
           if (!colorDisabledReason) {
-            setProperty(propertyCur, val);
+            setProperty({
+              name: propertyCur,
+              nextValue: val,
+            });
           }
         };
 

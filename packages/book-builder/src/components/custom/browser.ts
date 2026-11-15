@@ -63,7 +63,15 @@ export type BrowserLibrary = {
   dispose: () => void;
 };
 
-const readTarString = (data: Uint8Array, offset: number, size: number): string => {
+const readTarString = ({
+  data,
+  offset,
+  size,
+}: {
+  data: Uint8Array;
+  offset: number;
+  size: number;
+}): string => {
   const subarray = data.subarray(offset, offset + size);
   const decodedText = textDecoder.decode(subarray);
 
@@ -74,14 +82,26 @@ const readTar = (data: Uint8Array): Map<string, Uint8Array> => {
   const files = new Map<string, Uint8Array>();
 
   for (let offset = 0; offset + TAR_BLOCK_SIZE <= data.byteLength;) {
-    const name = readTarString(data, offset, 100);
-    const prefix = readTarString(data, offset + 345, 155);
+    const name = readTarString({
+      data,
+      offset,
+      size: 100,
+    });
+    const prefix = readTarString({
+      data,
+      offset: offset + 345,
+      size: 155,
+    });
 
     if (!name) {
       break;
     }
 
-    const tarString = readTarString(data, offset + 124, 12).trim();
+    const tarString = readTarString({
+      data,
+      offset: offset + 124,
+      size: 12,
+    }).trim();
     const length = Number.parseInt(tarString, 8);
     const contentOffset = offset + TAR_BLOCK_SIZE;
     const contentEnd = contentOffset + length;
@@ -223,10 +243,7 @@ export const inspectBrowserArchive = async (archive: Blob): Promise<BrowserArchi
     copyVisualData(defaults);
   }
 
-  const components = [
-    ...Object.entries(manifest.components),
-    ...Object.entries(visuals),
-  ];
+  const components = [...Object.entries(manifest.components), ...Object.entries(visuals)];
 
   for (const [name, component] of components) {
     const hasComponent = Boolean(component);

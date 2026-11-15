@@ -30,6 +30,12 @@ import '@styles/styles.scss';
 
 let project: Awaited<ReturnType<typeof createProject>>;
 
+type WriteParams = {
+  directory: FileSystemDirectoryHandle;
+  name: string;
+  data: string | Blob;
+};
+
 const selectPage = async (number: number) => {
   await page.getByRole('button', {
     name: `Страница ${number}`,
@@ -273,25 +279,51 @@ test('opens a complete book with page-owned media and a real custom TGZ, preserv
   );
   const { default: soundUrl } = await import('@root/tests/fixtures/multipage-book/assets/tone.wav?url');
 
-  // todo: применить правило max-params
-  // eslint-disable-next-line max-params
-  const write = async (directory: FileSystemDirectoryHandle, name: string, data: string | Blob) => {
+  const write = async ({
+    directory,
+    name,
+    data,
+  }: WriteParams) => {
     const handle = await directory.getFileHandle(name, { create: true });
     const stream = await handle.createWritable();
     await stream.write(data);
     await stream.close();
   };
   const bookWithRanges = fixture;
-  await write(project.directory, 'book.json', JSON.stringify(bookWithRanges));
-  await write(project.directory, 'package.json', JSON.stringify(packageMeta));
+  await write({
+    directory: project.directory,
+    name: 'book.json',
+    data: JSON.stringify(bookWithRanges),
+  });
+  await write({
+    directory: project.directory,
+    name: 'package.json',
+    data: JSON.stringify(packageMeta),
+  });
   const dependencies = await project.directory.getDirectoryHandle('dependencies', { create: true });
   const assets = await project.directory.getDirectoryHandle('assets', { create: true });
-  await write(dependencies, 'fixture-parts.tgz', await (await fetch(archiveUrl)).blob());
-  await write(assets, 'tone.wav', await (await fetch(soundUrl)).blob());
+  await write({
+    directory: dependencies,
+    name: 'fixture-parts.tgz',
+    data: await (await fetch(archiveUrl)).blob(),
+  });
+  await write({
+    directory: assets,
+    name: 'tone.wav',
+    data: await (await fetch(soundUrl)).blob(),
+  });
   const { default: movieUrl } = await import('@root/tests/fixtures/multipage-book/assets/movie.webm?url');
   const { default: imageUrl } = await import('@root/tests/fixtures/multipage-book/assets/range-pattern.svg?url');
-  await write(assets, 'movie.webm', await (await fetch(movieUrl)).blob());
-  await write(assets, 'range-pattern.svg', await (await fetch(imageUrl)).blob());
+  await write({
+    directory: assets,
+    name: 'movie.webm',
+    data: await (await fetch(movieUrl)).blob(),
+  });
+  await write({
+    directory: assets,
+    name: 'range-pattern.svg',
+    data: await (await fetch(imageUrl)).blob(),
+  });
   await page.getByRole('button', {
     name: 'Открыть проект',
     exact: true,
@@ -352,18 +384,32 @@ test('switching projects during a real TGZ import disposes resources and isolate
   const { default: archiveUrl } = await import(
     '@root/tests/fixtures/multipage-book/dependencies/fixture-parts.tgz?url'
   );
-  // todo: применить правило max-params
-  // eslint-disable-next-line max-params
-  const write = async (directory: FileSystemDirectoryHandle, name: string, data: string | Blob) => {
+  const write = async ({
+    directory,
+    name,
+    data,
+  }: WriteParams) => {
     const file = await directory.getFileHandle(name, { create: true });
     const stream = await file.createWritable();
     await stream.write(data);
     await stream.close();
   };
-  await write(project.directory, 'book.json', JSON.stringify(fixture));
-  await write(project.directory, 'package.json', JSON.stringify(packageMeta));
+  await write({
+    directory: project.directory,
+    name: 'book.json',
+    data: JSON.stringify(fixture),
+  });
+  await write({
+    directory: project.directory,
+    name: 'package.json',
+    data: JSON.stringify(packageMeta),
+  });
   const dependencies = await project.directory.getDirectoryHandle('dependencies', { create: true });
-  await write(dependencies, 'fixture-parts.tgz', await (await fetch(archiveUrl)).blob());
+  await write({
+    directory: dependencies,
+    name: 'fixture-parts.tgz',
+    data: await (await fetch(archiveUrl)).blob(),
+  });
   let finishImport: () => void = () => {};
   vi.stubGlobal('__fixtureLibraryGate', new Promise<void>((resolve) => {
     finishImport = resolve;

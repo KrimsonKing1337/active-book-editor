@@ -57,11 +57,15 @@ export const removeBuildSession = async (
   }
 };
 
-export const getBuildSessionFilePath = (
-  repoRoot: string,
-  sessionId: string,
-  relativePath: string,
-): string => {
+export const getBuildSessionFilePath = ({
+  repoRoot,
+  sessionId,
+  relativePath,
+}: {
+  repoRoot: string;
+  sessionId: string;
+  relativePath: string;
+}): string => {
   const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
   const normalizedPath = relativePath.replaceAll('\\', '/');
   const safePath = path.posix.normalize(normalizedPath);
