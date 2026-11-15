@@ -14,6 +14,8 @@ import type {
 
 import { trackProjectWrite } from '../pendingOperations';
 
+import { writeProjectFile } from './utils';
+
 import {
   BOOK_FILE_NAME,
   PACKAGE_FILE_NAME,
@@ -91,24 +93,16 @@ export class LocalProjectStorage implements ProjectStorage {
       create: true,
     });
 
-    const writable = await fileHandle.createWritable();
+    const packageMeta = {
+      name: 'active-book-project',
+      private: true,
+      version: '0.0.0',
+      dependencies: {},
+    };
 
-    try {
-      const packageMeta = {
-        name: 'active-book-project',
-        private: true,
-        version: '0.0.0',
-        dependencies: {},
-      };
+    const packageMetaJson = JSON.stringify(packageMeta, null, 2);
 
-      const packageMetaJson = JSON.stringify(packageMeta, null, 2);
-
-      await writable.write(`${packageMetaJson}\n`);
-      await writable.close();
-    } catch (error) {
-      await writable.abort?.();
-      throw error;
-    }
+    await writeProjectFile(fileHandle, `${packageMetaJson}\n`);
   }
 
   async initialize(document: BookDocument): Promise<void> {
@@ -180,18 +174,9 @@ export class LocalProjectStorage implements ProjectStorage {
       create: true,
     });
 
-    const writable = await fileHandle.createWritable();
+    const documentJson = JSON.stringify(document, null, 2);
 
-    try {
-      const documentJson = JSON.stringify(document, null, 2);
-
-      await writable.write(`${documentJson}\n`);
-      await writable.close();
-    } catch (error) {
-      await writable.abort?.();
-
-      throw error;
-    }
+    await writeProjectFile(fileHandle, `${documentJson}\n`);
   }
 
   async readPackageJson(): Promise<string> {
@@ -225,16 +210,7 @@ export class LocalProjectStorage implements ProjectStorage {
       create: true,
     });
 
-    const writable = await handle.createWritable();
-
-    try {
-      await writable.write(content);
-      await writable.close();
-    } catch (error) {
-      await writable.abort?.();
-
-      throw error;
-    }
+    await writeProjectFile(handle, content);
   }
 
   async importDependencyFile(file: File, sourceHandle?: ProjectFileHandle): Promise<string> {
@@ -279,16 +255,7 @@ export class LocalProjectStorage implements ProjectStorage {
       create: true,
     });
 
-    const writable = await handle.createWritable();
-
-    try {
-      await writable.write(file);
-      await writable.close();
-    } catch (error) {
-      await writable.abort?.();
-
-      throw error;
-    }
+    await writeProjectFile(handle, file);
 
     return `${DEPENDENCIES_DIRECTORY_NAME}/${candidate}`;
   }
@@ -394,16 +361,7 @@ export class LocalProjectStorage implements ProjectStorage {
       create: true,
     });
 
-    const writable = await fileHandle.createWritable();
-
-    try {
-      await writable.write(file);
-      await writable.close();
-    } catch (error) {
-      await writable.abort?.();
-
-      throw error;
-    }
+    await writeProjectFile(fileHandle, file);
 
     return `${ASSETS_DIRECTORY_NAME}/${candidate}`;
   }
