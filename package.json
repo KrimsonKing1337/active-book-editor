@@ -22,6 +22,7 @@
     "check": "npm run typecheck && npm run typecheck:test && npm run lint:ts:check && npm run lint:css:check",
     "core:package": "node scripts/packageCore.mjs",
     "test": "vitest run --configLoader runner",
+    "test:all": "node scripts/testAll.mjs",
     "test:unit": "vitest run --configLoader runner --project unit",
     "test:component": "vitest run --configLoader runner --project component",
     "test:browser": "vitest run --configLoader runner --project browser",
