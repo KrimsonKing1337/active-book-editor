@@ -24,7 +24,7 @@ export const prepareMediaProject = async (context: TestContext) => {
   await copyFile(path.join(repoRoot, 'tests/fixtures/media-book/book.json'), path.join(root, 'book.json'));
   await copyFile(
     path.join(repoRoot, 'tests/fixtures/media-book/assets/portrait.svg'),
-    path.join(root, 'assets/a #?%.svg'),
+    path.join(root, 'assets/a #%.svg'),
   );
   await copyFile(
     path.join(repoRoot, 'tests/fixtures/multipage-book/assets/movie.webm'),

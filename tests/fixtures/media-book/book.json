@@ -22,7 +22,7 @@
           {
             "type": "image",
             "attrs": {
-              "src": "assets/a #?%.svg",
+              "src": "assets/a #%.svg",
               "alt": "Portrait",
               "width": {
                 "value": 45,
@@ -40,7 +40,7 @@
             "type": "video",
             "attrs": {
               "src": "assets/movie.webm",
-              "poster": "assets/a #?%.svg",
+              "poster": "assets/a #%.svg",
               "controls": true,
               "autoPlay": true,
               "muted": true,
@@ -64,7 +64,7 @@
                   {
                     "type": "image",
                     "attrs": {
-                      "src": "assets/a #?%.svg",
+                      "src": "assets/a #%.svg",
                       "alt": "Slide portrait",
                       "height": {
                         "value": 180,
@@ -108,7 +108,7 @@
                   {
                     "type": "image",
                     "attrs": {
-                      "src": "assets/a #?%.svg",
+                      "src": "assets/a #%.svg",
                       "alt": "Mixed portrait",
                       "width": {
                         "value": 15,

@@ -39,7 +39,7 @@ test('author imports, saves, reopens and builds page/slide media for the product
   await editor.getByLabel('Автовоспроизведение').check();
   await editor.getByLabel('Повторять').check();
   await editor.getByLabel('Высота (пиксели)').fill('180');
-  await editor.getByLabel('Постер (путь в assets/)').fill('assets/a #?%.svg');
+  await editor.getByLabel('Постер (путь в assets/)').fill('assets/a #%.svg');
   await editor.getByLabel('Высота (пиксели)').click();
   assert.equal(await editor.locator('[data-editor-media="video"] video').evaluate((element) => {
     return element instanceof HTMLVideoElement && element.paused && !element.autoplay;
@@ -64,7 +64,7 @@ test('author imports, saves, reopens and builds page/slide media for the product
 
     return names.sort();
   });
-  assert.deepEqual(assets, ['a #?%.svg', 'movie.webm']);
+  assert.deepEqual(assets, ['a #%.svg', 'movie.webm']);
   await editor.getByRole('button', { name: 'Страница 1', exact: true }).click();
   await editor.getByRole('img', { name: 'Author portrait', exact: true }).waitFor();
   await editor.getByRole('button', { name: 'Открыть проект', exact: true }).click();

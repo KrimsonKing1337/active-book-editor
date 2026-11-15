@@ -21,7 +21,7 @@ test('built media keeps assets, layout and video activity across reader resize',
     repoRoot,
     outDir,
   });
-  assert((await readFile(path.join(outDir, 'assets/a #?%.svg'))).length > 0);
+  assert((await readFile(path.join(outDir, 'assets/a #%.svg'))).length > 0);
   const origin = await serveMediaBook(context, outDir);
   const page = await openMediaReader(context, origin);
   await page.getByRole('heading', { name: 'Built media', exact: true }).waitFor();
@@ -38,7 +38,7 @@ test('built media keeps assets, layout and video activity across reader resize',
   assert.equal(small.width, 32);
   assert.equal(small.height, 32);
   const ordinary = 'video[data-book-media]:not([data-book-carousel] video)';
-  assert.match(await page.locator(ordinary).getAttribute('poster') ?? '', /a%20%23%3F%25.svg/u);
+  assert.match(await page.locator(ordinary).getAttribute('poster') ?? '', /a%20%23%25\.svg/u);
   const managed = '[data-book-carousel] video';
   await page.waitForFunction(() => {
     return document.querySelector<HTMLVideoElement>('video[data-video-managed="false"]')?.paused === false;

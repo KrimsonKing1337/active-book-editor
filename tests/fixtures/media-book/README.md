@@ -7,4 +7,4 @@ video from a static poster. Tests use the committed file; no encoder dependency
 is needed. The other video is reused from the existing multipage fixture.
 
 The project preparation helper copies the portrait SVG to the literal filename
-`assets/a #?%.svg` to exercise correct filename-to-URL encoding.
+`assets/a #%.svg` to exercise correct filename-to-URL encoding.

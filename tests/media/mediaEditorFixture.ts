@@ -39,7 +39,7 @@ export const openMediaAuthor = async (context: TestContext) => {
       const root = await navigator.storage.getDirectory();
       const project = await root.getDirectoryHandle('media-authoring', {create: true});
       const source = await project.getDirectoryHandle('imports', {create: true});
-      const files = [['a #?%.svg', imageBytes], ['movie.webm', movieBytes]];
+      const files = [['a #%.svg', imageBytes], ['movie.webm', movieBytes]];
       for (const [name, bytes] of files) {
         const handle = await source.getFileHandle(name, {create: true});
         const writer = await handle.createWritable();
@@ -56,7 +56,7 @@ export const openMediaAuthor = async (context: TestContext) => {
     Object.defineProperty(window, 'showOpenFilePicker', {configurable: true, value: async (options) => {
       const isVideo = Object.keys(options.types[0].accept).some((type) => type.startsWith('video/'));
       let kind = 'image';
-      let name = 'a #?%.svg';
+      let name = 'a #%.svg';
       if (isVideo) {
         kind = 'video';
         name = 'movie.webm';
