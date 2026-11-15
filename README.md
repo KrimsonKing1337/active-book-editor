@@ -28,8 +28,14 @@ npm run core:package
 ```
 
 The command builds the sibling core, creates `active-book-core-<version>.tgz`,
-updates the `@active-book/core` dependency and lockfile, and installs it. Use
-`npm ci` for subsequent installs with that exact archive. No npm publication or
+updates the `@active-book/core` dependency and lockfile, and installs it.
+The command calls core's `build` and `packaging` separately and never increments
+the core version. Rebuilding changed code with the same version refreshes the installed
+archive and its lockfile integrity. Core's `postinstall` is no longer required;
+public subpaths resolve directly into its compiled `lib/src/` tree. The shared Vite
+configuration serves/emits Lottie WASM from the installed package for editor and reader.
+
+Use `npm ci` for subsequent installs with that exact archive. No npm publication or
 old-name alias is required. This repository's root package is
 `active-book-editor-root`; the application workspace is `active-book-editor`.
 

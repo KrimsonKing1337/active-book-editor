@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 
 import { optimizeSvg } from './svg';
+import { coreWasm } from './coreWasm';
 
 type CreateViteConfigParams = {
   root: string;
@@ -32,6 +33,7 @@ export const createViteConfig = ({
           plugins: [optimizeSvg, '@svgr/plugin-jsx'],
         },
       }),
+      coreWasm(),
     ],
 
     css: {
