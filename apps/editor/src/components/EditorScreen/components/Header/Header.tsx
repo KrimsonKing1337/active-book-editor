@@ -18,17 +18,19 @@ import {
 
 import styles from './Header.module.scss';
 
+type HeaderBuildProp = {
+  state: BuildState;
+  disabled: boolean;
+  onBuild: () => Promise<void>;
+};
+
 export type HeaderProps = {
   projectStatus: ProjectStatusProps;
   projectControls: ProjectControlsProps;
   viewControls: ViewControlsProps;
   insertControls: InsertControlsProps;
   libraryControls: LibraryControlsProps;
-  build: {
-    state: BuildState;
-    disabled: boolean;
-    onBuild: () => Promise<void>;
-  };
+  build: HeaderBuildProp;
 };
 
 export const Header = ({
@@ -44,11 +46,14 @@ export const Header = ({
     disabled: buildIsDisabled,
     onBuild,
   } = build;
+
   let buttonBuildLabel = 'Собрать книгу';
 
   if (buildState === 'building') {
     buttonBuildLabel = 'Сборка...';
   }
+
+  const buildButtonIsDisabled = buildIsDisabled || buildState === 'building';
 
   return (
     <header className={styles.Header}>
@@ -63,8 +68,8 @@ export const Header = ({
 
         <button
           type="button"
-          disabled={buildIsDisabled || buildState === 'building'}
-          onClick={() => void onBuild()}
+          disabled={buildButtonIsDisabled}
+          onClick={() => onBuild()}
         >
           {buttonBuildLabel}
         </button>

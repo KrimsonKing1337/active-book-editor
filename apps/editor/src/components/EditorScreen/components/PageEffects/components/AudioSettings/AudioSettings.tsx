@@ -1,27 +1,45 @@
-import { type ChangeEvent, useEffect, useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import type { AudioEffectOptions } from '@active-book/core/@types';
 
 import { Slider } from '@active-book/core/components';
 
 import type { BookProject } from '@project/@types';
-import type {
-  FilePickerWindow,
-  ProjectFileHandle,
-} from '@project/@types/fileSystemAccess';
+import type { FilePickerWindow, ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
 
 import { AudioPreview } from '../AudioPreview';
 
-import type { AudioEffectDraft, AudioOptions, OptionUpdater } from '../../@types';
+import type {
+  AudioEffectDraft,
+  AudioOptions,
+  OptionUpdater,
+} from '../../@types';
 
 import { IntegerInput } from '../IntegerInput';
-import { TextInput, Select, Checkbox, Button, FileChooser } from '../EffectControls';
+
+import {
+  TextInput,
+  Select,
+  Checkbox,
+  Button,
+  FileChooser,
+} from '../EffectControls';
 
 import styles from './AudioSettings.module.scss';
 
-type NumericAudioOptionName = keyof Pick<AudioEffectOptions, 'relativeVolume' | 'delay' | 'stopBy'>;
+type NumericAudioOptionName = keyof Pick<
+  AudioEffectOptions,
+  | 'relativeVolume'
+  | 'delay'
+  | 'stopBy'
+>;
 
 export type AudioSettingsProps = {
   effect: AudioEffectDraft;
@@ -60,7 +78,11 @@ export const AudioSettings = ({
     const isLoading = isImporting || isPreviewLoading;
 
     onLoadingChange(isLoading, loadingMessage);
-  }, [isImporting, isPreviewLoading, onLoadingChange]);
+  }, [
+    isImporting,
+    isPreviewLoading,
+    onLoadingChange,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -188,19 +210,21 @@ export const AudioSettings = ({
     try {
       const [fileHandle] = await pickerWindow.showOpenFilePicker({
         id: 'active-book-audio',
-        types: [{
-          description: 'Аудиофайлы',
-          accept: {
-            'audio/*': [
-              '.mp3',
-              '.ogg',
-              '.wav',
-              '.flac',
-              '.m4a',
-              '.aac',
-            ],
+        types: [
+          {
+            description: 'Аудиофайлы',
+            accept: {
+              'audio/*': [
+                '.mp3',
+                '.ogg',
+                '.wav',
+                '.flac',
+                '.m4a',
+                '.aac',
+              ],
+            },
           },
-        }],
+        ],
       });
 
       if (!fileHandle) {

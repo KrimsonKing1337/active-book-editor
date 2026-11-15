@@ -1,6 +1,8 @@
-import type { KeyboardEvent } from 'react';
-
-import { useEffect, useState } from 'react';
+import {
+  type KeyboardEvent,
+  useEffect,
+  useState,
+} from 'react';
 
 import type { Editor } from '@tiptap/core';
 

@@ -4,7 +4,7 @@ import type { BookProject } from '@project/@types';
 
 import { importBrowserLibrary } from '@project/libraries';
 
-import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '../../../constants';
+import { HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY } from '@components/EditorScreen/constants';
 
 type LibraryImportOptions = {
   isProjectBusy: boolean;
@@ -79,6 +79,7 @@ export const useLibraryImport = ({
     }
 
     setIsImportWarningOpen(false);
+
     void importCustomComponents();
   };
 

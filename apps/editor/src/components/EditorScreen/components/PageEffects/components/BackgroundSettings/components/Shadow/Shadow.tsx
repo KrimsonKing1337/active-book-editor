@@ -1,3 +1,5 @@
+import type { ChangeEvent } from 'react';
+
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 
 import { StyleEditor } from '../../../StyleEditor';
@@ -32,13 +34,17 @@ export const Shadow = ({ shadow, onChange }: ShadowProps) => {
     });
   };
 
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    handleShowChange(e.target.checked);
+  };
+
   return (
     <details className={styles.Section}>
       <summary>
         Затемнение и фильтры
       </summary>
 
-      <Checkbox checked={show ?? false} onChange={(e) => handleShowChange(e.target.checked)}>
+      <Checkbox checked={show ?? false} onChange={handleCheckboxChange}>
         Показывать слой
       </Checkbox>
 

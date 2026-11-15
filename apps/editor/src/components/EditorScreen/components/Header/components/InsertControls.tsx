@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react';
 
-import type { TextBlock } from '../../../@types';
+import type { TextBlock } from '@components/EditorScreen/@types';
 
 export type InsertControlsProps = {
   mediaTools: ReactNode;
   disabled: boolean;
-
   onInsertTextBlock: (block: TextBlock) => void;
   onInsertCarousel: () => void;
 };

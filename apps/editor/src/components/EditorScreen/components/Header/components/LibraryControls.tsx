@@ -3,7 +3,6 @@ import type { BrowserComponentDefinition } from '@active-book/book-builder/compo
 export type LibraryControlsProps = {
   definitions: BrowserComponentDefinition[];
   disabled: boolean;
-
   onImport: () => void;
   onInsertComponent: (packageName: string, name: string) => void;
 };
@@ -16,7 +15,7 @@ export const LibraryControls = ({
 }: LibraryControlsProps) => {
   return (
     <>
-      <button type="button" disabled={disabled} onClick={() => void onImport()}>
+      <button type="button" disabled={disabled} onClick={() => onImport()}>
         Импортировать .tgz
       </button>
 
