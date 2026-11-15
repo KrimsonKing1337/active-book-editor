@@ -1,7 +1,11 @@
 import type { FormEvent, MouseEvent } from 'react';
 
 import { render, screen } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import {
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { page } from 'vitest/browser';
 
 import { Button } from './Button';

@@ -97,21 +97,25 @@ export const EFFECT_CATEGORIES: EffectCategoryDefinition[] = [
     value: 'vibration',
     label: 'Vibration',
     description: 'Вибрация устройства',
-    groups: [{
-      value: 'vibration',
-      label: 'Vibration',
-      addLabel: 'Добавить вибрацию',
-    }],
+    groups: [
+      {
+        value: 'vibration',
+        label: 'Vibration',
+        addLabel: 'Добавить вибрацию',
+      },
+    ],
   },
   {
     value: 'flashlight',
     label: 'Flashlight',
     description: 'Вспышки и фонарик',
-    groups: [{
-      value: 'flashlight',
-      label: 'Flashlight',
-      addLabel: 'Добавить вспышку',
-    }],
+    groups: [
+      {
+        value: 'flashlight',
+        label: 'Flashlight',
+        addLabel: 'Добавить вспышку',
+      },
+    ],
   },
 ];
 

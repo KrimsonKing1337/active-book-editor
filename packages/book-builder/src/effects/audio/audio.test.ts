@@ -17,12 +17,14 @@ const audioOptions = {
 };
 
 test('rejects ungrouped audio effects', () => {
-  const ungrouped = [{
-    id: 'audio-1',
-    type: 'audio',
-    slug: 'Дождь',
-    options: audioOptions,
-  }];
+  const ungrouped = [
+    {
+      id: 'audio-1',
+      type: 'audio',
+      slug: 'Дождь',
+      options: audioOptions,
+    },
+  ];
 
   assert.deepEqual(normalizeAudioEffects(ungrouped), []);
 });

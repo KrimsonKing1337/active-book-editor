@@ -57,9 +57,11 @@ test('rejects malformed frame groups and invalid independent text', () => {
     id: 'legacy',
     type: 'frame',
     options: {
-      shadows: [{
-        id: 'shadow-1',
-      }],
+      shadows: [
+        {
+          id: 'shadow-1',
+        },
+      ],
     },
   };
 
@@ -85,12 +87,14 @@ test('resolves custom frame layer styles on the wrapper', () => {
       zIndex: 7,
       opacity: 0.8,
     },
-    styleFilters: [{
-      id: 'blur-one',
-      property: 'backdropFilter',
-      function: 'blur',
-      value: '3px',
-    }],
+    styleFilters: [
+      {
+        id: 'blur-one',
+        property: 'backdropFilter',
+        function: 'blur',
+        value: '3px',
+      },
+    ],
   });
 
   assert.equal(result.style.zIndex, 7);
@@ -106,12 +110,14 @@ test('resolves filters on one frame effect at a time', () => {
       color: '#ff0000',
       zIndex: 4,
     },
-    styleFilters: [{
-      id: 'blur',
-      property: 'filter' as const,
-      function: 'blur' as const,
-      value: '5px',
-    }],
+    styleFilters: [
+      {
+        id: 'blur',
+        property: 'filter' as const,
+        function: 'blur' as const,
+        value: '5px',
+      },
+    ],
   };
 
   const text = {
@@ -122,12 +128,14 @@ test('resolves filters on one frame effect at a time', () => {
       color: '#ffffff',
       zIndex: 3,
     },
-    styleFilters: [{
-      id: 'fade',
-      property: 'filter' as const,
-      function: 'opacity' as const,
-      value: '50%',
-    }],
+    styleFilters: [
+      {
+        id: 'fade',
+        property: 'filter' as const,
+        function: 'opacity' as const,
+        value: '50%',
+      },
+    ],
   };
 
   const result = resolveFrameOptions({

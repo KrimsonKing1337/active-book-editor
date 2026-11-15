@@ -1,4 +1,8 @@
-import type { ChangeEvent, CSSProperties, FocusEvent } from 'react';
+import type {
+  ChangeEvent,
+  CSSProperties,
+  FocusEvent,
+} from 'react';
 
 import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
 
@@ -8,7 +12,7 @@ import { customVisualDefinitionId } from '@active-book/book-builder/visualEffect
 
 import type { FilterOperation, FrameOptions } from '@active-book/book-builder/effects';
 
-import { useCustomComponents } from '@project/customComponentRegistry';
+import { useCustomComponents } from '@project/libraries';
 
 import { FrameSideCheckboxes } from './components/FrameSideCheckboxes';
 import { LayoutSettings } from './components/LayoutSettings';
@@ -16,12 +20,20 @@ import { LayoutSettings } from './components/LayoutSettings';
 import type { FrameEffectDraft } from '../../@types';
 import type { StyleEditorController } from '../StyleEditor/hooks';
 
-import { getFramePreviewKey, getFrameStylePreviewKey, usePageEffects } from '../../context';
+import {
+  getFramePreviewKey,
+  getFrameStylePreviewKey,
+  usePageEffects,
+} from '../../context';
 
 import { StyleEditor } from '../StyleEditor';
 import { IntegerInput } from '../IntegerInput';
 import { CssLengthInput } from '../CssLengthInput';
-import { TextInput, Select, Button } from '../EffectControls';
+import {
+  TextInput,
+  Select,
+  Button,
+} from '../EffectControls';
 import { VisualRegionSettings } from '../VisualRegionSettings';
 
 import { AnimationSettings } from './components';
@@ -111,7 +123,15 @@ export const FrameSettings = ({
     }
   };
 
-  const getItemStyle = (kind: Kind, id: string, style?: CSSProperties) => {
+  const getItemStyle = ({
+    kind,
+    id,
+    style,
+  }: {
+    kind: Kind;
+    id: string;
+    style?: CSSProperties;
+  }) => {
     const key = getFrameStylePreviewKey({
       effectId: effect.id,
       kind,
@@ -121,7 +141,15 @@ export const FrameSettings = ({
     return frameStylePreviews[key] ?? style ?? {};
   };
 
-  const handleStylePreview = (kind: Kind, itemId: string, style: CSSProperties) => {
+  const handleStylePreview = ({
+    kind,
+    itemId,
+    style,
+  }: {
+    kind: Kind;
+    itemId: string;
+    style: CSSProperties;
+  }) => {
     updateFrameStylePreview({
       effectId: effect.id,
       kind,
@@ -281,7 +309,11 @@ export const FrameSettings = ({
   const shadowController: StyleEditorController = {
     preview: (val) => {
       if (shadow) {
-        handleStylePreview('shadow', shadow.id, val);
+        handleStylePreview({
+          kind: 'shadow',
+          itemId: shadow.id,
+          style: val,
+        });
       }
     },
 
@@ -292,7 +324,11 @@ export const FrameSettings = ({
   const textController: StyleEditorController = {
     preview: (val) => {
       if (text) {
-        handleStylePreview('text', text.id, val);
+        handleStylePreview({
+          kind: 'text',
+          itemId: text.id,
+          style: val,
+        });
       }
     },
 
@@ -301,7 +337,11 @@ export const FrameSettings = ({
   };
 
   const componentController: StyleEditorController = {
-    preview: (val) => handleStylePreview('component', effect.id, val),
+    preview: (val) => handleStylePreview({
+      kind: 'component',
+      itemId: effect.id,
+      style: val,
+    }),
     commit: flushStylePreviews,
     commitFilters: (val) => commitItemFilters('component', val),
   };
@@ -322,18 +362,30 @@ export const FrameSettings = ({
     }
   }
 
-  const styleEditorComponentStyle = getItemStyle('component', effect.id, effect.options.style);
+  const styleEditorComponentStyle = getItemStyle({
+    kind: 'component',
+    id: effect.id,
+    style: effect.options.style,
+  });
 
   let styleEditorTextStyle = {};
 
   if (text) {
-    styleEditorTextStyle = getItemStyle('text', text.id, text.style);
+    styleEditorTextStyle = getItemStyle({
+      kind: 'text',
+      id: text.id,
+      style: text.style,
+    });
   }
 
   let styleEditorShadowStyle = {};
 
   if (shadow) {
-    styleEditorShadowStyle = getItemStyle('shadow', shadow.id, shadow.style);
+    styleEditorShadowStyle = getItemStyle({
+      kind: 'shadow',
+      id: shadow.id,
+      style: shadow.style,
+    });
   }
 
   const textFontSize = String(text?.style?.fontSize ?? '12px');

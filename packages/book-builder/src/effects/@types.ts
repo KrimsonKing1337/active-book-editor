@@ -1,4 +1,8 @@
-import type { VisualDepth, VisualPlacement, VisualVisibility } from '@active-book/types';
+import type {
+  VisualDepth,
+  VisualPlacement,
+  VisualVisibility,
+} from '@active-book/types';
 
 import type { AudioEffect, BuiltAudioEffect } from './audio';
 import type { BuiltVibrationEffect, VibrationEffect } from './vibration';

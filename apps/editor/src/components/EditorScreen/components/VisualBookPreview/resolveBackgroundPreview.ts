@@ -5,7 +5,12 @@ import type { BackgroundStylePreviews } from '../PageEffects/context';
 
 import { getBackgroundPreviewKey } from '../PageEffects/context';
 
-const layers = ['background', 'shadow', 'image', 'video'] as const;
+const layers = [
+  'background',
+  'shadow',
+  'image',
+  'video',
+] as const;
 
 export type BackgroundPreviewOptions = {
   effect: BackgroundEffectDraft;

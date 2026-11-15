@@ -83,14 +83,20 @@ test('rejects empty containers, orphan slides and unknown nested blocks and mark
   })).toThrow('node.content[0].content[0]: unknown node "missingBlock"');
   expect(() => assertContentNode({
     type: 'carousel',
-    content: [{
-      type: 'carouselSlide',
-      content: [{ type: 'paragraph', content: [{
-        type: 'text',
-        text: 'x',
-        marks: [{ type: 'missingMark' }],
-      }] }],
-    }],
+    content: [
+      {
+        type: 'carouselSlide',
+        content: [
+          { type: 'paragraph', content: [
+            {
+              type: 'text',
+              text: 'x',
+              marks: [{ type: 'missingMark' }],
+            },
+          ] },
+        ],
+      },
+    ],
   })).toThrow('node.content[0].content[0].content[0].marks[0]: unknown mark "missingMark"');
 });
 
@@ -134,15 +140,19 @@ describe('diagnostic paths', () => {
   test('reports an unknown mark inside nested text before it can disappear', () => {
     const document = {
       type: 'doc',
-      content: [{
-        type: 'heading',
-        attrs: { level: 1 },
-        content: [{
-          type: 'text',
-          text: 'Unknown',
-          marks: [{ type: 'textAction' }],
-        }],
-      }],
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1 },
+          content: [
+            {
+              type: 'text',
+              text: 'Unknown',
+              marks: [{ type: 'textAction' }],
+            },
+          ],
+        },
+      ],
     };
 
     expect(() => compilePageDocument(document, 'pages[0].document'))

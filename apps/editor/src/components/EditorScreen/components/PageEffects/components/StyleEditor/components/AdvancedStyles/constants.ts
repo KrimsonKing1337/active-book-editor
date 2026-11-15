@@ -61,12 +61,20 @@ export const FIT_OPTIONS = [
   },
 ];
 
-export const X_OPTIONS = ['left', 'center', 'right'].map((cur) => ({
+export const X_OPTIONS = [
+  'left',
+  'center',
+  'right',
+].map((cur) => ({
   value: cur,
   label: cur,
 }));
 
-export const Y_OPTIONS = ['top', 'center', 'bottom'].map((cur) => ({
+export const Y_OPTIONS = [
+  'top',
+  'center',
+  'bottom',
+].map((cur) => ({
   value: cur,
   label: cur,
 }));

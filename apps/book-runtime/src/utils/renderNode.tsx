@@ -22,7 +22,7 @@ import {
 
 import { assertContentNode } from '@active-book/book-builder/content';
 
-import { ContentMedia } from '@components/ContentMedia';
+import { ContentMedia } from '../components/ContentMedia';
 
 import { renderMarks } from './renderMarks';
 

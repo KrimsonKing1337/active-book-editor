@@ -1,6 +1,10 @@
 import { createElement } from 'react';
 
-import type { BookRuntime, VisualEffectDefinition, VisualRendererProps } from '@active-book/types';
+import type {
+  BookRuntime,
+  VisualEffectDefinition,
+  VisualRendererProps,
+} from '@active-book/types';
 
 import { BackgroundRenderer } from '@active-book/core/components/BackgroundEffects/components/BackgroundRenderer';
 import { FrameRenderer } from '@active-book/core/components/FrameEffects/components/FrameRenderer';

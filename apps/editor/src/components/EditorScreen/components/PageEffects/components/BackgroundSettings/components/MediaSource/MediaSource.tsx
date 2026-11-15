@@ -1,6 +1,12 @@
-import { type ChangeEvent, useEffect, useId, useRef, useState } from 'react';
+import {
+  type ChangeEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
 
-import type { FilePickerWindow, ProjectFileHandle } from '@project/fileSystemAccess';
+import type { FilePickerWindow, ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
 

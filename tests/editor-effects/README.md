@@ -1,6 +1,6 @@
 # Editor effects integration (real Chromium)
 
-`apps/editor/src/components/EditorScreen/EditorScreen.browser.test.tsx` mounts the
+`../../apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx` mounts the
 real EditorScreen, TipTap extensions, effects UI, core Redux/renderers, project
 services and application styles. It uses the existing Vitest `browser` project
 with `@vitest/browser-playwright`; it does not use jsdom or mock application logic.

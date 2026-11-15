@@ -48,7 +48,12 @@ export const getRgbaChannels = (hex: string): RgbaChannels => {
 
   const alphaPercent = Math.round(alpha / 255 * 100);
 
-  return [String(red), String(green), String(blue), String(alphaPercent)];
+  return [
+    String(red),
+    String(green),
+    String(blue),
+    String(alphaPercent),
+  ];
 };
 
 export const normalizeRgbaChannel = (value: string, index: number): string => {
@@ -60,7 +65,12 @@ export const normalizeRgbaChannel = (value: string, index: number): string => {
 };
 
 export const getRgbaError = (channels: RgbaChannels): string | null => {
-  const names = ['R', 'G', 'B', 'A'];
+  const names = [
+    'R',
+    'G',
+    'B',
+    'A',
+  ];
 
   for (let index = 0; index < channels.length; index += 1) {
     const text = channels[index];

@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 
 import { customVisualDefinitionId } from '@active-book/book-builder/visualEffects';
 
-import { useCustomComponents } from '@project/customComponentRegistry';
+import { useCustomComponents } from '@project/libraries';
 
 import type { BackgroundOptions } from '@components/EditorScreen/components/PageEffects/@types';
 

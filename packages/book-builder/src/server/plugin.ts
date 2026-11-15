@@ -24,11 +24,21 @@ type BuildPluginParams = {
   repoRoot: string;
 };
 
-const sendJson = (
-  res: ServerResponse,
-  statusCode: number,
-  payload: unknown,
-): void => {
+type BuildRequestParams = {
+  req: IncomingMessage;
+  res: ServerResponse;
+  repoRoot: string;
+};
+
+const sendJson = ({
+  res,
+  statusCode,
+  payload,
+}: {
+  res: ServerResponse;
+  statusCode: number;
+  payload: unknown;
+}): void => {
   res.statusCode = statusCode;
   res.setHeader('content-type', 'application/json');
 
@@ -37,14 +47,22 @@ const sendJson = (
   res.end(body);
 };
 
-const sendError = (
-  res: ServerResponse,
-  statusCode: number,
-  message: string,
-): void => {
-  sendJson(res, statusCode, {
-    ok: false,
-    error: message,
+const sendError = ({
+  res,
+  statusCode,
+  message,
+}: {
+  res: ServerResponse;
+  statusCode: number;
+  message: string;
+}): void => {
+  sendJson({
+    res,
+    statusCode,
+    payload: {
+      ok: false,
+      error: message,
+    },
   });
 };
 
@@ -66,11 +84,11 @@ const uploadProjectFile = async (
     throw new Error('Missing build file parameters');
   }
 
-  const targetPath = getBuildSessionFilePath(
+  const targetPath = getBuildSessionFilePath({
     repoRoot,
     sessionId,
-    filePath,
-  );
+    relativePath: filePath,
+  });
 
   await fsPromises.mkdir(path.dirname(targetPath), {
     recursive: true,
@@ -81,17 +99,21 @@ const uploadProjectFile = async (
   await pipeline(req, writeStream);
 };
 
-const handleSessionRequest = async (
-  req: IncomingMessage,
-  res: ServerResponse,
-  repoRoot: string,
-): Promise<void> => {
+const handleSessionRequest = async ({
+  req,
+  res,
+  repoRoot,
+}: BuildRequestParams): Promise<void> => {
   if (req.method === 'POST') {
     const sessionId = await createBuildSession(repoRoot);
 
-    sendJson(res, 200, {
-      ok: true,
-      sessionId,
+    sendJson({
+      res,
+      statusCode: 200,
+      payload: {
+        ok: true,
+        sessionId,
+      },
     });
 
     return;
@@ -101,43 +123,67 @@ const handleSessionRequest = async (
     const sessionId = getQuery(req).get('sessionId');
 
     if (!sessionId) {
-      sendError(res, 400, 'Missing sessionId');
+      sendError({
+        res,
+        statusCode: 400,
+        message: 'Missing sessionId',
+      });
 
       return;
     }
 
     await removeBuildSession(repoRoot, sessionId);
-    sendJson(res, 200, { ok: true });
+    sendJson({
+      res,
+      statusCode: 200,
+      payload: { ok: true },
+    });
 
     return;
   }
 
-  sendError(res, 405, 'Method Not Allowed');
+  sendError({
+    res,
+    statusCode: 405,
+    message: 'Method Not Allowed',
+  });
 };
 
-const handleFileRequest = async (
-  req: IncomingMessage,
-  res: ServerResponse,
-  repoRoot: string,
-): Promise<void> => {
+const handleFileRequest = async ({
+  req,
+  res,
+  repoRoot,
+}: BuildRequestParams): Promise<void> => {
   if (req.method !== 'PUT') {
-    sendError(res, 405, 'Method Not Allowed');
+    sendError({
+      res,
+      statusCode: 405,
+      message: 'Method Not Allowed',
+    });
 
     return;
   }
 
   await uploadProjectFile(req, repoRoot);
 
-  sendJson(res, 200, { ok: true });
+  sendJson({
+    res,
+    statusCode: 200,
+    payload: { ok: true },
+  });
 };
 
-const handleCompleteRequest = async (
-  req: IncomingMessage,
-  res: ServerResponse,
-  repoRoot: string,
-): Promise<void> => {
+const handleCompleteRequest = async ({
+  req,
+  res,
+  repoRoot,
+}: BuildRequestParams): Promise<void> => {
   if (req.method !== 'POST') {
-    sendError(res, 405, 'Method Not Allowed');
+    sendError({
+      res,
+      statusCode: 405,
+      message: 'Method Not Allowed',
+    });
 
     return;
   }
@@ -145,7 +191,11 @@ const handleCompleteRequest = async (
   const sessionId = getQuery(req).get('sessionId');
 
   if (!sessionId) {
-    sendError(res, 400, 'Missing sessionId');
+    sendError({
+      res,
+      statusCode: 400,
+      message: 'Missing sessionId',
+    });
 
     return;
   }
@@ -158,9 +208,13 @@ const handleCompleteRequest = async (
     await removeBuildSession(repoRoot, sessionId);
   }
 
-  sendJson(res, 200, {
-    ok: true,
-    outDir,
+  sendJson({
+    res,
+    statusCode: 200,
+    payload: {
+      ok: true,
+      outDir,
+    },
   });
 };
 
@@ -177,7 +231,11 @@ const withErrorHandling = (
         ? error.stack ?? error.message
         : String(error);
 
-      sendError(res, 500, message);
+      sendError({
+        res,
+        statusCode: 500,
+        message,
+      });
     }
   };
 };
@@ -190,21 +248,33 @@ export function bookBuildPlugin({ repoRoot }: BuildPluginParams): Plugin {
       server.middlewares.use(
         '/__active-book/build/session',
         withErrorHandling((req, res) => {
-          return handleSessionRequest(req, res, repoRoot);
+          return handleSessionRequest({
+            req,
+            res,
+            repoRoot,
+          });
         }),
       );
 
       server.middlewares.use(
         '/__active-book/build/file',
         withErrorHandling((req, res) => {
-          return handleFileRequest(req, res, repoRoot);
+          return handleFileRequest({
+            req,
+            res,
+            repoRoot,
+          });
         }),
       );
 
       server.middlewares.use(
         '/__active-book/build/complete',
         withErrorHandling((req, res) => {
-          return handleCompleteRequest(req, res, repoRoot);
+          return handleCompleteRequest({
+            req,
+            res,
+            repoRoot,
+          });
         }),
       );
     },

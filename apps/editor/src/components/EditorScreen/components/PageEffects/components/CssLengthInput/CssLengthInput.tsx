@@ -1,4 +1,8 @@
-import { type ChangeEvent, useEffect, useState } from 'react';
+import {
+  type ChangeEvent,
+  useEffect,
+  useState,
+} from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 import classNames from 'classnames';
@@ -8,7 +12,11 @@ import { Select } from '../EffectControls';
 import sharedStyles from '../EffectControls/EffectControls.module.scss';
 import styles from './CssLengthInput.module.scss';
 
-import { type Unit, units, maskOptions } from './constants';
+import {
+  type Unit,
+  units,
+  maskOptions,
+} from './constants';
 
 type CssLengthInputProps = {
   label?: string;

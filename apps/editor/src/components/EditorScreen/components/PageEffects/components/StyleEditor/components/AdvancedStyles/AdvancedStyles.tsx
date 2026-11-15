@@ -8,7 +8,13 @@ import { NumericControl, isValidNumericValue } from '../NumericControl';
 import { SearchSelect } from '../SearchSelect';
 
 import type { AdvancedProperty } from './constants';
-import { NUMERIC, PROPERTY_OPTIONS, FIT_OPTIONS, X_OPTIONS, Y_OPTIONS } from './constants';
+import {
+  NUMERIC,
+  PROPERTY_OPTIONS,
+  FIT_OPTIONS,
+  X_OPTIONS,
+  Y_OPTIONS,
+} from './constants';
 
 import styles from '../../StyleEditor.module.scss';
 
@@ -73,7 +79,12 @@ export const AdvancedStyles = ({
       objectFit,
       objectPosition,
     }));
-  }, [opacity, borderRadius, objectFit, objectPosition]);
+  }, [
+    opacity,
+    borderRadius,
+    objectFit,
+    objectPosition,
+  ]);
 
   const options = PROPERTY_OPTIONS.filter((optionCur) => {
     const mediaOnly = optionCur.value === 'objectFit' || optionCur.value === 'objectPosition';

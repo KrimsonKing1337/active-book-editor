@@ -1,5 +1,3 @@
-import type { KeyboardEvent } from 'react';
-
 import {
   useCallback,
   useEffect,
@@ -13,12 +11,8 @@ import classNames from 'classnames';
 
 import { compileVisualEffects, missingVisualDefinitions } from '@active-book/book-builder/visualEffects';
 
-import { useBookLibraries } from '@project/hooks';
-import { ProjectAssetsProvider } from '@project/ProjectAssets';
-
-import { importBrowserLibrary } from '@project/customComponents';
-
-import { CustomComponentsContext } from '@project/customComponentRegistry';
+import { ProjectAssetsProvider } from '@project/assets';
+import { CustomComponentsContext, useBookLibraries } from '@project/libraries';
 
 import type { BookProject, PendingLocalProject } from '@project/@types';
 
@@ -44,8 +38,7 @@ import { CustomComponentsWarningModal } from '../CustomComponentsWarningModal';
 import { Header } from '../Header';
 import { PageEffects, PageEffectsProvider } from '../PageEffects';
 import { RestoreBanner } from '../RestoreBanner';
-
-import { AudioInstances } from '../PageEffects/components/AudioInstances';
+import { AudioInstances } from '../PageEffects/components';
 
 import {
   editorConfig,
@@ -56,11 +49,12 @@ import {
   insertTextBlock,
 } from '../../utils';
 
+import { useCanvasInteraction, useLibraryImport } from './hooks';
+
 import styles from '../../EditorScreen.module.scss';
 
 import {
   SHOW_STRUCTURE_STORAGE_KEY,
-  HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY,
   SHOW_NARRATIVE_STORAGE_KEY,
   SHOW_BACKGROUNDS_STORAGE_KEY,
   SHOW_FRAME_EFFECTS_STORAGE_KEY,
@@ -70,13 +64,10 @@ export const EditorWorkspace = () => {
   const [buildState, setBuildState] = useState<BuildState>('idle');
   const [project, setProject] = useState<BookProject | null>(null);
   const [pendingRestore, setPendingRestore] = useState<PendingLocalProject | null>(null);
-  const [librariesRevision, setLibrariesRevision] = useState(0);
-  const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
 
   const [isDirty, setIsDirty] = useState(false);
   const [isProjectBusy, setIsProjectBusy] = useState(true);
   const [showSavedStatus, setShowSavedStatus] = useState(false);
-  const [isNodeSelectionActive, setIsNodeSelectionActive] = useState(false);
   const [projectMessage, setProjectMessage] = useState('Проверяем последний открытый проект...');
 
   const [showStructure, setShowStructure] = useState(() => {
@@ -133,24 +124,37 @@ export const EditorWorkspace = () => {
     flushStylesRef.current = flush ?? (() => true);
   }, []);
 
-  const pages = useBookPages({
+  const {
+    activePage,
+    activePosition,
+    addPage,
+    book,
+    deletePage,
+    getRevision,
+    getSnapshot,
+    movePage,
+    replaceBook,
+    revision,
+    selectPage,
+    session,
+  } = useBookPages({
     editor,
     flushStyles,
   });
 
-  const pageScope = `${pages.session}:${pages.activePage.id}`;
+  const pageScope = `${session}:${activePage.id}`;
 
   const previewConfig = {
     ...editorConfig,
-    pages: pages.book.pages.length,
+    pages: book.pages.length,
   };
 
   const autosave = useAutosave({
     editor,
-    bookRevision: pages.revision,
-    getBookSnapshot: pages.getSnapshot,
-    getBookRevision: pages.getRevision,
-    replaceBook: pages.replaceBook,
+    bookRevision: revision,
+    getBookSnapshot: getSnapshot,
+    getBookRevision: getRevision,
+    replaceBook,
     project,
     isDirty,
     isProjectBusy,
@@ -203,39 +207,23 @@ export const EditorWorkspace = () => {
   useBeforeUnload(isDirty);
   useSaveShortcut(handleSaveProject);
 
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
+  const {
+    librariesRevision,
+    isImportWarningOpen,
+    handleImportCustomComponents,
+    handleConfirmCustomComponentsImport,
+    closeImportWarning,
+  } = useLibraryImport({
+    isProjectBusy,
+    saveCurrentProject,
+    setIsProjectBusy,
+    setProjectMessage,
+  });
 
-    const handleCanvasInteraction = (event: Event) => {
-      const target = event.target;
-
-      if (!(target instanceof Node)) {
-        return;
-      }
-
-      if (editor.view.dom.contains(target)) {
-        setIsNodeSelectionActive(true);
-
-        return;
-      }
-
-      if (target instanceof Element && target.closest('[data-active-book-effects-ui]')) {
-        return;
-      }
-
-      setIsNodeSelectionActive(false);
-    };
-
-    document.addEventListener('pointerdown', handleCanvasInteraction, true);
-    document.addEventListener('focusin', handleCanvasInteraction, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handleCanvasInteraction, true);
-      document.removeEventListener('focusin', handleCanvasInteraction, true);
-    };
-  }, [editor]);
+  const {
+    isNodeSelectionActive,
+    handleCanvasKeyDown,
+  } = useCanvasInteraction(editor);
 
   useEffect(() => {
     localStorage.setItem(SHOW_STRUCTURE_STORAGE_KEY, String(showStructure));
@@ -243,7 +231,7 @@ export const EditorWorkspace = () => {
 
   const libraries = useBookLibraries({
     project,
-    session: pages.session,
+    session,
     revision: librariesRevision,
     onError: setProjectMessage,
   });
@@ -255,14 +243,14 @@ export const EditorWorkspace = () => {
       return;
     }
 
-    const compiledVisualEffects = compileVisualEffects(pages.book);
+    const compiledVisualEffects = compileVisualEffects(book);
     const missing = missingVisualDefinitions(compiledVisualEffects, libraries.definitions);
 
     if (missing.length) {
       setProjectMessage(`Не загружены определения эффектов: ${missing.join(', ')}`);
     }
   }, [
-    pages.book,
+    book,
     libraries.definitions,
     libraries.isLoading,
   ]);
@@ -283,94 +271,12 @@ export const EditorWorkspace = () => {
     setShowStructure((structureIsVisible) => !structureIsVisible);
   };
 
-  const importCustomComponents = async () => {
-    if (isProjectBusy) {
-      return;
-    }
-
-    setIsProjectBusy(true);
-
-    try {
-      const savedProject = await saveCurrentProject();
-
-      if (!savedProject) {
-        return;
-      }
-
-      const message = await importBrowserLibrary(savedProject.storage);
-
-      if (message) {
-        setLibrariesRevision((revision) => revision + 1);
-        setProjectMessage(`Подключена библиотека ${message}`);
-      }
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === 'AbortError')) {
-        console.error('[custom-components] Import failed.', error);
-
-        const errorMessage = error instanceof Error
-          ? error.message
-          : 'Ошибка импорта TGZ';
-
-        setProjectMessage(errorMessage);
-      }
-    } finally {
-      setIsProjectBusy(false);
-    }
-  };
-
-  const handleImportCustomComponents = () => {
-    if (isProjectBusy) {
-      return;
-    }
-
-    if (localStorage.getItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY) === 'true') {
-      void importCustomComponents();
-
-      return;
-    }
-
-    setIsImportWarningOpen(true);
-  };
-
-  const handleConfirmCustomComponentsImport = (doNotShowAgain: boolean) => {
-    if (doNotShowAgain) {
-      localStorage.setItem(HIDE_CUSTOM_COMPONENTS_WARNING_STORAGE_KEY, 'true');
-    }
-
-    setIsImportWarningOpen(false);
-    void importCustomComponents();
-  };
-
   const handleInsertCustomComponent = (packageName: string, name: string) => {
     insertCustomComponent(editor, { packageName, name });
   };
 
   const handleInsertTextBlock = (block: TextBlock) => {
     insertTextBlock(editor, block);
-  };
-
-  const handleCanvasKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key !== 'Escape' || !editor) {
-      return;
-    }
-
-    const target = event.target;
-
-    if (!(target instanceof Node) || !editor.view.dom.contains(target)) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const focusedElement = document.activeElement;
-
-    if (focusedElement instanceof HTMLElement && editor.view.dom.contains(focusedElement)) {
-      focusedElement.blur();
-    }
-
-    editor.commands.blur();
-    setIsNodeSelectionActive(false);
   };
 
   const pageEffects = (
@@ -386,61 +292,87 @@ export const EditorWorkspace = () => {
     />
   );
 
+  const headerProjectStatus = {
+    projectName,
+    projectMessage,
+    isDirty,
+    showSavedStatus,
+  };
+
+  const headerProjectControls = {
+    disabled: buttonIsDisabled,
+    isProjectBusy,
+    onNewProject: handleNewProject,
+    onOpenProject: handleOpenProject,
+    onSaveProject: handleSaveProject,
+  };
+
+  const headerViewControls = {
+    showStructure,
+    showNarrative,
+    showBackgrounds,
+    showFrameEffects,
+    structureButtonIsDisabled,
+    onToggleStructure: toggleStructure,
+    onToggleNarrative: () => setShowNarrative((visible) => !visible),
+    onToggleBackgrounds: () => setShowBackgrounds((visible) => !visible),
+    onToggleFrameEffects: () => setShowFrameEffects((visible) => !visible),
+  };
+
+  const headerInsertControls = {
+    mediaTools: mediaInsert,
+    disabled: buttonIsDisabled,
+    onInsertTextBlock: handleInsertTextBlock,
+    onInsertCarousel: () => editor?.commands.insertCarousel(),
+  };
+
+  const headerLibraryControls = {
+    definitions: customComponentDefinitions,
+    disabled: buttonIsDisabled,
+    onImport: handleImportCustomComponents,
+    onInsertComponent: handleInsertCustomComponent,
+  };
+
+  const headerBuild = {
+    state: buildState,
+    disabled: buttonIsDisabled,
+    onBuild: buildBook,
+  };
+
   return (
     <ProjectAssetsProvider project={project}>
       <CustomComponentsContext value={libraries.registry}>
         <PageEffectsProvider
           editor={editor}
           pageId={pageScope}
-          ownerPageId={pages.activePage.id}
+          ownerPageId={activePage.id}
           onStylesFlusher={registerStylesFlusher}
         >
           <div className={editorScreenClassNames}>
             <Header
-              mediaTools={mediaInsert}
-              projectName={projectName}
-              projectMessage={projectMessage}
-              isDirty={isDirty}
-              isProjectBusy={isProjectBusy}
-              showSavedStatus={showSavedStatus}
-              showStructure={showStructure}
-              showNarrative={showNarrative}
-              showBackgrounds={showBackgrounds}
-              showFrameEffects={showFrameEffects}
-              buildState={buildState}
-              buttonIsDisabled={buttonIsDisabled}
-              structureButtonIsDisabled={structureButtonIsDisabled}
-
-              onNewProject={handleNewProject}
-              onOpenProject={handleOpenProject}
-              onSaveProject={handleSaveProject}
-              onToggleStructure={toggleStructure}
-              onToggleNarrative={() => setShowNarrative((visible) => !visible)}
-              onToggleBackgrounds={() => setShowBackgrounds((visible) => !visible)}
-              onToggleFrameEffects={() => setShowFrameEffects((visible) => !visible)}
-              onInsertCustomComponent={handleInsertCustomComponent}
-              customComponentDefinitions={customComponentDefinitions}
-              onInsertTextBlock={handleInsertTextBlock}
-              onInsertCarousel={() => editor?.commands.insertCarousel()}
-              onBuildBook={buildBook}
-              onImportCustomComponents={handleImportCustomComponents}
+              projectStatus={headerProjectStatus}
+              projectControls={headerProjectControls}
+              viewControls={headerViewControls}
+              insertControls={headerInsertControls}
+              libraryControls={headerLibraryControls}
+              build={headerBuild}
             />
 
             <ContentError editor={editor} />
 
             <Pages
-              pages={pages.book.pages}
-              activeId={pages.activePage.id}
+              pages={book.pages}
+              activeId={activePage.id}
               disabled={buttonIsDisabled}
-              onSelect={pages.selectPage}
-              onAdd={pages.addPage}
-              onDelete={pages.deletePage}
-              onMove={pages.movePage}
+              onSelect={selectPage}
+              onAdd={addPage}
+              onDelete={deletePage}
+              onMove={movePage}
             />
 
             {isImportWarningOpen && (
               <CustomComponentsWarningModal
-                onClose={() => setIsImportWarningOpen(false)}
+                onClose={closeImportWarning}
                 onConfirm={handleConfirmCustomComponentsImport}
               />
             )}
@@ -460,18 +392,18 @@ export const EditorWorkspace = () => {
 
             <main className={styles.Canvas} onKeyDownCapture={handleCanvasKeyDown}>
               <VisualBookPreview
-                book={pages.book}
-                pageId={pages.activePage.id}
-                session={pages.session}
+                book={book}
+                pageId={activePage.id}
+                session={session}
                 definitions={libraries.definitions}
                 showBackgrounds={showBackgrounds}
                 showFrameEffects={showFrameEffects}
                 config={previewConfig}
                 editorTools={pageEffects}
               >
-                <AudioInstances key={`audio:${pageScope}`} project={project} page={pages.activePosition} />
+                <AudioInstances key={`audio:${pageScope}`} project={project} page={activePosition} />
 
-                <div data-editor-page-id={pages.activePage.id}>
+                <div data-editor-page-id={activePage.id}>
                   <EditorContent editor={editor} />
                 </div>
               </VisualBookPreview>

@@ -60,7 +60,11 @@ test('accepts independent background, image, video and shadow effects', () => {
 
   assert.equal(effects.length, 5);
   assert.deepEqual(effects.map((cur) => cur.kind), [
-    'background', 'image', 'video', 'shadow', 'component',
+    'background',
+    'image',
+    'video',
+    'shadow',
+    'component',
   ]);
   assert.equal(effects[1].options.image?.id, 'img-1');
 });
@@ -70,10 +74,12 @@ test('rejects legacy grouped background effects and missing media IDs', () => {
     id: 'old',
     type: 'background',
     options: {
-      images: [{
-        id: 'img',
-        src: 'forest.webp',
-      }],
+      images: [
+        {
+          id: 'img',
+          src: 'forest.webp',
+        },
+      ],
     },
   };
 

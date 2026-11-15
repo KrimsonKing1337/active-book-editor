@@ -1,5 +1,13 @@
-import type { ChangeEvent, FocusEvent, KeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import type {
+  ChangeEvent,
+  FocusEvent,
+  KeyboardEvent,
+} from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { InputMask, unformat } from '@react-input/mask';
 import { HexAlphaColorPicker } from 'react-colorful';
@@ -58,7 +66,12 @@ export const ColorSettings = ({
   const [showValidation, setShowValidation] = useState(false);
 
   const rgbaDraftRef = useRef(rgbaDraft);
-  const channelRefs = useRef<Array<HTMLInputElement | null>>([null, null, null, null]);
+  const channelRefs = useRef<Array<HTMLInputElement | null>>([
+    null,
+    null,
+    null,
+    null,
+  ]);
 
   useEffect(() => {
     const nextRgba = getRgbaChannels(pickerColor);

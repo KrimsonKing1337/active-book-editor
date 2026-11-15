@@ -1,15 +1,26 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
-
 import { createContext, useContext } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BackgroundPreviewLayer } from '../../context';
 
+export type PreviewParams = {
+  layer: BackgroundPreviewLayer;
+  mediaId: string | null;
+  style: CSSProperties;
+};
+
+export type CommitFiltersParams = {
+  layer: BackgroundPreviewLayer;
+  mediaId: string | null;
+  styleFilters: FilterOperation[];
+};
+
 type BackgroundStyleContextValue = {
-  preview: (layer: BackgroundPreviewLayer, mediaId: string | null, style: CSSProperties) => void;
+  preview: (params: PreviewParams) => void;
   commit: () => boolean;
-  commitFilters: (layer: BackgroundPreviewLayer, mediaId: string | null, filters: FilterOperation[]) => void;
+  commitFilters: (params: CommitFiltersParams) => void;
 };
 
 type BackgroundStyleProviderProps = PropsWithChildren<BackgroundStyleContextValue>;

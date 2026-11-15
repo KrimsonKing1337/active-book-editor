@@ -8,13 +8,11 @@ const collect = (nodes: readonly BookContentNode[], paths: Set<string>): void =>
   for (const nodeCur of nodes) {
     const { type } = nodeCur;
 
-    if (type === 'image') {
+    if (type === 'image' || type === 'video') {
       paths.add(nodeCur.attrs.src);
-    } else if (type === 'video') {
-      const { attrs } = nodeCur;
 
-      if (attrs.poster) {
-        paths.add(attrs.poster);
+      if (type === 'video' && nodeCur.attrs.poster) {
+        paths.add(nodeCur.attrs.poster);
       }
     } else if (type === 'carousel' || type === 'carouselSlide') {
       collect(nodeCur.content, paths);

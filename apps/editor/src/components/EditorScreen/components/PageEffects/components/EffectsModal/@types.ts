@@ -1,4 +1,8 @@
-import type { AudioOptions, BackgroundEffectKind, FrameEffectKind } from '@active-book/book-builder/effects';
+import type {
+  AudioOptions,
+  BackgroundEffectKind,
+  FrameEffectKind,
+} from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 

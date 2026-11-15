@@ -1,14 +1,22 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, test, vi } from 'vitest';
+import {
+  expect,
+  test,
+  vi,
+} from 'vitest';
 
 import type { VisualVisibility } from '@active-book/types';
 
 import { VisualRegionSettings } from './VisualRegionSettings';
 
 const customVisibility: VisualVisibility = {
-  sides: ['top', 'right', 'left'],
+  sides: [
+    'top',
+    'right',
+    'left',
+  ],
   frameWidth: {
     top: {
       value: 6,
@@ -54,7 +62,11 @@ const assertRegionChangesPreserveVisibility = async (visibility: VisualVisibilit
 
   const region = screen.getByRole('combobox', { name: 'Область размещения эффекта' });
 
-  for (const nextRegion of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame']) {
+  for (const nextRegion of [
+    'storyViewportFrame',
+    'narrativeFrame',
+    'toolbarFrame',
+  ]) {
     await user.selectOptions(region, nextRegion);
 
     expect(handleChange).toHaveBeenLastCalledWith({

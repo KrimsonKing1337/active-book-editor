@@ -1,6 +1,10 @@
 import type { ChangeEvent } from 'react';
 
-import type { VisualDepth, VisualPlacement, VisualVisibility } from '@active-book/types';
+import type {
+  VisualDepth,
+  VisualPlacement,
+  VisualVisibility,
+} from '@active-book/types';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 

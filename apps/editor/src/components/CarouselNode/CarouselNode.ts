@@ -24,7 +24,11 @@ export const CarouselSlide = Node.create({
   isolating: true,
 
   parseHTML: () => [{ tag: 'section[data-type="carouselSlide"]' }],
-  renderHTML: () => ['section', { 'data-type': 'carouselSlide', role: 'group' }, 0],
+  renderHTML: () => [
+    'section',
+    { 'data-type': 'carouselSlide', role: 'group' },
+    0,
+  ],
 });
 
 export const CarouselNode = Node.create({
@@ -35,7 +39,11 @@ export const CarouselNode = Node.create({
   isolating: true,
 
   parseHTML: () => [{ tag: 'section[data-type="carousel"]' }],
-  renderHTML: () => ['section', { 'data-type': 'carousel' }, 0],
+  renderHTML: () => [
+    'section',
+    { 'data-type': 'carousel' },
+    0,
+  ],
 
   addNodeView: () => ReactNodeViewRenderer(CarouselNodeView),
   addProseMirrorPlugins: () => [carouselSelectionPlugin()],

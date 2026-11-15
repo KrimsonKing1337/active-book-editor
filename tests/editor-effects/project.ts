@@ -8,7 +8,7 @@ import type { BookDocument } from '@active-book/book-builder/book';
 import { visualToDraft, pageVisualEffects } from '@active-book/book-builder/visualEffects';
 import { normalizeSpecializedEffects } from '@active-book/book-builder/effects/utils';
 
-import { clearLastProjectHandle } from '@project/recentProjectStore';
+import { clearLastProjectHandle } from '@project/storage';
 
 import { groupPageEffects } from '@components/EditorScreen/components/PageEffects/context/utils';
 
@@ -49,10 +49,12 @@ export const createProject = async ({ empty = false } = {}) => {
   await clearLastProjectHandle();
   localStorage.clear();
 
-  const projectName = `effects-${crypto.randomUUID()}`;
+  const projectRootName = `effects-${crypto.randomUUID()}`;
   const storageRoot = await navigator.storage.getDirectory();
 
-  const projectDirectory = await storageRoot.getDirectoryHandle(projectName, { create: true });
+  const projectRoot = await storageRoot.getDirectoryHandle(projectRootName, { create: true });
+  // Keep the visible name stable without sharing files between test projects.
+  const projectDirectory = await projectRoot.getDirectoryHandle('effects-book', { create: true });
   const assetsDirectory = await projectDirectory.getDirectoryHandle('assets', { create: true });
 
   if (!empty) {
@@ -113,11 +115,11 @@ export const createProject = async ({ empty = false } = {}) => {
 
   const dispose = async () => {
     await clearLastProjectHandle();
-    await storageRoot.removeEntry(projectName, { recursive: true });
+    await storageRoot.removeEntry(projectRootName, { recursive: true });
   };
 
   return {
-    name: projectName,
+    name: projectDirectory.name,
     directory: projectDirectory,
     pickDirectory,
     readDocument,

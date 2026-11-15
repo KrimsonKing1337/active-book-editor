@@ -7,7 +7,7 @@ import {
 import type { Editor } from '@tiptap/core';
 
 import type { BookProject } from '@project/@types';
-import type { ProjectFileHandle } from '@project/fileSystemAccess';
+import type { ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
 

@@ -1,4 +1,9 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import type { Editor } from '@tiptap/core';
 
@@ -157,7 +162,11 @@ export const usePageEffectsState = ({
       .setDocAttribute('visualEffects', visualEffects);
 
     editor.view.dispatch(transaction);
-  }, [editor, pageId, ownerPageId]);
+  }, [
+    editor,
+    pageId,
+    ownerPageId,
+  ]);
 
   const getCurrentEffects = useCallback((): EditorEffectDraft[] => {
     return getPageEffects(editor);

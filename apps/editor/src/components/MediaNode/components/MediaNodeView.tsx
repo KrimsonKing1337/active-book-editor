@@ -7,7 +7,7 @@ import mediaStyles from '@book-runtime/components/ContentMedia/ContentMedia.modu
 
 import { assertContentNode } from '@root/packages/book-builder/src/content';
 
-import { useProjectAssetUrls } from '@project/ProjectAssets';
+import { useProjectAssetUrls } from '@project/assets';
 
 import { MediaSettings } from './MediaSettings';
 

@@ -1,6 +1,6 @@
 import { contentMediaFormats, contentMediaFormat } from '@active-book/book-builder/content';
 
-import type { FilePickerWindow } from '@project/fileSystemAccess';
+import type { FilePickerWindow } from '@project/@types/fileSystemAccess';
 
 import type { MediaKind } from '../MediaNode/utils';
 

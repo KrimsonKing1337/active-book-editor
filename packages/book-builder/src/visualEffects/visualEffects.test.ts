@@ -215,9 +215,17 @@ test.each(['background', 'frame'] as const)('shared %s placement metadata round 
   });
   const defaultRegion = type === 'frame' ? 'storyViewportFrame' : 'storyViewport';
   expect(initial.effect.placement).toEqual({ region: defaultRegion });
-  for (const region of ['application', 'story', 'storyViewport', 'narrativeFrame', 'storyViewportFrame',
-    'toolbar', 'toolbarFrame',
-    'narrativeViewport', 'narrativeContent'] as const) {
+  for (const region of [
+    'application',
+    'story',
+    'storyViewport',
+    'narrativeFrame',
+    'storyViewportFrame',
+    'toolbar',
+    'toolbarFrame',
+    'narrativeViewport',
+    'narrativeContent',
+  ] as const) {
     const panel = visualToDraft(initial);
     panel.placement = {
       region,
@@ -317,7 +325,12 @@ test('minimal application placement compiles and old coordinate descriptions are
 
 test('every frame region is a rectangle without implicit masks or legacy aliases', () => {
   const book = readFixture();
-  for (const region of ['storyViewportFrame', 'narrativeFrame', 'toolbarFrame', 'toolbar'] as const) {
+  for (const region of [
+    'storyViewportFrame',
+    'narrativeFrame',
+    'toolbarFrame',
+    'toolbar',
+  ] as const) {
     const authored = book.visualEffects[0];
     authored.effect.placement = { region };
     authored.effect.visibility = {};
@@ -353,7 +366,12 @@ test('asymmetric side widths survive editing, serialization and builder validati
   };
   authored.effect.placement = { region: 'toolbarFrame' };
   authored.effect.visibility = {
-    sides: ['top', 'right', 'bottom', 'left'],
+    sides: [
+      'top',
+      'right',
+      'bottom',
+      'left',
+    ],
     frameWidth: width,
   };
 

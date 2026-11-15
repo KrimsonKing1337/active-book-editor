@@ -1,6 +1,6 @@
 import type { JsonValue, VisualEffectRegistration } from '@active-book/types';
 
-import { useProjectAssetUrls } from '@project/ProjectAssets';
+import { useProjectAssetUrls } from '@project/assets';
 
 const assetPaths = (value: JsonValue): string[] => {
   if (Array.isArray(value)) {

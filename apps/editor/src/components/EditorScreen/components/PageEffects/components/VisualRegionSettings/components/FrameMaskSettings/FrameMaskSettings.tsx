@@ -1,13 +1,22 @@
 import type { ChangeEvent, ReactNode } from 'react';
 
-import type { FrameSide, VisualVisibility, VisualFrameWidth } from '@active-book/types';
+import type {
+  FrameSide,
+  VisualVisibility,
+  VisualFrameWidth,
+} from '@active-book/types';
 
 import { Checkbox, Select } from '../../../EffectControls';
 import { PlacementNumber } from '../PlacementNumber';
 
 import styles from '../../VisualRegionSettings.module.scss';
 
-const frameSides: readonly FrameSide[] = ['top', 'right', 'bottom', 'left'];
+const frameSides: readonly FrameSide[] = [
+  'top',
+  'right',
+  'bottom',
+  'left',
+];
 
 const sideLabels: Record<FrameSide, string> = {
   top: 'Сверху',

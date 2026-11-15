@@ -67,7 +67,7 @@ export const MediaInsert = ({ disabled, ...options }: MediaInsertProps) => {
   return (
     <>
       {controls.map(({ kind, label }) => {
-        const ref = (element: HTMLInputElement) => {
+        const ref = (element: HTMLInputElement | null) => {
           inputs.current[kind] = element;
         };
 

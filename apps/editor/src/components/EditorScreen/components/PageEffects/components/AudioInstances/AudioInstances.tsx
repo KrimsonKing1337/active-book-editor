@@ -109,7 +109,13 @@ const AudioInstance = ({
         URL.revokeObjectURL(blobUrl);
       }
     };
-  }, [id, src, project, dispatch, setAudioPreviewStatus]);
+  }, [
+    id,
+    src,
+    project,
+    dispatch,
+    setAudioPreviewStatus,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -154,7 +160,12 @@ const AudioInstance = ({
       currentAudio.howlInst.off('load', handleReady);
       currentAudio.howlInst.off('loaderror', handleError);
     };
-  }, [currentAudio, currentSource, id, setAudioPreviewStatus]);
+  }, [
+    currentAudio,
+    currentSource,
+    id,
+    setAudioPreviewStatus,
+  ]);
 
   // These options can be changed without replacing a registered HowlWrapper.
   useEffect(() => {
@@ -171,7 +182,14 @@ const AudioInstance = ({
     } else {
       currentAudio.volume(currentAudio.getVolumeByType() / 100);
     }
-  }, [currentAudio, currentSource, loop, type, relativeVolume, screamer]);
+  }, [
+    currentAudio,
+    currentSource,
+    loop,
+    type,
+    relativeVolume,
+    screamer,
+  ]);
 
   if (!currentSource) {
     return null;

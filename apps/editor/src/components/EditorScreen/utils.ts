@@ -71,37 +71,39 @@ export const ActiveBlockHighlight = Extension.create({
   name: 'activeBlockHighlight',
 
   addProseMirrorPlugins() {
-    return [new Plugin({
-      props: {
-        decorations(state) {
-          const { selection } = state;
+    return [
+      new Plugin({
+        props: {
+          decorations(state) {
+            const { selection } = state;
 
-          let blockPosition: number;
+            let blockPosition: number;
 
-          if (selection instanceof NodeSelection) {
-            blockPosition = selection.from;
-          } else if (selection.$head.depth > 0) {
-            blockPosition = selection.$head.before(1);
-          } else {
-            return DecorationSet.empty;
-          }
+            if (selection instanceof NodeSelection) {
+              blockPosition = selection.from;
+            } else if (selection.$head.depth > 0) {
+              blockPosition = selection.$head.before(1);
+            } else {
+              return DecorationSet.empty;
+            }
 
-          const block = state.doc.nodeAt(blockPosition);
+            const block = state.doc.nodeAt(blockPosition);
 
-          if (!block || !ACTIVE_BLOCK_NAMES.has(block.type.name)) {
-            return DecorationSet.empty;
-          }
+            if (!block || !ACTIVE_BLOCK_NAMES.has(block.type.name)) {
+              return DecorationSet.empty;
+            }
 
-          const blockShift = blockPosition + block.nodeSize;
+            const blockShift = blockPosition + block.nodeSize;
 
-          const decoration = Decoration.node(blockPosition, blockShift, {
-            class: 'isActive',
-          });
+            const decoration = Decoration.node(blockPosition, blockShift, {
+              class: 'isActive',
+            });
 
-          return DecorationSet.create(state.doc, [decoration]);
+            return DecorationSet.create(state.doc, [decoration]);
+          },
         },
-      },
-    })];
+      }),
+    ];
   },
 });
 
@@ -141,9 +143,11 @@ export const editorConfig: Omit<Config, 'pages'> = {
 
 export const createEmptyDocument = (): JSONContent => ({
   type: 'doc',
-  content: [{
-    type: 'paragraph',
-  }],
+  content: [
+    {
+      type: 'paragraph',
+    },
+  ],
 });
 
 export const getProjectErrorMessage = (error: unknown): string => {

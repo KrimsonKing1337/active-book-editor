@@ -1,4 +1,9 @@
-import { type PropsWithChildren, useLayoutEffect, useMemo, useState } from 'react';
+import {
+  type PropsWithChildren,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import type { Editor } from '@tiptap/core';
 

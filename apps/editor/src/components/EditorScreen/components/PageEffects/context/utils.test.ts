@@ -78,9 +78,21 @@ test('preserves existing preview key formats', () => {
     itemId: 'text-1',
   });
 
-  assert.equal(backgroundKey, JSON.stringify(['background-1', 'image', 'image-1']));
-  assert.equal(defaultMediaKey, JSON.stringify(['background-1', 'shadow', null]));
-  assert.equal(frameKey, JSON.stringify(['frame-1', 'text', 'text-1']));
+  assert.equal(backgroundKey, JSON.stringify([
+    'background-1',
+    'image',
+    'image-1',
+  ]));
+  assert.equal(defaultMediaKey, JSON.stringify([
+    'background-1',
+    'shadow',
+    null,
+  ]));
+  assert.equal(frameKey, JSON.stringify([
+    'frame-1',
+    'text',
+    'text-1',
+  ]));
   assert.equal(getFramePreviewKey('frame-1', 'text-1'), JSON.stringify(['frame-1', 'text-1']));
 });
 

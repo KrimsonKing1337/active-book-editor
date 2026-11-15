@@ -32,7 +32,11 @@ export const missingVisualDefinitions = (
   definitions: readonly VisualEffectDefinition[],
 ): string[] => {
   const definitionIds = definitions.map((definitionCur) => definitionCur.id);
-  const known = new Set([backgroundDefinitionId, frameDefinitionId, ...definitionIds]);
+  const known = new Set([
+    backgroundDefinitionId,
+    frameDefinitionId,
+    ...definitionIds,
+  ]);
 
   const missing = registrations.filter((registrationCur) => {
     return !known.has(registrationCur.effect.definitionId);
