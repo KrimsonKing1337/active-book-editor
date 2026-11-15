@@ -69,7 +69,7 @@ export const getBuildSessionFilePath = (
   const isProjectManifest = safePath === 'book.json' || safePath === 'package.json';
 
   const isAsset = safePath.startsWith('assets/');
-  const isDependencyArchive = safePath.startsWith('dependencies/') && safePath.endsWith('.tgz');
+  const isDependencyArchive = safePath.startsWith('dependencies/') && safePath.toLowerCase().endsWith('.tgz');
 
   const isOutsideProject = safePath.startsWith('../') || path.posix.isAbsolute(safePath)
     || normalizedPath.split('/').includes('..');

@@ -28,7 +28,7 @@ beforeEach(async () => {
   project = await createProject({ empty: true });
   const directory = await project.directory.getDirectoryHandle('imports', { create: true });
 
-  archive = await directory.getFileHandle('fixture-parts.tgz', { create: true });
+  archive = await directory.getFileHandle('Fixture-Parts.TGZ', { create: true });
   const writable = await archive.createWritable();
 
   await writable.write(await (await fetch(archiveUrl)).blob());
@@ -106,7 +106,7 @@ test('retains a real TGZ registry until replacement is confirmed, then reloads a
   const savedPackage = await (await metadata.getFile()).text();
 
   expect(JSON.parse(savedPackage)).toMatchObject(initialPackage);
-  expect(JSON.parse(savedPackage).dependencies['fixture-parts']).toBe('file:./dependencies/fixture-parts.tgz');
+  expect(JSON.parse(savedPackage).dependencies['fixture-parts']).toBe('file:./dependencies/Fixture-Parts.TGZ');
   await insert.click();
   const badge = page.getByTestId('custom-badge');
 
@@ -139,7 +139,7 @@ test('retains a real TGZ registry until replacement is confirmed, then reloads a
     const description = JSON.parse(await (await metadata.getFile()).text());
 
     return description.dependencies['fixture-parts'];
-  }).toBe('file:./dependencies/fixture-parts-1.tgz');
+  }).toBe('file:./dependencies/Fixture-Parts-1.tgz');
   await expect.poll(() => reads.mock.calls.length).toBe(readCount + 1);
   await expect.element(insert).toBeEnabled();
   await expect.element(badge).toBeInTheDocument();

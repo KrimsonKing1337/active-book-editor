@@ -225,7 +225,7 @@ export class LocalProjectStorage implements ProjectStorage {
     if (sourceHandle && directory.resolve) {
       const relativePath = await directory.resolve(sourceHandle);
 
-      if (relativePath?.length === 1 && relativePath[0].endsWith('.tgz')) {
+      if (relativePath?.length === 1 && relativePath[0].toLowerCase().endsWith('.tgz')) {
         return `${DEPENDENCIES_DIRECTORY_NAME}/${relativePath[0]}`;
       }
     }
