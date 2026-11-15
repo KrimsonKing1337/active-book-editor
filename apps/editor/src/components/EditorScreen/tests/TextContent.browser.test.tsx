@@ -185,7 +185,8 @@ test('uses semantic text elements without a React NodeView and preserves typogra
 
   expect(paragraphStyle.marginTop).toBe('0px');
   expect(paragraphStyle.paddingBottom).toBe('7px');
-  expect(paragraphStyle.textIndent).not.toBe('0px');
+  expect(paragraphStyle.fontSize).toBe('20px');
+  expect(paragraphStyle.textIndent).toBe('24px');
   expect(headingOneStyle.marginTop).toBe('0px');
   expect(headingOneStyle.paddingBottom).toBe('7px');
   expect(headingOneStyle.fontWeight).toBe('700');

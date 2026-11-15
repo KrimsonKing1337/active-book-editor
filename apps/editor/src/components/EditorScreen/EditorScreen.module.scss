@@ -77,7 +77,8 @@
 
       font-size: calc(var(--font-base) * 1.25 * var(--font-scale) / 100);
       line-height: 1.2;
-      text-indent: 1.5em;
+      // Preserve the indent from the former wrapper, before the paragraph's font multiplier.
+      text-indent: 1.5rem;
     }
 
     h1 {
