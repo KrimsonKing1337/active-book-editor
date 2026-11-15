@@ -1,8 +1,8 @@
-import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+
+import { useRef, useState } from 'react';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
-
-import type { FilterOperation } from '@active-book/book-builder/effects';
 
 import type { BookProject } from '@project/@types';
 import type { ProjectFileHandle } from '@project/@types/fileSystemAccess';
@@ -11,9 +11,17 @@ import type { BackgroundEffectDraft, BackgroundOptions } from '../../@types';
 
 import { useBackgroundStylePreviewUpdater, usePageEffects } from '../../context';
 
+import type { CommitFiltersParams, PreviewParams } from './BackgroundStyleContext';
+
 import { BackgroundStyleProvider } from './BackgroundStyleContext';
 
-import { Image, Video, Shadow, Background, CustomComponent } from './components';
+import {
+  Image,
+  Video,
+  Shadow,
+  Background,
+  CustomComponent,
+} from './components';
 
 import { DEFAULT_SHADOW_OPTIONS } from './constants';
 
@@ -22,8 +30,6 @@ import { StyleEditor } from '../StyleEditor';
 import { VisualRegionSettings } from '../VisualRegionSettings';
 
 import styles from './BackgroundSettings.module.scss';
-
-type Layer = 'background' | 'image' | 'video' | 'shadow';
 
 export type BackgroundSettingsProps = {
   effect: BackgroundEffectDraft;
@@ -87,20 +93,26 @@ export const BackgroundSettings = ({
     onUpdate(effect.id, updatedEffect);
   };
 
-  const importAsset = async (
-    file: File,
-    fileHandle: ProjectFileHandle | undefined,
-    kind: 'image' | 'video',
-  ): Promise<string> => {
+  const importAsset = async ({
+    file,
+    fileHandle,
+    kind,
+  }: {
+    file: File;
+    fileHandle?: ProjectFileHandle;
+    kind: 'image' | 'video';
+  }): Promise<string> => {
     if (!project) {
       throw new Error('Сначала создайте или откройте проект книги');
     }
 
     importsInProgressRef.current += 1;
 
-    const loadingMessage = kind === 'image'
-      ? 'Загружаем изображение...'
-      : 'Загружаем видео...';
+    let loadingMessage = 'Загружаем видео...';
+
+    if (kind === 'image') {
+      loadingMessage = 'Загружаем изображение...';
+    }
 
     onLoadingChange(true, loadingMessage);
 
@@ -115,11 +127,11 @@ export const BackgroundSettings = ({
     }
   };
 
-  const updateStylePreviewForEffect = (
-    layer: Layer,
-    mediaId: string | null,
-    style: CSSProperties,
-  ) => {
+  const updateStylePreviewForEffect = ({
+    layer,
+    mediaId,
+    style,
+  }: PreviewParams) => {
     const update = {
       effectId: effect.id,
       layer,
@@ -130,11 +142,11 @@ export const BackgroundSettings = ({
     updateStylePreview(update);
   };
 
-  const commitFilters = (
-    layer: Layer,
-    mediaId: string | null,
-    styleFilters: FilterOperation[],
-  ) => {
+  const commitFilters = ({
+    layer,
+    mediaId,
+    styleFilters,
+  }: CommitFiltersParams) => {
     if (!flushStylePreviews()) {
       return;
     }
@@ -194,11 +206,19 @@ export const BackgroundSettings = ({
   };
 
   const handleImportImage = (file: File, handle?: ProjectFileHandle) => {
-    return importAsset(file, handle, 'image');
+    return importAsset({
+      file,
+      fileHandle: handle,
+      kind: 'image',
+    });
   };
 
   const handleImportVideo = (file: File, handle?: ProjectFileHandle) => {
-    return importAsset(file, handle, 'video');
+    return importAsset({
+      file,
+      fileHandle: handle,
+      kind: 'video',
+    });
   };
 
   const handleImageChange = (val: NonNullable<BackgroundOptions['image']>) => {

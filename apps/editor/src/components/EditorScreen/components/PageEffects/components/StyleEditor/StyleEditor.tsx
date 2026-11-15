@@ -11,7 +11,11 @@ import { useOptionalBackgroundStyle } from '../BackgroundSettings/BackgroundStyl
 
 import { type StyleEditorController, useStyleEditor } from './hooks';
 
-import { AdvancedStyles, ColorSettings, FilterSettings } from './components';
+import {
+  AdvancedStyles,
+  ColorSettings,
+  FilterSettings,
+} from './components';
 
 import styles from './StyleEditor.module.scss';
 
@@ -69,7 +73,11 @@ export const StyleEditor = ({
     if (controller) {
       controller.commitFilters(operations);
     } else {
-      backgroundStyle?.commitFilters(layer, normalizedMediaId, operations);
+      backgroundStyle?.commitFilters({
+        layer,
+        mediaId: normalizedMediaId,
+        styleFilters: operations,
+      });
     }
   };
 

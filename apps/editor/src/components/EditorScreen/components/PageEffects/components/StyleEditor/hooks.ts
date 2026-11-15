@@ -1,4 +1,6 @@
-import { type CSSProperties, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+
+import { useRef, useState } from 'react';
 
 import type { FilterOperation } from '@active-book/book-builder/effects';
 
@@ -45,7 +47,11 @@ export const useStyleEditor = ({
     if (controller) {
       controller.preview(style);
     } else if (backgroundStyle) {
-      backgroundStyle.preview(layer, normalizedMediaId, style);
+      backgroundStyle.preview({
+        layer,
+        mediaId: normalizedMediaId,
+        style,
+      });
     }
   };
 
