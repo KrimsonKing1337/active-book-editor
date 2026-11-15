@@ -79,7 +79,10 @@ for (const result of results) {
 const failures = results.filter((result) => !result.passed);
 const durationSeconds = (performance.now() - startedAt) / 1000;
 
-console.log(`\n${results.length - failures.length}/${results.length} suites passed in ${durationSeconds.toFixed(1)}s`);
+const testCounts = results.length - failures.length;
+const fixedSeconds = durationSeconds.toFixed(1);
+
+console.log(`\n${testCounts}/${results.length} suites passed in ${fixedSeconds}s`);
 
 if (failures.length > 0) {
   process.exitCode = 1;
