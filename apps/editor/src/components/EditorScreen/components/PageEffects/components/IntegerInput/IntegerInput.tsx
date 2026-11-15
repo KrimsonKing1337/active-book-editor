@@ -3,6 +3,7 @@ import type {
   FocusEvent,
   InputHTMLAttributes,
 } from 'react';
+
 import { useEffect, useState } from 'react';
 
 import classNames from 'classnames';
@@ -47,9 +48,10 @@ export const IntegerInput = ({
 
   const inputClassNames = classNames(sharedStyles.Control, inputStyles.Input, props.className);
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     const entered = input.value;
+
     const filtered = entered.replace(/\D/g, '');
     const canonical = filtered.replace(/^0+(?=\d)/, '');
     const raw = canonical.slice(0, digits);
@@ -77,11 +79,13 @@ export const IntegerInput = ({
     }
   };
 
-  const handleBlur = (event: FocusEvent<HTMLInputElement>) => {
+  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     let number = min;
 
     if (draft !== '') {
-      number = Math.min(max, Math.max(min, Number(draft)));
+      const mathMin = Math.max(min, Number(draft));
+
+      number = Math.min(max, mathMin);
     }
 
     setDraft(String(number));
@@ -90,7 +94,7 @@ export const IntegerInput = ({
       onValueChange(number);
     }
 
-    onBlur?.(event);
+    onBlur?.(e);
   };
 
   return (

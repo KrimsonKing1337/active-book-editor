@@ -1,6 +1,8 @@
 import type { ProjectFileHandle } from '../@types/fileSystemAccess';
 
-export const writeProjectFile = async (handle: ProjectFileHandle, content: string | Blob): Promise<void> => {
+type Content = string | Blob;
+
+export const writeProjectFile = async (handle: ProjectFileHandle, content: Content): Promise<void> => {
   const writable = await handle.createWritable();
 
   try {

@@ -8,11 +8,11 @@ export const useBeforeUnload = (isDirty: boolean): void => {
   isDirtyRef.current = isDirty;
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const hasPendingProjectChanges = getHasPendingProjectChanges();
 
       if (isDirtyRef.current || hasPendingProjectChanges) {
-        event.preventDefault();
+        e.preventDefault();
       }
     };
 

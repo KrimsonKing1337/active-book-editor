@@ -35,9 +35,9 @@ function assertPackageDescription(value: unknown): asserts value is PackageDescr
   }
 }
 
-export const readProjectPackage = async (
-  storage: Pick<ProjectStorage, 'readPackageJson'>,
-): Promise<PackageDescription> => {
+type Storage = Pick<ProjectStorage, 'readPackageJson'>;
+
+export const readProjectPackage = async (storage: Storage): Promise<PackageDescription> => {
   const packageJson = await storage.readPackageJson();
 
   let description: unknown;

@@ -32,10 +32,7 @@ const pickArchive = async (): Promise<PickedArchive> => {
 
   const file = await handle.getFile();
 
-  return {
-    file,
-    handle,
-  };
+  return { file, handle };
 };
 
 export const importBrowserLibrary = async (storage: ProjectStorage): Promise<string | null> => {
@@ -47,6 +44,7 @@ export const importBrowserLibrary = async (storage: ProjectStorage): Promise<str
 
   const { packageName, manifest } = await inspectBrowserArchive(file);
   const description = await readProjectPackage(storage);
+
   const existingDependency = description.dependencies?.[packageName];
 
   if (existingDependency) {

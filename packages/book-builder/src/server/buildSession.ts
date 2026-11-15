@@ -57,15 +57,17 @@ export const removeBuildSession = async (
   }
 };
 
+type GetBuildSessionFilePathArgs = {
+  repoRoot: string;
+  sessionId: string;
+  relativePath: string;
+};
+
 export const getBuildSessionFilePath = ({
   repoRoot,
   sessionId,
   relativePath,
-}: {
-  repoRoot: string;
-  sessionId: string;
-  relativePath: string;
-}): string => {
+}: GetBuildSessionFilePathArgs): string => {
   const sessionRoot = getActiveSessionRoot(repoRoot, sessionId);
   const normalizedPath = relativePath.replaceAll('\\', '/');
   const safePath = path.posix.normalize(normalizedPath);
@@ -73,9 +75,12 @@ export const getBuildSessionFilePath = ({
   const isProjectManifest = safePath === 'book.json' || safePath === 'package.json';
 
   const isAsset = safePath.startsWith('assets/');
-  const isDependencyArchive = safePath.startsWith('dependencies/') && safePath.toLowerCase().endsWith('.tgz');
 
-  const isOutsideProject = safePath.startsWith('../') || path.posix.isAbsolute(safePath)
+  const isDependencyArchive = safePath.startsWith('dependencies/')
+    && safePath.toLowerCase().endsWith('.tgz');
+
+  const isOutsideProject = safePath.startsWith('../')
+    || path.posix.isAbsolute(safePath)
     || normalizedPath.split('/').includes('..');
 
   if (isOutsideProject || (!isProjectManifest && !isAsset && !isDependencyArchive)) {

@@ -58,6 +58,7 @@ export const useAutosave = ({
   const clearAutosaveTimer = useCallback(() => {
     if (autosaveTimerRef.current !== null) {
       window.clearTimeout(autosaveTimerRef.current);
+
       autosaveTimerRef.current = null;
     }
   }, []);
@@ -94,10 +95,12 @@ export const useAutosave = ({
       }
 
       const session = sessionRef.current;
+
       const job = saveQueueRef.current.then(async () => {
         if (session !== sessionRef.current || target !== projectRef.current) {
           return;
         }
+
         // Read at execution time: an older queued autosave must not overwrite a newer manual save.
         const book = getBookSnapshot();
         const revision = getBookRevision();

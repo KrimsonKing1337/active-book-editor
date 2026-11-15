@@ -89,7 +89,6 @@ export const useBookLibraries = ({
   const isRevision = loaded?.revision === revision;
 
   const isCurrent = isProject && isSession && isRevision;
-
   const libraries = isCurrent ? loaded.libraries : noLibraries;
 
   return useMemo(() => {

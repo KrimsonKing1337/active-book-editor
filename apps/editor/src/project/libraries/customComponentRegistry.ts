@@ -1,6 +1,8 @@
-import type { ComponentType } from 'react';
-
-import { createContext, useContext } from 'react';
+import {
+  type ComponentType,
+  createContext,
+  useContext,
+} from 'react';
 
 import type {
   BrowserComponentDefinition,
