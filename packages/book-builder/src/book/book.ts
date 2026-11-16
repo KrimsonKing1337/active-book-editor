@@ -24,7 +24,7 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
   const pages = value.pages;
   const hasPages = Array.isArray(pages);
 
-  if (!isBook || !hasPages || 'rangeEffects' in value) {
+  if (!isBook || !hasPages) {
     return false;
   }
 

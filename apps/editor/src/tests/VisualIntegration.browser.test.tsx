@@ -91,7 +91,6 @@ test('native identity and independent book sessions', async () => {
             ]}
             editorTools={<Probe />}
             config={config}
-            rangeEffects={[]}
             tableOfContents={[]}
             definitions={definitions}
             registrations={registrations}

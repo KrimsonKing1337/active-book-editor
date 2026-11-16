@@ -84,7 +84,6 @@ const start = async (): Promise<void> => {
         }))}
         config={bookConfig}
         tableOfContents={[]}
-        rangeEffects={[]}
         registrations={document.visualEffects}
         definitions={definitions}
       >

@@ -149,7 +149,6 @@ export const VisualBookPreview = ({
       storyPages={storyPages}
       config={config}
       tableOfContents={[]}
-      rangeEffects={[]}
       registrations={registrations}
       definitions={definitions}
       hiddenVisualEffects={hidden}
