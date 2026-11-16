@@ -160,6 +160,10 @@ export default defineConfig([
       'tests/book-runtime/**/*.ts',
       'tests/media/**/*.ts',
     ],
+    languageOptions: { globals: globals.nodeBuiltin },
+  },
+  {
+    files: ['*.cjs', '{scripts,config,tests}/**/*.cjs'],
     languageOptions: { globals: globals.node },
   },
   {

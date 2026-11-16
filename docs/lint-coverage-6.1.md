@@ -50,11 +50,20 @@ Stylelint: **29/29 SCSS → 29/29**, **0 → 0 ошибок**.
 | `tests/infrastructure/lintCoverage.test.js` | Покрытие не закреплено тестом | Проверяются реальные src/tests/scripts/configs, новые виртуальные JS/MJS/CJS, окружения и generated ignores |
 | `package.json`, lint-staged | Существующий hook передавал ESLint только TS/TSX | Включены все поддерживаемые расширения JS/TS; hook не запускается повторно общим runner |
 
+Node ESM-инструменты получают `globals.nodeBuiltin`; `require`, `module`, `__dirname`
+доступны только CJS-инструментам. Это проверяется
+синтетическими JS/MJS/CJS-сценариями, не требующими новых файлов в `scripts/`.
+
 Общий preset не назначает всем файлам Node/Jest globals. Он экспортирует `globals` из
 стандартного одноимённого пакета: это единственная добавленная зависимость, принадлежащая
 common и используемая обоими потребителями. Версии остальных зависимостей не обновлялись.
 Стилистические правила, `max-params`, `max-lines`, React Hooks и type-imports не ослаблены.
 Сохранены рекомендованные TS-правила и собственные параметры unused-vars.
+
+Для TS штатный preset отключает `no-undef`, проверка глобальных имён опирается на tsc.
+ESLint globals не меняют ambient types, предоставленные существующими tsconfig и @types:
+например, Node typings могут быть доступны TS-компилятору и в browser-модулях.
+Разделение TypeScript-проектов по runtime-окружениям в 6.1 не выполнялось.
 
 ### Окружения и parser
 
@@ -105,7 +114,10 @@ npm run lint:js -- --repo active-book-core,active-book-editor
 `test:scripts` добавлен в группу unit-инфраструктуры ранее; новые проверки подключены к нему,
 отдельной второй команды в общем наборе нет. Browser runner и runtime не изменены.
 В editor локальный `check` также включает JS. CI отсутствует, автоматические CI-запуски
-не заявляются: сейчас контроль выполняется npm-командами и существующим Git hook.
+не заявляются: сейчас контроль доступен через npm-команды и конфигурацию существующего Git hook.
+В этом рабочем checkout `core.hooksPath` не задан: hook при коммитах автоматически не запускался,
+поэтому проверки выполнены явно. Активация Husky зависит от локальной установки;
+наличие `lint-staged` в manifest само по себе не является автоматическим gate.
 
 ## Распределение ESLint по правилам
 
@@ -227,7 +239,7 @@ ESLint помечает исправляемыми **79 из 98 ошибок** �
 | [`apps/editor/src/project/projectService.ts`](../apps/editor/src/project/projectService.ts) | 164 |
 | [`apps/editor/src/project/storage/LocalProjectStorage.ts`](../apps/editor/src/project/storage/LocalProjectStorage.ts) | 310 |
 | [`apps/editor/src/tests/VisualIntegration.browser.test.tsx`](../apps/editor/src/tests/VisualIntegration.browser.test.tsx) | 168 |
-| [`eslint.config.js`](../eslint.config.js) | 168 |
+| [`eslint.config.js`](../eslint.config.js) | 172 |
 | [`packages/book-builder/src/book/book.test.ts`](../packages/book-builder/src/book/book.test.ts) | 156 |
 | [`packages/book-builder/src/bookPreparation/compileBookDocument.test.ts`](../packages/book-builder/src/bookPreparation/compileBookDocument.test.ts) | 211 |
 | [`packages/book-builder/src/components/custom/browser.ts`](../packages/book-builder/src/components/custom/browser.ts) | 338 |
@@ -315,3 +327,5 @@ production-код не изменены; сбой известен до этап
 Его нужно объединить первым: локальный consumer использует новый именованный экспорт `globals`.
 Общий `test:infra` — 60/60. В common исправлены старые flat-config обращения array-format suite
 и ожидание текста deps-sync diagnostic; алгоритм deps-sync не менялся.
+
+После уточнения Node ESM/CJS globals повторён весь lint/infrastructure поднабор: 21/21. Счётчики полного ESLint повторно подтверждены, новых ошибок нет.

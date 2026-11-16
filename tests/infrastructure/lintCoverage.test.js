@@ -52,6 +52,16 @@ test('new JS, MJS and CJS tools are checked without a TypeScript project', async
     assert.equal(result.fatalErrorCount, 0);
     assert(result.messages.some((message) => message.ruleId === 'no-undef'));
     assert(!result.messages.some((message) => message.message.includes('\'process\'')));
+
+    if (extensionCur === 'cjs') {
+      const [commonjsResult] = await eslint.lintText('module.exports = __dirname;\n', { filePath });
+
+      assert.equal(commonjsResult.errorCount, 0, JSON.stringify(commonjsResult.messages));
+    } else {
+      const [esmResult] = await eslint.lintText('require(\'node:path\');\n', { filePath });
+
+      assert(esmResult.messages.some((message) => message.ruleId === 'no-undef'));
+    }
   }
 });
 
