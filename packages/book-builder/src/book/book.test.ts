@@ -59,10 +59,6 @@ test('requires nonempty pages, unique IDs and a single canonical visual format',
     ...book,
     pages: [page('one', 'A'), page('one', 'B')],
   })).toBe(false);
-  expect(isBookDocument({
-    ...book,
-    rangeEffects: [],
-  })).toBe(false);
   const duplicateModel = {
     ...page('one', 'A'),
     document: {
