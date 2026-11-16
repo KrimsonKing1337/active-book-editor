@@ -8,6 +8,7 @@ import svgr from 'vite-plugin-svgr';
 
 import { bookBuildPlugin } from '@active-book/book-builder/server/plugin';
 import { optimizeSvg } from '@active-book/book-builder/build/svg';
+import { coreWasm } from '@active-book/book-builder/build/coreWasm';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) => {
       }),
 
       bookBuildPlugin({ repoRoot }),
+      coreWasm(),
     ],
     define: {
       'process.env.mode': JSON.stringify(mode),

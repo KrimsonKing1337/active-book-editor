@@ -7,10 +7,16 @@ const editorRoot = fileURLToPath(new URL('../', import.meta.url));
 const coreRoot = resolve(editorRoot, '../active-book-core');
 
 try {
-  execFileSync(process.execPath, [process.env.npm_execpath, 'run', 'make'], {
-    cwd: coreRoot,
-    stdio: 'inherit',
-  });
+  for (const script of ['build', 'packaging']) {
+    execFileSync(process.execPath, [
+      process.env.npm_execpath,
+      'run',
+      script,
+    ], {
+      cwd: coreRoot,
+      stdio: 'inherit',
+    });
+  }
 
   const packageJsonOfCore = readFileSync(resolve(coreRoot, 'package.json'), 'utf8');
 
@@ -21,7 +27,12 @@ try {
 
   const archive = resolve(coreRoot, 'tgz', filename);
 
-  execFileSync(process.execPath, [process.env.npm_execpath, 'install', archive, '--save'], {
+  execFileSync(process.execPath, [
+    process.env.npm_execpath,
+    'install',
+    archive,
+    '--save',
+  ], {
     cwd: editorRoot,
     stdio: 'inherit',
   });
