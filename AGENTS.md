@@ -11,7 +11,8 @@
 
 ## Проверки и локальная разработка
 
-Быстрые проверки: `npm run typecheck`, `npm run typecheck:test`, `npm run lint:ts:check`, `npm run lint:css:check`, `npm run test:unit`, `npm run test:component`, `npm run test:scripts`.
+Быстрые проверки: `npm run typecheck`, `npm run typecheck:test`, `npm run lint:ts:check`, `npm run lint:js:check`, `npm run lint:css:check`, `npm run test:unit`, `npm run test:component`, `npm run test:scripts`.
 Браузерные проверки запускайте отдельно через `npm run test:browser`.
 Конфигурации сборки, тестов, алиасы и workspaces относятся к этому репозиторию.
+ESLint проверяет TS и JS отдельными командами во всём репозитории, включая тесты, фикстуры и инструменты. Покрытие, окружения и исключение сгенерированных файлов закреплены в `tests/infrastructure/lintCoverage.test.js`.
 Для обновления зависимости редактора используйте `npm run core:package`: команда вызывает build и packaging в core без изменения его версии или исходников, затем устанавливает архив. Изменения зависимости и integrity сохраняются в manifest/lock редактора; повторная установка изменённого архива той же версии поддерживается.

@@ -14,12 +14,12 @@
     "build:book": "npm run build -w @active-book/book-builder",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "typecheck:test": "tsc -p tsconfig.test.json",
-    "lint:ts": "eslint \"./{apps,packages}/**/*.{ts,tsx}\" --fix --quiet",
-    "lint:css": "stylelint \"{apps,packages}/**/*.scss\" --fix",
+    "lint:ts": "eslint \"**/*.{ts,tsx,mts,cts}\" --fix",
+    "lint:css": "stylelint \"{apps,packages,tests}/**/*.scss\" --fix",
     "lint-staged": "lint-staged",
     "pre-commit": "lint-staged",
     "prepare": "husky",
-    "check": "npm run typecheck && npm run typecheck:test && npm run lint:ts:check && npm run lint:css:check",
+    "check": "npm run typecheck && npm run typecheck:test && npm run lint:ts:check && npm run lint:js:check && npm run lint:css:check",
     "core:package": "node scripts/packageCore.mjs",
     "test": "vitest run --configLoader runner",
     "test:all": "node scripts/testAll.mjs",
@@ -32,11 +32,13 @@
     "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
     "test:runtime": "node --import tsx --test tests/book-runtime/bookRuntime.browser.test.ts",
     "test:tgz:workflow": "node --import tsx --test tests/book-runtime/tgzWorkflow.browser.test.ts",
-    "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
-    "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
-    "test:scripts": "node --test tests/package-core/packageCore.test.mjs",
+    "lint:ts:check": "eslint \"**/*.{ts,tsx,mts,cts}\"",
+    "lint:css:check": "stylelint \"{apps,packages,tests}/**/*.scss\"",
+    "test:scripts": "node --test tests/package-core/packageCore.test.mjs tests/eslint/*.test.js tests/infrastructure/*.test.js",
     "test:media:runtime": "node --import tsx --test tests/media/mediaRuntime.browser.test.ts",
-    "test:media:workflow": "node --import tsx --test tests/media/mediaWorkflow.browser.test.ts"
+    "test:media:workflow": "node --import tsx --test tests/media/mediaWorkflow.browser.test.ts",
+    "lint:js": "eslint \"**/*.{js,jsx,mjs,cjs}\" --fix",
+    "lint:js:check": "eslint \"**/*.{js,jsx,mjs,cjs}\""
   },
   "dependencies": {
     "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.64.tgz"
@@ -67,7 +69,7 @@
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": "eslint --fix",
+    "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": "eslint --fix",
     "*.scss": "stylelint --fix"
   },
   "overrides": {

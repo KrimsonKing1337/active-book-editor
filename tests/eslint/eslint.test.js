@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { ESLint } from 'eslint';
 
 const eslint = new ESLint({
+  cwd: fileURLToPath(new URL('../../', import.meta.url)),
   overrideConfig: {
     languageOptions: {
       parserOptions: { project: null },
@@ -12,7 +14,8 @@ const eslint = new ESLint({
 });
 
 const lintMessages = async (code) => {
-  const [result] = await eslint.lintText(code, { filePath: 'apps/editor/src/components/EditorScreen/EditorScreen.tsx' });
+  const filePath = 'apps/editor/src/components/EditorScreen/EditorScreen.tsx';
+  const [result] = await eslint.lintText(code, { filePath });
 
   return result.messages;
 };
@@ -20,7 +23,7 @@ const lintMessages = async (code) => {
 const violations = [
   {
     name: 'import grouping',
-    code: "import local from './local';\n\nimport React from 'react';\n",
+    code: 'import local from \'./local\';\n\nimport React from \'react\';\n',
     ruleId: 'import-x/order',
     severity: 2,
   },
@@ -33,19 +36,13 @@ const violations = [
   {
     name: 'three destructured properties on one line',
     code: 'const { first, second, third } = input;\n',
-    ruleId: 'newline-destructuring/newline',
-    severity: 2,
-  },
-  {
-    name: 'two destructured properties split across lines',
-    code: 'const {\n  first,\n  second,\n} = input;\n',
-    ruleId: 'newline-destructuring/newline',
+    ruleId: 'object-newline/object-newline',
     severity: 2,
   },
   {
     name: 'destructuring with a rest property',
     code: 'const { first, second, ...rest } = input;\n',
-    ruleId: 'newline-destructuring/newline',
+    ruleId: 'object-newline/object-newline',
     severity: 2,
   },
   {
@@ -68,7 +65,7 @@ const violations = [
   },
   {
     name: 'caught error causes',
-    code: "try { run(); } catch (error) { throw new Error('failed'); }\n",
+    code: 'try { run(); } catch (error) { throw new Error(\'failed\'); }\n',
     ruleId: 'preserve-caught-error',
     severity: 2,
   },
@@ -111,19 +108,20 @@ for (const violationCur of violations) {
 test('accepts compact pairs and expanded triples when destructuring', async () => {
   const snippets = [
     'const { first, second } = input;\n',
+    'const {\n  first,\n  second,\n} = input;\n',
     'const {\n  first,\n  second,\n  third,\n} = input;\n',
   ];
 
   for (const snippetCur of snippets) {
     const messages = await lintMessages(snippetCur);
 
-    assert(!messages.some((message) => message.ruleId === 'newline-destructuring/newline'));
+    assert(!messages.some((message) => message.ruleId === 'object-newline/object-newline'));
   }
 });
 
 test('accepts short value choices, nullish fallbacks and intentional truthy defaults', async () => {
   const snippets = [
-    "const value = ready ? 'yes' : 'no';\n",
+    'const value = ready ? \'yes\' : \'no\';\n',
     'const value = current ? current : fallback;\n',
     'const value = preview.hidden ?? item?.hidden ?? false;\n',
     'const value = item?.width ?? 0;\n',

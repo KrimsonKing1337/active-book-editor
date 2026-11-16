@@ -223,10 +223,23 @@ source paths, setups and Vite wiring remain in vitest.config.ts. The browser pro
 also stays a direct devDependency because TypeScript imports its context types.
 Editor tsconfig.base.json extends the common app profile.
 
-`core:package` runs sibling core's `make` once, reads its resulting name/version,
+`core:package` runs sibling core's `build` and `packaging`, reads its name/version,
 computes `tgz/active-book-core-<version>.tgz`, then invokes `npm install <archive> --save`
-at the editor root. npm owns all manifest/lock updates. `make` increments the core
-version and removes old archives, so `--no-save` would leave a stale dependency.
+at the editor root. npm owns all manifest/lock updates. These commands preserve the core version. npm reinstalls a changed archive of the
+same version and updates its integrity in the lockfile.
 The root owns the archive; `active-book-runtime` uses the hoisted package through `*`.
 A build/install failure reports npm's error and exits nonzero; completed changes
 remain visible in Git. `test:scripts` checks this workflow through real offline npm.
+
+## Покрытие статического анализа
+
+`npm run lint:ts:check` проверяет все TS/TSX/MTS/CTS, `npm run lint:js:check` —
+все JS/JSX/MJS/CJS, включая `scripts/`, корневые конфигурации, тесты и фикстуры.
+`npm run lint:css:check` проверяет SCSS в `apps/`, `packages/` и `tests/`.
+Сборки, временные workspace-копии и зависимости исключены из обеих конфигураций линтеров.
+`npm run check` включает обе ESLint-команды. Их версии без `:check` применяют исправления;
+не запускайте их массово для устранения накопленного долга.
+
+`npm run test:scripts` запускает package-core, ESLint-regression и coverage tests.
+Vitest запускает тесты в `apps/` и `packages/`; Node-инфраструктура с ними не пересекается.
+Покрытие и план устранения существующих нарушений: [аудит 6.1](docs/lint-coverage-6.1.md).
