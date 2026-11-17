@@ -1,100 +1,71 @@
-# Editor effects integration (real Chromium)
+# Интеграционные тесты эффектов редактора
 
-`../../apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx` mounts the
-real EditorScreen, TipTap extensions, effects UI, core Redux/renderers, project
-services and application styles. It uses the existing Vitest `browser` project
-with `@vitest/browser-playwright`; it does not use jsdom or mock application logic.
+`apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx`
+проверяет настоящий EditorScreen, TipTap, UI эффектов, Redux/renderers core,
+проектные сервисы и стили приложения. Используется существующий Vitest-проект browser
+с настоящим Chromium; jsdom и подмена логики приложения здесь не применяются.
 
-Two independent tests each start with a fresh, small OPFS project:
+## Основные сценарии
 
-1. Add a background and a frame shadow via the UI. Set both colors, opacity and
-   z-index, and change shadow thickness. Add brightness at 80%, assert its actual
-   CSS, then edit it to 120%. Assert saved JSON and computed styles, preserving
-   the fixture image while changing the background, preserving the background
-   while changing the shadow, and preserving the shadow while editing the
-   background again. Save, unmount, and mount a fresh EditorScreen. Its normal
-   recent-project service restores the real directory handle from IndexedDB and
-   reads book.json; no additional folder selection is made. Check both data and
-   styles again, and compare the composition before/after restoration to the same
-   committed screenshot reference.
-2. Independently create the composition, delete the selected shadow through its
-   UI confirmation, save, and assert the background/image data and DOM survive.
-   Use actual Ctrl+Z / Ctrl+Shift+Z in TipTap, save again, and verify the exact
-   restored/deleted data and rendered effects. The supported history operation
-   exercised here is effect deletion, not an invented project-level undo toolbar.
+- Добавление и независимое изменение фона, изображения и тени рамки: цвета, opacity,
+  z-index, толщина, brightness. Проверяются сохранённый JSON и computed styles.
+- Сохранение, размонтирование и повторное открытие EditorScreen. Сервис восстанавливает
+  реальный directory handle из IndexedDB и читает book.json. Композиция сравнивается
+  с одним screenshot reference до и после восстановления.
+- Удаление выбранной тени, сохранение и настоящие Ctrl+Z / Ctrl+Shift+Z в TipTap.
+  Проверяется независимость остальных эффектов; отдельная project-level undo-панель не предполагается.
+- Размещение визуальных эффектов и очистка выделения при переходах и удалении.
+  Для геометрического сравнения на строке 216 известен отдельный сбой дробных координат.
 
-The original local SVG is decoded in the browser and checked for a nonzero
-naturalWidth. The 1.8 KB downloaded asset, source, checksum and CC BY attribution
-are in `tests/fixtures/effects-book/`. Tests do not need network access at runtime.
-Masked fields use real keyboard events with animation-frame synchronization for
-selection updates, rather than setting DOM values or bypassing handlers.
+Каждый сценарий создаёт свежий OPFS-проект. Локальный SVG декодируется браузером,
+проверяется ненулевой naturalWidth. Происхождение изображения и лицензия:
+[effects-book](../fixtures/effects-book/README.md). Во время тестов сеть для него не нужна.
+Маскированные поля используют настоящие keyboard events с синхронизацией animation frame.
 
-## Run (PowerShell, repository root)
+## Запуск
 
-Use the existing sibling checkouts and Node 24.19.0. The lockfile references the generated core archive named in the root package.json. If you already have that exact
-archive, run `npm ci`. If it is missing or locally rebuilt with a different
-checksum, run `npm ci` in `active-book-types` and `active-book-core`,
-then run `npm run core:package` in this repository. That supported script
-rebuilds/version-bumps core and updates the editor dependency and lockfile;
-these local manifest changes are expected. Do not bypass checksum checks.
+Сначала выполните [общую установку](https://github.com/KrimsonKing1337/active-book-common/blob/main/README.md#установка-с-нуля-и-запуск-редактора):
+Node.js 24 LTS, npm 11, четыре соседних репозитория, core собран до `npm ci` editor.
+Core подключён каталогом; архив, увеличение версии и замена lockfile для запуска не нужны.
+Из корня editor:
 
-```powershell
+```sh
 npx playwright install chromium
-npm run test:browser -- EditorScreen.browser.test.tsx
+npm run test:browser -- apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx
 npm run typecheck
 npm run build:editor
 ```
 
-Use `$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = 'C:\path\to\chrome.exe'` only if
-selecting an existing Chromium. By default Playwright uses its installed browser.
-For diagnostic proof of the process launch, set `$env:DEBUG = 'pw:browser'`.
+При использовании установленного Chromium задайте `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`.
+В PowerShell: `$env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = 'C:\path\to\chrome.exe'`.
+`DEBUG=pw:browser` позволяет увидеть запускаемый executable и PID.
 
 ## Screenshot references
 
-Vitest 4's native `toMatchScreenshot` is supported and enabled. References are
-tracked under `tests/screenshots/EditorScreen.browser.test.tsx/`; failures and
-diffs remain ignored generated artifacts. The viewport is fixed at 1280x900.
-The reference contains the real core composition, including the local image,
-background, frame shadow and book text; it is not a synthetic image fixture.
-Verified here with Node 24.19.0, Vitest 4.1.12 and system Chromium
-154.0.8037.57 (the Playwright download is blocked by this cloud network policy).
-The complete CI run passed 48 tests in 17 files, including these two integration
-scenarios. TypeScript, editor production build and ESLint passed (the existing
-Vite default-export warning remains).
+Vitest использует `toMatchScreenshot`. Эталоны находятся в
+`tests/screenshots/EditorScreen.browser.test.tsx/`; diff и снимки ошибок игнорируются Git.
+Viewport — 1280×900. Эталон содержит реальную композицию core, текст и изображение.
+Имя включает ОС и браузер, чтобы различия растеризации шрифтов не считались Linux-регрессией.
 
-The Linux reference was reviewed and then passed a normal CI run without
-`--update`. Both the original and restored composition match the same reference.
+Для осознанного создания/обновления reference на нужной ОС:
 
-References include the OS and browser name to avoid treating Windows font
-rasterization as a Linux regression. On Windows, create the first Windows
-reference explicitly, inspect it, and then run the comparison without updating:
-
-```powershell
-npm run test:browser -- EditorScreen.browser.test.tsx --update
-npm run test:browser -- EditorScreen.browser.test.tsx
+```sh
+npm run test:browser -- apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx --update
+npm run test:browser -- apps/editor/src/components/EditorScreen/tests/EditorScreen.browser.test.tsx
 ```
 
-Commit the reviewed `effects-composition-chromium-win32.png` for Windows CI.
-Do not use `--update` in regular CI. No Windows runtime was available here.
+Перед коммитом просмотрите изображение. Обычный прогон не использует `--update`.
+Не обновляйте эталоны ради сокрытия geometry failure. Нативный Windows-прогон нужно
+выполнить на Windows; Linux не подтверждает корректность Windows rendering.
 
-## Boundaries
+## Границы сценария
 
-Only the native OS directory picker and acceptance of the delete confirmation
-are replaced. The picker returns a real, fresh Chromium OPFS directory;
-LocalProjectStorage writes real files, IndexedDB stores a real directory handle,
-and reopening reads those saved files. OPFS files/directories and remembered
-handles are cleaned up after each test. No in-memory replacement of project
-storage, Redux, TipTap, effect serializers or style resolvers is used.
+Подменены только native OS directory picker и подтверждение удаления. Picker возвращает
+реальную папку Chromium OPFS; LocalProjectStorage пишет файлы, IndexedDB сохраняет
+настоящий directory handle. Данные очищаются после теста. Storage, Redux, TipTap,
+сериализация эффектов и styles resolver не заменены in-memory реализациями.
 
-Native OS folder-picker chrome, permission denial/regrant for external folders,
-and restoration after a complete browser-process restart are outside these
-Browser Mode tests. Restoration here is an application remount in the same
-browser context. Those OS permission flows need a separate manual test or a
-platform-specific end-to-end setup. Animated presets, audio/video and project
-build/export are intentionally outside this visual-effects lifecycle scenario.
-
-
-The multipage editor now displays real page positions (1 of 1 in this fixture).
-Its Linux screenshot reference has been refreshed for that intentional change.
-Regenerate/review the Windows reference using the existing --update workflow on
-Windows; Linux rendering is not used to invent a Windows reference.
+Системный UI выбора папки, отказ/повторная выдача разрешения и восстановление после
+полного перезапуска browser process требуют отдельной ручной проверки. Здесь проверяется
+remount в том же контексте. Аудио/видео, анимации и сборка/экспорт проверяются другими
+наборами; исторические количества тестов из прошлых изменений не описывают текущий suite.

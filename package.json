@@ -34,12 +34,13 @@
     "test:tgz:workflow": "node --import tsx --test tests/book-runtime/tgzWorkflow.browser.test.ts",
     "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
     "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
-    "test:scripts": "node --test tests/package-core/packageCore.test.mjs",
+    "test:scripts": "node --test tests/package-core/*.test.mjs",
     "test:media:runtime": "node --import tsx --test tests/media/mediaRuntime.browser.test.ts",
-    "test:media:workflow": "node --import tsx --test tests/media/mediaWorkflow.browser.test.ts"
+    "test:media:workflow": "node --import tsx --test tests/media/mediaWorkflow.browser.test.ts",
+    "core:build": "npm --prefix ../active-book-core run build"
   },
   "dependencies": {
-    "@active-book/core": "file:../active-book-core/tgz/active-book-core-0.0.64.tgz"
+    "@active-book/core": "file:../active-book-core"
   },
   "devDependencies": {
     "@active-book/common": "file:../active-book-common",
@@ -74,7 +75,8 @@
     "minimatch@>=7.0.0 <11.0.1": "^11.0.5"
   },
   "engines": {
-    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    "node": "^24.15.0",
+    "npm": "^11.0.0"
   },
   "repository": {
     "type": "git",

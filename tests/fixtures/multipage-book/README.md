@@ -1,19 +1,20 @@
-# Three-page integration fixture
+# Трёхстраничная интеграционная фикстура
 
-Three permanent IDs, different text/background/frame settings, two page-owned
-sounds, vibration/flashlight declarations and a real TGZ custom component. All
-assets are local and authored for this test. The sound is 800 unsigned 8-bit PCM
-samples of silence at 8000 Hz. `library/package` contains the archive source;
-rebuild with `tar -czf dependencies/fixture-parts.tgz -C library package`.
+Три постоянных ID, разные текст/фон/рамка, два звука со временем жизни страницы,
+объявления вибрации/фонарика и настоящая TGZ-библиотека компонентов. Все ресурсы локальные,
+созданы для теста. Звук — 800 беззнаковых 8-битных PCM-сэмплов тишины с частотой 8000 Гц.
+`library/package` содержит исходники архива; пересборка:
 
-The Badge uses the existing shared React host and BookRuntime audio-controller
-hooks. It exposes loaded audio state and an interactive per-page counter.
+```sh
+tar -czf dependencies/fixture-parts.tgz -C library package
+```
 
+Badge использует общий React host и audio-controller hooks BookRuntime. Он показывает
+состояние загрузки звуков и интерактивный счётчик каждой страницы.
 
-Stage 6 uses canonical visual descriptions with a real image, locally generated
-WebM, filters, a pulse frame and ranges 1–1 / 3–5. The upper bound deliberately
-exceeds the three-page book. Overlay is a native background definition; Native is
-a native frame definition exposing playback and instance identity. Badge remains
-an ordinary inline component. The optional test-only __fixtureLibraryGate delays
-ESM evaluation to verify cancellation while switching projects. Both visual and
-inline exports still pass through the same existing TGZ loader.
+Канонические визуальные описания включают изображение, локально созданный WebM,
+фильтры, pulse frame и диапазоны 1–1 / 3–5. Верхняя граница намеренно выходит за три
+страницы книги. Overlay — native background definition; Native — native frame definition
+с playback и наблюдаемой identity. Badge остаётся обычным inline-компонентом.
+Необязательный тестовый `__fixtureLibraryGate` задерживает ESM evaluation для проверки
+отмены при смене проекта. Визуальные и inline exports проходят через один TGZ loader.
