@@ -36,6 +36,25 @@ export default defineConfig(({ mode }) => {
     // Keep linked core subpaths in one ESM graph so their React contexts stay shared.
     optimizeDeps: {
       exclude: ['@active-book/core'],
+      // Browser tests import core dynamically; prepare its dependencies before the first test to avoid reloads.
+      include: [
+        '@active-book/core > @fortawesome/free-solid-svg-icons',
+        '@active-book/core > @fortawesome/react-fontawesome',
+        '@active-book/core > @lottiefiles/dotlottie-react',
+        '@active-book/core > @radix-ui/react-dialog',
+        '@active-book/core > @reduxjs/toolkit',
+        '@active-book/core > embla-carousel-react',
+        '@active-book/core > hammerjs',
+        '@active-book/core > howler',
+        '@active-book/core > lodash-es',
+        '@active-book/core > nanoid',
+        '@active-book/core > react-range',
+        '@active-book/core > react-redux',
+        '@active-book/core > react-style-stringify',
+        '@active-book/core > react-toastify',
+        '@active-book/core > redux-saga',
+        '@active-book/core > redux-saga/effects',
+      ],
     },
     server: {
       fs: {
