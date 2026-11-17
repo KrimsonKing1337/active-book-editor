@@ -8,7 +8,9 @@
         "content": [
           {
             "type": "heading",
-            "attrs": { "level": 1 },
+            "attrs": {
+              "level": 1
+            },
             "content": [
               {
                 "type": "text",
@@ -24,12 +26,6 @@
                 "text": "Этот файл используется командой npm run build:book как минимальный пример."
               }
             ]
-          },
-          {
-            "type": "coreComponent",
-            "attrs": {
-              "name": "Counter"
-            }
           },
           {
             "type": "paragraph",
