@@ -81,6 +81,8 @@ npm run dev
 
 Команда пересобирает соседний core без смены версии. Vite редактора и builder уже
 настраивает dedupe `react`/`react-dom`, SCSS, SVG и dotLottie WASM для локального пакета.
+Dev-сервер разрешает HTTP-доступ к собранному `lib/src/` связанного core; `fs.strict`
+сохраняется, весь родительский каталог не открывается.
 Не меняйте `preserveSymlinks` и не используйте `npm link` вместо документированного `file:`.
 
 `npm run core:package` сохраняется для отдельной проверки production-упаковки:

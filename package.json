@@ -34,7 +34,7 @@
     "test:tgz:workflow": "node --import tsx --test tests/book-runtime/tgzWorkflow.browser.test.ts",
     "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
     "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",
-    "test:scripts": "node --test tests/package-core/packageCore.test.mjs",
+    "test:scripts": "node --test tests/package-core/*.test.mjs",
     "test:media:runtime": "node --import tsx --test tests/media/mediaRuntime.browser.test.ts",
     "test:media:workflow": "node --import tsx --test tests/media/mediaWorkflow.browser.test.ts",
     "core:build": "npm --prefix ../active-book-core run build"
