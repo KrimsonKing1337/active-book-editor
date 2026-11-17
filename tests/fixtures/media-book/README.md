@@ -1,10 +1,10 @@
-# Media build fixture
+# Фикстура сборки медиа
 
-The SVG images are synthetic: portrait 120 × 300, wide 1200 × 200 and small
-16 × 16. portrait.webm is a synthetic silent VP8 WebM recorded from a 120 × 300
-canvas with Chromium MediaRecorder. Its changing green fill distinguishes live
-video from a static poster. Tests use the committed file; no encoder dependency
-is needed. The other video is reused from the existing multipage fixture.
+Синтетические SVG: portrait 120×300, wide 1200×200, small 16×16.
+`portrait.webm` — синтетическое немое видео VP8 WebM, записанное из canvas 120×300
+через Chromium MediaRecorder. Меняющаяся зелёная заливка отличает живое видео
+от статического постера. Тесты используют зафиксированный файл; установка encoder
+не требуется. Другое видео переиспользуется из multipage-фикстуры.
 
-The project preparation helper copies the portrait SVG to the literal filename
-`assets/a #%.svg` to exercise correct filename-to-URL encoding.
+Помощник подготовки проекта копирует portrait SVG под буквальным именем
+`assets/a #%.svg`, чтобы проверить правильное кодирование имени файла в URL.

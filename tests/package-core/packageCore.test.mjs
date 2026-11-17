@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -13,42 +14,27 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 
-test('real npm reinstalls a rebuilt archive without changing its version', (t) => {
+test('packing core preserves the local directory dependency and exposes rebuilt modules', (context) => {
   const parent = mkdtempSync(join(tmpdir(), 'active book core-'));
-  t.after(() => rmSync(parent, { recursive: true, force: true }));
+  context.after(() => rmSync(parent, { recursive: true, force: true }));
   const root = join(parent, 'active-book-editor');
   const core = join(parent, 'active-book-core');
-  mkdirSync(root);
+  mkdirSync(join(root, 'scripts'), { recursive: true });
+  mkdirSync(join(root, 'apps/runtime'), { recursive: true });
   mkdirSync(core);
-  const corePackage = { name: '@active-book/core', version: '1.0.0' };
-  writeFileSync(join(root, 'package.json'), JSON.stringify({
-    name: 'editor-root',
-    private: true,
-    workspaces: ['apps/*'],
-    dependencies: { '@active-book/core': 'file:../active-book-core/tgz/active-book-core-1.0.0.tgz' },
-  }));
+
   const npmCli = process.env.npm_execpath;
   assert.ok(npmCli, 'Run through npm run test:scripts');
-  mkdirSync(join(root, 'scripts'));
-  writeFileSync(
-    join(root, 'scripts/packageCore.mjs'),
-    readFileSync(fileURLToPath(new URL('../../scripts/packageCore.mjs', import.meta.url))),
-  );
-  const editorPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  editorPackage.scripts = { 'core:package': 'node scripts/packageCore.mjs' };
-  writeFileSync(join(root, 'package.json'), JSON.stringify(editorPackage));
-  mkdirSync(join(root, 'apps/runtime'), { recursive: true });
-  writeFileSync(join(root, 'apps/runtime/package.json'), JSON.stringify({
-    name: 'fixture-runtime',
+  const corePackage = {
+    name: '@active-book/core',
     version: '1.0.0',
-    dependencies: { '@active-book/core': '*' },
-  }));
-  corePackage.exports = { './components': './lib/components.js' };
-  corePackage.files = ['lib'];
-  corePackage.scripts = {
-    build: 'node build.cjs',
-    packaging: 'node pack.cjs',
-    make: 'node -e "process.exit(99)"',
+    exports: { './components': './lib/components.js' },
+    files: ['lib'],
+    scripts: {
+      build: 'node build.cjs',
+      packaging: 'node pack.cjs',
+      make: 'node -e "process.exit(99)"',
+    },
   };
   writeFileSync(join(core, 'package.json'), JSON.stringify(corePackage));
   writeFileSync(join(core, 'value.txt'), 'fresh core');
@@ -66,49 +52,54 @@ test('real npm reinstalls a rebuilt archive without changing its version', (t) =
       stdio: 'inherit',
     });
   `);
-  const env = {
-    ...process.env,
-    npm_config_cache: join(root, '.npm-cache'),
-    npm_config_offline: 'true',
+  writeFileSync(join(root, 'package.json'), JSON.stringify({
+    name: 'editor-root',
+    private: true,
+    workspaces: ['apps/*'],
+    dependencies: { '@active-book/core': 'file:../active-book-core' },
+    scripts: { 'core:package': 'node scripts/packageCore.mjs' },
+  }));
+  writeFileSync(join(root, 'apps/runtime/package.json'), JSON.stringify({
+    name: 'fixture-runtime',
+    version: '1.0.0',
+    dependencies: { '@active-book/core': '*' },
+  }));
+  writeFileSync(
+    join(root, 'scripts/packageCore.mjs'),
+    readFileSync(fileURLToPath(new URL('../../scripts/packageCore.mjs', import.meta.url))),
+  );
+
+  const options = {
+    cwd: root,
+    env: {
+      ...process.env,
+      npm_config_cache: join(parent, 'cache'),
+      npm_config_offline: 'true',
+    },
+    encoding: 'utf8',
+    stdio: 'pipe',
   };
-  execFileSync(process.execPath, [
-    npmCli,
-    'run',
-    'core:package',
-  ], {
-    cwd: root,
-    env,
-    stdio: 'pipe',
-  });
-  const saved = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.equal(saved.dependencies['@active-book/core'], 'file:../active-book-core/tgz/active-book-core-1.0.0.tgz');
-  const lock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'));
-  assert.equal(lock.packages['node_modules/@active-book/core'].version, '1.0.0');
-  assert.ok(lock.packages['node_modules/@active-book/core'].integrity.startsWith('sha512-'));
-  assert.equal(lock.packages['apps/runtime'].dependencies['@active-book/core'], '*');
-  const runtimeRequire = createRequire(join(root, 'apps/runtime/package.json'));
-  assert.equal(runtimeRequire('@active-book/core/components'), 'fresh core');
-  const versionBefore = readFileSync(join(core, 'package.json'), 'utf8');
-  const firstIntegrity = lock.packages['node_modules/@active-book/core'].integrity;
+  const npm = (args) => execFileSync(process.execPath, [npmCli, ...args], options);
+  npm(['install']);
+  const manifest = readFileSync(join(root, 'package.json'), 'utf8');
+  const lock = readFileSync(join(root, 'package-lock.json'), 'utf8');
+  const version = readFileSync(join(core, 'package.json'), 'utf8');
+  const linked = JSON.parse(lock).packages['node_modules/@active-book/core'];
+  assert.equal(linked.link, true);
+  assert.equal(realpathSync(join(root, 'node_modules/@active-book/core')), realpathSync(core));
 
-  writeFileSync(join(core, 'value.txt'), 'rebuilt core');
-  execFileSync(process.execPath, [
-    npmCli,
-    'run',
-    'core:package',
-  ], {
-    cwd: root,
-    env,
-    stdio: 'pipe',
-  });
-
-  assert.equal(readFileSync(join(core, 'package.json'), 'utf8'), versionBefore);
-  const updatedLock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'));
-  assert.equal(updatedLock.packages['node_modules/@active-book/core'].version, '1.0.0');
-  assert.notEqual(updatedLock.packages['node_modules/@active-book/core'].integrity, firstIntegrity);
-  const consumed = execFileSync(process.execPath, [
+  const consume = () => execFileSync(process.execPath, [
     '-e',
     'console.log(require(\'@active-book/core/components\'))',
-  ], { cwd: join(root, 'apps/runtime'), encoding: 'utf8' });
-  assert.equal(consumed.trim(), 'rebuilt core');
+  ], { cwd: join(root, 'apps/runtime'), encoding: 'utf8' }).trim();
+  npm(['run', 'core:package']);
+  assert.equal(consume(), 'fresh core');
+  assert(existsSync(join(core, 'tgz/active-book-core-1.0.0.tgz')));
+
+  writeFileSync(join(core, 'value.txt'), 'rebuilt core');
+  npm(['run', 'core:package']);
+  assert.equal(consume(), 'rebuilt core');
+  assert.equal(readFileSync(join(root, 'package.json'), 'utf8'), manifest);
+  assert.equal(readFileSync(join(root, 'package-lock.json'), 'utf8'), lock);
+  assert.equal(readFileSync(join(core, 'package.json'), 'utf8'), version);
 });

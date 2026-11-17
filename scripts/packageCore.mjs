@@ -1,5 +1,4 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,26 +17,7 @@ try {
     });
   }
 
-  const packageJsonOfCore = readFileSync(resolve(coreRoot, 'package.json'), 'utf8');
-
-  const { name, version } = JSON.parse(packageJsonOfCore);
-
-  const filenameWithoutVersion = name.replace(/^@/, '').replace('/', '-');
-  const filename = `${filenameWithoutVersion}-${version}.tgz`;
-
-  const archive = resolve(coreRoot, 'tgz', filename);
-
-  execFileSync(process.execPath, [
-    process.env.npm_execpath,
-    'install',
-    archive,
-    '--save',
-  ], {
-    cwd: editorRoot,
-    stdio: 'inherit',
-  });
-
-  console.log(`Installed ${name} from ${archive}`);
+  console.log('Core built and packed; the editor keeps its local directory dependency');
 } catch (error) {
   console.error(error.message);
 

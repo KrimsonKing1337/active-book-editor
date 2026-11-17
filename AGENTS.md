@@ -14,4 +14,4 @@
 Быстрые проверки: `npm run typecheck`, `npm run typecheck:test`, `npm run lint:ts:check`, `npm run lint:css:check`, `npm run test:unit`, `npm run test:component`, `npm run test:scripts`.
 Браузерные проверки запускайте отдельно через `npm run test:browser`.
 Конфигурации сборки, тестов, алиасы и workspaces относятся к этому репозиторию.
-Для обновления зависимости редактора используйте `npm run core:package`: команда вызывает build и packaging в core без изменения его версии или исходников, затем устанавливает архив. Изменения зависимости и integrity сохраняются в manifest/lock редактора; повторная установка изменённого архива той же версии поддерживается.
+Редактор использует `@active-book/core: file:../active-book-core`. После установки common/types/core соберите core до `npm ci` в editor. `npm run core:build` пересобирает связанное ядро; перезапустите dev-сервер после сборки. `npm run core:package` выполняет build и packaging в core для проверки архива, не устанавливает его и не меняет зависимость редактора или версии.

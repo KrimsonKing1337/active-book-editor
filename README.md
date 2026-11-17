@@ -1,163 +1,168 @@
-# active-book-editor
+# ActiveBook: редактор и сборщик историй
 
-Prototype monorepo for the Active Book visual editor and book build pipeline.
+Редактор иллюстрированных линейных историй с предпросмотром на настоящем
+`@active-book/core`. Здесь же находятся сборщик проектов и production reader.
+React 19 и TipTap отвечают за интерфейс и редактирование; Vite собирает приложения.
 
-## Layout
+Проект находится **до первого релиза**. На новом движке ещё нет выпущенных книг.
+Демонстрационные проекты и browser-тесты показывают текущую реализацию, но не заменяют
+готовый продукт. API и формат проекта ещё могут меняться.
 
-- `apps/editor` — Vite + React + TipTap editor. The editable TipTap document is rendered inside the real `@active-book/core` `App` and `PageWrapper`.
-- `packages/book-builder` — internal Vite-based book builder used both by an npm script and by the editor dev server.
-- `example-book/book.json` — minimal ordered book containing TipTap page documents for CLI builds.
+## Что уже реализовано
 
-## Local core
+- Несколько упорядоченных страниц с постоянными ID, переключением и перестановкой.
+- Редактирование текста, заголовков, форматирования, изображений, видео и каруселей.
+- Настройки визуальных эффектов и их размещения, фонового аудио и других эффектов книги.
+- Предпросмотр через core, выбранные эффекты и параметры их отображения.
+- Локальные проекты в папках: сохранение, автосохранение и восстановление последнего проекта.
+- Импорт пользовательских библиотек компонентов/визуальных renderer из TGZ.
+- Сборка проекта в статический production reader.
 
-Keep the current repositories in sibling directories:
+Сохранение папок требует **File System Access API**. Для полного рабочего процесса
+используйте современный Chromium/Chrome на `localhost` или HTTPS. В другом браузере
+поддержка файловых разрешений и отдельных медиа/эффектов может отличаться.
+Нет заявленной поддержки ветвящегося сюжета, облачного сервера проектов или совместного редактирования.
+
+## Установка с нуля
+
+Нужны Git, Node.js **24 LTS** (24.15+ в ветке 24.x), npm **11.x**.
+В `.nvmrc` — **24.19.0**, проверяемая версия npm — **11.9.0**.
+[Клонирование и общая установка четырёх репозиториев](https://github.com/KrimsonKing1337/active-book-common/blob/main/README.md#установка-с-нуля-и-запуск-редактора).
+
+Расположение каталогов:
 
 ```text
-parent/
-├─ active-book-core/
-├─ active-book-editor/
-└─ active-book-types/
+active-book/
+├── active-book-common/
+├── active-book-types/
+├── active-book-core/
+└── active-book-editor/
 ```
 
-The core package is `@active-book/core`; its compiled archive is a local file
-dependency in the editor root. Install dependencies in `active-book-types` and
-`active-book-core` with `npm ci`, then run from this repository:
+После клонирования, из editor:
 
 ```sh
-npm run core:package
-```
-
-The command builds the sibling core, creates `active-book-core-<version>.tgz`,
-updates the `@active-book/core` dependency and lockfile, and installs it.
-The command calls core's `build` and `packaging` separately and never increments
-the core version. Rebuilding changed code with the same version refreshes the installed
-archive and its lockfile integrity. Core's `postinstall` is no longer required;
-public subpaths resolve directly into its compiled `lib/src/` tree. The shared Vite
-configuration serves/emits Lottie WASM from the installed package for editor and reader.
-
-Use `npm ci` for subsequent installs with that exact archive. No npm publication or
-old-name alias is required. This repository's root package is
-`active-book-editor-root`; the application workspace is `active-book-editor`.
-
-## Run
-
-```bash
-npm install
+cd ../active-book-common
+npm ci
+cd ../active-book-types
+npm ci
+cd ../active-book-core
+npm ci
+npm run build
+cd ../active-book-editor
+npm ci
 npm run dev
 ```
 
-The editor opens with an editable page inside `PageWrapper`. `Добавить Counter` inserts the real core `Counter` as an atomic TipTap node.
+Откройте URL Vite, обычно `http://localhost:5173`. Разрешите выбор папки при создании
+или открытии проекта. Для технического просмотра можно открыть `example-book/`
+либо создать проект в пустой папке. В репозитории уже есть демонстрационная библиотека,
+поэтому дополнительный `active-book-custom-test` для запуска не нужен.
 
-`Собрать книгу` sends the current TipTap JSON to the internal builder. The result is written to `dist-book/`.
+Для явного адреса/порта запускайте workspace-команду с передачей аргументов Vite:
 
-## CLI book build
+```sh
+npm run dev -w active-book-editor -- --host 127.0.0.1 --port 5173 --strictPort
+```
 
-```bash
+## Как подключено ядро
+
+Корневая зависимость — **`@active-book/core: file:../active-book-core`**.
+`npm ci` создаёт локальную ссылку, а exports читаются из собранного `lib/src/` core.
+Зависимости самого core/common/types должны быть установлены в их собственных каталогах.
+Нет скачивания ядра из npm, автоматической сборки при установке или необходимости иметь TGZ.
+
+После изменения ядра остановите dev-сервер, выполните здесь:
+
+```sh
+npm run core:build
+npm run dev
+```
+
+Команда пересобирает соседний core без смены версии. Vite редактора и builder уже
+настраивает dedupe `react`/`react-dom`, SCSS, SVG и dotLottie WASM для локального пакета.
+Не меняйте `preserveSymlinks` и не используйте `npm link` вместо документированного `file:`.
+
+`npm run core:package` сохраняется для отдельной проверки production-упаковки:
+он вызывает `build` и `packaging` в core, оставляя архив в его `tgz/`.
+Он **не устанавливает архив**, не меняет зависимость editor и не повышает версии.
+Для обычной разработки используйте `core:build`.
+
+## Проекты и сборка reader
+
+`book.json` хранит страницы и объявления эффектов; `assets/` — ресурсы проекта.
+Необязательный `package.json` и `dependencies/` описывают TGZ-библиотеки компонентов.
+В UI «Собрать книгу» передаёт сохранённые данные проекта внутреннему builder.
+Результат находится в `dist-book/`.
+
+Из корня editor:
+
+```sh
+npm run build:editor
+npm run build:book
+npm run preview
+```
+
+`build:editor` создаёт `apps/editor/dist/`. `build:book` использует `example-book/`,
+включая зафиксированный `dependencies/active-book-custom-test-0.0.8.tgz`.
+`preview` обслуживает reader из `dist-book/`, обычно на `http://localhost:4173`.
+Это имя демонстрационной библиотеки, а не старое имя `@active-book/core`.
+Её пересборка не требуется для установки четырёх основных репозиториев.
+
+Для другого проекта укажите путь относительно `packages/book-builder/`:
+
+```sh
+npm run build -w @active-book/book-builder -- ../../tests/fixtures/multipage-book
+```
+
+Reader — статическое браузерное приложение: размещайте весь `dist-book/` на HTTP/HTTPS,
+включая `app/`, ресурсы и `vendors/dotlottie-player.wasm`. Открытие HTML через `file://`
+не поддерживается. Production reader не требует Node.js на стороне читателя.
+
+## Проверки
+
+Сначала установите зависимости и соберите core по инструкции выше.
+
+```sh
+npm run typecheck
+npm run typecheck:test
+npm run test:unit
+npm run test:component
+npm run test:scripts
+npm run build:editor
 npm run build:book
 ```
 
-The root script builds `example-book`. It includes the renamed library archive at
-`example-book/dependencies/active-book-custom-test-0.0.8.tgz`. To rebuild that
-archive, run `npm ci && npm run make` in the sibling `active-book-custom-test`
-repository and copy the result from `tgz/` to this directory.
+| Команда | Назначение |
+| --- | --- |
+| `test:unit` | Vitest, Node.js, unit-тесты в apps/packages |
+| `test:component` | React Testing Library и jsdom; без эмуляции настоящей геометрии/медиа |
+| `test:browser` | Настоящий Chromium, Vitest Browser Mode |
+| `test:scripts` | Реальный npm: локальная ссылка core и отдельная упаковка |
+| `test:runtime` | Интеграция редактора, сборщика и production reader в Chromium |
+| `test:media:runtime` / `test:media:workflow` | Медиа в reader и полный workflow редактора |
+| `test:tgz:workflow` | Импорт TGZ-библиотек и сборка reader |
+| `test:all` | Все перечисленные наборы в согласованном порядке |
+| `test` / `test:coverage` | Три проекта Vitest / отчёты V8 в coverage; отдельные Node workflows сюда не входят |
+| `test:ci` | Те же Vitest-проекты, coverage и JUnit; CI как сервис не настроен |
+| `lint:ts:check` / `lint:css:check` | Существующие ESLint/Stylelint без исправлений |
 
-For another book, pass its project directory to the workspace script:
-
-```sh
-npm run build -w @active-book/book-builder -- ./path/to/book
-```
-
-The path is relative to `packages/book-builder`; the directory must contain
-`book.json` and `package.json`. The runtime application workspace is
-`active-book-runtime`.
-
-## Current prototype boundary
-
-The component registry currently contains `Counter` only. The important part of this prototype is the extension point: more `@active-book/core` components can be registered as TipTap nodes without changing the editor/build separation.
-
-The builder currently maps TipTap headings and paragraphs back to the core `H1`, `H2`, and `P` components and preserves basic inline marks. It deliberately has no Babel/core-js/legacy profile yet; compatibility profiles can be added later inside `packages/book-builder` without affecting the editor build.
-
-## Tests (Vitest)
-
-Run from the repository root with the existing Node/npm toolchain:
+Browser suites требуют установленного Chromium:
 
 ```sh
-npm ci
-npx playwright install --with-deps chromium
-npm test
+npx playwright install chromium
+npm run test:browser
+npm run test:runtime
 ```
 
-`vitest.config.ts` defines three projects and reuses the editor Vite configuration
-(React, SVG, SCSS and TypeScript path aliases). Scripts use Vite's `runner` config
-loader, as the editor does, to resolve the TypeScript workspace exports.
-
-- `npm run test:unit` — Node.js utilities, business logic, Redux and builder functions.
-  Use `*.test.ts` / `*.spec.ts` (or TSX) under `apps/` and `packages/`.
-- `npm run test:component` — jsdom, React Testing Library and user-event.
-  Use `*.component.test.tsx` (or TS). jsdom is verified with React 19 and user-event;
-  it does not replace a browser for layout, media or browser-only APIs.
-- `npm run test:browser` — real headless Chromium via Vitest Browser Mode and
-  `@vitest/browser-playwright`. Use `*.browser.test.tsx` (or TS).
-- `npm run test:coverage` — all projects with V8 reports in `coverage/`:
-  terminal text, HTML (`coverage/index.html`) and LCOV (`coverage/lcov.info`).
-- `npm run test:ci` — all projects, coverage and JUnit at `test-results/junit.xml`.
-  Local scripts do not enable JUnit. No coverage thresholds are imposed.
-
-`npm test` runs all projects once. For watch mode, append `-- --watch`.
-`npm run typecheck` checks workspace sources; run `npm run typecheck:test` for the test infrastructure. Import test APIs from
-`vitest`; no global test functions are enabled. DOM setups register jest-dom
-matchers and explicitly clean up RTL after each test. Browser tests can use
-`page` and native interactions from `vitest/browser`.
-
-Existing Node tests retain their assertions and scenarios, with only the runner
-imports migrated to Vitest. The old `browser.test.ts` archive-parser test remains
-in the Node unit project: browser tests require the `.browser.test.ts` suffix.
-The builder workspace's `npm test` still runs its own unit tests.
-
-In CI, install Chromium and its OS dependencies before `npm run test:ci`, then
-archive `coverage/` and `test-results/` even when tests fail. Chromium installation
-requires network access to Playwright's download hosts (including
-`cdn.playwright.dev` and any redirect destination). Do not skip browser tests if
-installation fails. This cloud environment blocks the download with HTTP 403,
-but has a system Chromium that was successfully verified using:
+Linux: при отсутствии системных библиотек используйте `npx playwright install --with-deps chromium`.
+Если браузер уже установлен, можно задать путь (POSIX shell):
 
 ```sh
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:browser
 ```
 
-The optional variable selects an existing Chromium executable; omit it to use
-Playwright's installed browser. The same variable works with `test`,
-`test:coverage` and `test:ci`. No browser path is hardcoded in the configuration.
-
-### Windows (PowerShell)
-
-Use Node.js 24.19.0 (the verified version; jsdom requires Node 24.15+ on the
-24.x line). Keep `active-book-types`, `active-book-core` and this
-repository in sibling directories. The editor still depends on a local core
-archive; it is not downloaded from npm. For an unchanged lockfile, provide the
-exact core archive at the path and version recorded in `package.json`.
-
-If that exact archive is unavailable, first run `npm ci` in the types and core
-repositories, then run the existing `npm run core:package` from the editor root.
-That command builds a new core archive, increments its version, updates the
-editor dependency and installs it with a new lockfile integrity. This is a
-local dependency refresh, so expect manifest/lockfile changes in both repos;
-do not disable integrity checks or substitute a different archive under the recorded filename.
-
-Once the local core dependency is available, run from the editor root:
-
-```powershell
-npm ci
-npx playwright install chromium
-npm run test:unit
-npm run test:component
-npm run test:browser
-npm run typecheck
-```
-
-Playwright installs its own Chromium on Windows; no executable path override is
-normally needed. If using an existing Chromium, set the optional variable in
-PowerShell syntax (replace the example path with your actual executable):
+PowerShell:
 
 ```powershell
 $env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = 'C:\path\to\chrome.exe'
@@ -165,68 +170,33 @@ npm run test:browser
 Remove-Item Env:PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
 ```
 
-To verify the real process launch, temporarily set `$env:DEBUG = 'pw:browser'`,
-run `npm run test:browser`, then `Remove-Item Env:DEBUG`. Playwright logs the
-executable and launched PID. The Button browser test also asserts Chromium's
-user agent, actual CSS layout and a trusted native click that does not submit
-its parent form. These checks intentionally fail in an emulated DOM.
+При ошибке загрузки браузера не заменяйте browser suite на jsdom.
+`test:all` запускает runtime/build workflows последовательно: они могут писать один `dist-book/`.
+Не запускайте эти workflows одновременно вручную. Тесты UI-проектов находятся в apps/packages,
+их APIs импортируются из `vitest`; Node-инфраструктура находится в корневом `tests/`.
 
-Infrastructure verification added just three scenarios: CSS RGBA conversion and
-clamping (unit), disabled/enabled Button interactions (component), and native
-Button behavior/layout (browser). Verified on Linux with Node 24.19.0:
-42 unit tests, 2 component tests and 2 browser tests passed in separate runs.
-Windows commands are provided for reproduction; Windows execution was not
-available in this environment.
+В исходниках есть известный долг ESLint. Также известен geometry failure в
+`EditorScreen.browser.test.tsx:216` из-за сравнения дробной геометрии.
+Они рассматриваются отдельно от ошибок установки; не используйте массовый autofix
+или обновление screenshot references для их сокрытия. Полный `check` включает линтеры
+и потому может завершаться ошибкой. `lint:ts`/`lint:css` изменяют файлы, варианты `:check` — нет.
 
-### Editor effects integration
+## Структура
 
-The browser suite now covers effect editing, saved data and computed styles,
-project restoration, deletion/undo/redo and screenshot comparison in the real
-editor. See [the integration test guide](tests/editor-effects/README.md) for
-scenarios, OS-dialog boundaries, local-core installation and Windows screenshot
-reference commands. The local test book and 1.8 KB graphic live in
-`tests/fixtures/effects-book/`.
+- `apps/editor/` — UI редактора, TipTap, проекты, эффекты и предпросмотр.
+- `apps/book-runtime/` — исходники production reader.
+- `packages/book-builder/` — подготовка документа, CLI, Vite-сборка и dev-server API.
+- `example-book/` — небольшой демонстрационный проект и готовая тестовая библиотека.
+- `tests/` — интеграционные сценарии, фикстуры и инфраструктура.
+- `scripts/` — упаковка core и координация тестов.
+- `dist-book/`, `apps/editor/dist/` — генерируемые результаты, не исходники.
 
-See [Multiple-page books](docs/multipage-books.md) for the current book.json model, page/history behavior and browser checks.
+В проекте нет нового общего workspace для соседних репозиториев: используются только
+существующие workspaces editor и локальные npm-зависимости.
 
-Current CSS-first experiment: [contract, controls, commits and validation](docs/css-first-story-surfaces.md).
-
-Final story regions: [contract, Toolbar, masks and validation](docs/story-regions-finalization.md).
-
-Regression follow-up: [preserved masks, current reset control and core 0.0.53 validation](docs/story-regions-test-regressions.md).
-
-
-## Shared development infrastructure
-
-Clone the ActiveBook repositories as siblings. Install `active-book-common` first,
-then this repository; it has the devDependency `@active-book/common: file:../active-book-common`.
-Coding conventions for human contributors and agents:
-[ActiveBook coding conventions](https://github.com/KrimsonKing1337/active-book-common/blob/main/CODING_CONVENTIONS.md).
-Agents should also read `../active-book-common/AGENTS.md` and this repository's
-`AGENTS.md` for task-specific workflow.
-Shared configurations load directly through the common package exports; no copied
-configuration snapshots or standalone-clone fallback are maintained.
-
-The common repository supplies grouped `check`, `typecheck`, `lint`, and `test`
-commands, each with `--repo` filtering. `check` and `test` include browser/runtime
-suites; choose `test:unit` or another subgroup for a narrower run. `deps:sync`
-applies standard npm section policies to already declared packages and workspaces.
-See the common README for installation order, groups, presets and policy semantics.
-
-ESLint extends `@active-book/common/eslint`; only project aliases, ignores and local
-rules remain here. Stylelint reexports `@active-book/common/stylelint`, including
-its SCSS rules and property ordering. `lint:ts:check` / `lint:css:check` check without
-fixes; existing fixing scripts remain available.
-
-Vitest uses the common coverage, unit, component and Playwright browser profiles;
-source paths, setups and Vite wiring remain in vitest.config.ts. The browser provider
-also stays a direct devDependency because TypeScript imports its context types.
-Editor tsconfig.base.json extends the common app profile.
-
-`core:package` runs sibling core's `make` once, reads its resulting name/version,
-computes `tgz/active-book-core-<version>.tgz`, then invokes `npm install <archive> --save`
-at the editor root. npm owns all manifest/lock updates. `make` increments the core
-version and removes old archives, so `--no-save` would leave a stale dependency.
-The root owns the archive; `active-book-runtime` uses the hoisted package through `*`.
-A build/install failure reports npm's error and exits nonzero; completed changes
-remain visible in Git. `test:scripts` checks this workflow through real offline npm.
+[Модель многостраничной книги](docs/multipage-books.md),
+[интеграционные тесты эффектов](tests/editor-effects/README.md),
+[DOM-регионы и история решений](docs/story-regions-finalization.md).
+Технические отчёты экспериментов сохранены как история реализации; их старые версии
+пакетов и результаты прогонов не являются инструкцией актуальной установки.
+[Общие соглашения](https://github.com/KrimsonKing1337/active-book-common/blob/main/CODING_CONVENTIONS.md), [инструкции для агентов](AGENTS.md).
