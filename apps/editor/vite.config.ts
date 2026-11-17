@@ -13,7 +13,7 @@ import { coreWasm } from '@active-book/book-builder/build/coreWasm';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const repoRoot = path.resolve(__dirname, '../..');
-const coreRoot = path.dirname(fileURLToPath(import.meta.resolve('@active-book/core/package.json')));
+const coreRoot = path.resolve(repoRoot, '../active-book-core');
 
 export default defineConfig(({ mode }) => {
   return {
