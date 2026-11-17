@@ -33,6 +33,10 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.mode': JSON.stringify(mode),
     },
+    // Keep linked core subpaths in one ESM graph so their React contexts stay shared.
+    optimizeDeps: {
+      exclude: ['@active-book/core'],
+    },
     server: {
       fs: {
         allow: [repoRoot, path.join(coreRoot, 'lib/src')],

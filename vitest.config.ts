@@ -17,15 +17,6 @@ export default defineConfig((env) => {
 
   return mergeConfig(mergedEditorConfig, {
     root: fileURLToPath(new URL('.', import.meta.url)),
-    optimizeDeps: {
-      include: [
-        '@active-book/core/controllers/visualEffects',
-        '@active-book/core/components/Video',
-        '@active-book/core/components/Carousel',
-        '@active-book/core/components/StoryDialog',
-        '@active-book/core/components/BookApplicationSurface',
-      ],
-    },
     test: {
       provide: { contentBenchmark },
       coverage: { include: ['apps/*/src/**/*.{ts,tsx}', 'packages/*/src/**/*.{ts,tsx}'] },
