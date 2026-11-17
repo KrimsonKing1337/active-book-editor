@@ -41,4 +41,15 @@ test('the editor serves linked core assets and WASM through its real Vite config
   assert.equal(wasm.status, 200);
   assert.match(wasm.headers.get('content-type'), /application\/wasm/);
   assert.deepEqual(Buffer.from(await wasm.arrayBuffer()), await readFile(wasmFile));
+
+  const coreRoot = path.dirname(fileURLToPath(import.meta.resolve('@active-book/core/package.json')));
+  const blockedResources = ['src/@types.ts', 'lib/src/@types.d.ts'];
+
+  for (const resourceCur of blockedResources) {
+    const filename = path.join(coreRoot, resourceCur);
+    const requestPath = encodeURI(`/@fs/${filename.replaceAll(path.sep, '/')}`);
+    const response = await fetch(`${origin}${requestPath}`);
+
+    assert.equal(response.status, 403, resourceCur);
+  }
 });
