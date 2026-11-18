@@ -1,4 +1,4 @@
-import { useGoToPage } from '@active-book/core/hooks/control/useGoToPage';
+import { useGoToPage } from '@active-book/core/hooks/control';
 
 import { Action } from '@active-book/core/components';
 

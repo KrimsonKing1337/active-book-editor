@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame';
 
 import { Checkbox } from '../../../EffectControls';
 import { frameSides } from '../../constants';

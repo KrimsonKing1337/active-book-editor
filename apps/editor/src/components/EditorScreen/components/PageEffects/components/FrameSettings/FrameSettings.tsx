@@ -4,7 +4,7 @@ import type {
   FocusEvent,
 } from 'react';
 
-import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame';
 
 import type { VisualLayout } from '@active-book/book-builder/effects';
 

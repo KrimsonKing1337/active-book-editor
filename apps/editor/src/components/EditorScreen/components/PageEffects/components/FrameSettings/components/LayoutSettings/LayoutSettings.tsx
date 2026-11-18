@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-import type { FrameElementLayout } from '@active-book/core/hooks/effects/frame/@types';
+import type { FrameElementLayout } from '@active-book/core/hooks/effects/frame';
 
 import { Select, Checkbox } from '../../../EffectControls';
 import { CssLengthInput } from '../../../CssLengthInput';

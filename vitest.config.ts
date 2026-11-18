@@ -35,7 +35,10 @@ export default defineConfig((env) => {
         mergeConfig(browser(env.mode), {
           extends: true,
           test: {
-            include: ['{apps,packages}/**/*.browser.test.{ts,tsx}'],
+            include: [
+              '{apps,packages}/**/*.browser.test.{ts,tsx}',
+              'tests/package-core/*.browser.test.{ts,tsx}',
+            ],
             setupFiles: ['./tests/setup-browser.ts'],
           },
         }),

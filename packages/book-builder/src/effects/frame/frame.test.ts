@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
 
-import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame';
 
 import { normalizeFrameEffects, resolveFrameOptions } from './frame';
 
