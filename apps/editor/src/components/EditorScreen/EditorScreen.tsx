@@ -1,6 +1,6 @@
 import { StoreProvider } from '@active-book/core/store';
 
-import { AppModeContext } from '@active-book/core/components/App/AppModeContext';
+import { AppModeContext } from '@active-book/core/components/App';
 
 import { EditorWorkspace } from './components';
 

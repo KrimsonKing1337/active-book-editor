@@ -1,4 +1,4 @@
-import type { FrameSide } from '@active-book/core/hooks/effects/frame/@types';
+import type { FrameSide } from '@active-book/core/hooks/effects/frame';
 
 import {
   type FrameShadowPreset,

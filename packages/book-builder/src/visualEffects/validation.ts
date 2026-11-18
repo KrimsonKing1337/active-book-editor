@@ -1,7 +1,7 @@
 
 import type { JsonObject, VisualLength } from '@active-book/types';
 
-import { copyVisualData } from '@active-book/core/controllers/visualEffects/utils/serialization';
+import { copyVisualData } from '@active-book/core/controllers/visualEffects/utils';
 
 import type { AuthoredVisualEffect } from './@types';
 
