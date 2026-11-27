@@ -44,6 +44,14 @@ const writeFile = async ({
   await writableStream.close();
 };
 
+export const writeBookFixture = async (directory: FileSystemDirectoryHandle, document: BookDocument) => {
+  await writeFile({
+    dir: directory,
+    name: 'book.json',
+    content: JSON.stringify(document),
+  });
+};
+
 export const createProject = async ({ empty = false } = {}) => {
   await clearLastProjectHandle();
   localStorage.clear();

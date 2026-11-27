@@ -12,7 +12,11 @@ import {
 
 import { page, userEvent } from 'vitest/browser';
 
-import { createProject, savedPageEffects } from '@root/tests/editor-effects/project';
+import {
+  createProject,
+  savedPageEffects,
+  writeBookFixture,
+} from '@root/tests/editor-effects/project';
 import {
   addEffect,
   configureShadow,
@@ -464,8 +468,7 @@ test.each([
   ['failed request', '/missing-preview-audio.wav'],
 ])('shows an error for preview loading with %s', async (scenario, path) => {
   const src = new URL(path, location.href).href;
-  const storage = new LocalProjectStorage(project.directory);
-  await storage.writeBook({
+  await writeBookFixture(project.directory, {
     type: 'book',
     pages: [
       {
@@ -509,7 +512,10 @@ test('discarded preview loads cannot change playback status on another page or i
   const goodSource = new URL(soundUrl, location.href).href;
   const pending: (() => void)[] = [];
   const readAsset = LocalProjectStorage.prototype.getAssetFile;
-  vi.spyOn(LocalProjectStorage.prototype, 'getAssetFile').mockImplementation(function (filePath) {
+  vi.spyOn(LocalProjectStorage.prototype, 'getAssetFile').mockImplementation(function (
+    this: LocalProjectStorage,
+    filePath,
+  ) {
     if (filePath === 'assets/slow-preview.wav') {
       return new Promise((_resolve, reject) => {
         pending.push(() => reject(new Error('Ошибка устаревшей загрузки')));
@@ -533,8 +539,7 @@ test('discarded preview loads cannot change playback status on another page or i
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Другая страница звука' }] }],
     },
   };
-  const storage = new LocalProjectStorage(project.directory);
-  await storage.writeBook({
+  await writeBookFixture(project.directory, {
     type: 'book',
     pages: [opening, next],
     visualEffects: [],
@@ -570,8 +575,7 @@ test('discarded preview loads cannot change playback status on another page or i
   await selectPage(1);
   await expect.poll(() => pending.length).toBeGreaterThan(0);
   const nextDirectory = await project.directory.getDirectoryHandle('next-project', { create: true });
-  const nextStorage = new LocalProjectStorage(nextDirectory);
-  await nextStorage.initialize({
+  await writeBookFixture(nextDirectory, {
     type: 'book',
     pages: [next],
     visualEffects: [],
