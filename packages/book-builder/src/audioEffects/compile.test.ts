@@ -95,8 +95,8 @@ test('requires unique IDs across the entire book and rejects page-embedded audio
   expect(isBookDocument({ ...book, pages: [embedded] })).toBe(false);
 });
 
-test('an unselected source can be saved as a draft and blocks compilation', () => {
-  const draft = { ...book, audioEffects: [{ ...audio, src: '' }] };
+test.each(['', 'assets'])('an unfinished source %j can be saved and reopened as a draft', (src) => {
+  const draft = { ...book, audioEffects: [{ ...audio, src }] };
   expect(isBookDocument(draft)).toBe(true);
   expect(() => compileBookDocument(draft)).toThrow(/\.src/);
 });

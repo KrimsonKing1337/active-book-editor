@@ -130,7 +130,7 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
 
   try {
     const pageIds = value.pages.map(({ id }) => id);
-    validateAudioEffects(value.audioEffects, { pageIds, allowUnselectedSource: true });
+    validateAudioEffects(value.audioEffects, { pageIds, allowSourceDraft: true });
 
     return true;
   } catch {

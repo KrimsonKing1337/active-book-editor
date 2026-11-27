@@ -55,7 +55,7 @@ const isRemoteAudioSource = (source: string): boolean => {
 
 type Validation = {
   pageIds: readonly string[];
-  allowUnselectedSource?: boolean;
+  allowSourceDraft?: boolean;
 };
 
 const isValidRange = (range: unknown, pageCount: number): range is PageRange => {
@@ -80,7 +80,7 @@ function assertEffect(effect: unknown, location: DescriptionLocation): asserts e
   const {
     path,
     pageIds,
-    allowUnselectedSource,
+    allowSourceDraft,
   } = location;
 
   if (!isRecord(effect)) {
@@ -102,11 +102,11 @@ function assertEffect(effect: unknown, location: DescriptionLocation): asserts e
   }
 
   const address = `${path} ("${id}")`;
-  const isUnselected = allowUnselectedSource && src === '';
+  const isDraftSource = allowSourceDraft && typeof src === 'string';
   const isAsset = isContentAssetPath(src);
   const isRemote = typeof src === 'string' && isRemoteAudioSource(src);
 
-  if (!isUnselected && !isAsset && !isRemote) {
+  if (!isDraftSource && !isAsset && !isRemote) {
     throw new Error(`${address}.src: expected a file inside assets/ or an HTTP(S) or audio data URL`);
   }
 
