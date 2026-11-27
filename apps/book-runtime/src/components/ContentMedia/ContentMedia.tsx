@@ -1,4 +1,3 @@
-
 import type { BookImageNode, BookVideoNode } from '@active-book/types';
 
 import { Video } from '@active-book/core/components/Video';
@@ -39,6 +38,7 @@ export const ContentMedia = ({ node, id }: ContentMediaProps) => {
     loop = false,
     poster,
   } = node.attrs;
+
   let posterUrl: string | undefined;
 
   if (poster) {

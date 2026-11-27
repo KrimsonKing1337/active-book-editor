@@ -1,9 +1,8 @@
 import type { JSONContent } from '@tiptap/core';
 
-import { type AuthoredAudioEffect, validateAudioEffects } from '../audioEffects/validation';
-
-import { isRecord } from '../effects/utils';
+import { type AuthoredAudioEffect, validateAudioEffects } from '../audioEffects';
 import { type AuthoredVisualEffect, isAuthoredVisualEffect } from '../visualEffects';
+import { isRecord } from '../effects/utils';
 
 export type BookPage = {
   id: string;
@@ -15,11 +14,11 @@ export type BookDocument = {
   type: 'book';
   pages: BookPage[];
   visualEffects: AuthoredVisualEffect[];
-  audioEffects?: readonly AuthoredAudioEffect[];
+  audioEffects?: AuthoredAudioEffect[];
 };
 
 type BookStructure = Omit<BookDocument, 'audioEffects'> & {
-  audioEffects?: unknown
+  audioEffects?: unknown;
 };
 
 export const isBookStructure = (value: unknown): value is BookStructure => {
@@ -27,38 +26,39 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
     return false;
   }
 
-  const isBook = value.type === 'book';
-  const pages = value.pages;
-  const hasPages = Array.isArray(pages);
-
-  if (!isBook || !hasPages) {
+  if (value.type !== 'book') {
     return false;
   }
 
-  const hasNonEmptyPages = pages.length > 0;
-  const ranges = value.visualEffects;
+  const { pages, visualEffects: visualRanges } = value;
 
-  if (!hasNonEmptyPages || !Array.isArray(ranges)) {
+  if (!Array.isArray(pages) || pages.length === 0) {
     return false;
   }
 
-  const hasValidRanges = ranges.every((rangeCur: unknown) => {
-    return isAuthoredVisualEffect(rangeCur) && rangeCur.lifetime.type === 'range';
-  });
-
-  if (!hasValidRanges) {
+  if (!Array.isArray(visualRanges)) {
     return false;
   }
 
-  const ids = new Set<string>();
+  const pageIds = new Set<string>();
   const visualIds = new Set<string>();
 
-  for (const rangeCur of ranges) {
-    if (visualIds.has(rangeCur.effect.id)) {
+  for (const rangeCur of visualRanges) {
+    if (!isAuthoredVisualEffect(rangeCur)) {
       return false;
     }
 
-    visualIds.add(rangeCur.effect.id);
+    if (rangeCur.lifetime.type !== 'range') {
+      return false;
+    }
+
+    const { id } = rangeCur.effect;
+
+    if (visualIds.has(id)) {
+      return false;
+    }
+
+    visualIds.add(id);
   }
 
   return pages.every((pageCur: unknown) => {
@@ -68,69 +68,91 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
 
     const { id, document } = pageCur;
 
-    const hasValidId = typeof id === 'string' && !!id.trim();
-    const isUniqueId = typeof id === 'string' && !ids.has(id);
-
-    const hasValidDocument = isRecord(document)
-      && document.type === 'doc'
-      && Array.isArray(document.content);
-
-    if (!hasValidId || !isUniqueId || !hasValidDocument) {
+    if (typeof id !== 'string' || !id.trim()) {
       return false;
     }
 
-    const attrs = document.attrs;
+    if (pageIds.has(id)) {
+      return false;
+    }
+
+    if (!isRecord(document)) {
+      return false;
+    }
+
+    if (document.type !== 'doc') {
+      return false;
+    }
+
+    if (!Array.isArray(document.content)) {
+      return false;
+    }
+
+    const { attrs } = document;
 
     if (attrs !== undefined && !isRecord(attrs)) {
       return false;
     }
 
-    const specialized = attrs?.pageEffects;
+    const pageEffects = attrs?.pageEffects;
 
-    const hasObsoleteVisualEffects = isRecord(specialized)
-      && ('background' in specialized || 'frame' in specialized || 'audio' in specialized);
+    if (isRecord(pageEffects)) {
+      const hasObsoleteVisualEffects =
+        'background' in pageEffects
+        || 'frame' in pageEffects
+        || 'audio' in pageEffects;
 
-    if (hasObsoleteVisualEffects) {
+      if (hasObsoleteVisualEffects) {
+        return false;
+      }
+    }
+
+    const visualEffects = attrs?.visualEffects ?? [];
+
+    if (!Array.isArray(visualEffects)) {
       return false;
     }
 
-    const visuals = attrs?.visualEffects ?? [];
-
-    if (!Array.isArray(visuals)) {
-      return false;
-    }
-
-    for (const visualCur of visuals) {
+    for (const visualCur of visualEffects) {
       if (!isAuthoredVisualEffect(visualCur)) {
         return false;
       }
 
-      const belongsToPage = visualCur.lifetime.type === 'page'
-        && visualCur.lifetime.pageId === id;
-      const hasDuplicateId = visualIds.has(visualCur.effect.id);
+      const { effect, lifetime } = visualCur;
 
-      if (!belongsToPage || hasDuplicateId) {
+      if (lifetime.type !== 'page') {
         return false;
       }
 
-      visualIds.add(visualCur.effect.id);
+      if (lifetime.pageId !== id) {
+        return false;
+      }
+
+      if (visualIds.has(effect.id)) {
+        return false;
+      }
+
+      visualIds.add(effect.id);
     }
 
-    ids.add(id);
+    pageIds.add(id);
 
     return true;
   });
 };
-
 
 export const isBookDocument = (value: unknown): value is BookDocument => {
   if (!isBookStructure(value)) {
     return false;
   }
 
+  const pageIds = value.pages.map(({ id }) => id);
+
   try {
-    const pageIds = value.pages.map(({ id }) => id);
-    validateAudioEffects(value.audioEffects, { pageIds, allowSourceDraft: true });
+    validateAudioEffects(value.audioEffects, {
+      pageIds,
+      allowSourceDraft: true,
+    });
 
     return true;
   } catch {

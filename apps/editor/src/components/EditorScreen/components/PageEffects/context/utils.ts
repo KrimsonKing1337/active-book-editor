@@ -201,12 +201,10 @@ const applyBackgroundStylePreviews = (
   const videoStyle = videoKey ? previews[videoKey] : undefined;
   const shadowStyle = previews[shadowKey];
 
-  if (
-    !backgroundStyle
+  if (!backgroundStyle
     && !imageStyle
     && !videoStyle
-    && !shadowStyle
-  ) {
+    && !shadowStyle) {
     return effect;
   }
 

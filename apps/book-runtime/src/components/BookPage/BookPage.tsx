@@ -2,10 +2,7 @@ import type { ComponentType } from 'react';
 
 import type { BookRuntime } from '@active-book/types';
 
-import {
-  Vibration,
-  Flashlight,
-} from '@active-book/core/components/ProxyHooks';
+import { Vibration, Flashlight } from '@active-book/core/components';
 
 import { assertContentDocument } from '@active-book/book-builder/content';
 

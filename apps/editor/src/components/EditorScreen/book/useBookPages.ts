@@ -67,14 +67,21 @@ export const useBookPages = ({
   }, []);
 
   const readPageAudio = useCallback((pageId: string) => {
-    return getPageAudio(bookRef.current.audioEffects ?? [], pageId);
+    const audioEffects = bookRef.current.audioEffects ?? [];
+
+    return getPageAudio(audioEffects, pageId);
   }, []);
 
   const writePageAudio = useCallback((change: PageAudioChange) => {
-    const current = bookRef.current;
     const { pageId, effects } = change;
 
-    if (!current.pages.some(({ id }) => id === pageId)) {
+    const current = bookRef.current;
+
+    const theSamePage = current.pages.some((pageCur) => {
+      return pageCur.id === pageId;
+    });
+
+    if (!theSamePage) {
       return;
     }
 
@@ -84,10 +91,19 @@ export const useBookPages = ({
       return;
     }
 
-    const retained = (current.audioEffects ?? []).filter((effect) => !belongsToPage(effect, pageId));
-    const audioEffects = [...retained, ...toPageAudio(change)];
+    const retainedAudioEffects = current.audioEffects ?? [];
 
-    publish({ ...current, audioEffects });
+    const retained = retainedAudioEffects.filter((effectCur) => {
+      return !belongsToPage(effectCur, pageId);
+    });
+
+    const audioInPage = toPageAudio(change);
+    const audioEffects = [...retained, ...audioInPage];
+
+    publish({
+      ...current,
+      audioEffects,
+    });
   }, [publish, readPageAudio]);
 
   const captureCurrentPage = useCallback(() => {
@@ -176,8 +192,10 @@ export const useBookPages = ({
 
   const activePosition = Math.min(Math.max(position, 1), book.pages.length);
   const activePage = book.pages[activePosition - 1];
+
   const pageAudio = useMemo(() => {
     const descriptions = book.audioEffects ?? [];
+
     const effects = getPageAudio(descriptions, activePage.id);
     const ids = descriptions.map(({ id }) => id);
 
@@ -303,13 +321,21 @@ export const useBookPages = ({
     }
 
     const pages = current.pages.filter((pageCur) => pageCur.id !== id);
-    const audioEffects = (current.audioEffects ?? []).filter((effect) => !belongsToPage(effect, id));
+
+    const audioEffectsSafe = current.audioEffects ?? [];
+
+    const audioEffects = audioEffectsSafe.filter((effectCur) => {
+      return !belongsToPage(effectCur, id);
+    });
+
     const hasOutOfBoundsAudio = audioEffects.some(({ lifetime }) => {
       if (lifetime.type !== 'range') {
         return false;
       }
 
-      return lifetime.range.some(({ to }) => to > pages.length);
+      return lifetime.range.some((rangeCur) => {
+        return rangeCur.to > pages.length;
+      });
     });
 
     if (hasOutOfBoundsAudio) {
@@ -327,7 +353,9 @@ export const useBookPages = ({
       audioEffects,
     });
 
-    dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
+    const pagesIds = pages.map((cur) => cur.id);
+
+    dispatch(mainActions.setStoryPages(pagesIds));
 
     navigateRef.current(nextPosition);
   }, [
@@ -339,6 +367,7 @@ export const useBookPages = ({
 
   const movePage = useCallback((id: string, direction: -1 | 1) => {
     const current = getSnapshot();
+
     const index = current.pages.findIndex((pageCur) => pageCur.id === id);
     const target = index + direction;
 
@@ -355,9 +384,13 @@ export const useBookPages = ({
       pages,
     });
 
-    const selected = pages.findIndex((pageCur) => pageCur.id === activeIdRef.current);
+    const selected = pages.findIndex((pageCur) => {
+      return pageCur.id === activeIdRef.current;
+    });
 
-    dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
+    const pagesIds = pages.map((cur) => cur.id);
+
+    dispatch(mainActions.setStoryPages(pagesIds));
 
     navigateRef.current(pages[selected].id);
   }, [
@@ -366,7 +399,9 @@ export const useBookPages = ({
     dispatch,
   ]);
 
-  const getRevision = useCallback(() => revisionRef.current, []);
+  const getRevision = useCallback(() => {
+    return revisionRef.current;
+  }, []);
 
   return {
     book,

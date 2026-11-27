@@ -1,7 +1,4 @@
-import type {
-  BuiltVibrationEffect,
-  BuiltFlashlightEffect,
-} from '@active-book/book-builder/effects';
+import type { BuiltVibrationEffect, BuiltFlashlightEffect } from '@active-book/book-builder/effects';
 
 import type { PageDocument } from '@types';
 

@@ -14,42 +14,63 @@ export type PageAudioAccess = {
 };
 
 export const belongsToPage = (effect: AuthoredAudioEffect, pageId: string): boolean => {
-  return effect.lifetime.type === 'page' && effect.lifetime.page === pageId;
+  if (effect.lifetime.type !== 'page') {
+    return false;
+  }
+
+  return effect.lifetime.page === pageId;
 };
 
 export const getPageAudio = (audioEffects: readonly AuthoredAudioEffect[], pageId: string): AudioDraft[] => {
-  const authored = audioEffects.filter((effect) => belongsToPage(effect, pageId));
+  const authored = audioEffects.filter((effectCur) => {
+    return belongsToPage(effectCur, pageId);
+  });
 
-  return authored.map((effect) => ({
-    id: effect.id,
-    type: 'audio',
-    slug: effect.slug ?? 'Новый звук',
-    options: {
-      src: effect.src,
-      type: effect.type ?? 'sfx',
-      relativeVolume: effect.relativeVolume ?? 100,
-      loop: effect.loop ?? false,
-      playOnLoad: effect.playOnLoad ?? false,
-      delay: effect.delay ?? 0,
-      stopBy: effect.stopBy ?? 0,
-      fadeIn: effect.fadeIn ?? false,
-      fadeOut: effect.fadeOut ?? false,
-      waitTillTheEnd: effect.waitTillTheEnd ?? false,
-      screamer: effect.screamer ?? false,
-      format: effect.format,
-    },
-  }));
+  return authored.map((effectCur) => {
+    const slug = effectCur.slug ?? 'Новый звук';
+
+    const options = {
+      src: effectCur.src,
+      type: effectCur.type ?? 'sfx',
+      relativeVolume: effectCur.relativeVolume ?? 100,
+      loop: effectCur.loop ?? false,
+      playOnLoad: effectCur.playOnLoad ?? false,
+      delay: effectCur.delay ?? 0,
+      stopBy: effectCur.stopBy ?? 0,
+      fadeIn: effectCur.fadeIn ?? false,
+      fadeOut: effectCur.fadeOut ?? false,
+      waitTillTheEnd: effectCur.waitTillTheEnd ?? false,
+      screamer: effectCur.screamer ?? false,
+      format: effectCur.format,
+    };
+
+    return {
+      id: effectCur.id,
+      type: 'audio',
+      slug,
+      options,
+    };
+  });
 };
 
 export const toPageAudio = ({ pageId, effects }: PageAudioChange): AuthoredAudioEffect[] => {
-  return effects.map(({
-    id,
-    slug,
-    options,
-  }) => ({
-    ...options,
-    id,
-    slug,
-    lifetime: { type: 'page', page: pageId },
-  }));
+  return effects.map((effectCur) => {
+    const {
+      id,
+      slug,
+      options,
+    } = effectCur;
+
+    const lifetime: AuthoredAudioEffect['lifetime'] = {
+      type: 'page',
+      page: pageId,
+    };
+
+    return {
+      ...options,
+      id,
+      slug,
+      lifetime,
+    };
+  });
 };

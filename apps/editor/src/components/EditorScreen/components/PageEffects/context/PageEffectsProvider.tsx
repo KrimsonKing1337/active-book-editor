@@ -21,12 +21,14 @@ import {
   PageEffectsContext,
 } from './contexts';
 
+type Flush = (() => boolean) | null;
+
 type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
   pageId?: string;
   ownerPageId?: string;
   pageAudio?: PageAudioAccess;
-  onStylesFlusher?: (flush: (() => boolean) | null) => void;
+  onStylesFlusher?: (flush: Flush) => void;
 };
 
 export const PageEffectsProvider = ({
@@ -37,8 +39,10 @@ export const PageEffectsProvider = ({
   pageAudio,
   onStylesFlusher,
 }: PageEffectsProviderProps) => {
-  const bookAudioIds = pageAudio?.ids;
   const [selectedVisualEffectId, setSelectedVisualEffectId] = useState<string | null>(null);
+
+  const bookAudioIds = pageAudio?.ids;
+
   const {
     effects,
     writeEffects,

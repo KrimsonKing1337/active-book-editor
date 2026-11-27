@@ -1,7 +1,10 @@
+import type { VisualDepth, VisualPlacement } from '@active-book/types';
+
 import type {
   BackgroundEffectKind,
   FilterOperation,
   FrameEffectKind,
+  StyledFrameShadow,
 } from '@active-book/book-builder/effects';
 
 import type {
@@ -12,9 +15,19 @@ import type {
   FrameEffectDraft,
 } from './@types';
 
+type AudioEffectDraftType = AudioEffectDraft['options']['type'];
+
+type BackgroundDefaults = Pick<BackgroundEffectDraft, 'slug' | 'options'> & {
+  order: number;
+};
+
+type FrameDefaults = Pick<FrameEffectDraft, 'slug' | 'options'>;
+
 export const createDefaultShadowFilters = (): FilterOperation[] => {
+  const id = crypto.randomUUID();
+
   const blurFilter: FilterOperation = {
-    id: crypto.randomUUID(),
+    id,
     property: 'backdropFilter',
     function: 'blur',
     value: '10px',
@@ -23,7 +36,9 @@ export const createDefaultShadowFilters = (): FilterOperation[] => {
   return [blurFilter];
 };
 
-export const createAudioEffect = (type: AudioEffectDraft['options']['type'] = 'sfx'): AudioEffectDraft => {
+export const createAudioEffect = (type: AudioEffectDraftType = 'sfx'): AudioEffectDraft => {
+  const id = crypto.randomUUID();
+
   const options: AudioEffectDraft['options'] = {
     src: '',
     type,
@@ -39,14 +54,16 @@ export const createAudioEffect = (type: AudioEffectDraft['options']['type'] = 's
   };
 
   return {
-    id: crypto.randomUUID(),
+    id,
+    options,
     type: 'audio',
     slug: 'Новый звук',
-    options,
   };
 };
 
 export const createVibrationEffect = (): VibrationEffectDraft => {
+  const id = crypto.randomUUID();
+
   const options: VibrationEffectDraft['options'] = {
     duration: 200,
     delay: 0,
@@ -54,14 +71,16 @@ export const createVibrationEffect = (): VibrationEffectDraft => {
   };
 
   return {
-    id: crypto.randomUUID(),
+    id,
+    options,
     type: 'vibration',
     slug: 'Новая вибрация',
-    options,
   };
 };
 
 export const createFlashlightEffect = (): FlashlightEffectDraft => {
+  const id = crypto.randomUUID();
+
   const options: FlashlightEffectDraft['options'] = {
     duration: 200,
     delay: 0,
@@ -71,89 +90,119 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
   };
 
   return {
-    id: crypto.randomUUID(),
+    id,
+    options,
     type: 'flashlight',
     slug: 'Новая вспышка',
-    options,
   };
+};
+
+const getBackgroundDefaults = (kind: BackgroundEffectKind): BackgroundDefaults => {
+  switch (kind) {
+    case 'background':
+      return {
+        slug: 'Новый фон',
+        order: 0,
+        options: {
+          style: {},
+        },
+      };
+
+    case 'image':
+      return {
+        slug: 'Новое изображение',
+        order: 1,
+        options: {
+          image: {
+            id: crypto.randomUUID(),
+            src: '',
+            style: {},
+          },
+        },
+      };
+
+    case 'video':
+      return {
+        slug: 'Новое видео',
+        order: 1,
+        options: {
+          video: {
+            id: crypto.randomUUID(),
+            src: '',
+            style: {},
+          },
+        },
+      };
+
+    case 'shadow': {
+      const styleFilters = createDefaultShadowFilters();
+
+      return {
+        slug: 'Новое затемнение',
+        order: 2,
+        options: {
+          shadow: {
+            show: true,
+            style: {},
+            styleFilters,
+          },
+        },
+      };
+    }
+
+    case 'component':
+      return {
+        slug: 'Новый фоновый компонент',
+        order: 1,
+        options: {
+          style: {},
+        },
+      };
+
+    default:
+      return {
+        slug: 'Новый фон',
+        order: 1,
+        options: {
+          style: {},
+        },
+      };
+  }
 };
 
 export const createBackgroundEffect = (kind: BackgroundEffectKind): BackgroundEffectDraft => {
   const id = crypto.randomUUID();
 
-  let slug = 'Новый фон';
-  let options: BackgroundEffectDraft['options'] = {
-    style: {},
+  const {
+    slug,
+    order,
+    options,
+  } = getBackgroundDefaults(kind);
+
+  const depth: VisualDepth = {
+    plane: 'background',
+    order,
   };
 
-  if (kind === 'image') {
-    slug = 'Новое изображение';
-    options = {
-      image: {
-        id: crypto.randomUUID(),
-        src: '',
-        style: {},
-      },
-    };
-  } else if (kind === 'video') {
-    slug = 'Новое видео';
-    options = {
-      video: {
-        id: crypto.randomUUID(),
-        src: '',
-        style: {},
-      },
-    };
-  } else if (kind === 'shadow') {
-    slug = 'Новое затемнение';
-    options = {
-      shadow: {
-        show: true,
-        style: {},
-        styleFilters: createDefaultShadowFilters(),
-      },
-    };
-  } else if (kind === 'component') {
-    slug = 'Новый фоновый компонент';
-    options = {
-      style: {},
-    };
-  }
-
-  let order = 1;
-  if (kind === 'shadow') {
-    order = 2;
-  }
-  else if (kind === 'background') {
-    order = 0;
-  }
+  const placement: VisualPlacement = {
+    region: 'storyViewport',
+  };
 
   return {
     id,
     type: 'background',
-    depth: {
-      plane: 'background',
-      order,
-    },
-    placement: { region: 'storyViewport' },
+    depth,
+    placement,
     kind,
     slug,
     options,
   };
 };
 
-export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
-  const id = crypto.randomUUID();
-
-  let slug = 'Новый рамочный компонент';
-  let options: FrameEffectDraft['options'] = {
-    style: {},
-  };
-
-  if (kind === 'shadow') {
-    slug = 'Новая рамочная тень';
-    options = {
-      shadow: {
+const getFrameDefaults = (kind: FrameEffectKind): FrameDefaults => {
+  switch (kind) {
+    case 'shadow': {
+      const shadow: StyledFrameShadow = {
         id: crypto.randomUUID(),
         sides: ['left', 'right'],
         position: 'top-left',
@@ -166,41 +215,66 @@ export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
           duration: 1000,
           iterations: 'infinite',
         },
-      },
-    };
-  } else if (kind === 'component') {
-    options = {
-      style: {},
+      };
 
-    };
-  } else if (kind === 'text') {
-    slug = 'Новый рамочный текст';
-    options = {
-      text: {
-        id: crypto.randomUUID(),
-        leftText: 'Левая сторона',
-        rightText: 'Правая сторона',
-        style: {
-          color: '#a3a3a3',
-          fontSize: '12px',
+      return {
+        slug: 'Новая рамочная тень',
+        options: {
+          shadow,
         },
-        animation: {
-          preset: 'scroll',
-          duration: 60000,
-          iterations: 'infinite',
+      };
+    }
+
+    case 'text':
+      return {
+        slug: 'Новый рамочный текст',
+        options: {
+          text: {
+            id: crypto.randomUUID(),
+            leftText: 'Левая сторона',
+            rightText: 'Правая сторона',
+            style: {
+              color: '#a3a3a3',
+              fontSize: '12px',
+            },
+            animation: {
+              preset: 'scroll',
+              duration: 60000,
+              iterations: 'infinite',
+            },
+          },
         },
-      },
-    };
+      };
+
+    case 'component':
+    default:
+      return {
+        slug: 'Новый рамочный компонент',
+        options: {
+          style: {},
+        },
+      };
   }
+};
+
+export const createFrameEffect = (kind: FrameEffectKind): FrameEffectDraft => {
+  const id = crypto.randomUUID();
+  const { slug, options } = getFrameDefaults(kind);
+
+  const depth: VisualDepth = {
+    plane: 'belowNarrative',
+    order: 1,
+  };
+
+  const placement: VisualPlacement = {
+    region: 'storyViewportFrame',
+  };
 
   return {
     id,
     type: 'frame',
-    depth: {
-      plane: 'belowNarrative',
-      order: 1,
-    },
-    placement: { region: 'storyViewportFrame' },
+    depth,
+    placement,
     kind,
     slug,
     options,

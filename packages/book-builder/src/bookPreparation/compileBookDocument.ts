@@ -1,16 +1,14 @@
 import type { AudioEffect, VisualEffectRegistration } from '@active-book/types';
 
-import type { BookDocument } from '../book';
 import { compileVisualEffects } from '../visualEffects';
 
-import { isBookStructure } from '../book/book';
+import { type BookDocument, isBookStructure } from '../book';
 import { compileAudioEffects } from '../audioEffects';
 import { assertContentDocument } from '../content';
 
 import type {
   BuiltVibrationEffect,
   BuiltFlashlightEffect,
-
   VibrationEffect,
   FlashlightEffect,
 } from '../effects';
@@ -32,7 +30,10 @@ const getMappedEffects: GetMappedEffects = (effects) => {
   });
 };
 
-export const compilePageDocument = (document: unknown, path = 'document'): Record<string, unknown> => {
+export const compilePageDocument = (
+  document: unknown,
+  path = 'document',
+): Record<string, unknown> => {
   if (!isRecord(document) || document.type !== 'doc') {
     throw new Error('book.json must contain an Active Book document');
   }
@@ -40,8 +41,10 @@ export const compilePageDocument = (document: unknown, path = 'document'): Recor
   assertContentDocument(document, path);
 
   const attributes = isRecord(document.attrs) ? document.attrs : {};
+
   const builtAttributes = { ...attributes };
   delete builtAttributes.visualEffects;
+
   const pageEffects = normalizePageEffects(attributes.pageEffects);
 
   const effectsVibration = pageEffects.vibration ?? [];
@@ -69,7 +72,10 @@ export type BuiltBookDocument = Omit<BookDocument, 'visualEffects' | 'audioEffec
   audioEffects: AudioEffect<number>[];
 };
 
-export const compileBookDocument = (book: unknown, audioAssets?: Set<string>): BuiltBookDocument => {
+export const compileBookDocument = (
+  book: unknown,
+  audioAssets?: Set<string>,
+): BuiltBookDocument => {
   if (!isBookStructure(book)) {
     throw new Error('book.json must contain a nonempty book with unique page IDs and valid positional ranges');
   }

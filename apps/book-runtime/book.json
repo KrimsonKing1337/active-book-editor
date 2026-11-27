@@ -5,10 +5,14 @@
       "id": "first-page",
       "document": {
         "type": "doc",
-        "content": [{ "type": "paragraph" }],
+        "content": [
+          {
+            "type": "paragraph"
+          }
+        ],
         "attrs": {
           "visualEffects": [],
-  "audioEffects": [],
+          "audioEffects": [],
           "pageEffects": {}
         }
       }
