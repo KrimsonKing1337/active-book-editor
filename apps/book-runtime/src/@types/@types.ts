@@ -1,9 +1,11 @@
 import type { BuiltPageEffects } from '@root/packages/book-builder/src/effects';
 
+export type PageDocumentAttrs = {
+  pageEffects?: Pick<BuiltPageEffects, 'vibration' | 'flashlight'>;
+};
+
 export type PageDocument = {
   type?: string;
-  attrs?: {
-    pageEffects?: Pick<BuiltPageEffects, 'audio' | 'vibration' | 'flashlight'>;
-  };
+  attrs?: PageDocumentAttrs;
   content?: unknown[];
 };

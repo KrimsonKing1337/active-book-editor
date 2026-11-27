@@ -2,6 +2,10 @@ import { isRecord } from '../effects/utils';
 
 import { contentMediaFormat } from './formats';
 
+export const contentAssetUrl = (path: string): string => {
+  return `./${path.split('/').map(encodeURIComponent).join('/')}`;
+};
+
 /** These are file paths, not URLs: rendering encodes each segment exactly once. */
 export const isContentAssetPath = (path: unknown): path is string => {
   if (typeof path !== 'string' || !path.startsWith('assets/') || path.includes('\\')) {

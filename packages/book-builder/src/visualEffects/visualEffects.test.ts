@@ -45,7 +45,11 @@ test('page lifetime follows permanent IDs through reorder; ranges retain their n
     page: 3,
   });
   expect(built.find((cur) => cur.effect.id === 'range-native')?.lifetime).toEqual(book.visualEffects[3].lifetime);
-  book.pages.splice(1);
+  const removedPages = book.pages.splice(1);
+  const removedIds = new Set(removedPages.map(({ id }) => id));
+  book.audioEffects = book.audioEffects?.filter(({ lifetime }) => {
+    return lifetime.type === 'range' || !removedIds.has(lifetime.page);
+  });
   expect(isBookDocument(book)).toBe(true);
   const reopened = JSON.parse(JSON.stringify(book));
   expect(compileBookDocument(reopened).visualEffects.find((cur) => cur.effect.id === 'range-native')?.lifetime)

@@ -7,17 +7,27 @@ export type ResolvedAudioSource = {
   format?: string[];
 };
 
+type AudioSource = {
+  src: string;
+  format?: readonly string[];
+};
+
 export const resolveAudioSource = async (
-  source: string,
+  audioSource: AudioSource,
   project: BookProject | null,
 ): Promise<ResolvedAudioSource> => {
+  const { src: source, format = [] } = audioSource;
+
   const path = source.trim();
 
-  if (/^(https?:|blob:|data:)/.test(path)) {
+  const sourceFormats = [...format];
+
+  if (/^(https?:|blob:|data:)/i.test(path)) {
     return {
       path: source,
       project,
       src: path,
+      format: sourceFormats,
     };
   }
 
@@ -25,17 +35,17 @@ export const resolveAudioSource = async (
     throw new Error('Сначала сохрани проект, чтобы загрузить файл из assets/');
   }
 
-  const assetPath = path.replace(/^\.\//, '').replace(/^\//, '');
-  const fileName = assetPath.split('/').pop() ?? '';
+  const assetPath = source.replace(/^\.\//, '').replace(/^\//, '');
 
-  let extension;
+  if (!sourceFormats.length) {
+    const fileName = assetPath.split('/').pop() ?? '';
+    const extension = /\.([^.]+)$/.exec(fileName)?.[1];
 
-  if (fileName.includes('.')) {
-    extension = fileName.split('.').pop()?.toLowerCase();
-  }
+    if (!extension) {
+      throw new Error('У аудиофайла должно быть расширение или заданный формат');
+    }
 
-  if (!extension) {
-    throw new Error('У аудиофайла должно быть расширение');
+    sourceFormats.push(extension.toLowerCase());
   }
 
   let file: File;
@@ -50,10 +60,12 @@ export const resolveAudioSource = async (
     throw error;
   }
 
+  const objectUrl = URL.createObjectURL(file);
+
   return {
     path: source,
     project,
-    src: URL.createObjectURL(file),
-    format: [extension],
+    src: objectUrl,
+    format: sourceFormats,
   };
 };

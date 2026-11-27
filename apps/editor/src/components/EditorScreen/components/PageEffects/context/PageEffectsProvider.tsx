@@ -1,11 +1,14 @@
+import type { PropsWithChildren } from 'react';
+
 import {
-  type PropsWithChildren,
   useLayoutEffect,
   useMemo,
   useState,
 } from 'react';
 
 import type { Editor } from '@tiptap/core';
+
+import type { PageAudioAccess } from '../../../book/pageAudio';
 
 import {
   usePageEffectsState,
@@ -19,11 +22,14 @@ import {
   PageEffectsContext,
 } from './contexts';
 
+type StylesFlusher = (() => boolean) | null;
+
 type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
   pageId?: string;
   ownerPageId?: string;
-  onStylesFlusher?: (flush: (() => boolean) | null) => void;
+  pageAudio?: PageAudioAccess;
+  onStylesFlusher?: (flush: StylesFlusher) => void;
 };
 
 export const PageEffectsProvider = ({
@@ -31,9 +37,13 @@ export const PageEffectsProvider = ({
   editor,
   pageId = 'page',
   ownerPageId = pageId,
+  pageAudio,
   onStylesFlusher,
 }: PageEffectsProviderProps) => {
   const [selectedVisualEffectId, setSelectedVisualEffectId] = useState<string | null>(null);
+
+  const bookAudioIds = pageAudio?.ids;
+
   const {
     effects,
     writeEffects,
@@ -44,6 +54,7 @@ export const PageEffectsProvider = ({
     editor,
     pageId,
     ownerPageId,
+    pageAudio,
   });
 
   const {
@@ -76,6 +87,7 @@ export const PageEffectsProvider = ({
     effects,
     writeEffects,
     getCurrentEffects,
+    bookAudioIds,
     audioPreviewStatuses,
     setAudioPreviewStatus,
     flushStylePreviews,
@@ -90,6 +102,7 @@ export const PageEffectsProvider = ({
     effects,
     writeEffects,
     getCurrentEffects,
+    bookAudioIds,
     audioPreviewStatuses,
     setAudioPreviewStatus,
     flushStylePreviews,

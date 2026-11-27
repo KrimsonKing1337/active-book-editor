@@ -2,7 +2,9 @@ import type { BookImageNode, BookVideoNode } from '@active-book/types';
 
 import { Video } from '@active-book/core/components/Video';
 
-import { contentAssetUrl, getMediaStyle } from './layout';
+import { contentAssetUrl } from '@active-book/book-builder/content/media';
+
+import { getMediaStyle } from './layout';
 
 import styles from './ContentMedia.module.scss';
 
@@ -36,6 +38,7 @@ export const ContentMedia = ({ node, id }: ContentMediaProps) => {
     loop = false,
     poster,
   } = node.attrs;
+
   let posterUrl: string | undefined;
 
   if (poster) {

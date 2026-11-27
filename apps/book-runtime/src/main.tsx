@@ -40,6 +40,7 @@ const start = async (): Promise<void> => {
   const document = bookDocumentDefault as unknown as BuiltBookDocument;
 
   const missing = missingVisualDefinitions(document.visualEffects, definitions);
+
   if (missing.length) {
     libraries.forEach((cur) => cur.dispose());
 
@@ -52,6 +53,9 @@ const start = async (): Promise<void> => {
     ...config,
     pages: document.pages.length,
   };
+
+  const requestedPageId = new URLSearchParams(location.search).get('page');
+  const initialPage = document.pages.find(({ id }) => id === requestedPageId);
 
   const reactRoot = ReactDOM.createRoot(root);
 
@@ -67,23 +71,31 @@ const start = async (): Promise<void> => {
     }
   });
 
+  const storyPages = document.pages.map((pageCur, index) => {
+    const content = (
+      <BookPage
+        document={pageCur.document}
+        page={index + 1}
+        pageId={pageCur.id}
+        customComponents={components}
+        bookRuntime={bookRuntime}
+      />
+    );
+
+    return {
+      id: pageCur.id,
+      content,
+    };
+  });
+
   reactRoot.render(
     <StoreProvider>
       <AppWrapper
-        storyPages={document.pages.map((pageCur, index) => ({
-          id: pageCur.id,
-          content: (
-            <BookPage
-              document={pageCur.document}
-              page={index + 1}
-              pageId={pageCur.id}
-              customComponents={components}
-              bookRuntime={bookRuntime}
-            />
-          ),
-        }))}
+        storyPages={storyPages}
         config={bookConfig}
         tableOfContents={[]}
+        initialPageId={initialPage?.id}
+        audioDescriptions={document.audioEffects}
         registrations={document.visualEffects}
         definitions={definitions}
       >

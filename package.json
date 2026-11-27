@@ -30,7 +30,7 @@
     "test:browser:preview": "vitest run --configLoader runner --mode preview --browser.ui=false --browser.headless=false",
     "test:coverage": "vitest run --configLoader runner --coverage",
     "test:ci": "vitest run --configLoader runner --coverage --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml",
-    "test:runtime": "node --import tsx --test tests/book-runtime/bookRuntime.browser.test.ts",
+    "test:runtime": "node --import tsx --test --test-concurrency=1 tests/book-runtime/bookRuntime.browser.test.ts tests/book-runtime/bookAudio.browser.test.ts",
     "test:tgz:workflow": "node --import tsx --test tests/book-runtime/tgzWorkflow.browser.test.ts",
     "lint:ts:check": "eslint \"./{apps,packages}/**/*.{ts,tsx}\"",
     "lint:css:check": "stylelint \"{apps,packages}/**/*.scss\"",

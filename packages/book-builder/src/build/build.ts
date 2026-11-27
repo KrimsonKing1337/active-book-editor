@@ -45,9 +45,15 @@ const prepareRuntime = async ({
 
   const bookJsonContent = await fs.readFile(bookJsonSource, 'utf8');
   const projectDocument: unknown = JSON.parse(bookJsonContent);
-  const builtDocument = compileBookDocument(projectDocument);
 
-  for (const assetPathCur of contentAssetPaths(builtDocument)) {
+  const assets = new Set<string>();
+  const builtDocument = compileBookDocument(projectDocument, assets);
+
+  for (const assetCur of contentAssetPaths(builtDocument)) {
+    assets.add(assetCur);
+  }
+
+  for (const assetPathCur of assets) {
     try {
       const file = await fs.stat(path.join(projectRoot, assetPathCur));
 
@@ -104,11 +110,11 @@ const prepareRuntime = async ({
   await fs.cp(assetsSource, assetsTarget, { recursive: true });
 };
 
-export async function buildBook({
+export const buildBook = async ({
   projectRoot,
   repoRoot,
   outDir,
-}: BuildBookParams): Promise<string> {
+}: BuildBookParams): Promise<string> => {
   const tempRoot = path.resolve(repoRoot, 'apps/.active-book-temp');
   const runtimeRoot = path.resolve(repoRoot, 'apps/book-runtime');
   const outDirSafe = outDir ?? path.join(repoRoot, 'dist-book');
@@ -140,4 +146,4 @@ export async function buildBook({
   }
 
   return outDirSafe;
-}
+};

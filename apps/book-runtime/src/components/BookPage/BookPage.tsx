@@ -2,11 +2,7 @@ import type { ComponentType } from 'react';
 
 import type { BookRuntime } from '@active-book/types';
 
-import {
-  Audio,
-  Vibration,
-  Flashlight,
-} from '@active-book/core/components/ProxyHooks';
+import { Vibration, Flashlight } from '@active-book/core/components';
 
 import { assertContentDocument } from '@active-book/book-builder/content';
 
@@ -15,7 +11,6 @@ import type { PageDocument } from '@types';
 import { renderNode } from '@utils/renderNode';
 
 import {
-  getAudioEffects,
   getVibrationEffects,
   getFlashlightEffects,
 } from './utils';
@@ -41,7 +36,6 @@ export const BookPage = ({
 
   const content = document.content ?? [];
 
-  const audioEffects = getAudioEffects(document);
   const vibrationEffects = getVibrationEffects(document);
   const flashlightEffects = getFlashlightEffects(document);
 
@@ -50,17 +44,6 @@ export const BookPage = ({
       { /* Эффекты */ }
 
       <>
-        {audioEffects.map((effectCur) => {
-          return (
-            <Audio
-              key={effectCur.id}
-              id={effectCur.id}
-              page={page}
-              {...effectCur.options}
-            />
-          );
-        })}
-
         {flashlightEffects.map((effectCur) => {
           return (
             <Flashlight

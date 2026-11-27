@@ -53,6 +53,7 @@ export type PageEffectsContextValue = {
   effects: EditorEffectDraft[];
   writeEffects: (effects: EditorEffectDraft[]) => void;
   getCurrentEffects: () => EditorEffectDraft[];
+  bookAudioIds?: readonly string[];
   audioPreviewStatuses: Record<string, AudioPreviewStatus>;
   setAudioPreviewStatus: (id: string, status: AudioPreviewStatus | null) => void;
   flushStylePreviews: () => boolean;

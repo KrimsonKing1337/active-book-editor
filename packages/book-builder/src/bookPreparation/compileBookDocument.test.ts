@@ -8,18 +8,6 @@ import { draftToVisual } from '../visualEffects';
 
 import { compileBookDocument, compilePageDocument } from './compileBookDocument';
 
-const audioOptions = {
-  src: 'assets/rain.ogg',
-  type: 'bg',
-  loop: true,
-  playOnLoad: true,
-  stopBy: 0,
-  delay: 0,
-  relativeVolume: 70,
-  screamer: false,
-  fadeOutWhenUnload: true,
-};
-
 const vibrationOptions = {
   duration: 250,
   delay: 300,
@@ -39,14 +27,6 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
     type: 'doc',
     attrs: {
       pageEffects: {
-        audio: [
-          {
-            id: 'a',
-            type: 'audio',
-            slug: 'Звук',
-            options: audioOptions,
-          },
-        ],
         vibration: [
           {
             id: 'v',
@@ -74,13 +54,6 @@ test('compiles independent effects with kind and strips editor-only slug', () =>
     type: 'doc',
     attrs: {
       pageEffects: {
-        audio: [
-          {
-            id: 'a',
-            type: 'audio',
-            options: audioOptions,
-          },
-        ],
         vibration: [
           {
             id: 'v',
@@ -109,7 +82,6 @@ test('an empty paragraph compiles with empty effect groups', () => {
     type: 'doc',
     attrs: {
       pageEffects: {
-        audio: [],
         vibration: [],
         flashlight: [],
       },

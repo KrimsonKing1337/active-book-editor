@@ -133,6 +133,7 @@ export const EditorWorkspace = () => {
     getRevision,
     getSnapshot,
     movePage,
+    pageAudio,
     replaceBook,
     revision,
     selectPage,
@@ -140,6 +141,7 @@ export const EditorWorkspace = () => {
   } = useBookPages({
     editor,
     flushStyles,
+    onError: setProjectMessage,
   });
 
   const pageScope = `${session}:${activePage.id}`;
@@ -346,6 +348,7 @@ export const EditorWorkspace = () => {
           editor={editor}
           pageId={pageScope}
           ownerPageId={activePage.id}
+          pageAudio={pageAudio}
           onStylesFlusher={registerStylesFlusher}
         >
           <div className={editorScreenClassNames}>

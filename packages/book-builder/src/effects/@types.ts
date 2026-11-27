@@ -4,7 +4,7 @@ import type {
   VisualVisibility,
 } from '@active-book/types';
 
-import type { AudioEffect, BuiltAudioEffect } from './audio';
+import type { AudioEffect } from './audio';
 import type { BuiltVibrationEffect, VibrationEffect } from './vibration';
 import type { BuiltFlashlightEffect, FlashlightEffect } from './flashlight';
 import type { BackgroundEffect, BuiltBackgroundEffect } from './background';
@@ -24,20 +24,21 @@ export type EditorEffect =
   | FrameEffect;
 
 export type PageEffects = {
-  [K in EditorEffect['type']]?: Extract<EditorEffect, {
-    type: K
-  }>[];
+  vibration?: VibrationEffect[];
+  flashlight?: FlashlightEffect[];
+  background?: BackgroundEffect[];
+  frame?: FrameEffect[];
 };
 
 export type BuiltEffect =
-  | BuiltAudioEffect
   | BuiltVibrationEffect
   | BuiltFlashlightEffect
   | BuiltBackgroundEffect
   | BuiltFrameEffect;
 
 export type BuiltPageEffects = {
-  [K in BuiltEffect['type']]?: Extract<BuiltEffect, {
-    type: K
-  }>[];
+  vibration?: BuiltVibrationEffect[];
+  flashlight?: BuiltFlashlightEffect[];
+  background?: BuiltBackgroundEffect[];
+  frame?: BuiltFrameEffect[];
 };

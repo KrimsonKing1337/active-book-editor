@@ -5,7 +5,11 @@
       "id": "first-page",
       "document": {
         "type": "doc",
-        "content": [],
+        "content": [
+          {
+            "type": "paragraph"
+          }
+        ],
         "attrs": {
           "visualEffects": [],
           "pageEffects": {}
@@ -13,5 +17,6 @@
       }
     }
   ],
-  "visualEffects": []
+  "visualEffects": [],
+  "audioEffects": []
 }
