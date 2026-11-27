@@ -6,6 +6,7 @@ import type { BookDocument } from '../book';
 
 import { isBookStructure } from '../book';
 import { compileAudioEffects } from '../audioEffects';
+import { hasPageAudio } from '../audioEffects/validation';
 import { assertContentDocument } from '../content';
 
 import type {
@@ -43,6 +44,10 @@ export const compilePageDocument = (
   assertContentDocument(document, path);
 
   const attributes = isRecord(document.attrs) ? document.attrs : {};
+
+  if (hasPageAudio(attributes)) {
+    throw new Error(`${path}.attrs: declare audio in the book-level audioEffects array`);
+  }
 
   const builtAttributes = { ...attributes };
   delete builtAttributes.visualEffects;

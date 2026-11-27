@@ -323,6 +323,16 @@ function assertEffect(
   assertAudioFields(effect, address);
 }
 
+export const hasPageAudio = (attrs: Record<string, unknown>): boolean => {
+  if ('audioEffects' in attrs) {
+    return true;
+  }
+
+  const { pageEffects } = attrs;
+
+  return isRecord(pageEffects) && 'audio' in pageEffects;
+};
+
 export const validateAudioEffects = (
   effects: unknown,
   validation: Validation,

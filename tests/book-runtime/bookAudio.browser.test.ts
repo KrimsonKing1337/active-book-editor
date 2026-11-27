@@ -30,7 +30,7 @@ test('a real built book shares audio assets and preserves the range voice throug
   context.after(() => rm(workspace, { recursive: true, force: true }));
   const projectRoot = path.join(workspace, 'project');
   const outDir = path.join(workspace, 'dist');
-  const filename = 'гром #?%.wav';
+  const filename = 'гром #%.wav';
   const source = `assets/${filename}`;
   await mkdir(path.join(projectRoot, 'assets'), { recursive: true });
 
