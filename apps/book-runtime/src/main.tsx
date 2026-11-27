@@ -53,6 +53,9 @@ const start = async (): Promise<void> => {
     pages: document.pages.length,
   };
 
+  const requestedPageId = new URLSearchParams(location.search).get('page');
+  const initialPage = document.pages.find(({ id }) => id === requestedPageId);
+
   const reactRoot = ReactDOM.createRoot(root);
 
   const dispose = () => {
@@ -84,6 +87,8 @@ const start = async (): Promise<void> => {
         }))}
         config={bookConfig}
         tableOfContents={[]}
+        initialPageId={initialPage?.id}
+        audioDescriptions={document.audioEffects}
         registrations={document.visualEffects}
         definitions={definitions}
       >

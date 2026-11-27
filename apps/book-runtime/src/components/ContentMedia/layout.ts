@@ -45,7 +45,3 @@ export const getMediaStyle = (attrs: BookMediaAttributes): MediaStyle => {
     '--book-media-fit': bookMediaFit,
   };
 };
-
-export const contentAssetUrl = (path: string): string => {
-  return `./${path.split('/').map(encodeURIComponent).join('/')}`;
-};

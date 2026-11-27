@@ -1,6 +1,7 @@
 import {
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -11,7 +12,9 @@ import { type AuthoredVisualEffect, draftToVisual } from '@active-book/book-buil
 
 import { normalizePageEffects } from '@active-book/book-builder/effects/utils';
 
-import type { EditorEffectDraft } from '../../@types';
+import type { PageAudioAccess } from '../../../../book/pageAudio';
+
+import type { AudioEffectDraft, EditorEffectDraft } from '../../@types';
 import type { AudioPreviewStatus } from '../@types';
 
 import { getPageEffects, groupPageEffects } from '../utils';
@@ -22,12 +25,14 @@ type PageEffectsStateOptions = {
   editor: Editor | null;
   pageId: string;
   ownerPageId: string;
+  pageAudio?: PageAudioAccess;
 };
 
 export const usePageEffectsState = ({
   editor,
   pageId,
   ownerPageId,
+  pageAudio,
 }: PageEffectsStateOptions) => {
   const [source, setSource] = useState(() => {
     const effects = getPageEffects(editor);
@@ -38,7 +43,21 @@ export const usePageEffectsState = ({
     };
   });
 
-  const effects = source.pageId === pageId ? source.effects : [];
+  const drafts = pageAudio?.effects;
+  const readPageAudio = pageAudio?.read;
+  const writePageAudio = pageAudio?.write;
+
+  const effects = useMemo(() => {
+    if (source.pageId !== pageId) {
+      return [];
+    }
+
+    return [...(drafts ?? []), ...source.effects];
+  }, [
+    source,
+    drafts,
+    pageId,
+  ]);
 
   const currentPageRef = useRef(pageId);
   currentPageRef.current = pageId;
@@ -161,16 +180,27 @@ export const usePageEffectsState = ({
       .setDocAttribute('pageEffects', specialized)
       .setDocAttribute('visualEffects', visualEffects);
 
+    const audio = nextEffects.filter((effect): effect is AudioEffectDraft => effect.type === 'audio');
+
+    writePageAudio?.({ pageId: ownerPageId, effects: audio });
+
     editor.view.dispatch(transaction);
   }, [
     editor,
     pageId,
     ownerPageId,
+    writePageAudio,
   ]);
 
   const getCurrentEffects = useCallback((): EditorEffectDraft[] => {
-    return getPageEffects(editor);
-  }, [editor]);
+    const audio = readPageAudio?.(ownerPageId) ?? [];
+
+    return [...audio, ...getPageEffects(editor)];
+  }, [
+    editor,
+    ownerPageId,
+    readPageAudio,
+  ]);
 
   return {
     effects,

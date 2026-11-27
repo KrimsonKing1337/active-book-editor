@@ -1,6 +1,8 @@
 import { expect, test } from 'vitest';
 
-import { contentAssetUrl, getMediaStyle } from '../layout';
+import { contentAssetUrl } from '@active-book/book-builder/content/media';
+
+import { getMediaStyle } from '../layout';
 
 test('maps numeric author dimensions to CSS properties without reader/Dialog preferences', () => {
   expect(getMediaStyle({ src: 'assets/image.png' })).toEqual({

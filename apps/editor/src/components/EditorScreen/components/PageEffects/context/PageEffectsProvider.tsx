@@ -7,6 +7,8 @@ import {
 
 import type { Editor } from '@tiptap/core';
 
+import type { PageAudioAccess } from '../../../book/pageAudio';
+
 import {
   usePageEffectsState,
   useFrameItemPreviews,
@@ -23,6 +25,7 @@ type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
   pageId?: string;
   ownerPageId?: string;
+  pageAudio?: PageAudioAccess;
   onStylesFlusher?: (flush: (() => boolean) | null) => void;
 };
 
@@ -31,8 +34,10 @@ export const PageEffectsProvider = ({
   editor,
   pageId = 'page',
   ownerPageId = pageId,
+  pageAudio,
   onStylesFlusher,
 }: PageEffectsProviderProps) => {
+  const bookAudioIds = pageAudio?.ids;
   const [selectedVisualEffectId, setSelectedVisualEffectId] = useState<string | null>(null);
   const {
     effects,
@@ -44,6 +49,7 @@ export const PageEffectsProvider = ({
     editor,
     pageId,
     ownerPageId,
+    pageAudio,
   });
 
   const {
@@ -76,6 +82,7 @@ export const PageEffectsProvider = ({
     effects,
     writeEffects,
     getCurrentEffects,
+    bookAudioIds,
     audioPreviewStatuses,
     setAudioPreviewStatus,
     flushStylePreviews,
@@ -90,6 +97,7 @@ export const PageEffectsProvider = ({
     effects,
     writeEffects,
     getCurrentEffects,
+    bookAudioIds,
     audioPreviewStatuses,
     setAudioPreviewStatus,
     flushStylePreviews,

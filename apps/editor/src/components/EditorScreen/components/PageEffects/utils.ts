@@ -33,7 +33,9 @@ export const createAudioEffect = (type: AudioEffectDraft['options']['type'] = 's
     delay: 0,
     relativeVolume: 100,
     screamer: false,
-    fadeOutWhenUnload: true,
+    fadeIn: false,
+    fadeOut: true,
+    waitTillTheEnd: false,
   };
 
   return {

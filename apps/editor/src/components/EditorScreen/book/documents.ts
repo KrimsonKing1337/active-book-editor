@@ -22,6 +22,7 @@ export const createEmptyBook = (): BookDocument => {
     type: 'book',
     pages: [page],
     visualEffects: [],
+    audioEffects: [],
   };
 };
 

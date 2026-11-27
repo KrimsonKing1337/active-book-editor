@@ -7,7 +7,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "audio": [],
             "vibration": [],
             "flashlight": []
           },
@@ -80,5 +79,6 @@
       }
     }
   ],
-  "visualEffects": []
+  "visualEffects": [],
+  "audioEffects": []
 }

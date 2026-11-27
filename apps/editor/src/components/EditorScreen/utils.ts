@@ -45,7 +45,6 @@ export const PageDocument = Document.extend({
 
   addAttributes() {
     const defaultEffects = {
-      audio: [],
       vibration: [],
     };
 

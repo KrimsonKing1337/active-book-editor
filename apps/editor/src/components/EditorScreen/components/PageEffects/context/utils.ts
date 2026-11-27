@@ -5,7 +5,6 @@ import { visualToDraft } from '@active-book/book-builder/visualEffects';
 import type { PageEffects as GroupedPageEffects } from '@active-book/book-builder/effects';
 
 import type {
-  AudioEffectDraft,
   BackgroundEffectDraft,
   EditorEffectDraft,
   FlashlightEffectDraft,
@@ -62,7 +61,6 @@ export const getBackgroundPreviewKey = ({
 export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const grouped: GroupedPageEffects = editor?.state.doc.attrs.pageEffects ?? {};
 
-  const groupedAudio = grouped.audio ?? [];
   const groupedVibration = grouped.vibration ?? [];
   const groupedFlashlight = grouped.flashlight ?? [];
 
@@ -70,7 +68,6 @@ export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
   const visualDraft = visual.map(visualToDraft);
 
   return [
-    ...groupedAudio,
     ...groupedVibration,
     ...groupedFlashlight,
     ...visualDraft,
@@ -78,10 +75,6 @@ export const getPageEffects = (editor: Editor | null): EditorEffectDraft[] => {
 };
 
 export const groupPageEffects = ({ effects, previous }: GroupPageEffectsParams): GroupedPageEffects => {
-  const audio = effects.filter((effectCur): effectCur is AudioEffectDraft => {
-    return effectCur.type === 'audio';
-  });
-
   const vibration = effects.filter((effectCur): effectCur is VibrationEffectDraft => {
     return effectCur.type === 'vibration';
   });
@@ -101,7 +94,6 @@ export const groupPageEffects = ({ effects, previous }: GroupPageEffectsParams):
   return {
     ...previous,
 
-    audio,
     vibration,
     flashlight,
     background,

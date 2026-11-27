@@ -67,7 +67,7 @@ test('restores every frame kind and its placement from saved page effects', () =
   const normalized = normalizePageEffects(saved);
 
   assert.deepEqual(normalized, {
-    audio: [],
+
     vibration: [],
     flashlight: [],
     background,
@@ -78,7 +78,7 @@ test('restores every frame kind and its placement from saved page effects', () =
 
 test('normalizes absent and malformed frame groups to empty lists', () => {
   assert.deepEqual(normalizePageEffects(null), {
-    audio: [],
+
     vibration: [],
     flashlight: [],
     background: [],

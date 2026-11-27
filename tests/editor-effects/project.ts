@@ -18,7 +18,6 @@ import herb from '../fixtures/effects-book/assets/herb.svg?raw';
 export const savedPageEffects = (document: JSONContent) => {
   const specialized = normalizeSpecializedEffects(document.attrs?.pageEffects);
   const effects = [
-    ...(specialized.audio ?? []),
     ...(specialized.vibration ?? []),
     ...(specialized.flashlight ?? []),
     ...pageVisualEffects(document).map(visualToDraft),

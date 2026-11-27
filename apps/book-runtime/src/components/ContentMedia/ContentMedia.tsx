@@ -1,8 +1,11 @@
+
 import type { BookImageNode, BookVideoNode } from '@active-book/types';
 
 import { Video } from '@active-book/core/components/Video';
 
-import { contentAssetUrl, getMediaStyle } from './layout';
+import { contentAssetUrl } from '@active-book/book-builder/content/media';
+
+import { getMediaStyle } from './layout';
 
 import styles from './ContentMedia.module.scss';
 

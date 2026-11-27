@@ -1,5 +1,7 @@
 import type { JSONContent } from '@tiptap/core';
 
+import { type AuthoredAudioEffect, validateAudioEffects } from '../audioEffects/validation';
+
 import { isRecord } from '../effects/utils';
 import { type AuthoredVisualEffect, isAuthoredVisualEffect } from '../visualEffects';
 
@@ -13,9 +15,14 @@ export type BookDocument = {
   type: 'book';
   pages: BookPage[];
   visualEffects: AuthoredVisualEffect[];
+  audioEffects?: readonly AuthoredAudioEffect[];
 };
 
-export const isBookDocument = (value: unknown): value is BookDocument => {
+type BookStructure = Omit<BookDocument, 'audioEffects'> & {
+  audioEffects?: unknown
+};
+
+export const isBookStructure = (value: unknown): value is BookStructure => {
   if (!isRecord(value)) {
     return false;
   }
@@ -81,7 +88,7 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
     const specialized = attrs?.pageEffects;
 
     const hasObsoleteVisualEffects = isRecord(specialized)
-      && ('background' in specialized || 'frame' in specialized);
+      && ('background' in specialized || 'frame' in specialized || 'audio' in specialized);
 
     if (hasObsoleteVisualEffects) {
       return false;
@@ -113,4 +120,20 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
 
     return true;
   });
+};
+
+
+export const isBookDocument = (value: unknown): value is BookDocument => {
+  if (!isBookStructure(value)) {
+    return false;
+  }
+
+  try {
+    const pageIds = value.pages.map(({ id }) => id);
+    validateAudioEffects(value.audioEffects, { pageIds, allowUnselectedSource: true });
+
+    return true;
+  } catch {
+    return false;
+  }
 };

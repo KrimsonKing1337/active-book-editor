@@ -45,9 +45,14 @@ const prepareRuntime = async ({
 
   const bookJsonContent = await fs.readFile(bookJsonSource, 'utf8');
   const projectDocument: unknown = JSON.parse(bookJsonContent);
-  const builtDocument = compileBookDocument(projectDocument);
+  const assets = new Set<string>();
+  const builtDocument = compileBookDocument(projectDocument, assets);
 
-  for (const assetPathCur of contentAssetPaths(builtDocument)) {
+  for (const contentAsset of contentAssetPaths(builtDocument)) {
+    assets.add(contentAsset);
+  }
+
+  for (const assetPathCur of assets) {
     try {
       const file = await fs.stat(path.join(projectRoot, assetPathCur));
 

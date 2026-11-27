@@ -5,13 +5,15 @@
       "id": "first-page",
       "document": {
         "type": "doc",
-        "content": [],
+        "content": [{ "type": "paragraph" }],
         "attrs": {
           "visualEffects": [],
+  "audioEffects": [],
           "pageEffects": {}
         }
       }
     }
   ],
-  "visualEffects": []
+  "visualEffects": [],
+  "audioEffects": []
 }

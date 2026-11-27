@@ -150,7 +150,7 @@ test('keeps effect references unchanged when there are no relevant previews', ()
 
 test('groups independent background and frame effects', () => {
   const previous = {
-    audio: [],
+
     vibration: [],
     flashlight: [],
     background: [],
@@ -164,5 +164,4 @@ test('groups independent background and frame effects', () => {
 
   assert.equal(grouped.background?.[0], background);
   assert.equal(grouped.frame?.[0], frame);
-  assert.deepEqual(grouped.audio, []);
 });

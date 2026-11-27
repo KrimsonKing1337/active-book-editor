@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { useDispatch } from '@active-book/core/store';
-import { mainActions } from '@active-book/core/store/main';
-
 import { useAudioController } from '@active-book/core/hooks/effects';
 
 import { Audio } from '@active-book/core/components/ProxyHooks';
@@ -31,8 +28,6 @@ const AudioInstance = ({
   project,
   page,
 }: AudioInstanceProps) => {
-  const dispatch = useDispatch();
-
   const { setAudioPreviewStatus } = usePageEffects();
   const { audio } = useAudioController(effect.id);
 
@@ -44,10 +39,9 @@ const AudioInstance = ({
     src,
     type = 'sfx',
     loop = false,
+    format,
     relativeVolume = 100,
     screamer = false,
-    delay = 0,
-    stopBy = 0,
   } = options;
 
   useEffect(() => {
@@ -67,7 +61,7 @@ const AudioInstance = ({
 
     const prepare = async () => {
       try {
-        const source = await resolveAudioSource(src, project);
+        const source = await resolveAudioSource({ src, format }, project);
 
         if (source.src.startsWith('blob:') && source.src !== trimmedSource) {
           blobUrl = source.src;
@@ -80,10 +74,6 @@ const AudioInstance = ({
 
           return;
         }
-
-        // useAudio creates its HowlWrapper once the core's audio gate is open.
-        // Auto-play remains disabled in the editor.
-        dispatch(mainActions.setIsAudioUnlocked(true));
 
         setResolved(source);
       } catch (error) {
@@ -113,7 +103,7 @@ const AudioInstance = ({
     id,
     src,
     project,
-    dispatch,
+    format,
     setAudioPreviewStatus,
   ]);
 
@@ -195,10 +185,9 @@ const AudioInstance = ({
     return null;
   }
 
-  const audioInstanceKey = `${id}:${currentSource.src}:${delay}:${stopBy}`;
+  const audioInstanceKey = `${id}:${currentSource.src}`;
 
-  // The editor owns the audio instance, not the settings modal.
-  // In auto lifecycle core removes it from Redux and unloads it on unmount.
+  // The page owns the preview. Starting it is always an explicit command.
   return (
     <Audio
       key={audioInstanceKey}
@@ -208,11 +197,8 @@ const AudioInstance = ({
       format={currentSource.format}
       type={type}
       loop={loop}
-      playOnLoad={false}
       relativeVolume={relativeVolume}
       screamer={screamer}
-      delay={delay}
-      stopBy={stopBy}
       fadeOutWhenUnload={false}
       lifecycle="auto"
     />

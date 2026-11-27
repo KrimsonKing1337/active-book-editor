@@ -1,6 +1,7 @@
 import {
   useCallback,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -20,12 +21,24 @@ import {
   replaceEditorDocument,
 } from './documents';
 
+import {
+  type PageAudioChange,
+  belongsToPage,
+  getPageAudio,
+  toPageAudio,
+} from './pageAudio';
+
 type BookPagesOptions = {
   editor: Editor | null;
   flushStyles: () => boolean;
+  onError: (message: string) => void;
 };
 
-export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
+export const useBookPages = ({
+  editor,
+  flushStyles,
+  onError,
+}: BookPagesOptions) => {
   const dispatch = useDispatch();
 
   const [book, setBook] = useState(createEmptyBook);
@@ -52,6 +65,30 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
     setRevision(revisionRef.current);
   }, []);
+
+  const readPageAudio = useCallback((pageId: string) => {
+    return getPageAudio(bookRef.current.audioEffects ?? [], pageId);
+  }, []);
+
+  const writePageAudio = useCallback((change: PageAudioChange) => {
+    const current = bookRef.current;
+    const { pageId, effects } = change;
+
+    if (!current.pages.some(({ id }) => id === pageId)) {
+      return;
+    }
+
+    const previous = readPageAudio(pageId);
+
+    if (JSON.stringify(previous) === JSON.stringify(effects)) {
+      return;
+    }
+
+    const retained = (current.audioEffects ?? []).filter((effect) => !belongsToPage(effect, pageId));
+    const audioEffects = [...retained, ...toPageAudio(change)];
+
+    publish({ ...current, audioEffects });
+  }, [publish, readPageAudio]);
 
   const captureCurrentPage = useCallback(() => {
     if (!editor || !activeIdRef.current) {
@@ -139,6 +176,23 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
 
   const activePosition = Math.min(Math.max(position, 1), book.pages.length);
   const activePage = book.pages[activePosition - 1];
+  const pageAudio = useMemo(() => {
+    const descriptions = book.audioEffects ?? [];
+    const effects = getPageAudio(descriptions, activePage.id);
+    const ids = descriptions.map(({ id }) => id);
+
+    return {
+      effects,
+      ids,
+      read: readPageAudio,
+      write: writePageAudio,
+    };
+  }, [
+    book.audioEffects,
+    activePage.id,
+    readPageAudio,
+    writePageAudio,
+  ]);
 
   useLayoutEffect(() => {
     if (!editor) {
@@ -249,12 +303,28 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     }
 
     const pages = current.pages.filter((pageCur) => pageCur.id !== id);
+    const audioEffects = (current.audioEffects ?? []).filter((effect) => !belongsToPage(effect, id));
+    const hasOutOfBoundsAudio = audioEffects.some(({ lifetime }) => {
+      if (lifetime.type !== 'range') {
+        return false;
+      }
+
+      return lifetime.range.some(({ to }) => to > pages.length);
+    });
+
+    if (hasOutOfBoundsAudio) {
+      onError('Удаление страницы нарушит границы диапазона аудиоэффекта');
+
+      return;
+    }
+
     const selected = pages.findIndex((pageCur) => pageCur.id === activeIdRef.current);
     const nextPosition = selected >= 0 ? selected + 1 : Math.min(index + 1, pages.length);
 
     publish({
       ...current,
       pages,
+      audioEffects,
     });
 
     dispatch(mainActions.setStoryPages(pages.map((cur) => cur.id)));
@@ -264,6 +334,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     getSnapshot,
     publish,
     dispatch,
+    onError,
   ]);
 
   const movePage = useCallback((id: string, direction: -1 | 1) => {
@@ -303,6 +374,7 @@ export const useBookPages = ({ editor, flushStyles }: BookPagesOptions) => {
     revision,
     activePage,
     activePosition,
+    pageAudio,
     getSnapshot,
     getRevision,
     replaceBook,

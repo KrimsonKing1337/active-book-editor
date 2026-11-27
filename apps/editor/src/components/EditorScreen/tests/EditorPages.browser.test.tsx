@@ -17,6 +17,7 @@ import {
   addEffect,
   configureShadow,
   historyShortcut,
+  selectEffect,
   setColor,
 } from '@root/tests/editor-effects/controls';
 
@@ -330,6 +331,17 @@ test('opens a complete book with page-owned media and a real custom TGZ, preserv
   }).click();
   await expect.element(editorText()).toHaveTextContent('Альфа: первая страница');
   await expect.element(page.getByTestId('custom-badge')).toHaveAttribute('data-audio-alpha', 'true');
+  await selectEffect('Звук');
+  const settings = page.getByRole('dialog', { name: 'Эффекты страницы' });
+  const audition = settings.getByRole('button', { name: 'Прослушать', exact: true });
+  await expect.element(audition).toBeEnabled();
+  await settings.getByRole('checkbox', { name: 'Зациклить только предпрослушивание' }).click();
+  await audition.click();
+  const stop = settings.getByRole('button', { name: 'Остановить', exact: true });
+  await expect.element(stop).toBeEnabled();
+  await stop.click();
+  await expect.element(audition).toBeEnabled();
+  await settings.getByRole('button', { name: 'Закрыть', exact: true }).click();
   await page.getByTestId('custom-badge').click();
   await expect.element(page.getByTestId('custom-badge')).toHaveTextContent('Кастомная вставка: 1');
   await selectPage(2);
@@ -355,6 +367,7 @@ test('opens a complete book with page-owned media and a real custom TGZ, preserv
     'stable-beta',
   ]);
   expect(saved.visualEffects).toEqual(fixture.visualEffects);
+  expect(saved.audioEffects).toEqual(fixture.audioEffects);
   expect(saved.pages[1].document.content).toEqual(fixture.pages[2].document.content);
   expect(saved.pages[1]).toEqual(beforeMove.pages[2]);
 }, 60_000);

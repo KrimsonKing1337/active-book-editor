@@ -7,19 +7,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "audio": [
-              {
-                "id": "audio-alpha",
-                "type": "audio",
-                "slug": "Звук",
-                "options": {
-                  "src": "assets/tone.wav",
-                  "type": "sfx",
-                  "playOnLoad": false,
-                  "fadeOutWhenUnload": false
-                }
-              }
-            ],
             "vibration": [
               {
                 "id": "vibration-alpha",
@@ -241,19 +228,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "audio": [
-              {
-                "id": "audio-beta",
-                "type": "audio",
-                "slug": "Звук",
-                "options": {
-                  "src": "assets/tone.wav",
-                  "type": "sfx",
-                  "playOnLoad": false,
-                  "fadeOutWhenUnload": false
-                }
-              }
-            ],
             "vibration": [],
             "flashlight": []
           },
@@ -388,7 +362,6 @@
         "type": "doc",
         "attrs": {
           "pageEffects": {
-            "audio": [],
             "vibration": [],
             "flashlight": []
           },
@@ -820,6 +793,33 @@
           }
         ]
       }
+    }
+  ],
+  "audioEffects": [
+    {
+      "id": "audio-alpha",
+      "delay": 10000,
+      "slug": "Звук",
+      "lifetime": {
+        "type": "page",
+        "page": "stable-alpha"
+      },
+      "src": "assets/tone.wav",
+      "type": "sfx",
+      "playOnLoad": false,
+      "fadeOut": false
+    },
+    {
+      "id": "audio-beta",
+      "slug": "Звук",
+      "lifetime": {
+        "type": "page",
+        "page": "stable-beta"
+      },
+      "src": "assets/tone.wav",
+      "type": "sfx",
+      "playOnLoad": false,
+      "fadeOut": false
     }
   ]
 }

@@ -27,6 +27,7 @@
     "./bookPreparation": "./src/bookPreparation/index.ts",
     "./server": "./src/server/index.ts",
     "./components/custom": "./src/components/custom/index.ts",
+    "./audioEffects": "./src/audioEffects/index.ts",
     "./book": "./src/book/index.ts",
     "./content": "./src/content/index.ts",
     "./visualEffects": "./src/visualEffects/index.ts",

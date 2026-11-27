@@ -81,32 +81,22 @@ test('compiles ordered pages, preserves IDs and positional ranges, and strips ed
   const first = page('persistent-first', 'Первая');
   const second = page('persistent-second', 'Вторая');
   const third = page('persistent-third', 'Третья');
-  const document = {
-    ...second.document,
-    attrs: {
-      pageEffects: {
-        audio: [
-          {
-            id: 'audio',
-            type: 'audio',
-            slug: 'Звук',
-            options: { src: 'x.ogg' },
-          },
-        ],
-      },
-    },
-  };
   const book = {
     type: 'book',
     pages: [
       third,
       first,
-      {
-        ...second,
-        document,
-      },
+      second,
     ],
     visualEffects: [rangeVisual()],
+    audioEffects: [
+      {
+        id: 'audio',
+        slug: 'Звук',
+        src: 'assets/x.ogg',
+        lifetime: { type: 'page', page: second.id },
+      },
+    ],
   };
   const original = JSON.stringify(book);
   const built = compileBookDocument(book);
@@ -116,7 +106,12 @@ test('compiles ordered pages, preserves IDs and positional ranges, and strips ed
     'persistent-second',
   ]);
   expect(built.pages.map((cur) => cur.document.content)).toEqual(book.pages.map((cur) => cur.document.content));
-  expect(built.pages[2].document.attrs?.pageEffects.audio[0]).not.toHaveProperty('slug');
+  expect(built.audioEffects[0]).toEqual({
+    id: 'audio',
+    src: './assets/x.ogg',
+    lifetime: { type: 'page', page: 3 },
+  });
+  expect(built.pages[2].document.attrs?.pageEffects).not.toHaveProperty('audio');
   expect(built.visualEffects[0].lifetime).toEqual(book.visualEffects[0].lifetime);
   expect(JSON.stringify(book)).toBe(original);
 });

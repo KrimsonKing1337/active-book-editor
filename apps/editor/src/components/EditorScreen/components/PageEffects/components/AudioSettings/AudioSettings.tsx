@@ -5,14 +5,14 @@ import {
   useState,
 } from 'react';
 
-import type { AudioEffectOptions } from '@active-book/core/@types';
-
 import { Slider } from '@active-book/core/components';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
 import { isAbortError } from '@project/errors';
+
+import { usePageEffects } from '../../context';
 
 import { AudioPreview } from '../AudioPreview';
 
@@ -35,7 +35,7 @@ import {
 import styles from './AudioSettings.module.scss';
 
 type NumericAudioOptionName = keyof Pick<
-  AudioEffectOptions,
+  AudioOptions,
   | 'relativeVolume'
   | 'delay'
   | 'stopBy'
@@ -62,6 +62,7 @@ export const AudioSettings = ({
   onDelete,
 }: AudioSettingsProps) => {
   const { options } = effect;
+  const { bookAudioIds = [] } = usePageEffects();
 
   const [idDraft, setIdDraft] = useState(effect.id);
   const [isImporting, setIsImporting] = useState(false);
@@ -92,8 +93,10 @@ export const AudioSettings = ({
 
   const normalizedId = idDraft.trim();
   const idIsEmpty = normalizedId.length === 0;
+  const idIsReserved = Object.prototype.hasOwnProperty.call(Object.prototype, normalizedId);
 
-  const idAlreadyExists = existingIds.some((idCur) => {
+  const allIds = [...existingIds, ...bookAudioIds];
+  const idAlreadyExists = allIds.some((idCur) => {
     if (idCur === effect.id) {
       return false;
     }
@@ -105,6 +108,8 @@ export const AudioSettings = ({
 
   if (idIsEmpty) {
     idError = 'ID не может быть пустым';
+  } else if (idIsReserved) {
+    idError = 'Этот ID зарезервирован';
   } else if (idAlreadyExists) {
     idError = 'Такой ID уже существует';
   }
@@ -284,7 +289,7 @@ export const AudioSettings = ({
   };
 
   const handleFadeOutChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateOption('fadeOutWhenUnload', event.target.checked);
+    updateOption('fadeOut', event.target.checked);
   };
 
   const handleScreamerChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -346,7 +351,7 @@ export const AudioSettings = ({
 
           {!idError && (
             <small>
-              ID должен быть уникальным. После изменения нажмите «Применить»
+              ID должен быть уникальным в книге. После изменения нажмите «Применить»
             </small>
           )}
         </div>
@@ -467,7 +472,7 @@ export const AudioSettings = ({
               </small>
             </label>
 
-            <Checkbox checked={options.fadeOutWhenUnload} onChange={handleFadeOutChange}>
+            <Checkbox checked={options.fadeOut} onChange={handleFadeOutChange}>
               Плавно затухать при выгрузке
             </Checkbox>
 
