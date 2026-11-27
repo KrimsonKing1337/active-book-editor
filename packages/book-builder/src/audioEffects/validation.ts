@@ -8,7 +8,7 @@ export type AuthoredAudioEffect = AudioEffect & {
 };
 
 type Validation = {
-  pageIds: string[];
+  pageIds: readonly string[];
   allowSourceDraft?: boolean;
 };
 
@@ -260,8 +260,10 @@ const assertAudioOptions = (effect: Record<string, unknown>, address: string) =>
       throw new Error(errorMessage);
     }
 
-    if (!format.every(isNonemptyString)) {
-      throw new Error(errorMessage);
+    for (const formatCur of format) {
+      if (!isNonemptyString(formatCur)) {
+        throw new Error(errorMessage);
+      }
     }
   }
 
@@ -324,7 +326,7 @@ function assertEffect(
 export const validateAudioEffects = (
   effects: unknown,
   validation: Validation,
-): AuthoredAudioEffect[] => {
+): readonly AuthoredAudioEffect[] => {
   if (effects === undefined) {
     return [];
   }

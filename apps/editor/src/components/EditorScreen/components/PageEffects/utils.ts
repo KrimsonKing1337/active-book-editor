@@ -55,9 +55,9 @@ export const createAudioEffect = (type: AudioEffectDraftType = 'sfx'): AudioEffe
 
   return {
     id,
-    options,
     type: 'audio',
     slug: 'Новый звук',
+    options,
   };
 };
 
@@ -72,9 +72,9 @@ export const createVibrationEffect = (): VibrationEffectDraft => {
 
   return {
     id,
-    options,
     type: 'vibration',
     slug: 'Новая вибрация',
+    options,
   };
 };
 
@@ -91,9 +91,9 @@ export const createFlashlightEffect = (): FlashlightEffectDraft => {
 
   return {
     id,
-    options,
     type: 'flashlight',
     slug: 'Новая вспышка',
+    options,
   };
 };
 

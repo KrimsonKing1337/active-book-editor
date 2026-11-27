@@ -1,5 +1,6 @@
+import type { PropsWithChildren } from 'react';
+
 import {
-  type PropsWithChildren,
   useLayoutEffect,
   useMemo,
   useState,
@@ -21,14 +22,14 @@ import {
   PageEffectsContext,
 } from './contexts';
 
-type Flush = (() => boolean) | null;
+type StylesFlusher = (() => boolean) | null;
 
 type PageEffectsProviderProps = PropsWithChildren & {
   editor: Editor | null;
   pageId?: string;
   ownerPageId?: string;
   pageAudio?: PageAudioAccess;
-  onStylesFlusher?: (flush: Flush) => void;
+  onStylesFlusher?: (flush: StylesFlusher) => void;
 };
 
 export const PageEffectsProvider = ({

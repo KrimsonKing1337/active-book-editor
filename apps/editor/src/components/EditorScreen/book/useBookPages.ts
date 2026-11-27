@@ -21,8 +21,9 @@ import {
   replaceEditorDocument,
 } from './documents';
 
+import type { PageAudioChange } from './pageAudio';
+
 import {
-  type PageAudioChange,
   belongsToPage,
   getPageAudio,
   toPageAudio,
@@ -77,11 +78,11 @@ export const useBookPages = ({
 
     const current = bookRef.current;
 
-    const theSamePage = current.pages.some((pageCur) => {
+    const hasPage = current.pages.some((pageCur) => {
       return pageCur.id === pageId;
     });
 
-    if (!theSamePage) {
+    if (!hasPage) {
       return;
     }
 
@@ -91,14 +92,14 @@ export const useBookPages = ({
       return;
     }
 
-    const retainedAudioEffects = current.audioEffects ?? [];
+    const currentAudioEffects = current.audioEffects ?? [];
 
-    const retained = retainedAudioEffects.filter((effectCur) => {
+    const retainedAudioEffects = currentAudioEffects.filter((effectCur) => {
       return !belongsToPage(effectCur, pageId);
     });
 
-    const audioInPage = toPageAudio(change);
-    const audioEffects = [...retained, ...audioInPage];
+    const pageAudioEffects = toPageAudio(change);
+    const audioEffects = [...retainedAudioEffects, ...pageAudioEffects];
 
     publish({
       ...current,
@@ -322,9 +323,9 @@ export const useBookPages = ({
 
     const pages = current.pages.filter((pageCur) => pageCur.id !== id);
 
-    const audioEffectsSafe = current.audioEffects ?? [];
+    const currentAudioEffects = current.audioEffects ?? [];
 
-    const audioEffects = audioEffectsSafe.filter((effectCur) => {
+    const audioEffects = currentAudioEffects.filter((effectCur) => {
       return !belongsToPage(effectCur, id);
     });
 
@@ -353,9 +354,9 @@ export const useBookPages = ({
       audioEffects,
     });
 
-    const pagesIds = pages.map((cur) => cur.id);
+    const pageIds = pages.map((cur) => cur.id);
 
-    dispatch(mainActions.setStoryPages(pagesIds));
+    dispatch(mainActions.setStoryPages(pageIds));
 
     navigateRef.current(nextPosition);
   }, [
@@ -388,9 +389,9 @@ export const useBookPages = ({
       return pageCur.id === activeIdRef.current;
     });
 
-    const pagesIds = pages.map((cur) => cur.id);
+    const pageIds = pages.map((cur) => cur.id);
 
-    dispatch(mainActions.setStoryPages(pagesIds));
+    dispatch(mainActions.setStoryPages(pageIds));
 
     navigateRef.current(pages[selected].id);
   }, [

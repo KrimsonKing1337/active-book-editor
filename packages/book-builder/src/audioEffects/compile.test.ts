@@ -88,6 +88,15 @@ test.each([
   expect(() => compileBookDocument({ ...book, audioEffects: [{ ...audio, ...override }] })).toThrow(message);
 });
 
+test('rejects sparse format arrays', () => {
+  const format: string[] = [];
+  format.length = 1;
+
+  const effect = { ...audio, format };
+
+  expect(() => compileBookDocument({ ...book, audioEffects: [effect] })).toThrow(/\.format/);
+});
+
 test('requires unique IDs across the entire book and rejects page-embedded audio', () => {
   const duplicate = { ...audio, lifetime: { type: 'page', page: 'ending' } };
   expect(() => compileBookDocument({ ...book, audioEffects: [audio, duplicate] })).toThrow(/duplicate audio ID/);

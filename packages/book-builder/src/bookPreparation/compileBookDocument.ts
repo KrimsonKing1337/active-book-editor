@@ -2,7 +2,9 @@ import type { AudioEffect, VisualEffectRegistration } from '@active-book/types';
 
 import { compileVisualEffects } from '../visualEffects';
 
-import { type BookDocument, isBookStructure } from '../book';
+import type { BookDocument } from '../book';
+
+import { isBookStructure } from '../book';
 import { compileAudioEffects } from '../audioEffects';
 import { assertContentDocument } from '../content';
 

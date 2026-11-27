@@ -1,7 +1,10 @@
 import type { JSONContent } from '@tiptap/core';
 
-import { type AuthoredAudioEffect, validateAudioEffects } from '../audioEffects';
-import { type AuthoredVisualEffect, isAuthoredVisualEffect } from '../visualEffects';
+import type { AuthoredAudioEffect } from '../audioEffects';
+import type { AuthoredVisualEffect } from '../visualEffects';
+
+import { validateAudioEffects } from '../audioEffects';
+import { isAuthoredVisualEffect } from '../visualEffects';
 import { isRecord } from '../effects/utils';
 
 export type BookPage = {
@@ -14,7 +17,7 @@ export type BookDocument = {
   type: 'book';
   pages: BookPage[];
   visualEffects: AuthoredVisualEffect[];
-  audioEffects?: AuthoredAudioEffect[];
+  audioEffects?: readonly AuthoredAudioEffect[];
 };
 
 type BookStructure = Omit<BookDocument, 'audioEffects'> & {
@@ -61,7 +64,7 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
     visualIds.add(id);
   }
 
-  return pages.every((pageCur: unknown) => {
+  for (const pageCur of pages) {
     if (!isRecord(pageCur)) {
       return false;
     }
@@ -97,12 +100,12 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
     const pageEffects = attrs?.pageEffects;
 
     if (isRecord(pageEffects)) {
-      const hasObsoleteVisualEffects =
+      const hasObsoletePageEffects =
         'background' in pageEffects
         || 'frame' in pageEffects
         || 'audio' in pageEffects;
 
-      if (hasObsoleteVisualEffects) {
+      if (hasObsoletePageEffects) {
         return false;
       }
     }
@@ -136,9 +139,9 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
     }
 
     pageIds.add(id);
+  }
 
-    return true;
-  });
+  return true;
 };
 
 export const isBookDocument = (value: unknown): value is BookDocument => {
@@ -146,9 +149,9 @@ export const isBookDocument = (value: unknown): value is BookDocument => {
     return false;
   }
 
-  const pageIds = value.pages.map(({ id }) => id);
-
   try {
+    const pageIds = value.pages.map(({ id }) => id);
+
     validateAudioEffects(value.audioEffects, {
       pageIds,
       allowSourceDraft: true,

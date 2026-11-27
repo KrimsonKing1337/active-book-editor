@@ -22,11 +22,11 @@ export const belongsToPage = (effect: AuthoredAudioEffect, pageId: string): bool
 };
 
 export const getPageAudio = (audioEffects: readonly AuthoredAudioEffect[], pageId: string): AudioDraft[] => {
-  const authored = audioEffects.filter((effectCur) => {
+  const pageAudioEffects = audioEffects.filter((effectCur) => {
     return belongsToPage(effectCur, pageId);
   });
 
-  return authored.map((effectCur) => {
+  return pageAudioEffects.map((effectCur) => {
     const slug = effectCur.slug ?? 'Новый звук';
 
     const options = {

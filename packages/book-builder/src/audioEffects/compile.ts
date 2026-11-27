@@ -9,13 +9,11 @@ type AudioBookPage = {
 };
 
 type AudioBook = {
-  pages: AudioBookPage[];
+  pages: readonly AudioBookPage[];
   audioEffects?: unknown;
 };
 
-type AudioEffects = AudioEffect<number>[];
-
-export const compileAudioEffects = (book: AudioBook, assets?: Set<string>): AudioEffects => {
+export const compileAudioEffects = (book: AudioBook, assets?: Set<string>): AudioEffect<number>[] => {
   const pageIds = book.pages.map(({ id }) => id);
   const descriptions = validateAudioEffects(book.audioEffects, { pageIds });
 

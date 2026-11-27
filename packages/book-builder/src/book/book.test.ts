@@ -77,6 +77,23 @@ test('requires nonempty pages, unique IDs and a single canonical visual format',
   })).toBe(false);
 });
 
+test('rejects holes in page and visual effect collections', () => {
+  const book = {
+    type: 'book',
+    pages: [page('one', 'A')],
+    visualEffects: [],
+  };
+
+  const sparsePages: unknown[] = [];
+  sparsePages.length = 1;
+
+  const sparseVisuals: unknown[] = [];
+  sparseVisuals.length = 1;
+
+  expect(isBookDocument({ ...book, pages: sparsePages })).toBe(false);
+  expect(isBookDocument({ ...book, visualEffects: sparseVisuals })).toBe(false);
+});
+
 test('compiles ordered pages, preserves IDs and positional ranges, and strips editor metadata', () => {
   const first = page('persistent-first', 'Первая');
   const second = page('persistent-second', 'Вторая');

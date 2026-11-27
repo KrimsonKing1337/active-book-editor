@@ -14,7 +14,8 @@ type AudioSource = {
 
 export const resolveAudioSource = async (
   audioSource: AudioSource,
-  project: BookProject | null): Promise<ResolvedAudioSource> => {
+  project: BookProject | null,
+): Promise<ResolvedAudioSource> => {
   const { src: source, format = [] } = audioSource;
 
   const path = source.trim();
@@ -59,12 +60,12 @@ export const resolveAudioSource = async (
     throw error;
   }
 
-  const src = URL.createObjectURL(file);
+  const objectUrl = URL.createObjectURL(file);
 
   return {
     path: source,
     project,
-    src,
+    src: objectUrl,
     format: sourceFormats,
   };
 };
