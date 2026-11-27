@@ -468,6 +468,13 @@ test.each([
   ['failed request', '/missing-preview-audio.wav'],
 ])('shows an error for preview loading with %s', async (scenario, path) => {
   const src = new URL(path, location.href).href;
+
+  if (scenario === 'failed request') {
+    const response = await fetch(src);
+
+    expect(response.status).toBe(404);
+  }
+
   await writeBookFixture(project.directory, {
     type: 'book',
     pages: [
