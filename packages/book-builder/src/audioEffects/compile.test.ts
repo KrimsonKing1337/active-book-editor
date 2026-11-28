@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 
 import type { AudioEffect } from '@active-book/types';
 
-import { compileBookDocument } from '../bookPreparation';
+import { compileBookDocument, compilePageDocument } from '../bookPreparation';
 import { isBookDocument } from '../book';
 
 import { compileAudioEffects } from './compile';
@@ -97,11 +97,26 @@ test('rejects sparse format arrays', () => {
   expect(() => compileBookDocument({ ...book, audioEffects: [effect] })).toThrow(/\.format/);
 });
 
-test('requires unique IDs across the entire book and rejects page-embedded audio', () => {
+test('requires unique IDs across the entire book', () => {
   const duplicate = { ...audio, lifetime: { type: 'page', page: 'ending' } };
   expect(() => compileBookDocument({ ...book, audioEffects: [audio, duplicate] })).toThrow(/duplicate audio ID/);
-  const embedded = { ...book.pages[0], document: { ...book.pages[0].document, attrs: { pageEffects: { audio: [] } } } };
-  expect(isBookDocument({ ...book, pages: [embedded] })).toBe(false);
+});
+
+test.each([
+  { pageEffects: { audio: [] } },
+  { audioEffects: [] },
+  { audioEffects: [audio] },
+])('rejects page-embedded audio %# when opening or compiling a book', (attrs) => {
+  const [firstPage] = book.pages;
+  const document = { ...firstPage.document, attrs };
+  const documentWithPageAudio = {
+    ...book,
+    pages: [{ ...firstPage, document }],
+    audioEffects: [],
+  };
+  expect(isBookDocument(documentWithPageAudio)).toBe(false);
+  expect(() => compileBookDocument(documentWithPageAudio)).toThrow(/book.json/);
+  expect(() => compilePageDocument(document)).toThrow(/book-level audioEffects/);
 });
 
 test.each(['', 'assets'])('an unfinished source %j can be saved and reopened as a draft', (src) => {

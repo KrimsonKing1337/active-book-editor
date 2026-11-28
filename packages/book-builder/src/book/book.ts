@@ -4,6 +4,7 @@ import type { AuthoredAudioEffect } from '../audioEffects';
 import type { AuthoredVisualEffect } from '../visualEffects';
 
 import { validateAudioEffects } from '../audioEffects';
+import { hasPageAudio } from '../audioEffects/validation';
 import { isAuthoredVisualEffect } from '../visualEffects';
 import { isRecord } from '../effects/utils';
 
@@ -97,13 +98,14 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
       return false;
     }
 
+    if (attrs && hasPageAudio(attrs)) {
+      return false;
+    }
+
     const pageEffects = attrs?.pageEffects;
 
     if (isRecord(pageEffects)) {
-      const hasObsoletePageEffects =
-        'background' in pageEffects
-        || 'frame' in pageEffects
-        || 'audio' in pageEffects;
+      const hasObsoletePageEffects = 'background' in pageEffects || 'frame' in pageEffects;
 
       if (hasObsoletePageEffects) {
         return false;

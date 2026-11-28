@@ -12,7 +12,11 @@ import {
 
 import { page, userEvent } from 'vitest/browser';
 
-import { createProject, savedPageEffects } from '@root/tests/editor-effects/project';
+import {
+  createProject,
+  savedPageEffects,
+  writeBookFixture,
+} from '@root/tests/editor-effects/project';
 import {
   addEffect,
   configureShadow,
@@ -457,3 +461,142 @@ test('switching projects during a real TGZ import disposes resources and isolate
   await expect.element(page.getByTestId('native-visual')).toHaveTextContent('0');
   expect(document.querySelector('[data-testid="custom-badge"]')).not.toBeNull();
 }, 60_000);
+
+test.each([
+  ['unsupported codec', '/preview.unsupported-audio-codec'],
+  ['corrupt audio', 'data:audio/wav;base64,AAAAAAAA'],
+  ['failed request', '/missing-preview-audio.wav'],
+])('shows an error for preview loading with %s', async (scenario, path) => {
+  const src = new URL(path, location.href).href;
+
+  if (scenario === 'failed request') {
+    const response = await fetch(src);
+
+    expect(response.status).toBe(404);
+  }
+
+  await writeBookFixture(project.directory, {
+    type: 'book',
+    pages: [
+      {
+        id: 'preview',
+        document: {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Страница предпрослушивания' }] }],
+        },
+      },
+    ],
+    visualEffects: [],
+    audioEffects: [
+      {
+        id: 'preview',
+        slug: 'Проверка звука',
+        src,
+        lifetime: { type: 'page', page: 'preview' },
+      },
+    ],
+  });
+  await page.getByRole('button', { name: 'Открыть проект', exact: true }).click();
+  await expect.element(editorText()).toHaveTextContent('Страница предпрослушивания');
+  await selectEffect('Проверка звука');
+  const settings = page.getByRole('dialog', { name: 'Эффекты страницы' });
+  await expect.element(settings.getByRole('alert')).toHaveTextContent('Не удалось загрузить аудио в Howler');
+  await expect.element(settings.getByRole('button', { name: 'Прослушать', exact: true })).toBeDisabled();
+  await expect.element(settings.getByText('Подготавливаем аудио...')).not.toBeInTheDocument();
+
+  if (scenario === 'unsupported codec') {
+    const { default: soundUrl } = await import('@root/tests/fixtures/multipage-book/assets/tone.wav?url');
+    const input = settings.getByRole('textbox', { name: 'Путь к аудиофайлу' });
+    const replacement = new URL(soundUrl, location.href).href;
+    await input.fill(replacement);
+    await expect.element(settings.getByRole('button', { name: 'Прослушать', exact: true })).toBeEnabled();
+    await expect.element(settings.getByRole('alert')).not.toBeInTheDocument();
+  }
+}, 30_000);
+
+test('discarded preview loads cannot change playback status on another page or in another project', async () => {
+  const { default: soundUrl } = await import('@root/tests/fixtures/multipage-book/assets/tone.wav?url');
+  const goodSource = new URL(soundUrl, location.href).href;
+  const pending: (() => void)[] = [];
+  const readAsset = LocalProjectStorage.prototype.getAssetFile;
+  vi.spyOn(LocalProjectStorage.prototype, 'getAssetFile').mockImplementation(function (
+    this: LocalProjectStorage,
+    filePath,
+  ) {
+    if (filePath === 'assets/slow-preview.wav') {
+      return new Promise((_resolve, reject) => {
+        pending.push(() => reject(new Error('Ошибка устаревшей загрузки')));
+      });
+    }
+
+    return readAsset.call(this, filePath);
+  });
+
+  const opening = {
+    id: 'opening',
+    document: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Первая страница звука' }] }],
+    },
+  };
+  const next = {
+    id: 'next',
+    document: {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Другая страница звука' }] }],
+    },
+  };
+  await writeBookFixture(project.directory, {
+    type: 'book',
+    pages: [opening, next],
+    visualEffects: [],
+    audioEffects: [
+      {
+        id: 'preview',
+        src: 'assets/slow-preview.wav',
+        lifetime: { type: 'page', page: opening.id },
+      },
+      {
+        id: 'next-preview',
+        src: goodSource,
+        lifetime: { type: 'page', page: next.id },
+      },
+    ],
+  });
+  const openProject = page.getByRole('button', { name: 'Открыть проект', exact: true });
+  const assertPreviewReady = async () => {
+    await selectEffect('Новый звук');
+    const settings = page.getByRole('dialog', { name: 'Эффекты страницы' });
+    await expect.element(settings.getByRole('button', { name: 'Прослушать', exact: true })).toBeEnabled();
+    await expect.element(settings.getByRole('alert')).not.toBeInTheDocument();
+    await settings.getByRole('button', { name: 'Закрыть', exact: true }).click();
+  };
+
+  await openProject.click();
+  await expect.element(editorText()).toHaveTextContent('Первая страница звука');
+  await expect.poll(() => pending.length).toBeGreaterThan(0);
+  await selectPage(2);
+  pending.splice(0).forEach((fail) => fail());
+  await assertPreviewReady();
+
+  await selectPage(1);
+  await expect.poll(() => pending.length).toBeGreaterThan(0);
+  const nextDirectory = await project.directory.getDirectoryHandle('next-project', { create: true });
+  await writeBookFixture(nextDirectory, {
+    type: 'book',
+    pages: [next],
+    visualEffects: [],
+    audioEffects: [
+      {
+        id: 'preview',
+        src: goodSource,
+        lifetime: { type: 'page', page: next.id },
+      },
+    ],
+  });
+  vi.stubGlobal('showDirectoryPicker', async () => nextDirectory);
+  await openProject.click();
+  await expect.element(editorText()).toHaveTextContent('Другая страница звука');
+  pending.splice(0).forEach((fail) => fail());
+  await assertPreviewReady();
+}, 45_000);

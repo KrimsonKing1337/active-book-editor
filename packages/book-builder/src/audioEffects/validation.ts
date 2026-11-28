@@ -1,6 +1,6 @@
 import type { AudioEffect, PageRange } from '@active-book/types';
 
-import { isContentAssetPath } from '../content/media';
+import { isContentAssetPath } from '../content';
 import { isRecord } from '../effects/utils';
 
 export type AuthoredAudioEffect = AudioEffect & {
@@ -322,6 +322,16 @@ function assertEffect(
   assertAudioOptions(effect, address);
   assertAudioFields(effect, address);
 }
+
+export const hasPageAudio = (attrs: Record<string, unknown>): boolean => {
+  if ('audioEffects' in attrs) {
+    return true;
+  }
+
+  const { pageEffects } = attrs;
+
+  return isRecord(pageEffects) && 'audio' in pageEffects;
+};
 
 export const validateAudioEffects = (
   effects: unknown,

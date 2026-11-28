@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 
 import { useAudioController } from '@active-book/core/hooks/effects';
 
@@ -11,6 +15,11 @@ import type { AudioEffectDraft } from '../../@types';
 import { usePageEffects } from '../../context';
 
 import { type ResolvedAudioSource, resolveAudioSource } from './utils';
+
+type PreviewSource = {
+  source: ResolvedAudioSource;
+  requestedFormat?: readonly string[];
+};
 
 type AudioInstanceProps = {
   effect: AudioEffectDraft;
@@ -31,7 +40,7 @@ const AudioInstance = ({
   const { setAudioPreviewStatus } = usePageEffects();
   const { audio } = useAudioController(effect.id);
 
-  const [resolved, setResolved] = useState<ResolvedAudioSource | null>(null);
+  const [resolved, setResolved] = useState<PreviewSource | null>(null);
 
   const { id, options } = effect;
 
@@ -44,20 +53,21 @@ const AudioInstance = ({
     screamer = false,
   } = options;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let cancelled = false;
     let blobUrl: string | null = null;
 
     const trimmedSource = src.trim();
 
-    const initialState = trimmedSource ? 'loading' : 'empty';
-
     setResolved(null);
-    setAudioPreviewStatus(id, { state: initialState });
 
     if (!trimmedSource) {
+      setAudioPreviewStatus(id, { state: 'empty' });
+
       return;
     }
+
+    setAudioPreviewStatus(id, { state: 'loading' });
 
     const prepare = async () => {
       try {
@@ -75,7 +85,7 @@ const AudioInstance = ({
           return;
         }
 
-        setResolved(source);
+        setResolved({ source, requestedFormat: format });
       } catch (error) {
         if (cancelled) {
           return;
@@ -107,49 +117,55 @@ const AudioInstance = ({
     setAudioPreviewStatus,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     return () => {
       setAudioPreviewStatus(id, null);
     };
   }, [id, setAudioPreviewStatus]);
 
-  const isCurrentResolvedSource = resolved?.path === src && resolved.project === project;
-  const currentSource = isCurrentResolvedSource ? resolved : null;
+  let currentSource: ResolvedAudioSource | null = null;
 
-  const audioSrc = audio?.src;
-  const registeredSource = Array.isArray(audioSrc) ? audioSrc[0] : audioSrc;
+  if (resolved) {
+    const { source, requestedFormat } = resolved;
 
-  const currentAudio = registeredSource === currentSource?.src ? audio : null;
+    const sourceTheSame = source.path === src;
+    const projectTheSame = source.project === project;
+    const formatTheSame = requestedFormat === format;
 
-  useEffect(() => {
-    if (!currentAudio || !currentSource) {
+    const isCurrentSource = sourceTheSame && projectTheSame && formatTheSame;
+
+    if (isCurrentSource) {
+      currentSource = source;
+    }
+  }
+
+  let registeredSource = audio?.src;
+
+  if (Array.isArray(registeredSource)) {
+    [registeredSource] = registeredSource;
+  }
+
+  let currentAudio = null;
+
+  if (currentSource && registeredSource === currentSource.src) {
+    currentAudio = audio;
+  }
+
+  useLayoutEffect(() => {
+    if (!currentAudio) {
       return;
     }
 
-    const handleReady = () => {
-      setAudioPreviewStatus(id, {
-        state: 'ready',
-      });
-    };
-
-    const handleError = () => {
-      setAudioPreviewStatus(id, {
-        state: 'error',
-        error: 'Не удалось загрузить аудио в Howler',
-      });
-    };
-
-    currentAudio.howlInst.on('load', handleReady);
-    currentAudio.howlInst.on('loaderror', handleError);
-
-    if (currentAudio.state() === 'loaded') {
-      handleReady();
-    }
-
-    return () => {
-      currentAudio.howlInst.off('load', handleReady);
-      currentAudio.howlInst.off('loaderror', handleError);
-    };
+    return currentAudio.observeLoad((outcome) => {
+      if (outcome === 'ready') {
+        setAudioPreviewStatus(id, { state: 'ready' });
+      } else if (outcome === 'failed') {
+        setAudioPreviewStatus(id, {
+          state: 'error',
+          error: 'Не удалось загрузить аудио в Howler',
+        });
+      }
+    });
   }, [
     currentAudio,
     currentSource,
