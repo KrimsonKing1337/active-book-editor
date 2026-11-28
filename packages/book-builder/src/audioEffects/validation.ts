@@ -1,6 +1,6 @@
 import type { AudioEffect, PageRange } from '@active-book/types';
 
-import { isContentAssetPath } from '../content/media';
+import { isContentAssetPath } from '../content';
 import { isRecord } from '../effects/utils';
 
 export type AuthoredAudioEffect = AudioEffect & {

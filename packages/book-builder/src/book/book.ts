@@ -105,9 +105,7 @@ export const isBookStructure = (value: unknown): value is BookStructure => {
     const pageEffects = attrs?.pageEffects;
 
     if (isRecord(pageEffects)) {
-      const hasObsoletePageEffects =
-        'background' in pageEffects
-        || 'frame' in pageEffects;
+      const hasObsoletePageEffects = 'background' in pageEffects || 'frame' in pageEffects;
 
       if (hasObsoletePageEffects) {
         return false;

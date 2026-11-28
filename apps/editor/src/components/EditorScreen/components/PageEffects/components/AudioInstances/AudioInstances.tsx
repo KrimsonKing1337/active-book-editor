@@ -127,7 +127,12 @@ const AudioInstance = ({
 
   if (resolved) {
     const { source, requestedFormat } = resolved;
-    const isCurrentSource = source.path === src && source.project === project && requestedFormat === format;
+
+    const sourceTheSame = source.path === src;
+    const projectTheSame = source.project === project;
+    const formatTheSame = requestedFormat === format;
+
+    const isCurrentSource = sourceTheSame && projectTheSame && formatTheSame;
 
     if (isCurrentSource) {
       currentSource = source;
