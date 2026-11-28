@@ -7,7 +7,7 @@ import {
 
 import { Slider } from '@active-book/core/components';
 
-import { MAX_AUDIO_RELATIVE_VOLUME } from '@active-book/core/audioVolume';
+import { MAX_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
 
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/@types/fileSystemAccess';

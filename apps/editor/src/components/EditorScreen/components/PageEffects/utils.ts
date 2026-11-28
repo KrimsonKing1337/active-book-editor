@@ -1,6 +1,6 @@
 import type { VisualDepth, VisualPlacement } from '@active-book/types';
 
-import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/audioVolume';
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
 
 import type {
   BackgroundEffectKind,

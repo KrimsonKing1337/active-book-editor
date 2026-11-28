@@ -4,7 +4,7 @@ import {
   isAudioRelativeVolume,
   MAX_AUDIO_RELATIVE_VOLUME,
   MIN_AUDIO_RELATIVE_VOLUME,
-} from '@active-book/core/audioVolume';
+} from '@active-book/core/utils/effects/audio/audioVolume';
 
 import { isContentAssetPath } from '../content';
 import { isRecord } from '../effects/utils';

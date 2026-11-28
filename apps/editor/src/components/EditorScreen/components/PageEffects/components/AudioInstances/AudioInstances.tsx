@@ -8,7 +8,7 @@ import { useAudioController } from '@active-book/core/hooks/effects';
 
 import { Audio } from '@active-book/core/components/ProxyHooks';
 
-import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/audioVolume';
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
 
 import type { BookProject } from '@project/@types';
 

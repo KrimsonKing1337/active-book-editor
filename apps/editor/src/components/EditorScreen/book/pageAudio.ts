@@ -1,4 +1,4 @@
-import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/audioVolume';
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
 
 import type { AuthoredAudioEffect } from '@active-book/book-builder/audioEffects';
 import type { AudioEffect as AudioDraft } from '@active-book/book-builder/effects';
