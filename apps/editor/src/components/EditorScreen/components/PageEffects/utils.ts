@@ -1,5 +1,7 @@
 import type { VisualDepth, VisualPlacement } from '@active-book/types';
 
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
+
 import type {
   BackgroundEffectKind,
   FilterOperation,
@@ -46,8 +48,7 @@ export const createAudioEffect = (type: AudioEffectDraftType = 'sfx'): AudioEffe
     playOnLoad: false,
     stopBy: 0,
     delay: 0,
-    relativeVolume: 100,
-    screamer: false,
+    relativeVolume: DEFAULT_AUDIO_RELATIVE_VOLUME,
     fadeIn: false,
     fadeOut: true,
     waitTillTheEnd: false,

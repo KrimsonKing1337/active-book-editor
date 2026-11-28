@@ -7,6 +7,8 @@ import {
 
 import { Slider } from '@active-book/core/components';
 
+import { MAX_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
+
 import type { BookProject } from '@project/@types';
 import type { FilePickerWindow, ProjectFileHandle } from '@project/@types/fileSystemAccess';
 
@@ -36,7 +38,6 @@ import styles from './AudioSettings.module.scss';
 
 type NumericAudioOptionName = keyof Pick<
   AudioOptions,
-  | 'relativeVolume'
   | 'delay'
   | 'stopBy'
 >;
@@ -165,11 +166,7 @@ export const AudioSettings = ({
       return;
     }
 
-    let normalized = Math.max(0, number);
-
-    if (name === 'relativeVolume') {
-      normalized = Math.min(100, normalized);
-    }
+    const normalized = Math.max(0, number);
 
     updateOption(name, normalized);
   };
@@ -290,10 +287,6 @@ export const AudioSettings = ({
 
   const handleFadeOutChange = (event: ChangeEvent<HTMLInputElement>) => {
     updateOption('fadeOut', event.target.checked);
-  };
-
-  const handleScreamerChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateOption('screamer', event.target.checked);
   };
 
   return (
@@ -433,7 +426,12 @@ export const AudioSettings = ({
             </strong>
           </span>
 
-          <Slider value={options.relativeVolume} onChange={handleVolumeChange} />
+          <Slider
+            label="Относительная громкость"
+            value={options.relativeVolume}
+            max={MAX_AUDIO_RELATIVE_VOLUME}
+            onChange={handleVolumeChange}
+          />
         </div>
 
         <details className={styles.Advanced}>
@@ -474,10 +472,6 @@ export const AudioSettings = ({
 
             <Checkbox checked={options.fadeOut} onChange={handleFadeOutChange}>
               Плавно затухать при выгрузке
-            </Checkbox>
-
-            <Checkbox checked={options.screamer} onChange={handleScreamerChange}>
-              Режим скримера (сверхгромкость)
             </Checkbox>
           </div>
         </details>

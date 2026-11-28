@@ -8,6 +8,8 @@ import { useAudioController } from '@active-book/core/hooks/effects';
 
 import { Audio } from '@active-book/core/components/ProxyHooks';
 
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/utils/effects/audio/audioVolume';
+
 import type { BookProject } from '@project/@types';
 
 import type { AudioEffectDraft } from '../../@types';
@@ -49,8 +51,7 @@ const AudioInstance = ({
     type = 'sfx',
     loop = false,
     format,
-    relativeVolume = 100,
-    screamer = false,
+    relativeVolume = DEFAULT_AUDIO_RELATIVE_VOLUME,
   } = options;
 
   useLayoutEffect(() => {
@@ -180,12 +181,10 @@ const AudioInstance = ({
     }
 
     currentAudio.howlInst.loop(loop);
-    currentAudio.type = type;
-    currentAudio.relativeVolume = relativeVolume;
 
-    if (screamer) {
-      currentAudio.howlInst.volume(1);
-    } else {
+    if (currentAudio.type !== type) {
+      currentAudio.type = type;
+
       currentAudio.volume(currentAudio.getVolumeByType() / 100);
     }
   }, [
@@ -193,8 +192,16 @@ const AudioInstance = ({
     currentSource,
     loop,
     type,
+  ]);
+
+  useEffect(() => {
+    if (currentAudio && currentSource) {
+      currentAudio.setRelativeVolume(relativeVolume);
+    }
+  }, [
+    currentAudio,
+    currentSource,
     relativeVolume,
-    screamer,
   ]);
 
   if (!currentSource) {
@@ -214,7 +221,6 @@ const AudioInstance = ({
       type={type}
       loop={loop}
       relativeVolume={relativeVolume}
-      screamer={screamer}
       fadeOutWhenUnload={false}
       lifecycle="auto"
     />
