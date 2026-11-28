@@ -1,3 +1,5 @@
+import { DEFAULT_AUDIO_RELATIVE_VOLUME } from '@active-book/core/audioVolume';
+
 import type { AuthoredAudioEffect } from '@active-book/book-builder/audioEffects';
 import type { AudioEffect as AudioDraft } from '@active-book/book-builder/effects';
 
@@ -32,7 +34,7 @@ export const getPageAudio = (audioEffects: readonly AuthoredAudioEffect[], pageI
     const options = {
       src: effectCur.src,
       type: effectCur.type ?? 'sfx',
-      relativeVolume: effectCur.relativeVolume ?? 100,
+      relativeVolume: effectCur.relativeVolume ?? DEFAULT_AUDIO_RELATIVE_VOLUME,
       loop: effectCur.loop ?? false,
       playOnLoad: effectCur.playOnLoad ?? false,
       delay: effectCur.delay ?? 0,
@@ -40,7 +42,6 @@ export const getPageAudio = (audioEffects: readonly AuthoredAudioEffect[], pageI
       fadeIn: effectCur.fadeIn ?? false,
       fadeOut: effectCur.fadeOut ?? false,
       waitTillTheEnd: effectCur.waitTillTheEnd ?? false,
-      screamer: effectCur.screamer ?? false,
       format: effectCur.format,
     };
 

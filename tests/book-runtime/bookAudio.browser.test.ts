@@ -15,8 +15,16 @@ import { buildBook } from '../../packages/book-builder/src/build/build';
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wav': 'audio/wav' };
 
+type VoiceTrace = {
+  id: number;
+  loop: boolean;
+  busy: string | null;
+  stopped: boolean;
+  instanceGain: number;
+};
+
 type SoundTrace = {
-  voices: { id: number; loop: boolean; busy: string | null; stopped: boolean }[];
+  voices: VoiceTrace[];
 };
 
 declare global {
@@ -25,7 +33,7 @@ declare global {
   }
 }
 
-test('a real built book shares audio assets and preserves the range voice through navigation', { timeout: 90_000 }, async (context) => {
+test('a real built book shares audio assets and preserves an amplified range voice through navigation', { timeout: 90_000 }, async (context) => {
   const workspace = await mkdtemp(path.join(tmpdir(), 'active-book-audio-'));
   context.after(() => rm(workspace, { recursive: true, force: true }));
   const projectRoot = path.join(workspace, 'project');
@@ -40,6 +48,7 @@ test('a real built book shares audio assets and preserves the range voice throug
       src: source,
       lifetime: { type: 'range', range: [{ from: 1, to: 2 }, { from: 1, to: 1 }] },
       playOnLoad: true,
+      relativeVolume: 150,
       loop: true,
       stopBy: 2500,
       fadeOut: true,
@@ -102,11 +111,31 @@ test('a real built book shares audio assets and preserves the range voice throug
   await page.addInitScript(`(() => {
     const voices = [];
     const observed = new WeakMap();
+    const routes = new WeakMap();
+    const gains = new WeakMap();
+    const { setValueAtTime } = AudioParam.prototype;
+    AudioParam.prototype.setValueAtTime = function (value, time) {
+      gains.set(this, value);
+      return setValueAtTime.call(this, value, time);
+    };
+    const { connect } = AudioNode.prototype;
+    AudioNode.prototype.connect = function (destination, ...args) {
+      routes.set(this, destination);
+      return connect.call(this, destination, ...args);
+    };
     const { start, stop } = AudioBufferSourceNode.prototype;
     AudioBufferSourceNode.prototype.start = function (...args) {
       const story = document.querySelector('[data-story-content]');
       if (this.buffer?.duration > 0.08 && document.querySelector('[data-page-id]')) {
-        const voice = { id: voices.length, loop: this.loop, busy: story?.getAttribute('aria-busy'), stopped: false };
+        const outputGain = routes.get(routes.get(this))?.gain;
+        const instanceGain = gains.get(outputGain) ?? outputGain?.value;
+        const voice = {
+          id: voices.length,
+          loop: this.loop,
+          busy: story?.getAttribute('aria-busy'),
+          stopped: false,
+          instanceGain,
+        };
         voices.push(voice);
         observed.set(this, voice);
         this.addEventListener('ended', () => { voice.stopped = true; }, { once: true });
@@ -147,7 +176,9 @@ test('a real built book shares audio assets and preserves the range voice throug
   const voices = await page.evaluate(() => window.soundTrace.voices);
   assert.equal(voices.every(({ busy }) => busy === 'false'), true);
   const range = voices.find(({ loop }) => loop);
-  assert(range && voices.some(({ loop }) => !loop));
+  assert(range);
+  assert.equal(range.instanceGain, 1.5);
+  assert.equal(voices.find(({ loop }) => !loop)?.instanceGain, 1);
 
   await page.keyboard.press('ArrowLeft');
   await page.getByText('Story opening').waitFor();

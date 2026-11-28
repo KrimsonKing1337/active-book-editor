@@ -12,6 +12,8 @@ import {
 
 import { page, userEvent } from 'vitest/browser';
 
+import { store } from '@active-book/core/store';
+
 import {
   createProject,
   savedPageEffects,
@@ -461,6 +463,65 @@ test('switching projects during a real TGZ import disposes resources and isolate
   await expect.element(page.getByTestId('native-visual')).toHaveTextContent('0');
   expect(document.querySelector('[data-testid="custom-badge"]')).not.toBeNull();
 }, 60_000);
+
+test('changes and saves the gain of a playing audio preview without replacing it', async () => {
+  const { default: soundUrl } = await import('@root/tests/fixtures/multipage-book/assets/tone.wav?url');
+  await writeBookFixture(project.directory, {
+    type: 'book',
+    pages: [
+      {
+        id: 'preview',
+        document: {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Предпрослушивание усиления' }] }],
+        },
+      },
+    ],
+    visualEffects: [],
+    audioEffects: [
+      {
+        id: 'amplified-preview',
+        slug: 'Усиленный звук',
+        src: new URL(soundUrl, location.href).href,
+        relativeVolume: 150,
+        lifetime: { type: 'page', page: 'preview' },
+      },
+    ],
+  });
+
+  const openProject = page.getByRole('button', { name: 'Открыть проект', exact: true });
+  await openProject.click();
+  await selectEffect('Усиленный звук');
+  const settings = page.getByRole('dialog', { name: 'Эффекты страницы' });
+  const audition = settings.getByRole('button', { name: 'Прослушать', exact: true });
+  await expect.element(audition).toBeEnabled();
+  const getAudio = () => store.getState().audioEffects.audioInstances['amplified-preview'];
+  const audio = getAudio();
+
+  expect(audio?.relativeVolume).toBe(150);
+  expect(audio?.playing()).toBe(false);
+  await settings.getByRole('checkbox', { name: 'Зациклить только предпрослушивание' }).click();
+  await audition.click();
+  await expect.element(settings.getByRole('button', { name: 'Остановить', exact: true })).toBeEnabled();
+
+  const volume = settings.getByRole('slider', { name: 'Относительная громкость' });
+  await expect.element(volume).toHaveAttribute('aria-valuemax', '200');
+  volume.element().focus();
+  await userEvent.keyboard('{ArrowRight}');
+  await expect.element(volume).toHaveAttribute('aria-valuenow', '151');
+  await expect.poll(() => getAudio()?.relativeVolume).toBe(151);
+  expect(getAudio()).toBe(audio);
+  expect(audio?.playing()).toBe(true);
+
+  await settings.getByRole('button', { name: 'Закрыть', exact: true }).click();
+  const saved = await saveBook();
+  expect(saved.audioEffects?.[0].relativeVolume).toBe(151);
+  await openProject.click();
+  await selectEffect('Усиленный звук');
+  await expect.element(volume).toHaveAttribute('aria-valuenow', '151');
+  await expect.element(audition).toBeEnabled();
+  expect(getAudio()?.playing()).toBe(false);
+});
 
 test.each([
   ['unsupported codec', '/preview.unsupported-audio-codec'],

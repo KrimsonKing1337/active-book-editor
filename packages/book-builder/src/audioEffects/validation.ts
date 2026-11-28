@@ -1,5 +1,11 @@
 import type { AudioEffect, PageRange } from '@active-book/types';
 
+import {
+  isAudioRelativeVolume,
+  MAX_AUDIO_RELATIVE_VOLUME,
+  MIN_AUDIO_RELATIVE_VOLUME,
+} from '@active-book/core/audioVolume';
+
 import { isContentAssetPath } from '../content';
 import { isRecord } from '../effects/utils';
 
@@ -34,7 +40,6 @@ const booleanOptions = [
   'fadeIn',
   'fadeOut',
   'waitTillTheEnd',
-  'screamer',
 ];
 
 const allowedFields = new Set([
@@ -221,12 +226,10 @@ const assertAudioOptions = (effect: Record<string, unknown>, address: string) =>
     }
   }
 
-  if (relativeVolume !== undefined) {
-    const isNonnegative = isNonnegativeNumber(relativeVolume);
+  if (relativeVolume !== undefined && !isAudioRelativeVolume(relativeVolume)) {
+    const range = `${MIN_AUDIO_RELATIVE_VOLUME} to ${MAX_AUDIO_RELATIVE_VOLUME}`;
 
-    if (!isNonnegative || relativeVolume > 100) {
-      throw new Error(`${address}.relativeVolume: expected a number from 0 to 100`);
-    }
+    throw new Error(`${address}.relativeVolume: expected a number from ${range}`);
   }
 
   for (const keyCur of ['delay', 'stopBy']) {
