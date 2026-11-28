@@ -184,6 +184,7 @@ const AudioInstance = ({
 
     if (currentAudio.type !== type) {
       currentAudio.type = type;
+
       currentAudio.volume(currentAudio.getVolumeByType() / 100);
     }
   }, [
